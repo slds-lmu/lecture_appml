@@ -1,0 +1,52 @@
+# TODO: WIP TOPICS
+
+
+
+# Introduction
+intro-motivation
+intro-dimensions
+intro-correlation
+intro-interaction
+intro-pitfalls
+
+# Interpretable Models
+intro-bike-data
+im-motivation
+im-lm-lasso
+im-glm
+im-nonlinear
+im-compboost
+
+## Feature Effects
+fe-intro
+fe-marginal-effects -> WIP not helt in SS22
+fe-ice
+fe-pdp
+fe-ale
+
+# WIP: Feature Interactions
+fe-h-statistic -> WIP not helt in SS22
+fe-decomposition -> WIP not helt in SS22
+fi-pdp -> WIP not helt in SS22 (Variance-based Importance)
+
+## Loss-based Feature Importance
+fi-intro
+fi-pfi
+fi-cfi
+fi-loco
+
+## Shapley
+shapley-game-theory
+shapley-ml
+fi-sage
+shapley-shap
+
+## Local
+le-intro
+le-adversarial -> not helt in SS22
+le-lime
+le-lime-examples
+le-lime-pitfalls
+le-counterfactuals
+le-counterfactuals-methods
+le-trust -> not helt in SS22 (maybe move to end?) --> needs to be after counterfactuals since they are mentioned in here
