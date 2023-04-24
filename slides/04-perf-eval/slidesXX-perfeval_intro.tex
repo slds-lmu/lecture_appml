@@ -13,41 +13,73 @@
 
 \newcommand{\titlefigure}{figure/performance_vs_interpretability}
 \newcommand{\learninggoals}{
-\item What to watch out for to evaluate models in practice
+\item How model evaluation works
+\item What to watch out for in practice
 \item Pros and cons of performance metrics
 \item Advanced evaluation practices}
 
 \lecturechapter{Applied Performance Evaluation}
 \lecture{Applied Machine Learning}
 
-\begin{frame}{The ABC of Model Evaluation}
+\begin{frame}{The Basics of Model Evaluation}
 
 \begin{itemize}
-    \item abc
+    \item Describe what model evaluation is here?
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Pros and Cons of Performance Metrics}
+
+\begin{frame}{General Things to Consider in Practice}
 
 \begin{itemize}
-    \item abc
+    \item Stakeholders need to understand metrics
+    \item Interpretation important? Easy to understand?
+    \item What matters for the specific usecase, e.g., outlier sensitivity?
+    \item Computational considerations?
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Advanced Model Evaluation in Practice}
+\begin{frame}{What Affects Performance?}
+% https://vuquangnguyen2016.files.wordpress.com/2018/03/applied-predictive-modeling-max-kuhn-kjell-johnson_1518.pdf
 
 \begin{itemize}
-    \item abc
+    \item Take this from Applied Predictive Modeling book
+    \item Type 3 error: What are we trying to measure?
+    \item Measurement errors in the outcome
+    \item Measurement errors in the features
+    \item Sample size
+    \item ...
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Pros and Cons of Performance Metrics}
+
+\begin{frame}{Calibration versus Discrimination}
 
 \begin{itemize}
-    \item abc
+    \item Related to what we are trying to measure (type 3 error)
+    \item Example with disease modeling
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Established Performance Metrics}
+
+\begin{itemize}
+    \item List \textbf{established} performance metrics here
+    \item E.g., for \textbf{classification}: accuracy, true and false positive rate, precision and recall, F-score, Area Under (ROC) Curve, Brier score
+    \item E.g., for \textbf{regression}: MSE, RMSE, MAE, R2
+    \item Describe typical use case and why metric works
+    \item Example: 
 \end{itemize}
 \end{frame}
-	
+
+\begin{frame}{Advanced Performance Metrics}
+
+\begin{itemize}
+    \item Dive into esoterical stuff here: Youden, Cohens-Kappa, Matthews correlation
+\end{itemize}
+\end{frame}
+
 
 
 \endlecture
