@@ -1,0 +1,78 @@
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math.tex}
+\input{../../latex-math/basic-ml.tex}
+
+\newcommand{\titlefigure}{figure/ensembling.png}
+\newcommand{\learninggoals}{
+\item Understand model averaging
+\item Know the difference between weight averaging vs. model averaging}
+
+\title{Applied Machine Learning}
+% FIXME:
+%\author{}
+%\institute{\href{https://compstat-lmu.github.io/lecture_i2ml/}{compstat-lmu.github.io/lecture\_i2ml}}
+\date{}
+
+\begin{document}
+\lecturechapter{Ensembling: Model Averaging}
+\lecture{Applied Machine Learning}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Model Averaging}
+Combine predictions of multiple (different / unique) models to make a final prediction
+
+Leverages strengths and diversity of different models to improve overall performance and robustness
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Steps}
+
+\begin{itemize}
+\item Base model training
+\item Collect and combine predictions
+\end{itemize}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Base Model Training}
+Note on post-hoc ensembling
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Collect and Combine Predictions}
+  Regression vs. Classification
+  Weighted averaging vs. averaging (selection) Note: Should we even bother?
+
+  \begin{itemize}
+    \item Combine predictions of base models by taking a weighted average
+    \item Weights represent importance of a base model's prediction
+    \item Can also be tuned
+  \end{itemize}
+
+  \begin{itemize}
+    \item Combine predictions by simply averaging the predictions of base models
+    \item Potentially also only selecting a subset of base models
+    \item Selecting base models is equal to weighted averaging with weights only 0 or 1
+   \end{itemize}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{}
+
+\begin{itemize}
+  \item ...
+\end{itemize}
+
+\end{vbframe}
+
+
+% ------------------------------------------------------------------------------
+
+\endlecture
+\end{document}

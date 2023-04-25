@@ -1,0 +1,135 @@
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math.tex}
+\input{../../latex-math/basic-ml.tex}
+
+\newcommand{\titlefigure}{figure/ensembling.png}
+\newcommand{\learninggoals}{
+\item Understand the basic idea of ensembling
+\item Obtain an overview of different methods}
+
+\title{Applied Machine Learning}
+% FIXME:
+%\author{}
+%\institute{\href{https://compstat-lmu.github.io/lecture_i2ml/}{compstat-lmu.github.io/lecture\_i2ml}}
+\date{}
+
+\begin{document}
+\lecturechapter{Ensembling: Overview}
+\lecture{Applied Machine Learning}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Ensembling in Machine Learning}
+\begin{itemize}
+\item Techniques that combine predictions of multiple base models
+\item Goal: Improve predictive performance and model robustness
+\end{itemize}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Ensemble Methods}
+\begin{itemize}
+\item Note on Bayes Optimal Classifier? 
+\item Model Averaging
+\item Bagging
+\item Boosting
+\item Stacking
+\end{itemize}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Model Averaging}
+
+Definition: Combine predictions of multiple (different / unique) models to make a final prediction
+
+Steps:
+
+\begin{itemize}
+\item Base model training
+\item Combine predictions
+\end{itemize}
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Bagging}
+
+  Definition: Bagging (stands for Bootstrap Aggregating), training multiple instances of the same base model on different subsets of the training data, obtained through random sampling with replacement.
+
+Steps:
+
+\begin{itemize}
+\item Random sampling with replacement
+\item Base model training
+\item Combine predictions
+\end{itemize}
+
+Popular use case: Construction of a random forest using decision trees as base models
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Boosting}
+Definition: Boosting is an iterative technique that adjusts the weights of the training instances based on their misclassification rate or residual errors, and trains subsequent base models to focus on the misclassified or poorly predicted instances.
+
+Steps:
+
+\begin{itemize}
+\item Initial model training:
+\item Weight update
+\item Base model training using updated weights
+\item Repeat weight update
+\item ...
+\item Combine predictions
+\end{itemize}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Stacking}
+Definition: Stacking (also stacked generalization or meta-ensemble), is an ensemble technique that involves training multiple base models on the same data and using their predictions as input features for a meta-model that makes the final ensemble prediction.
+
+Steps:
+
+\begin{itemize}
+\item Base model training
+\item Collect predictions
+\item Meta model training
+\end{itemize}
+
+1 Level stacking vs. multi level stacking
+
+In contrast to the other methods, stacking already combines model predictions during training
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Benefits}
+
+\begin{itemize}
+  \item ...
+\end{itemize}
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Caveats and Practical Considerations}
+
+\begin{itemize}
+  \item ...
+\end{itemize}
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+
+\endlecture
+\end{document}

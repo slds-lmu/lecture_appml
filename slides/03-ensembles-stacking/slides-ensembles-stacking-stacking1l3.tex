@@ -1,0 +1,85 @@
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math.tex}
+\input{../../latex-math/basic-ml.tex}
+
+\newcommand{\titlefigure}{figure/ensembling.png}
+\newcommand{\learninggoals}{
+\item Understand the basic idea of stacking
+\item Learn how to construct the task for the meta model
+\item Obtain an overview of popular meta models}
+
+\title{Applied Machine Learning}
+% FIXME:
+%\author{}
+%\institute{\href{https://compstat-lmu.github.io/lecture_i2ml/}{compstat-lmu.github.io/lecture\_i2ml}}
+\date{}
+
+\begin{document}
+\lecturechapter{Ensembling: 1 Level Stacking}
+\lecture{Applied Machine Learning}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Stacking}
+Train multiple base models on the same data and use their predictions as input features for a meta model that makes the final ensemble prediction.
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Steps}
+
+\begin{itemize}
+\item Base model training
+\item Prediction Collection
+\item Meta model training
+\end{itemize}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Base Model Training}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Collect Predictions}
+Build task for the meta model
+Note on using original features or not
+Crossvalidated predictions
+Overfitting
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Meta Model Training}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Popular Meta Models}
+  \begin{itemize}
+    \item linear / logistic regression
+    \item decision tree
+    \item random forest
+    \item ...
+  \end{itemize}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+
+\begin{vbframe}{}
+  Note on interpretability when using interpretable meta models
+
+\begin{itemize}
+  \item ...
+\end{itemize}
+
+\end{vbframe}
+
+
+% ------------------------------------------------------------------------------
+
+\endlecture
+\end{document}
