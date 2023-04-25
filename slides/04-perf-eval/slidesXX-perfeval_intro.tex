@@ -13,7 +13,6 @@
 
 \newcommand{\titlefigure}{figure/performance_vs_interpretability}
 \newcommand{\learninggoals}{
-\item How model evaluation works
 \item What to watch out for in practice
 \item Pros and cons of performance metrics
 \item Advanced evaluation practices}
@@ -21,20 +20,13 @@
 \lecturechapter{Applied Performance Evaluation}
 \lecture{Applied Machine Learning}
 
-\begin{frame}{The Basics of Model Evaluation}
-
-\begin{itemize}
-    \item Describe what model evaluation is here?
-\end{itemize}
-\end{frame}
-
 
 \begin{frame}{General Things to Consider in Practice}
 
 \begin{itemize}
     \item Stakeholders need to understand metrics
     \item Interpretation important? Easy to understand?
-    \item What matters for the specific usecase, e.g., outlier sensitivity?
+    \item What matters for the specific usecase, e.g., outlier sensitivity, cost sensitivity?
     \item Computational considerations?
 \end{itemize}
 \end{frame}
@@ -44,11 +36,12 @@
 
 \begin{itemize}
     \item Take this from Applied Predictive Modeling book
-    \item Type 3 error: What are we trying to measure?
-    \item Measurement errors in the outcome
-    \item Measurement errors in the features
+    \item Type 3 error: Developing a model that answers the wrong question.
+    \item Non-informative features
+    \item Measurement errors / noise in the outcome
+    \item Measurement errors / noise in the features
     \item Sample size
-    \item ...
+    \item What kind of data? (algorithm-dependent)
 \end{itemize}
 \end{frame}
 
@@ -65,11 +58,11 @@
 \begin{frame}{Established Performance Metrics}
 
 \begin{itemize}
-    \item List \textbf{established} performance metrics here
-    \item E.g., for \textbf{classification}: accuracy, true and false positive rate, precision and recall, F-score, Area Under (ROC) Curve, Brier score
+    \item List and motivate established performance metrics here
+    \item E.g., for \textbf{classification}: accuracy, true and false positive rate, precision and recall, F-score, AUC, Brier score
     \item E.g., for \textbf{regression}: MSE, RMSE, MAE, R2
     \item Describe typical use case and why metric works
-    \item Example: 
+    \item Example: Brier Score rewards model confidence (i.e. give a high probability to a true outcome) and punishes the reverse.
 \end{itemize}
 \end{frame}
 
@@ -77,9 +70,25 @@
 
 \begin{itemize}
     \item Dive into esoterical stuff here: Youden, Cohens-Kappa, Matthews correlation
+    \item Motivate each advanced metric, do not just list formula
+    \item Example: "MCC produces a high score only if the prediction obtained good results in all of the confusion matrix categories (TP, FP, TN, FN), proportionally both to the size of positive elements and the size of negative elements in the dataset"
 \end{itemize}
 \end{frame}
 
+\begin{frame}{Lift Charts}
+
+\begin{itemize}
+    \item Lift charts (Ling and Li 1998) are a visualization tool for assessing the ability of a model to detect events in a data set with two classes. 
+    \item They ank the samples by their scores and determine the cumulative event rate as more samples are evaluated. In the optimal case, the M highest-ranked samples would contain all M events
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Calibration Curves}
+
+\begin{itemize}
+    \item Calibration curves can be used to characterisze how consistent the predicted class probabilities are with the observed event rates.
+\end{itemize}
+\end{frame}
 
 
 \endlecture
