@@ -28,6 +28,7 @@
     \item Interpretation important? Easy to understand?
     \item What matters for the specific usecase, e.g., outlier sensitivity, cost sensitivity?
     \item Computational considerations?
+    \item Type 3 error: Developing a model that answers the wrong question.
 \end{itemize}
 \end{frame}
 
@@ -35,9 +36,10 @@
 % https://vuquangnguyen2016.files.wordpress.com/2018/03/applied-predictive-modeling-max-kuhn-kjell-johnson_1518.pdf
 
 \begin{itemize}
-    \item Take this from Applied Predictive Modeling book
-    \item Type 3 error: Developing a model that answers the wrong question.
+    % \item Take this from Applied Predictive Modeling book
+    \item Model type
     \item Non-informative features
+    \item Pre-processing of features
     \item Measurement errors / noise in the outcome
     \item Measurement errors / noise in the features
     \item Sample size
@@ -69,24 +71,65 @@
 \begin{frame}{Advanced Performance Metrics}
 
 \begin{itemize}
-    \item Dive into esoterical stuff here: Youden, Cohens-Kappa, Matthews correlation
+    \item Dive into esoteric stuff here: Youden, Cohens-Kappa, Matthews correlation
     \item Motivate each advanced metric, do not just list formula
     \item Example: "MCC produces a high score only if the prediction obtained good results in all of the confusion matrix categories (TP, FP, TN, FN), proportionally both to the size of positive elements and the size of negative elements in the dataset"
 \end{itemize}
 \end{frame}
 
+% \begin{frame}{Lift Curves}
+
+% \begin{itemize}
+%     \item Lift charts (Ling and Li 1998) are a visualization tool for assessing the ability of a model to detect events in a data set with two classes. 
+%     \item They rank the samples by their scores and determine the cumulative event rate as more samples are evaluated. In the optimal case, the M highest-ranked samples would contain all M events.
+% \end{itemize}
+% \end{frame}
+
 \begin{frame}{Lift Charts}
 
 \begin{itemize}
-    \item Lift charts (Ling and Li 1998) are a visualization tool for assessing the ability of a model to detect events in a data set with two classes. 
-    \item They ank the samples by their scores and determine the cumulative event rate as more samples are evaluated. In the optimal case, the M highest-ranked samples would contain all M events
+\setlength\itemsep{1em}
+    \item Lift charts visualize a model's ability to detect events.
+    \item Samples are ranked according to their scores (probability for an event to take place). We then evaluate the cumulative event rate.
+    \item In the optimal case, we would suspect the $m$ highest ranked samples to contain all $m$ events.
+    \item For a non-informative model, the fraction $\frac{k}{n}$ of the highest ranked samples contains $k$ events on average.
+    \item For a more informative model, the fraction $\frac{k}{n}$ of the highest ranked samples contains more than $k$ events.
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}{Lift Chart Example}
+
+\begin{figure}
+    \centering
+    % \includegraphics{}
+    \caption{Caption}
+    \label{fig:my_label}
+\end{figure}
+
+\end{frame}
+
+
+\begin{frame}{Pseudo Code to Create Lift Chart}
+
+To construct a lift chart, we follow a general recipe:
+\begin{itemize}
+\setlength\itemsep{1em}
+    \item Predict target values for a sample that was not used during training with known target values.
+    \item Compute fraction of true events in the
+entire data set.
+    \item Rank data by scores (probability of event taking place).
+    \item For every unique score,  
+    For each unique class probability value, calculate the percent of true events
+in all samples below the probability value.
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Calibration Curves}
 
 \begin{itemize}
-    \item Calibration curves can be used to characterisze how consistent the predicted class probabilities are with the observed event rates.
+    \item Calibration curves (also known as reliability diagrams) compare how well the probabilistic predictions of a binary classifier are calibrated. It plots the true frequency of the positive label against its predicted probability, for binned predictions.
 \end{itemize}
 \end{frame}
 
