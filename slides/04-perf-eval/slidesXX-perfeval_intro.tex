@@ -24,11 +24,12 @@
 \begin{frame}{General Things to Consider in Practice}
 
 \begin{itemize}
-    \item Stakeholders need to understand metrics
-    \item Interpretation important? Easy to understand?
+\setlength\itemsep{2em}
+    \item The stakeholders need to understand metrics. 
+    \item Is the interpretation important? This related back to stakeholders understanding results.
     \item What matters for the specific usecase, e.g., outlier sensitivity, cost sensitivity?
-    \item Computational considerations?
-    \item Type 3 error: Developing a model that answers the wrong question.
+    \item What are computational limitations? What computational resources are at our disposal?
+    \item Are we developing a model that answers the right question?. What a model optimizes does not necessarily overlap with what we are trying to optimize in a specific use case.
 \end{itemize}
 \end{frame}
 
@@ -36,6 +37,8 @@
 % https://vuquangnguyen2016.files.wordpress.com/2018/03/applied-predictive-modeling-max-kuhn-kjell-johnson_1518.pdf
 
 \begin{itemize}
+
+\setlength\itemsep{2em}
     % \item Take this from Applied Predictive Modeling book
     \item Model type
     \item Non-informative features
@@ -51,6 +54,7 @@
 \begin{frame}{Calibration versus Discrimination}
 
 \begin{itemize}
+\setlength\itemsep{2em}
     \item Related to what we are trying to measure (type 3 error)
     \item Example with disease modeling
 \end{itemize}
@@ -60,6 +64,7 @@
 \begin{frame}{Established Performance Metrics}
 
 \begin{itemize}
+\setlength\itemsep{2em}
     \item List and motivate established performance metrics here
     \item E.g., for \textbf{classification}: accuracy, true and false positive rate, precision and recall, F-score, AUC, Brier score
     \item E.g., for \textbf{regression}: MSE, RMSE, MAE, R2
@@ -71,6 +76,7 @@
 \begin{frame}{Advanced Performance Metrics}
 
 \begin{itemize}
+\setlength\itemsep{2em}
     \item Dive into esoteric stuff here: Youden, Cohens-Kappa, Matthews correlation
     \item Motivate each advanced metric, do not just list formula
     \item Example: "MCC produces a high score only if the prediction obtained good results in all of the confusion matrix categories (TP, FP, TN, FN), proportionally both to the size of positive elements and the size of negative elements in the dataset"
@@ -88,25 +94,44 @@
 \begin{frame}{Lift Charts}
 
 \begin{itemize}
-\setlength\itemsep{1em}
+\setlength\itemsep{2em}
     \item Lift charts visualize a model's ability to detect events.
     \item Samples are ranked according to their scores (probability for an event to take place). We then evaluate the cumulative event rate.
     \item In the optimal case, we would suspect the $m$ highest ranked samples to contain all $m$ events.
     \item For a non-informative model, the fraction $\frac{k}{n}$ of the highest ranked samples contains $k$ events on average.
     \item For a more informative model, the fraction $\frac{k}{n}$ of the highest ranked samples contains more than $k$ events.
+    \item The \textbf{lift} corresponds to the amount of events detected by a model above a completely random selection of samples.
 \end{itemize}
 \end{frame}
 
 
 
 \begin{frame}{Lift Chart Example}
-
+\begin{columns}
+% The lift chart plots the cumulative gain/lift against the cumulative percentage
+% of samples that have been screened. Figure 11.7 shows the best and worse
+% case lift curves for a data set with a 50 % event rate. The non-informative
+% model has a curve that is close to the 45◦ reference line, meaning that the
+% model has no benefit for ranking samples. The other curve is indicative of
+% a model that can perfectly separate two classes. At the 50 % point on the
+% x-axis, all of the events have been captured by the model
+\begin{column}{0.5\textwidth}
+\begin{itemize}
+    \item We plot the cumulative event rate against the percentage of screened observations.
+    \item Here, we face a 50\% event rate. For a perfect model, the 50\% highest ranked observations contain 50\% of all events.
+    \item We create a lift curve for a non-informative model which runs along the diagonal line.
+    \item Another model is able to perfectly detect events. After evaluating 50\% of the observations associated with the highest event probabilities, we have captured all events.
+\end{itemize}
+\end{column}
+\begin{column}{0.5\textwidth}
 \begin{figure}
     \centering
-    % \includegraphics{}
-    \caption{Caption}
-    \label{fig:my_label}
+    \includegraphics[width = \textwidth]{slides/04-perf-eval/figure/lift_chart.png}
+    \caption{Lift chart from Applied Predictive Modeling (Max Kuhn).}
 \end{figure}
+\end{column}
+
+\end{columns}
 
 \end{frame}
 
@@ -115,21 +140,23 @@
 
 To construct a lift chart, we follow a general recipe:
 \begin{itemize}
-\setlength\itemsep{1em}
+\setlength\itemsep{2em}
     \item Predict target values for a sample that was not used during training with known target values.
     \item Compute fraction of true events in the
-entire data set.
+entire data set (= baseline event rate).
     \item Rank data by scores (probability of event taking place).
-    \item For every unique score,  
-    For each unique class probability value, calculate the percent of true events
-in all samples below the probability value.
+    \item For every unique event probability $\phi$, compute: 
+    $$\frac{\text{percentage of events in all observations with scores below $\phi$}}{\text{baseline event rate}}$$
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Calibration Curves}
 
 \begin{itemize}
-    \item Calibration curves (also known as reliability diagrams) compare how well the probabilistic predictions of a binary classifier are calibrated. It plots the true frequency of the positive label against its predicted probability, for binned predictions.
+\setlength\itemsep{2em}
+    \item Calibration curves plot the true frequency of the positive label against its predicted probability for binned predictions.
+    \item They measure how well calibrated the classifier is (see earlier slides on calibration).
+    \item The horizontal axis represents the average predicted probability in each bin. The vertical axis indicates the the proportion of predicted positive labels.
 \end{itemize}
 \end{frame}
 
