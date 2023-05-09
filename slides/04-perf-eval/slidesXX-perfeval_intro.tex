@@ -25,28 +25,37 @@
 
 \begin{itemize}
 \setlength\itemsep{2em}
-    \item The stakeholders need to understand metrics. 
-    \item Is the interpretation important? This related back to stakeholders understanding results.
+    \item Stakeholders need to understand metrics. Stakeholders are (groups of) people that share an interest in the successful completion of the use case. 
+    \item Is the interpretation important? Can the results be communicated to the stakeholders? Depending on the technical expertise of stakeholders or how much time can be invested in understanding the results, performance metrics shall be chosen and evaluated carefully.
     \item What matters for the specific usecase, e.g., outlier sensitivity, cost sensitivity?
-    \item What are computational limitations? What computational resources are at our disposal?
-    \item Are we developing a model that answers the right question?. What a model optimizes does not necessarily overlap with what we are trying to optimize in a specific use case.
+    \item What are computational limitations (e.g., time constraints)? What computational resources are at our disposal?
+    \item Are we developing a model that answers the right question? What a model optimizes does not necessarily overlap with what we are trying to achieve in a specific use case.
 \end{itemize}
 \end{frame}
 
+\begin{frame}{Answering the Wrong Question}
+% A. W. Kimball (1957) Errors of the Third Kind in Statistical Consulting, Journal of the American Statistical Association, 52:278, 133-142
+\begin{itemize}
+\setlength\itemsep{1em}
+    \item An approximate answer to the right question is worth much more than the right answer to the wrong question.
+    \item Pay attention to but do not get lost in technical details. You might end up developing a model that answers the wrong question or optimizes the wrong metric.
+    \item \textbf{Example:} An online retail company aims to increase revenue by displaying advertisements with different products, hoping that the customer is going to purchase additional products. The company measures how often the user clicks / taps on those advertisements. A model is trained to predict click rates based on features such as the product category, price, age of the customer, etc. However, this model does not actually measure additional revenue from advertisements, as many customers will click on them by accident or not go through with the purchase.
+\end{itemize}
+    
+\end{frame}
 \begin{frame}{What Affects Performance?}
 % https://vuquangnguyen2016.files.wordpress.com/2018/03/applied-predictive-modeling-max-kuhn-kjell-johnson_1518.pdf
 
+There is a multitude of technical aspects we need to consider:
+\vspace{1em}
 \begin{itemize}
-
-\setlength\itemsep{2em}
-    % \item Take this from Applied Predictive Modeling book
-    \item Model type
-    \item Non-informative features
-    \item Pre-processing of features
-    \item Measurement errors / noise in the outcome
-    \item Measurement errors / noise in the features
-    \item Sample size
-    \item What kind of data? (algorithm-dependent)
+\setlength\itemsep{1em}
+    \item \textbf{Model type:} Some models are or are not suited for certain tasks. For instance, tree-based models are bad at predicting linearly shaped data.
+    \item \textbf{Non-informative features:} Including features that are not correlated with the target increases the risk of modeling noise.
+    \item \textbf{Pre-processing of features:} Features can or have to be processed to improve performance, depending on the chosen model.
+    \item \textbf{Measurement errors / noise in the outcome or features:} Garbage in = garbage out. Our performance depends on the quality of model inputs.
+    \item \textbf{Sample size:} The more data we have at our disposal, the better our algorithm is able to learn from it.
+    \item \textbf{What kind of data?:} It also matters what kind of data we have. Increasing the size of the data set is not sufficient. The data need to be diverse as well.
 \end{itemize}
 \end{frame}
 
@@ -55,23 +64,43 @@
 
 \begin{itemize}
 \setlength\itemsep{2em}
-    \item Related to what we are trying to measure (type 3 error)
-    \item Example with disease modeling
+    \item Calibration indicates the agreement between estimated probabilities and actual observed probabilities (through observed events).
+    \item Discrimination is a model's ability to correctly separate observations into specific groups.
+    \item Models can over-/underestimate probabilities (poor calibration) and still separate classes (good discrimination) or vice versa.
+    \item Consider a model that predicts a patient's disease risk, where a patient is classified as a high-risk patient if disease risk exceeds 20\%. Patient A has a true risk of 5\% while patient B has a true risk of 30\%. The model predicts roughly the same risk with 19\% for A and 21\% for B. It is poorly calibrated but still separates both patients accurately into low-risk and high-risk groups (good discrimination).
+    
 \end{itemize}
 
 \end{frame}
 
-\begin{frame}{Established Performance Metrics}
+\begin{frame}{Selecting an Established Metric}
 
-\begin{itemize}
-\setlength\itemsep{2em}
-    \item List and motivate established performance metrics here
-    \item E.g., for \textbf{classification}: accuracy, true and false positive rate, precision and recall, F-score, AUC, Brier score
-    \item E.g., for \textbf{regression}: MSE, RMSE, MAE, R2
-    \item Describe typical use case and why metric works
-    \item Example: Brier Score rewards model confidence (i.e. give a high probability to a true outcome) and punishes the reverse.
-\end{itemize}
+\begin{figure}
+    \centering
+    \includegraphics[width = 0.85\textwidth]{slides/04-perf-eval/figure/ontology_perf_metrics.png}
+\end{figure}
 \end{frame}
+
+\begin{frame}{Selecting an Established Metric}
+
+\begin{figure}
+    \centering
+    \includegraphics[width = 0.85\textwidth]{slides/04-perf-eval/figure/classification_of_metrics.png}
+\end{figure}
+\end{frame}
+
+
+% \begin{frame}{Established Performance Metrics}
+
+% \begin{itemize}
+% \setlength\itemsep{2em}
+%     \item List and motivate established performance metrics here
+%     \item E.g., for \textbf{classification}: accuracy, true and false positive rate, precision and recall, F-score, AUC, Brier score
+%     \item E.g., for \textbf{regression}: MSE, RMSE, MAE, R2
+%     \item Describe typical use case and why metric works
+%     \item Example: Brier Score rewards model confidence (i.e. give a high probability to a true outcome) and punishes the reverse.
+% \end{itemize}
+% \end{frame}
 
 \begin{frame}{Advanced Performance Metrics}
 
@@ -94,7 +123,7 @@
 \begin{frame}{Lift Charts}
 
 \begin{itemize}
-\setlength\itemsep{2em}
+\setlength\itemsep{1em}
     \item Lift charts visualize a model's ability to detect events.
     \item Samples are ranked according to their scores (probability for an event to take place). We then evaluate the cumulative event rate.
     \item In the optimal case, we would suspect the $m$ highest ranked samples to contain all $m$ events.
@@ -108,13 +137,6 @@
 
 \begin{frame}{Lift Chart Example}
 \begin{columns}
-% The lift chart plots the cumulative gain/lift against the cumulative percentage
-% of samples that have been screened. Figure 11.7 shows the best and worse
-% case lift curves for a data set with a 50 % event rate. The non-informative
-% model has a curve that is close to the 45◦ reference line, meaning that the
-% model has no benefit for ranking samples. The other curve is indicative of
-% a model that can perfectly separate two classes. At the 50 % point on the
-% x-axis, all of the events have been captured by the model
 \begin{column}{0.5\textwidth}
 \begin{itemize}
     \item We plot the cumulative event rate against the percentage of screened observations.
@@ -136,28 +158,41 @@
 \end{frame}
 
 
-\begin{frame}{Pseudo Code to Create Lift Chart}
+% \begin{frame}{Pseudo Code to Create Lift Chart}
 
-To construct a lift chart, we follow a general recipe:
-\begin{itemize}
-\setlength\itemsep{2em}
-    \item Predict target values for a sample that was not used during training with known target values.
-    \item Compute fraction of true events in the
-entire data set (= baseline event rate).
-    \item Rank data by scores (probability of event taking place).
-    \item For every unique event probability $\phi$, compute: 
-    $$\frac{\text{percentage of events in all observations with scores below $\phi$}}{\text{baseline event rate}}$$
-\end{itemize}
-\end{frame}
+% To construct a lift chart, we follow a general recipe:
+% \begin{itemize}
+% \setlength\itemsep{2em}
+%     \item Predict target values for a sample that was not used during training with known target values.
+%     \item Compute fraction of true events in the
+% entire data set (= baseline event rate).
+%     \item Rank data by scores (probability of event taking place).
+%     \item For every unique event probability $\phi$, compute: 
+%     $$\frac{\text{percentage of events in all observations with scores below $\phi$}}{\text{baseline event rate}}$$
+% \end{itemize}
+% \end{frame}
 
 \begin{frame}{Calibration Curves}
 
+\begin{columns}
+
+\begin{column}{0.5\textwidth}
 \begin{itemize}
 \setlength\itemsep{2em}
     \item Calibration curves plot the true frequency of the positive label against its predicted probability for binned predictions.
-    \item They measure how well calibrated the classifier is (see earlier slides on calibration).
     \item The horizontal axis represents the average predicted probability in each bin. The vertical axis indicates the the proportion of predicted positive labels.
+    \item A well-calibrated classifier is associated with a diagonal clibration curve.
 \end{itemize}
+\end{column}
+\begin{column}{0.5\textwidth}
+\begin{figure}
+    \centering
+    \includegraphics{slides/04-perf-eval/figure/calibration_plot.png}
+    \caption{Calibration plot from Applied Predictive Modeling (Max Kuhn).}
+\end{figure}
+\end{column}
+\end{columns}
+
 \end{frame}
 
 

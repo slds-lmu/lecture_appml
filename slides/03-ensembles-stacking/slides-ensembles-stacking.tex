@@ -1,0 +1,171 @@
+\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+
+\usepackage{../../style/lmu-lecture}
+% Defines macros and environments
+\input{../../style/common.tex}
+
+\title{Applied Machine Learning}
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\begin{document}
+\lecturechapter{Ensembling}
+\lecture{Applied Machine Learning}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Ensembling in Machine Learning}
+\begin{itemize}
+\item Techniques that combine predictions of multiple base models
+\item Goal: Improve predictive performance and model robustness
+\item Idea: Errors of a single model will likely be compensated by other models, and as a result, the overall prediction performance of the ensemble would be better than that of a single model
+\end{itemize}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Ensemble Methods}
+Different approaches:
+\begin{itemize}
+\item Model Averaging
+\item Bagging
+\item Boosting
+\item Stacking
+\end{itemize}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Notation}
+\begin{itemize}
+\item $\mathcal{D}$ training data
+\item $\{f_{1}, \ldots, f_{m}\}$ set of $m$ models trained on $\mathcal{D}$
+\item $f^{[M]} = G(f_{1}, \ldots, f_{m})$ ensemble model obtained via an aggregating function $G$
+\end{itemize}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{slides/03-ensembles-stacking/figure/rf_majvot_averaging.png}
+    %\caption{Caption}
+    % from i2ml
+    \label{fig:rf_mjavot_averaging}
+\end{figure}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Model Averaging}
+
+Definition: Combine predictions of multiple (different / unique) models to make a final prediction\\
+\vspace{1em}
+Steps:
+\begin{enumerate}
+\item Base model training
+\item Combine predictions
+\end{enumerate}
+\vspace{1em}
+Combine predictions: majority voting (hard) / model averaging (soft)
+\begin{itemize}
+    \item $f^{[M]}(\mathbf{x}) = \text{mode}(\{f_{1}(\mathbf{x}), \ldots, f_{m}(\mathbf{x})\})$ assuming hard label predictions    
+    \item $f^{[M]}(\mathbf{x}) = \frac{1}{M} \sum_{i = 1}^{M} f_{i}(\mathbf{x})$ assuming probability predictions
+\end{itemize}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Weighted Model Averaging}
+
+We can also introduce weights $\mathbf{w} = (w_{i}, \ldots, w_{m}), \text{usually: } 0 \le w_{i} \le 1, \sum_{i=1}^{M} w_{i} = 1$ accounting for the contribution of each individual model to the prediction of the ensemble: $f_{\mathbf{w}}^{[M]}(\mathbf{x}) = \frac{1}{M} \sum_{i = 1}^{M} w_{i} f_{i}(\mathbf{x})$\\
+\vspace{1em}
+This gives rise to an optimization problem to find the optimal weight vector so that the generalization error of the ensemble is optimal:
+$\argmin_{\mathbf{w} \in \mathcal{W}} \hat{\text{GE}}(f_{\mathbf{w}}^{[M]})$\\
+\vspace{1em}
+Popular method for post-hoc ensemble selection: Greedy ensemble selection (GES)
+\begin{enumerate}
+    \item Start with the empty ensemble
+    \item Add the base model that maximizes the ensembles performance on a hillclimb (validation) set
+    \item Repeat step 2 until a given number of iterations are reached
+    \item Return the ensemble from the set of generated ensembles that has maximum performance on the validation set
+\end{enumerate}
+\footnotesize Note that ensemble selection effectively optimizes the weights on an integer domain (i.e., base models are selected one or multiple times or not at all)
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Bagging}
+
+  Definition: Bagging (stands for Bootstrap Aggregating), training multiple instances of the same base model on different subsets of the training data, obtained through random sampling with replacement.
+
+Steps:
+
+\begin{itemize}
+\item Random sampling with replacement
+\item Base model training
+\item Combine predictions
+\end{itemize}
+
+Popular use case: Construction of a random forest using decision trees as base models
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Boosting}
+Definition: Boosting is an iterative technique that adjusts the weights of the training instances based on their misclassification rate or residual errors, and trains subsequent base models to focus on the misclassified or poorly predicted instances.
+
+Steps:
+
+\begin{itemize}
+\item Initial model training:
+\item Weight update
+\item Base model training using updated weights
+\item Repeat weight update
+\item ...
+\item Combine predictions
+\end{itemize}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Stacking}
+Definition: Stacking (also stacked generalization or meta-ensemble), is an ensemble technique that involves training multiple base models on the same data and using their predictions as input features for a meta-model that makes the final ensemble prediction.
+
+Steps:
+
+\begin{itemize}
+\item Base model training
+\item Collect predictions
+\item Meta model training
+\end{itemize}
+
+1 Level stacking vs. multi level stacking
+
+In contrast to the other methods, stacking already combines model predictions during training
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Benefits}
+
+\begin{itemize}
+  \item ...
+\end{itemize}
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Caveats and Practical Considerations}
+
+\begin{itemize}
+  \item ...
+\end{itemize}
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+
+\endlecture
+\end{document}
