@@ -10,6 +10,12 @@
 \date{}
 
 \begin{document}
+\newcommand{\titlefigure}{slides/03-ensembles-stacking/figure/voting.png}
+\newcommand{\learninggoals}{
+\item Why ensembling is useful
+\item Different techniques
+\item Stacking}
+
 \lecturechapter{Ensembling}
 \lecture{Applied Machine Learning}
 
@@ -52,7 +58,7 @@ Different approaches:
 \begin{itemize}
 \item Model Averaging
 \item Bagging
-\item Boosting
+%\item Boosting
 \item Stacking
 \end{itemize}
 \vspace{1em}
@@ -61,7 +67,7 @@ Higher level mechanisms:
     \begin{itemize}
         \item during base model training (how to generate different models?)
         \begin{itemize}
-            \item input manipulation (e.g., bagging)
+            \item data manipulation (e.g., bagging)
             \item partitioning of data
             \item learning algorithm manipulation (e.g., randomly select splits)
             \item output manipulation (error-correcting output codes)
@@ -69,20 +75,25 @@ Higher level mechanisms:
         \end{itemize}
         \item during prediction (how to combine the predictions of different models?)
         \begin{itemize}
+            \item output manipulation
             \item weighting methods
             \item meta-learning
         \end{itemize}
+        \item homogeneous vs. heterogeneous
+        \begin{itemize}
+            \item same types of models vs. different models
+        \end{itemize}
     \end{itemize}
 \end{itemize}
-\end{vbframe}
+ \end{vbframe}
 
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Notation}
 \begin{itemize}
 \item $\mathcal{D}$ training data
-\item $\{f_{1}, \ldots, f_{m}\}$ set of $m$ models trained on $\mathcal{D}$
-\item $f^{[M]} = G(f_{1}, \ldots, f_{m})$ ensemble model obtained via an aggregating function $G$
+\item $\{f_{1}, \ldots, f_{m}\} \subseteq \mathcal{H}$ set of $m$ models trained on $\mathcal{D}$
+\item $f^{[M]} = G(f_{1}, \ldots, f_{m})$ ensemble model obtained via an aggregating function $G: \mathcal{H}^m \rightarrow \mathcal{H}$
 \end{itemize}
 \begin{figure}
     \centering
@@ -133,6 +144,13 @@ We can also introduce weights $\mathbf{w} = (w_{i}, \ldots, w_{m}), \text{usuall
 \vspace{1em}
 This gives rise to an optimization problem to find the optimal weight vector so that the generalization error of the ensemble is optimal:
 $\argmin_{\mathbf{w} \in \mathcal{W}} \hat{\text{GE}}(f_{\mathbf{w}}^{[M]})$\\
+\vspace{1em}
+Can be optimized via:
+\begin{itemize}
+    \item linear model
+    \item greedy ensemble selection
+    \item ...
+\end{itemize}
 
 \end{vbframe}
 
@@ -172,9 +190,13 @@ Popular use case: Construction of a random forest using decision trees as base m
 
 \begin{vbframe}{Bagging}
 
-Why subsets of training data obtained through random sampling with replacement (input manipulation)
+Why subsets of training data obtained through random sampling with replacement (input manipulation):
 \begin{itemize}
-    \item Introduce variability in base models
+    \item Bias vs. variance trade-off
+    \begin{itemize}
+        \item By training each model on slightly different data the variance of the predictions are reduced
+        \item The training data is reused many times so bias can be slightly higher  
+    \end{itemize}
     \item Effective for cases where small changes in the training set may result in a completely different model (instable learners)
 \end{itemize}
 \vspace{1em}
@@ -185,18 +207,20 @@ Note that a random forest does not only employ input manipulation via bagging bu
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Boosting}
-Definition: Boosting is an iterative technique that adjusts the weights of the training instances based on their misclassification rate or residual errors, and trains subsequent base models to focus on the misclassified or poorly predicted instances.
+ToDo: Don't cover boosting here detailed like the other topics, because boosting is more or less a learning method (similarly as a random forest which we do not cover except for the example in bagging).
+Briefly mention this and examples adaboost, xgboost, ... and refer to other lectures
+%Definition: Boosting is an iterative technique that adjusts the weights of the training instances based on their misclassification rate or residual errors, and trains subsequent base models to focus on the misclassified or poorly predicted instances.
 
-Steps:
+%Steps:
 
-\begin{itemize}
-\item Initial model training:
-\item Weight update
-\item Base model training using updated weights
-\item Repeat weight update
-\item ...
-\item Combine predictions
-\end{itemize}
+%begin{itemize}
+%\item Initial model training:
+%\item Weight update
+%\item Base model training using updated weights
+%\item Repeat weight update
+%\item ...
+%\item Combine predictions
+%\end{itemize}
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
@@ -204,56 +228,109 @@ Steps:
 \begin{vbframe}{Stacking}
 Definition: Stacking (also stacked generalization or meta-ensemble), is an ensemble technique that involves training multiple base models on the same data and using their predictions as input features for a meta-model that makes the final ensemble prediction.
 
-Steps:
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+        \vspace{-1em}
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.9\textwidth]{slides/03-ensembles-stacking/figure/stacking.png}
+            %\caption{Caption}
+            % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
+            \label{fig:baggiing}
+        \end{figure}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+        Steps:
+        \begin{enumerate}
+            \item Base model training
+            \item Collect predictions
+            \item Meta model training
+        \end{enumerate}
+    \end{column}
+\end{columns}
+\vspace{1em}
 
+In contrast to the other methods, stacking already combines model predictions during training.
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Stacking Cross-validated}
+
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+        \vspace{-1em}
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.9\textwidth]{slides/03-ensembles-stacking/figure/stacking_cv.png}
+            %\caption{Caption}
+            % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
+            \label{fig:baggiing}
+        \end{figure}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+        Using cross-validated predictions of the base models
+        \begin{itemize}
+            \item improve generalization
+            \item reduce overfitting
+            \item enhances base model diversity
+            \item minimizes information leakage
+        \end{itemize}
+    \end{column}
+\end{columns}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Multilevel Stacking}
+So far: train L0 base models, use predictions to train the L1 meta model.\\
+Now: train multiple meta models at L1, use predictions to train final L2 meta model 
+
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+        \vspace{-1em}
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.9\textwidth]{slides/03-ensembles-stacking/figure/stacking.png}
+            %\caption{Caption}
+            % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
+            \label{fig:baggiing}
+        \end{figure}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+        Steps:
+        \begin{enumerate}
+            \item L0 base model training
+            \item Collect predictions of L0 base models
+            \item L1 meta model training 
+            \item Collect predictions of L1 models
+            \item L2 final meta model training
+        \end{enumerate}
+    \end{column}
+\end{columns}
+\vspace{1em}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Meta Models}
+Popular choices of meta models in stacking include:
 \begin{itemize}
-\item Base model training
-\item Collect predictions
-\item Meta model training
+    \item linear / logistic regression 
+    \item random forest (especially in the case of multilevel stacking)
 \end{itemize}
-
-1 Level stacking vs. multi level stacking
-
-In contrast to the other methods, stacking already combines model predictions during training
-
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
 
-\begin{vbframe}{Stacking Crossvalidated}
-Using cross-validated predictions of the base models in stacking improves generalization, reduces overfitting, enhances model diversity, and minimizes information leakage. 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.5\textwidth]{slides/03-ensembles-stacking/figure/stacking_cv.png}
-    %\caption{Caption}
-    % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
-    \label{fig:stacking_cv}
-\end{figure}
-\end{vbframe}
-
-% ------------------------------------------------------------------------------
-
-\begin{vbframe}{Stacking Multilevel}
-\end{vbframe}
-
-% ------------------------------------------------------------------------------
-
-\begin{vbframe}{Benefits}
-
+\begin{vbframe}{Open topics}
 \begin{itemize}
-  \item ...
+    \item calibration of ensembles
+    \item how detailed bias variance recap
+    \item diversity in ensembling
+    \item HPO
 \end{itemize}
-
-\end{vbframe}
-
-% ------------------------------------------------------------------------------
-
-\begin{vbframe}{Caveats and Practical Considerations}
-
-\begin{itemize}
-  \item ...
-\end{itemize}
-
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
