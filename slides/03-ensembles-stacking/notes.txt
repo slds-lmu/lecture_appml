@@ -1,4 +1,3 @@
-* how mathy
-* do we need bagging recap / boosting recap or only focus on model averaging stacking
-* practical stuff like: ensembling in automl?
-* figures: mermaid / tikz?
+* 1 averaging
+* 2 stacking
+* 3 review --> homo vs. hetero

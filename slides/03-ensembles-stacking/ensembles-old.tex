@@ -1,8 +1,9 @@
 \documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
 
 \usepackage{../../style/lmu-lecture}
-% Defines macros and environments
+\usepackage[algo2e]{algorithm2e} % Defines macros and environments
 \input{../../style/common.tex}
+
 
 \title{Applied Machine Learning}
 % \author{LMU}
@@ -12,9 +13,7 @@
 \begin{document}
 \newcommand{\titlefigure}{slides/03-ensembles-stacking/figure/voting.png}
 \newcommand{\learninggoals}{
-\item Why ensembling is useful
-\item Different techniques
-\item Stacking}
+\item tbd}
 
 \lecturechapter{Ensembling}
 \lecture{Applied Machine Learning}
@@ -54,46 +53,35 @@
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Ensemble Methods}
-Different approaches:
-\begin{itemize}
-\item Model Averaging
-\item Bagging
-%\item Boosting
-\item Stacking
-\end{itemize}
-\vspace{1em}
 Higher level mechanisms:
 \begin{itemize}
+    \item during base model training (how to generate different models?)
     \begin{itemize}
-        \item during base model training (how to generate different models?)
-        \begin{itemize}
-            \item data manipulation (e.g., bagging)
-            \item partitioning of data
-            \item learning algorithm manipulation (e.g., randomly select splits)
-            \item output manipulation (error-correcting output codes)
-            \item hybridization of the above
-        \end{itemize}
-        \item during prediction (how to combine the predictions of different models?)
-        \begin{itemize}
-            \item output manipulation
-            \item weighting methods
-            \item meta-learning
-        \end{itemize}
-        \item homogeneous vs. heterogeneous
-        \begin{itemize}
-            \item same types of models vs. different models
-        \end{itemize}
+        \item data manipulation (e.g., bagging); partitioning of data
+        \item learning algorithm manipulation (e.g., randomly select splits)
+        \item output manipulation (error-correcting output codes)
+        \item hybridization of the above
+    \end{itemize}
+    \item during prediction (how to combine the predictions of different models?)
+    \begin{itemize}
+        \item output manipulation
+        \item weighting methods
+        \item meta-learning
+    \end{itemize}
+    \item homogeneous vs. heterogeneous
+    \begin{itemize}
+        \item same types of models vs. different models
     \end{itemize}
 \end{itemize}
- \end{vbframe}
+\end{vbframe}
 
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Notation}
 \begin{itemize}
-\item $\mathcal{D}$ training data
-\item $\{f_{1}, \ldots, f_{m}\} \subseteq \mathcal{H}$ set of $m$ models trained on $\mathcal{D}$
-\item $f^{[M]} = G(f_{1}, \ldots, f_{m})$ ensemble model obtained via an aggregating function $G: \mathcal{H}^m \rightarrow \mathcal{H}$
+\item $\D$ training data
+\item $\{\bl[1], \ldots, \bl[M]\} \subseteq \mathcal{H}$ set of $M$ models trained on $\mathcal{D}$
+\item $\fM = G(\bl[1], \ldots, \bl[M])$ ensemble model obtained via an aggregating function $G: \mathcal{H}^M \rightarrow \mathcal{H}$
 \end{itemize}
 \begin{figure}
     \centering
@@ -108,7 +96,7 @@ Higher level mechanisms:
 
 \begin{vbframe}{Model Averaging}
 
-Definition: Combine predictions of multiple (different) models to make a final prediction\\
+Definition: Combine predictions of multiple (different) models to make a final prediction $\rightarrow$ heterogeneous ensembling
 \begin{columns}
     \begin{column}{0.5\textwidth}
         \vspace{-1em}
@@ -131,34 +119,64 @@ Definition: Combine predictions of multiple (different) models to make a final p
 \vspace{1em}
 Combine predictions: majority voting (hard) / model averaging (soft)
 \begin{itemize}
-    \item $f^{[M]}(\mathbf{x}) = \text{mode}(\{f_{1}(\mathbf{x}), \ldots, f_{m}(\mathbf{x})\})$ assuming hard label predictions    
-    \item $f^{[M]}(\mathbf{x}) = \frac{1}{M} \sum_{i = 1}^{M} f_{i}(\mathbf{x})$ assuming probability predictions
+    \item $\fMx = \text{mode}(\{\hblx[1], \ldots, \hblx[M]\})$ assuming hard label predictions    
+    \item $\fMx = \frac{1}{M} \sum_{m = 1}^{M} \sblx[m]$ assuming probability predictions
 \end{itemize}
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Weighted Model Averaging}
+Assume a set of $M$ different models trained on $\D$.\\
+We can also introduce weights $\mathbf{w} = (w_{1}, \ldots, w_{M}), \text{usually: } 0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$ accounting for the contribution of each individual model to the prediction of the ensemble: $\fMwx = \frac{1}{M} \sum_{m = 1}^{M} w_{m} \cdot \sblx[m]$\\
+\vspace{1em}
+This gives rise to an optimization problem to find the optimal weight vector so a given performance metric $\rho$ of the ensemble is optimal:\\
+$\argoptlim_{\mathbf{w} \in \R^{M}} \rho(y, \fMwx)$\\
+\vspace{1em}
+If we do not know the performance metric or loss function a priori (e.g. AutoML) this optimization problem is treated as a black box
+\end{vbframe}
 
-We can also introduce weights $\mathbf{w} = (w_{i}, \ldots, w_{m}), \text{usually: } 0 \le w_{i} \le 1, \sum_{i=1}^{M} w_{i} = 1$ accounting for the contribution of each individual model to the prediction of the ensemble: $f_{\mathbf{w}}^{[M]}(\mathbf{x}) = \frac{1}{M} \sum_{i = 1}^{M} w_{i} f_{i}(\mathbf{x})$\\
-\vspace{1em}
-This gives rise to an optimization problem to find the optimal weight vector so that the generalization error of the ensemble is optimal:
-$\argmin_{\mathbf{w} \in \mathcal{W}} \hat{\text{GE}}(f_{\mathbf{w}}^{[M]})$\\
-\vspace{1em}
-Can be optimized via:
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Weighted Model Averaging}
+Depending on the loss function, the optimization problem can also be straightforward:
 \begin{itemize}
-    \item linear model
-    \item greedy ensemble selection
-    \item ...
+    \item Assume MSE as loss function $L(y^{(i)}, \xv^{(i)}) = (y^{(i)} - \fMwxi)^{2}$
+    \item And constraints of the form $0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$
+    \item Then $\argminlim_{\mathbf{w} \in \R^{M}} \frac{1}{n} \sum_{i = 1}^{n} (y^{(i)} - \fMwxi)^{2}$ s.t. $0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$ can be written as a quadratic program
 \end{itemize}
+\vspace{1em}
+In practice, people typically rely on  
+\begin{itemize}
+    \item black box optimizers
+    \item greedy ensemble selection
+    \item linear model $\rightarrow$ stacking
+\end{itemize}
+\end{vbframe}
 
+% ------------------------------------------------------------------------------
+
+
+\begin{vbframe}{Greedy Ensemble Selection}
+Assume a set of $M$ different models trained on $\D$.\\
+We now want to optimize the weights used in weighted model averaging.\\
+\vspace{1em}
+Greedy ensemble selection is one of the most popular methods to do so:
+\begin{enumerate}
+    \item Start with the empty ensemble
+    \item Add the base model that maximizes the ensembles performance metric on a hillclimb (validation) set
+    \item Repeat step 2 until a given number of iterations are reached
+    \item Return the ensemble from the set of generated ensembles that has the best performance metric on the validation set
+\end{enumerate}
+\vspace{1em}
+Note that ensemble selection effectively optimizes the weights on an integer domain (i.e., base models are selected one or multiple times or not at all)
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Bagging}
 
-Definition: Bagging (stands for Bootstrap Aggregating), training multiple instances of the same base model on different subsets of the training data, obtained through random sampling with replacement.\\
+Definition: Bagging (stands for Bootstrap Aggregating), training multiple instances of the same base model on different subsets of the training data, obtained through random sampling with replacement $\rightarrow$ homogeneous ensembling
 \begin{columns}
     \begin{column}{0.5\textwidth}
         \vspace{-1em}
@@ -167,7 +185,7 @@ Definition: Bagging (stands for Bootstrap Aggregating), training multiple instan
             \includegraphics{slides/03-ensembles-stacking/figure/bagging.png}
             %\caption{Caption}
             % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
-            \label{fig:baggiing}
+            \label{fig:bagging}
         \end{figure}
     \end{column}
     \begin{column}{0.5\textwidth}
@@ -183,8 +201,6 @@ Definition: Bagging (stands for Bootstrap Aggregating), training multiple instan
 Popular use case: Construction of a random forest using decision trees as base models
 
 \end{vbframe}
-
-% ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
 
@@ -207,10 +223,16 @@ Note that a random forest does not only employ input manipulation via bagging bu
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Boosting}
-ToDo: Don't cover boosting here detailed like the other topics, because boosting is more or less a learning method (similarly as a random forest which we do not cover except for the example in bagging).
-Briefly mention this and examples adaboost, xgboost, ... and refer to other lectures
-%Definition: Boosting is an iterative technique that adjusts the weights of the training instances based on their misclassification rate or residual errors, and trains subsequent base models to focus on the misclassified or poorly predicted instances.
-
+Definition: Boosting is an iterative technique that adjusts the weights of the training instances based on their misclassification rate or residual errors, and sequentially trains subsequent base models (weak learners) to focus on the misclassified or poorly predicted instances.
+\vspace{1em}
+Well known frameworks:
+\begin{itemize}
+    \item AdaBoost (Adaptive Boosting)
+    \item Gradient Boosting
+    \item XGBoost (Extreme Gradient Boosting)
+\end{itemize}
+\vspace{1em}
+Different from other ensembling methods as training is done sequentially
 %Steps:
 
 %begin{itemize}
@@ -226,7 +248,7 @@ Briefly mention this and examples adaboost, xgboost, ... and refer to other lect
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Stacking}
-Definition: Stacking (also stacked generalization or meta-ensemble), is an ensemble technique that involves training multiple base models on the same data and using their predictions as input features for a meta-model that makes the final ensemble prediction.
+Definition: Stacking (also stacked generalization or meta-ensemble), is an ensemble technique that involves training multiple base models (level 0) on the same data and using their predictions as input features for a level 1 model that makes the final ensemble prediction $\rightarrow$ heterogeneous ensembling
 
 \begin{columns}
     \begin{column}{0.5\textwidth}
@@ -236,21 +258,54 @@ Definition: Stacking (also stacked generalization or meta-ensemble), is an ensem
             \includegraphics[width=0.9\textwidth]{slides/03-ensembles-stacking/figure/stacking.png}
             %\caption{Caption}
             % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
-            \label{fig:baggiing}
+            \label{fig:stacking}
         \end{figure}
     \end{column}
     \begin{column}{0.5\textwidth}
         Steps:
         \begin{enumerate}
-            \item Base model training
+            \item Base model training (level 0)
             \item Collect predictions
-            \item Meta model training
+            \item level 1 model training
         \end{enumerate}
     \end{column}
 \end{columns}
 \vspace{1em}
 
-In contrast to the other methods, stacking already combines model predictions during training.
+In contrast to other methods, stacking already combines predictions during training.
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Stacking}
+\footnotesize
+\begin{algorithm}[H]
+    \SetAlgoLined
+    \caption{Stacking}
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+
+    \Input{$\D = \Dset$}
+    \Output{Ensemble}
+    
+    \BlankLine
+    \textbf{Step 1: Learn level 0 base models}\;\\
+    \For{$m \leftarrow 1$ \KwTo $M$}{
+        Fit base model $\bl[m]$ on $\D$\;
+    }
+    
+    \BlankLine
+    \textbf{Step 2: Construct new dataset $\D^\prime$ from $\D$}\;\\
+    \For{$i \leftarrow 1$ \KwTo $n$}{
+        Add $(\mathbf{x}^{\prime(i)}, y^{(i)})$ to new dataset, where $\mathbf{x}^{\prime(i)} = (\blx[1], \ldots, \blx[M])$\;
+    }
+    
+    \BlankLine
+    \textbf{Step 3: Learn level 1 model $\fM(\D^\prime)$}\;\\
+    \KwRet $\fM(\D^\prime)$\;
+\end{algorithm}
+Note: We can either drop the original features or keep them when learning the level 1 model
 
 \end{vbframe}
 
@@ -266,7 +321,7 @@ In contrast to the other methods, stacking already combines model predictions du
             \includegraphics[width=0.9\textwidth]{slides/03-ensembles-stacking/figure/stacking_cv.png}
             %\caption{Caption}
             % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
-            \label{fig:baggiing}
+            \label{fig:stacking_cv}
         \end{figure}
     \end{column}
     \begin{column}{0.5\textwidth}
@@ -284,8 +339,8 @@ In contrast to the other methods, stacking already combines model predictions du
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Multilevel Stacking}
-So far: train L0 base models, use predictions to train the L1 meta model.\\
-Now: train multiple meta models at L1, use predictions to train final L2 meta model 
+So far: train level 0 base models, use predictions to train the level 1 model.\\
+Now: train multiple models at level 1, use predictions to train final level 2 model 
 
 \begin{columns}
     \begin{column}{0.5\textwidth}
@@ -295,17 +350,17 @@ Now: train multiple meta models at L1, use predictions to train final L2 meta mo
             \includegraphics[width=0.9\textwidth]{slides/03-ensembles-stacking/figure/stacking.png}
             %\caption{Caption}
             % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
-            \label{fig:baggiing}
+            \label{fig:stacking_multi}
         \end{figure}
     \end{column}
     \begin{column}{0.5\textwidth}
         Steps:
         \begin{enumerate}
-            \item L0 base model training
-            \item Collect predictions of L0 base models
-            \item L1 meta model training 
-            \item Collect predictions of L1 models
-            \item L2 final meta model training
+            \item level 0 base model training
+            \item Collect predictions of level 0 base models
+            \item level 1 model training 
+            \item Collect predictions of level 1 models
+            \item level 2 final model training
         \end{enumerate}
     \end{column}
 \end{columns}
@@ -314,8 +369,8 @@ Now: train multiple meta models at L1, use predictions to train final L2 meta mo
 
 % ------------------------------------------------------------------------------
 
-\begin{vbframe}{Meta Models}
-Popular choices of meta models in stacking include:
+\begin{vbframe}{Higher Level Models}
+Popular choices of level 1 or level 2 models in stacking include:
 \begin{itemize}
     \item linear / logistic regression 
     \item random forest (especially in the case of multilevel stacking)
@@ -330,6 +385,7 @@ Popular choices of meta models in stacking include:
     \item how detailed bias variance recap
     \item diversity in ensembling
     \item HPO
+    \item overfitting automl paper
 \end{itemize}
 \end{vbframe}
 

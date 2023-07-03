@@ -1,0 +1,214 @@
+\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+
+\usepackage{../../style/lmu-lecture}
+\usepackage[algo2e]{algorithm2e} % Defines macros and environments
+\input{../../style/common.tex}
+
+
+\title{Applied Machine Learning}
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\begin{document}
+\newcommand{\titlefigure}{slides/03-ensembles-stacking/figure/bagging.png}
+\newcommand{\learninggoals}{
+\item Bagging and Boosting Recap
+\item Model Averaging
+}
+
+\lecturechapter{Ensembling Part I}
+\lecture{Applied Machine Learning}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Bagging}
+
+Definition: Bagging (stands for Bootstrap Aggregating), training multiple instances of the same base model on different subsets of the training data, obtained through random sampling with replacement $\rightarrow$ homogeneous ensembling
+\vspace{1em}
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+        \vspace{-1em}
+        \begin{figure}
+            \centering
+            \includegraphics{slides/03-ensembles-stacking/figure/bagging.png}
+            %\caption{Caption}
+            % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
+            \label{fig:bagging}
+        \end{figure}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+        Steps:
+        \begin{enumerate}
+            \item Random sampling with replacement to generate different train data sets
+            \item Base model training
+            \item Combine predictions
+        \end{enumerate}
+    \end{column}
+\end{columns}
+\vspace{1em}
+Popular use case: Construction of a random forest using decision trees as base models
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Bagging}
+
+Why subsets of training data obtained through random sampling with replacement (input manipulation):
+\begin{itemize}
+    \item Bias vs. variance trade-off
+    \begin{itemize}
+        \item By training each model on slightly different data the variance of the predictions are reduced
+        \item The training data is reused many times so bias can be slightly higher  
+    \end{itemize}
+    \item Effective for cases where small changes in the training set may result in a completely different model (instable learners)
+\end{itemize}
+\vspace{1em}
+Note that a random forest does not only employ input manipulation via bagging but also learning algorithm manipulation (sampling splits).
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Boosting}
+Definition: Boosting is an iterative technique that adjusts the weights of the training instances based on their misclassification rate or residual errors, and sequentially trains subsequent base models (weak learners) to focus on the misclassified or poorly predicted instances.
+\vspace{1em}
+Well known frameworks:
+\begin{itemize}
+    \item AdaBoost (Adaptive Boosting)
+    \item Gradient Boosting
+    \item XGBoost (Extreme Gradient Boosting)
+\end{itemize}
+\vspace{1em}
+Different from other ensembling methods as training is done sequentially
+%Steps:
+
+%begin{itemize}
+%\item Initial model training:
+%\item Weight update
+%\item Base model training using updated weights
+%\item Repeat weight update
+%\item ...
+%\item Combine predictions
+%\end{itemize}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Notation}
+\begin{columns}
+    \begin{column}{0.4\textwidth}
+        \begin{itemize}
+            \item $\D$ training data
+            \item $\{\bl[1], \ldots, \bl[M]\} \subseteq \mathcal{H}$ set of $M$ models trained on $\mathcal{D}$
+            \item $\sbl[m]: \mathcal{X} \rightarrow [0, 1]^{g}$ probability predictions (w.l.o.g. we assume $g = 1$ in the following)
+            \item $\hbl[m]: \mathcal{X} \rightarrow \mathcal{Y}$ hard label / outcome predictions
+            \item $\fM = G((\bl[1], \ldots, \bl[M]))$ ensemble model obtained via aggregating function $G$
+            \begin{itemize}
+                \item Either aggregate probability or hard label predictions
+            \end{itemize}
+        \end{itemize}
+    \end{column}
+    \begin{column}{0.6\textwidth}
+        \vspace{-1em}
+        \begin{figure}
+            \centering
+            \includegraphics{slides/03-ensembles-stacking/figure/rf_majvot_averaging.png}
+            %\caption{Caption}
+            % from i2ml
+            \label{fig:rf_mjavot_averaging}
+        \end{figure}
+    \end{column}
+\end{columns}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Model Averaging}
+
+Definition: Combine predictions of multiple (different) models to make a final prediction $\rightarrow$ heterogeneous ensembling
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+        \vspace{-1em}
+        \begin{figure}
+            \centering
+            \includegraphics{slides/03-ensembles-stacking/figure/voting.png}
+            %\caption{Caption}
+            % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
+            \label{fig:voting}
+        \end{figure}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+        Steps:
+        \begin{enumerate}
+            \item Base model training
+            \item Combine predictions
+        \end{enumerate}
+    \end{column}
+\end{columns}
+\vspace{1em}
+Combine predictions: majority voting (hard) / model averaging (soft)
+\begin{itemize}
+    \item $\fMx = \frac{1}{M} \sum_{m = 1}^{M} \sblx[m]$ assuming probability predictions
+    \item $\fMx = \text{mode}(\{\hblx[1], \ldots, \hblx[M]\})$ assuming hard label predictions    
+\end{itemize}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Weighted Model Averaging}
+Assume a set of $M$ different models trained on $\D$.\\
+We can also introduce weights $\mathbf{w} = (w_{1}, \ldots, w_{M}), \text{usually: } 0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$ accounting for the contribution of each individual model to the prediction of the ensemble (e.g., predicting positive class probabilities): $\fMwx = \frac{1}{M} \sum_{m = 1}^{M} w_{m} \cdot \sblx[m]$\\
+\vspace{1em}
+This gives rise to an optimization problem to find the optimal weight vector so a given performance metric or loss function $L$ of the ensemble is optimal:\\
+$\argoptlim_{\mathbf{w} \in \R^{M}} \frac{1}{n} \sum_{i = 1}^{n} L(y^{(i)}, \fMwxi)$\\
+\vspace{1em}
+If we do not know the performance metric or loss function a priori (e.g. AutoML) this optimization problem is treated as a black box
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Weighted Model Averaging}
+Depending on the loss function, the optimization problem can also be straightforward:
+\begin{itemize}
+    \item Assume MSE as loss function $L(y^{(i)}, \fMwxi) = (y^{(i)} - \fMwxi)^{2}$
+    \item And constraints of the form $0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$
+    \item Then $\argminlim_{\mathbf{w} \in \R^{M}} \frac{1}{n} \sum_{i = 1}^{n} (y^{(i)} - \fMwxi)^{2}$ s.t. $0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$ can be written as a quadratic program
+\end{itemize}
+\vspace{1em}
+In practice, people usually still rely on the following methods to find optimal weights:
+\begin{itemize}
+    \item black box optimizers
+    \item greedy ensemble selection
+    \item linear model $\rightarrow$ stacking
+\end{itemize}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Greedy Ensemble Selection}
+Assume a set of $M$ different base models trained on $\D$.\\
+We now want to optimize the weights used in weighted model averaging.\\
+\vspace{1em}
+Greedy ensemble selection is one of the most popular methods to do so:
+\begin{enumerate}
+    \item Start with the empty ensemble
+    \item Add the base model that maximizes the ensembles performance metric on a hillclimb (validation) set
+    \item Repeat step 2 until a given number of iterations are reached
+    \item Return the ensemble from the set of generated ensembles that has the best performance metric on the validation set
+\end{enumerate}
+\vspace{1em}
+Note that ensemble selection effectively optimizes the weights on an integer domain (i.e., base models are selected one or multiple times or not at all)
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Further Reading}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+
+\endlecture
+\end{document}

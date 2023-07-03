@@ -1,0 +1,64 @@
+\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+
+\usepackage{../../style/lmu-lecture}
+% Defines macros and environments
+\input{../../style/common.tex}
+
+\title{Applied Machine Learning}
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\begin{document}
+
+\begin{frame}{Selecting a Performance Metric}
+
+\begin{itemize}
+    \item 
+\end{itemize}
+    
+\end{frame}
+
+\begin{frame}{Selecting an Established Metric}
+
+\begin{figure}
+    \centering
+    \includegraphics[width = 0.85\textwidth]{slides/04-perf-eval/figure/ontology_perf_metrics.png}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Selecting an Established Metric}
+
+\begin{figure}
+    \centering
+    \includegraphics[width = 0.85\textwidth]{slides/04-perf-eval/figure/classification_of_metrics.png}
+\end{figure}
+\end{frame}
+
+xx
+% \begin{frame}{Established Performance Metrics}
+
+% \begin{itemize}
+% \setlength\itemsep{2em}
+%     \item List and motivate established performance metrics here
+%     \item E.g., for \textbf{classification}: accuracy, true and false positive rate, precision and recall, F-score, AUC, Brier score
+%     \item E.g., for \textbf{regression}: MSE, RMSE, MAE, R2
+%     \item Describe typical use case and why metric works
+%     \item Example: Brier Score rewards model confidence (i.e. give a high probability to a true outcome) and punishes the reverse.
+% \end{itemize}
+% \end{frame}
+
+\begin{frame}{Advanced Performance Metrics}
+
+\begin{itemize}
+\setlength\itemsep{2em}
+    \item Dive into esoteric stuff here: Youden, Cohens-Kappa, Matthews correlation
+    \item Motivate each advanced metric, do not just list formula
+    \item Example: "MCC produces a high score only if the prediction obtained good results in all of the confusion matrix categories (TP, FP, TN, FN), proportionally both to the size of positive elements and the size of negative elements in the dataset"
+\end{itemize}
+\end{frame}
+
+
+
+\endlecture
+\end{document}

@@ -2,12 +2,21 @@
 \newcommand{\bl}[1][m]{b^{[#1]}} % baselearner, default m
 \newcommand{\blh}[1][m]{\hat{b}^{[#1]}} % estimated base learner, default m 
 \newcommand{\blx}[1][m]{b^{[#1]}(\xv)} % baselearner, default m
-\newcommand{\fM}{f^{[M]}(\xv)} % ensembled predictor
+\newcommand{\fM}{f^{[M]}} % ensembled predictor
+\newcommand{\fMx}{f^{[M]}(\xv)} % ensembled predictor
 \newcommand{\fMh}{\hat f^{[M]}(\xv)} % estimated ensembled predictor
 \newcommand{\ambifM}{\Delta\left(\fM\right)} % ambiguity/instability of ensemble
 \newcommand{\betam}[1][m]{\beta^{[#1]}} % weight of basemodel m
 \newcommand{\betamh}[1][m]{\hat{\beta}^{[#1]}} % weight of basemodel m with hat
 \newcommand{\betaM}{\beta^{[M]}} % last baselearner
+\newcommand{\hbl}[1][m]{b_{h}^{[#1]}} % baselearner hard label, default m
+\newcommand{\sbl}[1][m]{b_{\pi}^{[#1]}} % baselearner probs, default m
+\newcommand{\hblx}[1][m]{b_{h}^{[#1]}(\xv)} % baselearner hard label, default m
+\newcommand{\sblx}[1][m]{b_{\pi}^{[#1]}(\xv)} % baselearner probs, default m
+\newcommand{\fMw}{f_{\mathbf{w}}^{[M]}} % ensembled predictor weighted
+\newcommand{\fMwx}{f_{\mathbf{w}}^{[M]}(\xv)} % ensembled predictor weighted
+\newcommand{\fMwxi}{f_{\mathbf{w}}^{[M]}(\xv^{(i)})} % ensembled predictor weighted
+
 
 % ml - boosting
 \newcommand{\fm}[1][m]{f^{[#1]}} % prediction in iteration m

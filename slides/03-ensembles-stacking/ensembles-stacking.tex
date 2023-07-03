@@ -1,0 +1,161 @@
+\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+
+\usepackage{../../style/lmu-lecture}
+\usepackage[algo2e]{algorithm2e} % Defines macros and environments
+\input{../../style/common.tex}
+
+
+\title{Applied Machine Learning}
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\begin{document}
+\newcommand{\titlefigure}{slides/03-ensembles-stacking/figure/voting.png}
+\newcommand{\learninggoals}{
+\item Stacking}
+
+\lecturechapter{Ensembling Part II}
+\lecture{Applied Machine Learning}
+
+\begin{vbframe}{Stacking}
+Definition: Stacking (also stacked generalization or meta-ensemble), is an ensemble technique that involves training multiple base models (level 0) on the same data and using their predictions as input features for a level 1 model that makes the final ensemble prediction $\rightarrow$ heterogeneous ensembling
+\vspace{1em}
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+        \vspace{-1em}
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.9\textwidth]{slides/03-ensembles-stacking/figure/stacking.png}
+            %\caption{Caption}
+            % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
+            \label{fig:stacking}
+        \end{figure}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+        Steps:
+        \begin{enumerate}
+            \item Base model training (level 0)
+            \item Collect predictions
+            \item level 1 model training
+        \end{enumerate}
+    \end{column}
+\end{columns}
+\vspace{1em}
+
+In contrast to other methods, stacking already combines predictions during training.
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Stacking}
+\footnotesize
+\begin{algorithm}[H]
+    \SetAlgoLined
+    \caption{Stacking}
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+
+    \Input{$\D = \Dset$}
+    \Output{Ensemble}
+    
+    \BlankLine
+    \textbf{Step 1: Learn level 0 base models}\;\\
+    \For{$m \leftarrow 1$ \KwTo $M$}{
+        Fit base model $\bl[m]$ on $\D$\;
+    }
+    
+    \BlankLine
+    \textbf{Step 2: Construct new dataset $\D^\prime$ from $\D$}\;\\
+    \For{$i \leftarrow 1$ \KwTo $n$}{
+        Add $(\mathbf{x}^{\prime(i)}, y^{(i)})$ to new dataset, where $\mathbf{x}^{\prime(i)} = (\blx[1], \ldots, \blx[M])$\;
+    }
+    
+    \BlankLine
+    \textbf{Step 3: Learn level 1 model $\fM(\D^\prime)$}\;\\
+    \KwRet $\fM(\D^\prime)$\;
+\end{algorithm}
+Note: We can either drop the original features or keep them when learning the level 1 model
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Stacking Cross-validated}
+
+\begin{columns}
+    \begin{column}{0.6\textwidth}
+        \vspace{-1em}
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.9\textwidth]{slides/03-ensembles-stacking/figure/stacking_cv.png}
+            %\caption{Caption}
+            % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
+            \label{fig:stacking_cv}
+        \end{figure}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+        Using cross-validated predictions of the base models
+        \begin{itemize}
+            \item improve generalization
+            \item reduce overfitting
+            \item enhances base model diversity
+            \item minimizes information leakage
+        \end{itemize}
+        \vspace{1em}
+        Note: Stacking with a simple hold-out split instead of cross-validation is also known as \emph{blending}
+    \end{column}
+\end{columns}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Multilevel Stacking}
+So far: train level 0 base models, use predictions to train the level 1 model.\\
+Now: train multiple models at level 1, use predictions to train final level 2 model 
+\vspace{1em}
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+        \vspace{-1em}
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.9\textwidth]{slides/03-ensembles-stacking/figure/stacking.png}
+            %\caption{Caption}
+            % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
+            \label{fig:stacking_multi}
+        \end{figure}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+        Steps:
+        \begin{enumerate}
+            \item level 0 base model training
+            \item Collect predictions of level 0 base models
+            \item level 1 model training 
+            \item Collect predictions of level 1 models
+            \item level 2 final model training
+        \end{enumerate}
+    \end{column}
+\end{columns}
+\vspace{1em}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Higher Level Models}
+Popular choices of level 1 or level 2 models in stacking include:
+\begin{itemize}
+    \item linear / logistic regression 
+    \item random forest (especially in the case of multilevel stacking)
+\end{itemize}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Further Reading}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\endlecture
+\end{document}
