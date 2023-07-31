@@ -24,7 +24,7 @@
 
 \begin{vbframe}{Bagging}
 
-Definition: Bagging (stands for Bootstrap Aggregating), training multiple instances of the same base model on different subsets of the training data, obtained through random sampling with replacement $\rightarrow$ homogeneous ensembling
+Bootstrap Aggregating: Training multiple instances of the same base model on different subsets of the training data, obtained through random sampling with replacement $\rightarrow$ homogeneous ensembling
 \vspace{1em}
 \begin{columns}
     \begin{column}{0.5\textwidth}
@@ -47,7 +47,7 @@ Definition: Bagging (stands for Bootstrap Aggregating), training multiple instan
     \end{column}
 \end{columns}
 \vspace{1em}
-Popular use case: Construction of a random forest using decision trees as base models
+Popular use case: Construction of RF using trees as base models
 
 \end{vbframe}
 
@@ -55,24 +55,26 @@ Popular use case: Construction of a random forest using decision trees as base m
 
 \begin{vbframe}{Bagging}
 
-Why subsets of training data obtained through random sampling with replacement (input manipulation):
+Why resampled data?
+
 \begin{itemize}
     \item Bias vs. variance trade-off
     \begin{itemize}
-        \item By training each model on slightly different data the variance of the predictions are reduced
-        \item The training data is reused many times so bias can be slightly higher  
+        \item Variance reduction 
+            through averaging
+        \item Bias of model is increased as less (unique) data are seen  
     \end{itemize}
-    \item Effective for cases where small changes in the training set may result in a completely different model (instable learners)
+    \item Works well for unstable learners
 \end{itemize}
 \vspace{1em}
-Note that a random forest does not only employ input manipulation via bagging but also learning algorithm manipulation (sampling splits).
+NB: RF also uses col subsampling.
 
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Boosting}
-Definition: Boosting is an iterative technique that adjusts the weights of the training instances based on their misclassification rate or residual errors, and sequentially trains subsequent base models (weak learners) to focus on the misclassified or poorly predicted instances.
+Iterative technique that adjusts the weights of the training instances based on their misclassification rate or residual errors, and sequentially trains subsequent base models (weak learners) to focus on the misclassified or poorly predicted instances.
 \vspace{1em}
 Well known frameworks:
 \begin{itemize}
@@ -81,7 +83,7 @@ Well known frameworks:
     \item XGBoost (Extreme Gradient Boosting)
 \end{itemize}
 \vspace{1em}
-Different from other ensembling methods as training is done sequentially
+Different from other ensembling methods as ensemble is built sequentially.
 %Steps:
 
 %begin{itemize}
@@ -169,15 +171,30 @@ If we do not know the performance metric or loss function a priori (e.g. AutoML)
 
 % ------------------------------------------------------------------------------
 
-\begin{vbframe}{Weighted Model Averaging}
-Depending on the loss function, the optimization problem can also be straightforward:
+\begin{vbframe}{Example: Sonar Task}
+% rsrc/ensembles_averaging.R
+We fit different learners on the sonar task and evaluate their performance using balanced accuracy (BACC) via a simple holdout (2/3 vs. 1/3) stratified for the target:
 \begin{itemize}
-    \item Assume MSE as loss function $L(y^{(i)}, \fMwxi) = (y^{(i)} - \fMwxi)^{2}$
-    \item And constraints of the form $0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$
-    \item Then $\argminlim_{\mathbf{w} \in \R^{M}} \frac{1}{n} \sum_{i = 1}^{n} (y^{(i)} - \fMwxi)^{2}$ s.t. $0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$ can be written as a quadratic program
+    \item random forest: BACC = 0.788
+    \item k-NN ($k = 7$): BACC = 0.776
+    \item log. reg.: BACC = 0.707
 \end{itemize}
 \vspace{1em}
-In practice, people usually still rely on the following methods to find optimal weights:
+Model averaging with equal weights, $w_{i} = \frac{1}{3}~\forall i \in \{1, \ldots 3\}$: BACC = 0.765\\
+\vspace{1em}
+Different weight vector, $\mathbf{w} = (0.85, 0.10, 0.05)$: BACC = 0.815
+\end{vbframe}
+
+\begin{vbframe}{Weighted Model Averaging}
+Depending on the loss function, the optimization problem can be straightforward or difficult:
+\begin{itemize}
+    \item Assume MSE as loss function (regression) $L(y^{(i)}, \fMwxi) = (y^{(i)} - \fMwxi)^{2}$
+    \item And constraints of the form $0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$
+    \item Then $\argminlim_{\mathbf{w} \in \R^{M}} \frac{1}{n} \sum_{i = 1}^{n} (y^{(i)} - \fMwxi)^{2}$ s.t. $0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$ can be written as a quadratic program
+    \item Now assume 0-1 loss loss function (binary classification), then the optimization problem is np-hard
+\end{itemize}
+\vspace{1em}
+In practice, people usually rely on the following methods to solve the optimization problem:
 \begin{itemize}
     \item black box optimizers
     \item greedy ensemble selection
@@ -199,7 +216,7 @@ Greedy ensemble selection is one of the most popular methods to do so:
     \item Return the ensemble from the set of generated ensembles that has the best performance metric on the validation set
 \end{enumerate}
 \vspace{1em}
-Note that ensemble selection effectively optimizes the weights on an integer domain (i.e., base models are selected one or multiple times or not at all)
+Note that ensemble selection effectively optimizes the weights on an integer domain (i.e., base models are selected one or multiple times or not at all).
 \end{vbframe}
 
 % ------------------------------------------------------------------------------

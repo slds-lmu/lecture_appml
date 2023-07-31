@@ -3,7 +3,7 @@
 \usepackage{../../style/lmu-lecture}
 % Defines macros and environments
 \input{../../style/common.tex}
-
+\newcommand{\Dtestb}{\mathcal{D}_{\text{test}}^{(b)}}
 \title{Applied Machine Learning}
 % \author{LMU}
 %\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
@@ -15,22 +15,25 @@
 
 % Raschka paper
 % https://arxiv.org/pdf/1811.12808.pdf
+
+% Demsar paper main reference
 \begin{frame}{Hypothesis Testing in Benchmarking}
 
 \begin{itemize}
     \setlength\itemsep{2em}
-    \item We want to ensure that a model consistently outperforms another model, not just on certain test sets.
-    \item Hypothesis tests quantify such evidence, meaning that our benchmark describes the general behavior of the algorithms and not a coincidental finding specific to a certain test set.
-    \item We can think of 3 different test scenarios:
+    %\item We want to ensure that a model consistently outperforms another model and not just on certain test sets.
+    \item Differences in model performance may not be consistent across multiple data sets.
+    \item Hypothesis testing quantifies evidence that a model or algorithm significantly outperforms another.
+    %\item Hypothesis tests quantify such evidence, meaning that our benchmark describes the general behavior of the algorithms and not a coincidental finding specific to a certain test set.#
+    \item 
+    We can think of 3 different scenarios:
         \begin{itemize}
             \item 2 models / algorithms on a single domain (i.e., on a single data set)
             \item 2 algorithms across different domains (i.e., on multiple data sets)
-            \item multiple algorithms across different domains / data sets.
+            \item Multiple algorithms across different domains / data sets.
         \end{itemize}
-    \item In this case, a data set consists of multiple performance measurements of each model.
     \end{itemize}
 
-    
 \end{frame}
 
 % \begin{frame}{Hypothesis Testing - General Procedure}
@@ -191,18 +194,22 @@
     
     \begin{itemize}
         \setlength\itemsep{1em}
-        \item $H_0$: $\widehat{\text{GE}}(\mathcal{I}_1, \mathcal{J}, \lamv_1, \rho) = \widehat{\text{GE}}(\mathcal{I}_2, \mathcal{J}, \lamv_2, \rho)$ \\ 
-        $H_1$: $\widehat{\text{GE}}(\mathcal{I}_1, \mathcal{J}, \lamv_1, \rho) \neq \widehat{\text{GE}}(\mathcal{I}_2, \mathcal{J}, \lamv_2, \rho)$
-        \item Test statistic $T = \sqrt{n} \frac{\bar{d}}{\sigma_{d}}$:
-        %Teststatistic $t=\frac{d\left(\fh_A,\fh_B\right)}{\sqrt{\sigma_{A}^2 + \sigma_{B}^2}}$, with
-        $$\sigma_{d} = \sqrt{\frac{1}{n - 1}\sum_{i=1}^{n} \left(d_i - \bar{d} \right)^2}
+        \item Does model $\widehat{f}_1$ outperform $\widehat{f}_2$ on $ \Dtest$?
+        $$H_0: \widehat{\text{GE}}(\widehat{f}_1, L, \Dtest) = \widehat{\text{GE}}(\widehat{f}_2, L, \Dtest) \text{ vs. } H_1: \widehat{\text{GE}}(\widehat{f}_1, L, \Dtest) \neq \widehat{\text{GE}}(\widehat{f}_2, L, \Dtest)$$
+        \item Test statistic: 
+            $$
+            T_{\text{t-test}} = \sqrt{n_{test}} \frac{\bar{d}}{\sigma_{d}} \sim t(n_{test} - 1), \text{ with }
+            \sigma_{d} = \sqrt{\frac{1}{n_{test} - 1}\sum_{i=1}^{n_{test}} \left(d_i - \bar{d} \right)^2}
         $$
-        where $d_i = L(\yi, \fh_1 (\xi)) - L(\yi, \fh_2 (\xi))$ and $\bar{d} = \sum\limits_{i=1}^{n} d_i$
-        \item The two-matched samples t-test (or paired t-test) is one of the most popular tests for benchmarking but has multiple shortcomings:
+        $$d_i = L(\yi, \fh_1 (\xi)) - L(\yi, \fh_2 (\xi))\qquad \bar{d} = \sum\limits_{i=1}^{n} d_i \qquad (\xi, \yi) \in \Dtest$$
+        \item The two-matched samples t-test (or paired t-test) has multiple requirements:
         \begin{itemize}
-            \item \textbf{Randomness:} Performance samples need to be random samples from the underlying population.
-            \item \textbf{(Pseudo-) Normality:} The t-test requires a minimum of $\approx$ 30 samples or that samples come from a normal distribution.
-            \item \textbf{Equal variances:} The paired t-test assumes equal variances of both populations.
+            \item \textbf{iid of loss values:} %Samples need to be iid samples from the underlying population 
+            Only the case for a hold-out set but not for CV as loss is based on models that use overlapping obs. across CV folds.%, which, for instance, is not the case for cross-validation.
+            
+            \item \textbf{(Pseudo-) normality of loss values:} 
+            Requires a minimum of $\approx$ 30 loss values or loss values following a normal distribution.
+            \item \textbf{Equal variances:} Assumes equal variances of both populations. %(if not, apply Welch test).
             \end{itemize}
         \end{itemize}
 \end{frame}
@@ -248,10 +255,12 @@
 \begin{frame}{McNemar Test for Classification}
 % https://slideplayer.com/slide/9574350/
 \begin{itemize}
-\item The McNemar test compares the relative errors of two models.
-\item As opposed to the paired t-test, it is non-parametric and does not rely on distributional assumptions.
+% \item The McNemar test compares the relative errors of two models.
+\item McNemar test is non-parametric (no distributional assumptions).
+\item Caveat: Only works for classification tasks.
+\item $H_0$: $(A + B = A + C) \land (C + D = B + D) \Rightarrow H_0: B = C \text{ vs. } H_1$:  $B \neq C$
 \item Test statistic:
-$$\chi^2_{Mc} =  \tfrac{(|B-C| - 1)^2}{B + C} \sim \chi^2_{1}
+$$T_{\text{McNemar}} =  \tfrac{(|B-C| - 1)^2}{B + C} \sim \chi^2_{1}
 $$
 % when the considered performance measure is based on an outer loss with a nominal or binary output, e.g., accuracy is based on a binary outer loss.
 % \item Both models are trained on a training set and evaluated on a test set. Based on the test set, a \textbf{contingency table} that compares the two models (model 1 and model 2) is calculated:
@@ -352,9 +361,15 @@ $$
 
 Calculate the test statistic:
 
-$$\chi^2_{Mc} =  \frac{(|5-17| - 1)^2}{5 + 17} = 5.5 > 3.841 = \chi^2_{1,0.95}.$$
-
-We can reject $H_0$ at a significance level of 0.05, i.e., we reject the hypothesis that the tree and the random forest have the same performance.
+$$T_{\text{McNemar}} =  \frac{(|5-17| - 1)^2}{5 + 17} = 5.5 
+$$
+% > 3.841 = \chi^2_{1,0.95}.$$
+\begin{itemize}
+    \item For $\alpha = 0.5$, the critical value is 3.841.
+    \item $T_{\text{McNemar}} > 3.841 \Rightarrow$ Reject $H_0$.
+    \item We conclude that the tree and random forest do not have the same performance.
+\end{itemize}
+% We can reject $H_0$ at a significance level of 0.05, i.e., we reject the hypothesis that the tree and the random forest have the same performance.
 % and assume that our tree and our random forest classify the data differently
 
 \end{frame}
@@ -362,20 +377,64 @@ We can reject $H_0$ at a significance level of 0.05, i.e., we reject the hypothe
 
 \begin{frame}{Wilcoxon Signed Rank Test}
     \begin{itemize}
-        \item The Wilcoxon Signed Rank Test ranks differences in performance of two classifiers, ignores the signs, and then compares ranks for positive and negative differences.
-        \item In this case, $d_t$ denotes the difference between the performance scores of the two classifiers on the $t$-th data set:
+        % \item The Wilcoxon signed rank test ranks differences in performance of two classifiers, ignores the signs, and then compares ranks for positive and negative differences.
+        \item Non-parametric and suitable for any performance measure.
+        \item $H_0$: Model 1 and 2 have tied ranks in model performance. \\ 
+        $H_1$: Model 1 and 2 have different ranks in performance.
+        \item Consider $B$ data sets. Let $\widehat{\text{GE}}(\widehat{f}_k, L, \Dtestb)$  denote the GE estimate for model $k$ and data set $b$. The difference $d_b$ between GE estimates on the $b$-th data set is:
         $$
-        d_t = \widehat{\text{GE}}(\mathcal{I}_1, \mathcal{J}_t, \lamv_1, \rho) - \widehat{\text{GE}}(\mathcal{I}_2, \mathcal{J}_t, \lamv_2, \rho)
+        d_b = \widehat{\text{GE}}(\widehat{f}_1, L, \Dtestb) - \widehat{\text{GE}}(\widehat{f}_2, L, \Dtestb)
         $$
-        \item Let $R^{+}$ denote the rank sum for data sets where algorithm B outperforms algorithm A and $R^{-}$ for the opposite:
+        \item Let $R^{+}$ denote the rank sum for data sets where algorithm B outperforms algorithm A and vice versa for $R^{-}$:
         $$
-        R^{+} = \sum_{d_i > 0} \text{rank}(d_i) + \frac{1}{2} \sum_{d_i = 0} \text{rank}(d_i) \quad\quad R^{-} = \sum_{d_i < 0} \text{rank}(d_i) + \frac{1}{2} \sum_{d_i = 0} \text{rank}(d_i) \quad\quad T = \min(R^{+}, R^{-})  
+        R^{+} = \sum_{d_b > 0} \text{rank}(d_b) + \frac{1}{2} \sum_{d_b = 0} \text{rank}(d_b) \quad\quad R^{-} = \sum_{d_b < 0} \text{rank}(d_b) + \frac{1}{2} \sum_{d_b = 0} \text{rank}(d_b)
         $$
-        \item The approximately normal $z$-score corresponds to:
+        \item The test statistic does not follow a closed-form distribution, but probabilities can be derived from a distribution table:
         $$
-        z = \frac{T - \frac{1}{4}N(N + 1)}{\sqrt{\frac{1}{24}N(N + 1)(2N + 1)}}
+        T_{\text{Wilcoxon}} = \frac{\min(R^{+}, R^{-})   - \frac{1}{4}B(B + 1)}{\sqrt{\frac{1}{24}B(B + 1)(2B + 1)}}
         $$
     \end{itemize}
+\end{frame}
+
+\begin{frame}{Wilcoxon Signed Rank Test}
+% https://edisciplinas.usp.br/pluginfile.php/4129451/mod_resource/content/1/model_selection_evaluation.pdf
+\textbf{Example:} AUC of two algorithms on multiple data sets
+
+\begin{table}[!ht]
+    \scriptsize
+    \centering
+    \begin{tabular}{|l|l|l|}
+    \hline
+        \textbf{data set} & \textbf{algorithm 1} & \textbf{algorithm 2} \\ \hline\hline
+        adult & 0.763 & \textbf{0.768} \\ \hline 
+        % breast\_cancer & 0.599 & 0.591 & \\ \hline
+        breast\_cancer\_wisconsin & 0.954 & \textbf{0.971} \\ \hline
+        % cmc & 0.628 & 0.661 & \\ \hline
+        ionosphere & 0.882 & \textbf{0.888} \\ \hline
+        % iris & 0.936 & 0.931 & \\ \hline
+        % liver\_disorders & 0.661 & 0.668 & \\ \hline
+        lung\_cancer & \textbf{0.583} & \textbf{0.583} \\ \hline
+        % lymphography & 0.775 & 0.838 & \\ \hline
+        mushroom & \textbf{1.000} & \textbf{1.000} \\ \hline
+        % primary\_tumor & 0.940 & 0.962 & \\ \hline
+        % rheum & 0.619 & 0.666 & \\ \hline
+        % voting & 0.972 & 0.981 & \\ \hline
+        wine & 0.957 & \textbf{0.978} \\ \hline
+    \end{tabular}
+\end{table}
+$$
+R^{+} = 5\qquad R^{-} = 1\qquad \min(R^{+}, R^{-}) = 1
+$$
+$$
+T_{\text{Wilcoxon}} = \frac{1 - \frac{1}{4}6(6 + 1)}{\sqrt{\frac{1}{24}6(6 + 1)(12 + 1)}} = - 1.99 
+$$
+\begin{itemize}
+    \item For $\alpha = 0.05$, the critical value is 0.
+    \item $T_{\text{Wilcoxon}} < 0 \Rightarrow$ reject $H_0$! 
+    \item There is evidence that the two algorithms do not perform equally well.
+\end{itemize}
+
+
 \end{frame}
 
 % \begin{frame}{McNemar Test}
@@ -408,16 +467,25 @@ We can reject $H_0$ at a significance level of 0.05, i.e., we reject the hypothe
 
 \begin{itemize}
     \setlength\itemsep{1em}
-    \item So far, we have only been comparing the performance of two models.
-    \item When comparing multiple models, we can make use of an omnibus test.
+    \item So far: comparing perf. of 2 models
+    \item Now: comparing multiple models using omnibus test
+    %So far, we have only been comparing the performance of two models. When comparing multiple models, we can make use of an omnibus test.
     \item Omnibus hypotheses to be tested are:
         \begin{itemize}
             \item $H_0:$ All algorithms are equivalent in their performance and hence their average ranks should be equal.
             \item $H_1:$ The average rank for at least one algorithm is different.
         \end{itemize}
-    \item Omnibus tests are only useful to indicate that at least one model performs differently than the others. If that is the case, we need to do subsequent pairwise comparisons.
-    \item When using pairwise comparisons, we need to do a correction for multiple hypothesis testing, e.g., a Bonferroni correction.
+    \item Omnibus tests are only useful to indicate that at least one model performs differently than the others.\\
+    $\Rightarrow$ If yes, run post-hoc pairwise comparisons.
+    % \item We first run an omnibus Friedman test, and if if $H_0$ is rejected, we run pairwise comparisons via the post-hoc Nemenyi test or the post-hoc Bonferroni-Dunn test.
 \end{itemize}
+
+\begin{figure}
+    \centering
+    \includegraphics{slides/04-perf-eval/figure/omnibustesting.png}
+    % \caption{Caption}
+    % \label{fig:enter-label}
+\end{figure}
     
 \end{frame}
 % \begin{frame}{Cochran's Q Test? (not a slide)}
@@ -431,6 +499,7 @@ We can reject $H_0$ at a significance level of 0.05, i.e., we reject the hypothe
 %\section{Compare Multiple Models Multiple Domains}
 
 
+
 \begin{frame}{Friedman test}
 % So far we have only compared 2 models / algorithms on one dataset. The \textbf{Friedman test} can be used to compare multiple classifiers on multiple datasets. The hypotheses to be tested are:
 % \begin{itemize}
@@ -438,29 +507,98 @@ We can reject $H_0$ at a significance level of 0.05, i.e., we reject the hypothe
 % \item $H_1:$ The average rank for at least one algorithm is different.
 % \end{itemize}
 
-Suppose we want to evaluate $m$ data sets and $k$ algorithms. The Friedman test first ranks algorithms for each data set separately:
+Suppose we want to evaluate $B$ data sets and $K$ algorithms. The Friedman test first ranks algorithms for each data set separately:
 
 \begin{itemize}
-  \item Separately rank each algorithm for each dataset from best-performing (rank 1) to worst-performing, using any performance measure of interest.
+  \item Separately rank each algorithm for each dataset from best-performing (lowest rank) to worst-performing (highest rank), using any performance measure.
   \item If there is a $d$-way tie after rank $r$, assign a rank of $ \left[(r+1) + (r+2) + ... + (r+d)\right] /d $ to all tied classifiers.
-  \item $R_{ij}$ is the rank of algorithm $j$ on data set $i$.
+  \item Let $R_{bk}$ denote the rank of algorithm $k$ on data set $b$.
 \end{itemize}
 
 After ranking algorithms, calculate the following quantities:
 
 \begin{itemize}
   \item The overall mean rank:
-  $ \bar{R} = \frac{1}{mk} \sum_{i=1}^{m} \sum_{j=1}^{k} R_{ij}. $
+  $ \bar{R} = \frac{1}{bk} \sum_{k=1}^{K} \sum_{b=1}^{B} R_{bk}$
   \item The total sum of squares:
-  $ SS_{Total} = m \sum_{j=1}^{k} (\bar{R}_{.j} - \bar{R})^2 $, where $\bar{R}_{.j} =  \frac{1}{m} \sum_{i=1}^{m} R_{ij}$.
+  $ SS_{Total} = B \sum_{k=1}^{K} (\bar{R}_{.k} - \bar{R})^2 $, where $\bar{R}_{.k} =  \frac{1}{B} \sum_{b=1}^{B} R_{bk}$.
   \item The error sum of squares:
-  $ SS_{Error} = \frac{1}{m(k-1)} \sum_{i=1}^{m} \sum_{j=1}^{k} (R_{ij} - \bar{R})^2. $
+  $ SS_{Error} = \frac{1}{B(K-1)} \sum_{b=1}^{B} \sum_{k=1}^{K} (R_{bk} - \bar{R})^2 $
 \end{itemize}
 
 The Friedman test statistic is calculated as:
 
-$${\chi_F}^2 = \frac{SS_{Total}}{SS_{Error}} \sim \chi_{k-1}^2 \text{ for large \textit{m} ($>15$) and \textit{k} ($>5$).}$$
+$$T_{\text{Friedman}} = \frac{SS_{Total}}{SS_{Error}} \sim \chi_{K-1}^2 \text{ for large \textit{B} ($>15$) and \textit{K} ($>5$)}$$
 \end{frame}
+
+\begin{frame}{Friedman Test}
+
+\textbf{Illustrative example ($B < 15$ and $K < 5$ here, so test statistic not $\chi^2$-distributed):}
+    
+    \begin{table}[!ht]
+        \scriptsize
+        \centering
+        \begin{tabular}{|l|l|l|l|l|}
+        \hline
+            \textbf{data set} & \textbf{algorithm 1} & \textbf{algorithm 2}  & \textbf{algorithm 3} & \textbf{algorithm 4} \\ \hline\hline
+            adult & 0.763 (4) & 0.768 (3) & 0.771 (2) & 0.798 (1) \\ \hline 
+            % breast\_cancer & 0.599 & 0.591 & \\ \hline
+            breast\_cancer\_wisconsin & 0.954 (4) & 0.971 (1) & 0.968 (2) & 0.967 (3) \\ \hline
+            % cmc & 0.628 & 0.661 & \\ \hline
+            ionosphere & 0.882 (4) & 0.888 (2) & 0.886 (3) & 0.898 (1) \\ \hline
+            % iris & 0.936 & 0.931 & \\ \hline
+            % liver\_disorders & 0.661 & 0.668 & \\ \hline
+            lung\_cancer & 0.583 (2.5) & 0.583 (2.5) & 0.563 (4) & 0.625 (1) \\ \hline
+            % lymphography & 0.775 & 0.838 & \\ \hline
+            mushroom & 1.000 (2.5) & 1.000 (2.5) & 1.000 (2.5) & 1.000 (2.5) \\ \hline
+            % primary\_tumor & 0.940 & 0.962 & \\ \hline
+            % rheum & 0.619 & 0.666 & \\ \hline
+            % voting & 0.972 & 0.981 & \\ \hline
+            wine & 0.957 (3) & 0.978 (1) & 0.946 (4) & 0.970 (2) \\ \hline
+        \end{tabular}
+    \end{table}
+\begin{align*}
+    \bar{R} &= \frac{1}{6 \cdot 4} \sum_{k=1}^{4} \sum_{b=1}^{6} R_{bk} = \frac{60}{24} = 2.5 \\
+    SS_{Total} &= 6 \sum_{k=1}^{4} (\bar{R}_{.k} - 2.5)^2 = 6 \cdot \left(3.333^2 + 2^2 + 2.916^2 + 1.75^2 \right) \approx 160.047
+    % , where \bar{R}_{.k} =  \frac{1}{B} \sum_{b=1}^{B} R_{bk} 
+    \\
+    SS_{Error} &= \frac{1}{6(4-1)} \sum_{b=1}^{6} \sum_{k=1}^{4} (R_{bk} - \bar{R})^2 = 1.375 \\
+    T_{\text{Friedman}} &= \frac{SS_{Total}}{SS_{Error}} = \frac{160.047}{1.375} \approx 116.4 > 7.815 \Rightarrow \text{Reject $H_0$!}
+\end{align*}
+
+
+\end{frame}
+
+% \begin{frame}{Friedman test}
+% % So far we have only compared 2 models / algorithms on one dataset. The \textbf{Friedman test} can be used to compare multiple classifiers on multiple datasets. The hypotheses to be tested are:
+% % \begin{itemize}
+% % \item $H_0:$ All algorithms are equivalent in their performance and hence their average ranks should be equal.
+% % \item $H_1:$ The average rank for at least one algorithm is different.
+% % \end{itemize}
+
+% Suppose we want to evaluate $m$ data sets and $k$ algorithms. The Friedman test first ranks algorithms for each data set separately:
+
+% \begin{itemize}
+%   \item Separately rank each algorithm for each dataset from best-performing to worst-performing, using any performance measure of interest.
+%   \item If there is a $d$-way tie after rank $r$, assign a rank of $ \left[(r+1) + (r+2) + ... + (r+d)\right] /d $ to all tied classifiers.
+%   \item Let $R_{ij}$ denote the rank of algorithm $j$ on data set $i$.
+% \end{itemize}
+
+% After ranking algorithms, calculate the following quantities:
+
+% \begin{itemize}
+%   \item The overall mean rank:
+%   $ \bar{R} = \frac{1}{mk} \sum_{i=1}^{m} \sum_{j=1}^{k} R_{ij}. $
+%   \item The total sum of squares:
+%   $ SS_{Total} = m \sum_{j=1}^{k} (\bar{R}_{.j} - \bar{R})^2 $, where $\bar{R}_{.j} =  \frac{1}{m} \sum_{i=1}^{m} R_{ij}$.
+%   \item The error sum of squares:
+%   $ SS_{Error} = \frac{1}{m(k-1)} \sum_{i=1}^{m} \sum_{j=1}^{k} (R_{ij} - \bar{R})^2. $
+% \end{itemize}
+
+% The Friedman test statistic is calculated as:
+
+% $${\chi_F}^2 = \frac{SS_{Total}}{SS_{Error}} \sim \chi_{k-1}^2 \text{ for large \textit{m} ($>15$) and \textit{k} ($>5$).}$$
+% \end{frame}
 
 
 
@@ -486,53 +624,114 @@ $${\chi_F}^2 = \frac{SS_{Total}}{SS_{Error}} \sim \chi_{k-1}^2 \text{ for large 
 % \end{frame}
 
 
-\begin{frame}{Post-hoc tests}
-A Friedman test checks if all algorithms are ranked equally or not. However, it does not provide information w.r.t. the best-performing algorithm.
-To address this issue, post-hoc tests can be used.
+\begin{frame}{Post-hoc Nemenyi test}
+% A Friedman test checks if all algorithms are ranked equally or not. However, it does not provide information w.r.t. the best-performing algorithm.
+% To address this issue, post-hoc tests can be used.
 
-\lz \textbf{Post-hoc Nemenyi test}:
+% \lz \textbf{Post-hoc Nemenyi test}:
 \begin{itemize}
-\item Compares all algorithms pairwise to find the best-performing algorithm after $H_0$ of the Friedman test was rejected.
-\item For $m$ data sets and $k$ algorithms, $\frac{k(k-1)}{2}$ comparisons are made.
-\item Calculates the average rank of algorithm $j$ on all $m$ data sets: $\bar{R}_{.j} =\frac{1}{m} \sum_{i=1}^m R_{ij}.$
+\setlength\itemsep{1em}
+\item The post-hoc Nemenyi test is used after an omnibus test (like the Friedman test) rejects the null hypothesis.
+\item Runs all $\frac{K(K-1)}{2}$ pairwise comparisons for $B$ data sets and $K$ algorithms.
+\item Calculates the average rank of $k$-th algorithm on all $B$ data sets: 
+$$
+\bar{R}_{.k} =\frac{1}{B} \sum_{b=1}^B R_{bk}
+$$
+\item $H_0: \bar{R}_{.k_1} = \bar{R}_{.k_2}$ versus 
+$H_1: \bar{R}_{.k_1} \neq \bar{R}_{.k_2}$
+\item The test statistic corresponds to the difference in average ranks:
+$$
+T_{\text{Nemenyi}} = \bar{R}_{.k_1} - \bar{R}_{.k_2} 
+$$
+with critical value to reject $H_0$:
+$$ 
+T_{\text{Nemenyi}} \geq q_{\alpha} \sqrt{\frac{K(K + 1)}{6B}}
+$$
+where $q_{\alpha}$ is based on the studentized range statistic divided by $\sqrt{2}$.
+% \item For any two algorithms, we compute the test statistic as:
+% $$T_{\text{Nemenyi}} = \frac{\bar{R}_{.k_1} - \bar{R}_{.k_2}}{\sqrt{\frac{K(K+1)}{6B}}}$$
+% with
+% $$
+% T_{\text{Nemenyi}} \sim N(0, 1)
+% $$
+% \item The critical value $q_{\alpha}$ is obtained from a table of the studentized range statistic, scaled through division by $\sqrt{2}$:
 \end{itemize}
-
-\lz %The performance of two algorithms are significantly different when their average ranks differ by at least the significance level $q_{\alpha}$.
-For any two algorithms $j_1$ and $j_2$, we compute the test statistic as:
-$$q = \frac{\bar{R}_{.j_1} - \bar{R}_{.j_2}}{\sqrt{\frac{k(k+1)}{6m}}}.$$
 \end{frame}
 
-\begin{frame}{Post-hoc tests}
+\begin{frame}{Post-Hoc Nemenyi Test}
+
+\textbf{Example (for one pairwise comparison):}
+
+\begin{align*}
+    \bar{R}_{.2} &= \frac{1}{6} \sum_{b=1}^B R_{b2} = \frac{13}{6} \\
+    \bar{R}_{.3} &= \frac{1}{6} \sum_{b=1}^B R_{b3} = \frac{17.5}{6} \\
+    % T_{\text{Nemenyi}} &= \frac{\frac{13 - 17.5}{6}}{\sqrt{\frac{4(4+1)}{36}}} \approx - 1 
+    T_{\text{Nemenyi}} &= \frac{-4.5}{6} = -0.75
+\end{align*}
+\begin{itemize}
+    \item For $\alpha = 0.05$, critical difference in average ranks is 2.569.
+    \item $T_{\text{Nemenyi}} < 2.569 \Rightarrow$ Do not reject $H_0$!
+    \item We conclude the performance of algorithms 2 and 3 is equal.
+\end{itemize}
+    % \begin{itemize}
+    %     \item Under $H_0$, the probability of $T_{\text{Nemenyi}} < -0.99$ is 18.4\%. \item With a significance level of $\alpha = 0.05$, we cannot reject the null hypothesis.
+    %     \item We assume the performance of both algorithms is equal.
+    % \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Post-hoc Bonferroni-Dunn test}
     
-\textbf{Post-hoc Bonferroni-Dunn test}:
+% \textbf{Post-hoc Bonferroni-Dunn test}:
     
     \begin{itemize}
-    \item Compares all algorithms with a baseline (i.e., $k-1$ comparisons).
-    \item It is used after a Friedman test to find which algorithms differ from the baseline significantly.
-    \item It uses the Bonferroni correction to prevent randomly accepting one of the algorithms as significant due to multiple testing.
-    \end{itemize}
-    The test statistic is the same as before:
-    $$q = \frac{\bar{R}_{.j_1} - \bar{R}_{.j_{baseline}}}{\sqrt{\frac{k(k+1)}{6m}}}.$$
-    
-    The performances of $j_1$ and $j_2$ differ significantly if $|q| > q_{\alpha}$, where the critical value $q_{\alpha}$ is obtained from a table of the studentized range statistic, scaled through division by $\sqrt{2}$.
+    \setlength\itemsep{1em}
+    \item Instead of pairwise comparisons, we now compare all algorithms with one baseline algorithm (i.e., $K-1$ comparisons).
+    \item The test statistic is the same as before:
+    $$
+        T_{\text{Bonferroni-Dunn}} = \frac{\bar{R}_{.k_1} - \bar{R}_{.k_{\text{baseline}}}}{\sqrt{\frac{K(K+1)}{6B}}}
+    $$
+    % \item 
+    % The performances of $j_1$ and $j_2$ differ significantly if $|q| > q_{\alpha}$, where the
+    % .
     %Another difference between Bonferroni-Dunn Test with Nemenyi test is that total number of comparisons are 1/k of Nemenyi test.
+     \item It uses the Bonferroni correction for multiple testing, so the significance level $\alpha$ is adjusted downward via the number of comparisons:
+     $$
+        \alpha_{\text{corrected}} = \frac{\alpha}{K - 1}
+     $$
+     \item Power is greater for Bonferroni-Dunn than for Nemenyi due to only comparing to a control classifier and not between all algorithms. 
+     \item Generally, we want to test whether a newly proposed method is better than an existing one and thus, the Bonferroni-Dunn test is preferable in most settings.
+     \end{itemize}
 \end{frame}
-\begin{frame}{Guidelines on Hypothesis Tests}
 
-\begin{itemize}
-    \item There is no golden standard for using hypothesis testing in performance evaluation. Often, tests are based on questionable or unverifiable assumptions or conclusions.
-    \item The Wilcoxon and Friedman tests have been demonstrated to be most useful CITE. They partially fulfil commensurability, do not assume normal distributions or homogeneity of variance, and can be applied to any evaluation metric (e.g., accuracy, error ratios).
-    \item For comparisons of two models, use the Wilcoxon test. For comparisons of multiple models, use the Friedman test.
-    \item  "Tests provide certain reassurance about the validity and non-randomness of the published
-results. For that to be true, they should be performed correctly and the resulting conclusions should
-be drawn cautiously. On the other hand, statistical tests should not be the deciding factor for or
-against publishing the work. Other merits of the proposed algorithm that are beyond the grasp of
-statistical testing should also be considered and possibly even favoured over pure improvements in
-predictive power." (Japkowiecz)
-\end{itemize}
+
+\begin{frame}{Overview of different hypothesis tests}
+% https://docs.google.com/presentation/d/1iiaVfeVwJJEFTTal_2dYQYOPm_WiykKBNAcryAWuLHk/edit#slide=id.p
+\begin{center}\includegraphics[width = 1\textwidth]{slides/04-perf-eval/figure/tests.pdf} \end{center}
+
+% \footnotesize
+% {\tiny{Source: Evaluating Learning Algorithms:
+% A Classification Perspective}\par}
+
+\end{frame}
+
+
+% \begin{frame}{Guidelines on Hypothesis Tests}
+
+% \begin{itemize}
+%     \item There is no golden standard for using hypothesis testing in performance evaluation. Often, tests are based on questionable or unverifiable assumptions or conclusions.
+%     \item The Wilcoxon and Friedman tests have been demonstrated to be most useful CITE. They partially fulfil commensurability, do not assume normal distributions or homogeneity of variance, and can be applied to any evaluation metric (e.g., accuracy, error ratios).
+%     \item For comparisons of two models, use the Wilcoxon test. For comparisons of multiple models, use the Friedman test.
+%     \item  "Tests provide certain reassurance about the validity and non-randomness of the published
+% results. For that to be true, they should be performed correctly and the resulting conclusions should
+% be drawn cautiously. On the other hand, statistical tests should not be the deciding factor for or
+% against publishing the work. Other merits of the proposed algorithm that are beyond the grasp of
+% statistical testing should also be considered and possibly even favoured over pure improvements in
+% predictive power." (Japkowiecz)
+% \end{itemize}
     
-\end{frame}
+% \end{frame}
 
-xx
+% xx
 \endlecture
 \end{document}

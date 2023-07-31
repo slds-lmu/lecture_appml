@@ -14,8 +14,71 @@
 \begin{frame}{Selecting a Performance Metric}
 
 \begin{itemize}
-    \item 
+    \setlength\itemsep{2em}
+    \item Selecting a performance metric is based on technical (task, properties of the data) and non-technical considerations (stakeholder demands). 
+    \item To assist you in selecting a performance metric in practice, we formulate several guiding questions.
+    \item The most fundamental guiding question is whether the modeling task concerns regression or classification.
 \end{itemize}
+    
+\end{frame}
+
+
+\begin{frame}{Overview for Classification}
+% https://www.kaggle.com/code/vipulgandhi/how-to-choose-right-metric-for-evaluating-ml-model
+
+% https://neptune.ai/blog/f1-score-accuracy-roc-auc-pr-auc
+\begin{figure}
+    \centering
+    \includegraphics[width = 1.1\textwidth]{slides/04-perf-eval/figure/classif_measures.pdf}
+\end{figure}
+    
+\end{frame}
+\begin{frame}{Output of Classification Software}
+    \begin{itemize}
+        \setlength\itemsep{2em}
+        \item Most software packages support both probability / score and hard label outputs.
+        \item Probabilities / scores can always be converted to hard labels. However, in certain settings we may be stuck with hard label predictions.
+        \item For hard labels, we are restricted to measures based on the confusion matrix: accuracy, error rate, precision, recall, null error rate, F score, Cohen's Kappa
+        \item For soft labels, we can use additional measures as well: The ROC curve and AUC measure and the PR curve.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Balanced vs Imbalanced Data Sets}
+    \begin{itemize}
+        \setlength\itemsep{2em}
+        \item Accuracy is a good measure if roughly the same number of observations belong to each class (balanced data).
+        \item Example: Consider two classes A and B with 98\% of observations belonging to class A. A naive (and useless) model that always predicts class A will have 98\% accuracy and falsely evaluated as a good model.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Cost Sensititivity - Identifying True Positives}
+    \begin{itemize}
+        \item
+        \setlength\itemsep{2em}
+        For certain applications, identifying true positives and avoiding false negatives is more important than predicting false positives (\enquote{a false alarm}). For instance, when screening for cancer, missing to diagnose it will likely result in a fatal outcome for the patient, whereas a false positive may warrant additional investigations by doctors but no fatal outcome.
+        \item Here, the true positive rate is important, which is also known as recall or sensitivity.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Cost Sensititivity - Avoiding False Positives}
+    \begin{itemize}
+        \setlength\itemsep{2em}
+        \item In other applications, avoiding false positives may be most important.
+        \item Example: For spam detection, we may not care about a few spam emails in our inbox folder (false negative), but we really want to avoid classifying an important email as spam (false positive).
+        \item Here, precision is the right measure.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Cost Sensitivity - Identifying True Negatives}
+    \begin{itemize}
+        \setlength\itemsep{2em}
+        \item Lastly, we may want to identify all true negatives and accept some false positives.
+        \item An example could be an automated credit loan decision. Identifying all applicants with bad credit ratings (i.e., who will not pay back the loan) is more important than not giving a loan to an applicant with a good credit rating (who would pay back the loan).
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Output of Classification Software}
     
 \end{frame}
 

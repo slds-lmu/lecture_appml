@@ -4,7 +4,6 @@
 General idea:
 3 binary classif datasets from openml; compare various ensembling methods
 
-
 in class A1 (easy):
 write your own model averaging ensemble (classification)
 soft vs. hard vote
@@ -35,3 +34,10 @@ Construct a 60/20/20 train/validation/test split manually (stratified for the ta
 Train each base learner on the train split to generate the base models and use the validation split to perform GES for 10 iterations. Which models are selected and how often are they selected?
 What is the test performance of the final ensemble?
 How does it compare to the test performance of each base model?
+
+another idea:
+proof that weighted model averaging with MSE loss can be written as a quadratic program
+
+
+another idea:
+weighted model averaging insample optimization vs. holdout vs. GE
