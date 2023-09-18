@@ -34,6 +34,7 @@ benchmark_result = benchmark(benchmark_grid)
 benchmark_result$score(measure)
 
 library(bbotk)
+library(mlr3misc)
 
 train_task = task$clone(deep = TRUE)$filter(resampling$train_set(1))
 test_task = task$clone(deep = TRUE)$filter(resampling$test_set(1))
@@ -79,7 +80,48 @@ instance = OptimInstanceSingleCrit$new(
   terminator = trm("evals", n_evals = 1000)
 )
 
-optimizer = opt("random_search")
+optimizer = opt("cmaes")
 optimizer$optimize(instance)
 
 weights = normalize_weights(instance$archive$best()$x_domain[[1L]])
+
+# GES
+get_ges_weights = function(selected, learner_ids) {
+  selected = selected[selected != 0]
+  n = length(selected)
+  weights = map_dbl(learner_ids, function(learner_id) {
+    sum(learner_id == selected) / n
+  })
+  weights
+}
+
+ges = function(learner_predicts, test_task, iterations = 100L) {
+  iteration = 0
+  learner_ids = seq_along(learner_predicts)
+  performance = numeric(iterations)
+  selected = integer(iterations)
+  for (iteration in seq_len(iterations)) {
+    performance_tmp = map_dbl(learner_ids, function(learner_id) {
+      selected_tmp = selected
+      selected_tmp[iteration] = learner_id
+      weights = get_ges_weights(selected_tmp, learner_ids = learner_ids)
+      reduce_probs = function(p, w) {
+        p$prob[, 1] * w
+      }
+      prob = Reduce("+", x = Map(reduce_probs, learner_predicts, weights))
+      prob = cbind(prob, 1 - prob)
+      colnames(prob) = test_task$class_names
+      ensemble_prediction = PredictionClassif$new(task = test_task, response = NULL, prob = prob)
+      ensemble_prediction$score(measure)
+    })
+    select = which.max(performance_tmp)
+    performance[iteration] = performance_tmp[select]
+    selected[iteration] = select
+  }
+  best = which.max(performance)
+  weights = get_ges_weights(selected[1:best], learner_ids = learner_ids)
+  list(performance[best], weights, selected, performance)
+}
+
+ges_results = ges(list(ranger_predict, kknn_predict, log_reg_predict), test_task = test_task, iterations = 10L)
+
