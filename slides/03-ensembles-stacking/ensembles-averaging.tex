@@ -20,6 +20,8 @@
 \lecturechapter{Ensembling Part I}
 \lecture{Applied Machine Learning}
 
+% FIXME: math and alphabets are totally messed up because we use way to many different fonts and styles in lectures
+
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Bagging}
@@ -74,7 +76,7 @@ NB: RF also uses col subsampling.
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Boosting}
-Iterative technique that adjusts the weights of the training instances based on their misclassification rate or residual errors, and sequentially trains subsequent base models (weak learners) to focus on the misclassified or poorly predicted instances.
+Iterative technique that adjusts the weights of the training instances based on their misclassification rate or residual errors or pseudo-residuals, and sequentially trains subsequent base models (weak learners) to focus on the misclassified or poorly predicted instances.
 \vspace{1em}
 Well known frameworks:
 \begin{itemize}
@@ -99,34 +101,17 @@ Different from other ensembling methods as ensemble is built sequentially.
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Notation}
-\begin{columns}
-    \begin{column}{0.4\textwidth}
-        \begin{itemize}
-            \item $\D$ training data
-            \item $\{\bl[1], \ldots, \bl[M]\} \subseteq \mathcal{H}$ set of $M$ models trained on $\mathcal{D}$
-            \item $\sbl[m]: \mathcal{X} \rightarrow [0, 1]^{g}$ probability predictions (w.l.o.g. we assume $g = 1$ in the following)
-            \item $\hbl[m]: \mathcal{X} \rightarrow \mathcal{Y}$ hard label / outcome predictions
-            \item $\fM = G((\bl[1], \ldots, \bl[M]))$ ensemble model obtained via aggregating function $G$
-            \begin{itemize}
-                \item Either aggregate probability or hard label predictions
-            \end{itemize}
-        \end{itemize}
-    \end{column}
-    \begin{column}{0.6\textwidth}
-        \vspace{-1em}
-        \begin{figure}
-            \centering
-            \includegraphics{slides/03-ensembles-stacking/figure/rf_majvot_averaging.png}
-            %\caption{Caption}
-            % from i2ml
-            \label{fig:rf_mjavot_averaging}
-        \end{figure}
-    \end{column}
-\end{columns}
+Let us introduce some general notation:
+\vspace{1em}
+    \begin{itemize}
+        \item $\{\bl[1], \ldots, \bl[M]\} \subseteq \mathcal{H}_{1} \times \ldots \times \mathcal{H}_{M}$ set of $M$ models trained on training data $\mathcal{D}$
+        \item $\sbl[m]: \mathcal{X} \rightarrow [0, 1]^{g}$ probability predictions under the $m$-th model when doing classification (w.l.o.g. we assume $g = 1$ in the following)
+        \item $\hbl[m]: \mathcal{X} \rightarrow \mathcal{Y}$ hard label predictions under the $m$-th model when doing classification or regression
+        \item $\fMx = G(\blx[1], \ldots, \blx[M])$ prediction of an ensemble model obtained via aggregating function $G$
+    \end{itemize}
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
-
 \begin{vbframe}{Model Averaging}
 
 Definition: Combine predictions of multiple (different) models to make a final prediction $\rightarrow$ heterogeneous ensembling
@@ -150,10 +135,20 @@ Definition: Combine predictions of multiple (different) models to make a final p
     \end{column}
 \end{columns}
 \vspace{1em}
-Combine predictions: majority voting (hard) / model averaging (soft)
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Model Averaging}
+Classification: majority voting (hard voting) / model averaging (soft voting)
 \begin{itemize}
+    \item $\fMx = \text{mode}(\{\hblx[1], \ldots, \hblx[M]\})$ assuming hard label predictions
     \item $\fMx = \frac{1}{M} \sum_{m = 1}^{M} \sblx[m]$ assuming probability predictions
-    \item $\fMx = \text{mode}(\{\hblx[1], \ldots, \hblx[M]\})$ assuming hard label predictions    
+\end{itemize}
+\vspace{1em}
+Regression: model averaging
+\begin{itemize}
+    \item $\fMx = \frac{1}{M} \sum_{m = 1}^{M} \hblx[m]$
 \end{itemize}
 \end{vbframe}
 
@@ -161,12 +156,16 @@ Combine predictions: majority voting (hard) / model averaging (soft)
 
 \begin{vbframe}{Weighted Model Averaging}
 Assume a set of $M$ different models trained on $\D$.\\
-We can also introduce weights $\mathbf{w} = (w_{1}, \ldots, w_{M}), \text{usually: } 0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$ accounting for the contribution of each individual model to the prediction of the ensemble (e.g., predicting positive class probabilities): $\fMwx = \frac{1}{M} \sum_{m = 1}^{M} w_{m} \cdot \sblx[m]$\\
 \vspace{1em}
-This gives rise to an optimization problem to find the optimal weight vector so a given performance metric or loss function $L$ of the ensemble is optimal:\\
-$\argoptlim_{\mathbf{w} \in \R^{M}} \frac{1}{n} \sum_{i = 1}^{n} L(y^{(i)}, \fMwxi)$\\
+We can also introduce weights $\mathbf{w} = (w_{1}, \ldots, w_{M}), \text{usually: } 0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$ accounting for the contribution of each individual model to the prediction of the ensemble (e.g., predicting positive class probabilities):\\
+$\fMwx = \frac{1}{M} \sum_{m = 1}^{M} w_{m} \cdot \sblx[m]$\\
 \vspace{1em}
-If we do not know the performance metric or loss function a priori (e.g. AutoML) this optimization problem is treated as a black box
+This gives rise to an optimization problem to find the optimal weight vector $\mathbf{w}^{*}$ so that the estimated (via a resampling method $\mathcal{J}$) generalization error (based on a performance metric $\rho$ or loss function $L$) of the ensemble is optimal:\\
+$$\wstar \coloneqq \argoptlim_{\w \in \R^{M}} \GEh\left(\fMw, \mathcal{J}, \rho\right)$$
+%$\argoptlim_{\mathbf{w} \in \R^{M}} \frac{1}{n} \sum_{i = 1}^{n} L(y^{(i)}, \fMwxi)$\\
+
+\vspace{1em}
+If we do not know the performance metric or loss function a priori (e.g. as in AutoML) this optimization problem is treated as a black box
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
@@ -175,26 +174,26 @@ If we do not know the performance metric or loss function a priori (e.g. AutoML)
 % rsrc/ensembles_averaging.R
 We fit different learners on the sonar task and evaluate their performance using balanced accuracy (BACC) via a simple holdout (2/3 vs. 1/3) stratified for the target:
 \begin{itemize}
-    \item random forest: BACC = 0.788
+    \item random forest: BACC = 0.772
     \item k-NN ($k = 7$): BACC = 0.776
     \item log. reg.: BACC = 0.707
 \end{itemize}
 \vspace{1em}
 Model averaging with equal weights, $w_{i} = \frac{1}{3}~\forall i \in \{1, \ldots 3\}$: BACC = 0.765\\
 \vspace{1em}
-Different weight vector, $\mathbf{w} = (0.85, 0.10, 0.05)$: BACC = 0.815
+Different weight vector, $\w = (0.85, 0.10, 0.05)$: BACC = 0.815
 \end{vbframe}
 
 \begin{vbframe}{Weighted Model Averaging}
-Depending on the loss function, the optimization problem can be straightforward or difficult:
+How difficult the optimization problem is depends on the loss function:
 \begin{itemize}
-    \item Assume MSE as loss function (regression) $L(y^{(i)}, \fMwxi) = (y^{(i)} - \fMwxi)^{2}$
+    \item Assume we use the MSE as a performance metric (regression) with the following point-wise loss function $L_{\mathrm{MSE}}(y^{(i)}, \fMwxi) = (y^{(i)} - \fMwxi)^{2}$
     \item And constraints of the form $0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$
-    \item Then $\argminlim_{\mathbf{w} \in \R^{M}} \frac{1}{n} \sum_{i = 1}^{n} (y^{(i)} - \fMwxi)^{2}$ s.t. $0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$ can be written as a quadratic program
-    \item Now assume 0-1 loss loss function (binary classification), then the optimization problem is np-hard
+    \item Then $\argminlim_{\w \in \R^{M}} \GEh(\fMw, \mathcal{J}, L_{\mathrm{MSE}})$ s.t. $0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$ can be written as a quadratic program
+    \item Now assume we use the 0-1 loss (binary classification), then the optimization problem is np-hard
 \end{itemize}
 \vspace{1em}
-In practice, people usually rely on the following methods to solve the optimization problem:
+In practice, we rely on the following methods to solve the optimization problem:
 \begin{itemize}
     \item black box optimizers
     \item greedy ensemble selection
@@ -208,20 +207,42 @@ In practice, people usually rely on the following methods to solve the optimizat
 Assume a set of $M$ different base models trained on $\D$.\\
 We now want to optimize the weights used in weighted model averaging.\\
 \vspace{1em}
-Greedy ensemble selection is one of the most popular methods to do so:
+Greedy ensemble selection (GES) is one of the most popular methods to do so:
 \begin{enumerate}
     \item Start with the empty ensemble
-    \item Add the base model that maximizes the ensembles performance metric on a hillclimb (validation) set
+    \item Add the base model that maximizes the ensembles' performance metric on a hillclimb (validation) set
     \item Repeat step 2 until a given number of iterations are reached
-    \item Return the ensemble from the set of generated ensembles that has the best performance metric on the validation set
+    \item Return the ensemble from the set of generated ensembles that has the best performance on the validation set
 \end{enumerate}
 \vspace{1em}
-Note that ensemble selection effectively optimizes the weights on an integer domain (i.e., base models are selected one or multiple times or not at all).
+NB: ensemble selection effectively optimizes the weights on an integer domain (i.e., base models are selected one or multiple times or not at all).
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
 
+\begin{vbframe}{Example: Sonar Task}
+% rsrc/ensembles_averaging.R
+10 iterations of GES:
+\begin{itemize}
+    \item Selection IDs:\\
+    \{1: random forest, 2: k-NN, 3: log. reg.\}
+    \item Ensemble selection vector after 10 iterations:\\
+    $(2, 1, 1, 1, 1, 1, 1, 2, 1, 1)$
+    \item Corresponding performance values (BACC) of the ensemble constructed based on the $i$-th iteration:\\
+    $(0.776, 0.788, 0.817, 0.830, 0.830, \textbf{0.846}, 0.830, 0.830, \textbf{0.846}, 0.830$
+    \item We select the ensemble based on the $6$-th iteration\\
+    $\rightarrow$ selection vector of $(2, 1, 1, 1, 1, 1)$\\
+    $\rightarrow$ $\w = (\frac{5}{6}, \frac{1}{6}, 0) \approx (0.833, 0.167, 0)$
+\end{itemize}
+\end{vbframe}
+
+%------------------------------------------------------------------------------
+
 \begin{vbframe}{Further Reading}
+\begin{itemize}
+    \item Stacking books from Lennart P.
+    \item GES paper Caruana 2004
+\end{itemize}
 \end{vbframe}
 
 % ------------------------------------------------------------------------------

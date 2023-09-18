@@ -76,7 +76,7 @@ In contrast to other methods, stacking already combines predictions during train
     \textbf{Step 3: Learn level 1 model $\fM(\D^\prime)$}\;\\
     \KwRet $\fM(\D^\prime)$\;
 \end{algorithm}
-Note: We can either drop the original features or keep them when learning the level 1 model
+NB: We can either drop the original features or keep them when learning the level 1 model
 
 \end{vbframe}
 
@@ -153,6 +153,9 @@ Popular choices of level 1 or level 2 models in stacking include:
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Further Reading}
+\begin{itemize}
+    \item One of the most popular and most successful AutoML systems \textit{AutoGluon} uses multilevel stacking together with repeated k-fold bagging https://auto.gluon.ai/stable/index.html
+\end{itemize}
 \end{vbframe}
 
 % ------------------------------------------------------------------------------

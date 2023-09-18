@@ -1,5 +1,4 @@
 \documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
-
 \usepackage{../../style/lmu-lecture}
 % Defines macros and environments
 \input{../../style/common.tex}
@@ -17,23 +16,68 @@
 % https://arxiv.org/pdf/1811.12808.pdf
 
 % Demsar paper main reference
-\begin{frame}{Hypothesis Testing in Benchmarking}
+\begin{frame}{Questions to Ask in Model Selection Tasks}
 
+There are several considerations when selecting a model:
+\vspace{0.25cm}
+\begin{enumerate}
+    \setlength\itemsep{1em}
+    \item Do we only care about performance or do we have additional model preferences, e.g., complex vs. non-complex models, slow vs. fast computation?
+    \item Do we only care about performance on the given test data or whether differences in performance hold for other test data as well?
+    \item How large is the difference in model performance?
+    \item How shall benchmark studies and our own preferences guide our decision in model selection? For instance, if we care about limiting model complexity, and a non-complex model can achieve 90\% of the predictive performance of a complex one, which model shall be selected?
+\end{enumerate}
+\vspace{0.5cm}
+$\Rightarrow$ Hypothesis tests are an additional tool in benchmarking to assist us in model selection tasks but only represent one aspect in our decision making process; important other considerations include our preferences regarding the model and the actual observed difference in performance.
+
+
+% \begin{itemize}
+%     \setlength\itemsep{2em}
+%     %\item We want to ensure that a model consistently outperforms another model and not just on certain test sets.
+%     \item Differences in model performance may not be consistent across multiple data sets.
+%     \item Hypothesis testing quantifies evidence that a model or algorithm significantly outperforms another.
+%     %\item Hypothesis tests quantify such evidence, meaning that our benchmark describes the general behavior of the algorithms and not a coincidental finding specific to a certain test set.#
+%     \item 
+%     We can think of 3 different scenarios:
+%         \begin{itemize}
+%             \item 2 models / algorithms on a single domain (i.e., on a single data set)
+%             \item 2 algorithms across different domains (i.e., on multiple data sets)
+%             \item Multiple algorithms across different domains / data sets.
+%         \end{itemize}
+%     \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Need for Hypothesis Tests in Benchmarking}
+
+Hypothesis tests can (a) quantify evidence that a difference in model performance can be generalized to other data; and (b) assist us in weighing the trade-off in our model preferences. Consider the following two scenarios:
+\vspace{0.25cm}
 \begin{itemize}
-    \setlength\itemsep{2em}
-    %\item We want to ensure that a model consistently outperforms another model and not just on certain test sets.
-    \item Differences in model performance may not be consistent across multiple data sets.
-    \item Hypothesis testing quantifies evidence that a model or algorithm significantly outperforms another.
-    %\item Hypothesis tests quantify such evidence, meaning that our benchmark describes the general behavior of the algorithms and not a coincidental finding specific to a certain test set.#
-    \item 
-    We can think of 3 different scenarios:
-        \begin{itemize}
-            \item 2 models / algorithms on a single domain (i.e., on a single data set)
-            \item 2 algorithms across different domains (i.e., on multiple data sets)
-            \item Multiple algorithms across different domains / data sets.
-        \end{itemize}
-    \end{itemize}
+    \setlength\itemsep{1em} 
+    \item Assume we are interested in both limiting model complexity and predictive performance. A non-complex linear model achieves 90\% of the predictive performance of a complex random forest.
+    \item \textbf{Scenario A}: A hypothesis test indicates that the difference in performance is \textbf{not significant}.
+    \item \textbf{Scenario B}: A hypothesis test indicates that the difference in performance is \textbf{significant}.
+    \item Given our preferences, we decide that the given difference in performance needs to be significant to accept an increase in model complexity. In scenario A, we choose the linear model; in scenario B we choose the random forest.
+\end{itemize}
 
+
+\end{frame}
+
+\begin{frame}{Scenarios in Benchmarking}
+
+We can think of 3 different scenarios, which all require different testing strategies:
+\vspace{0.25cm}
+\begin{enumerate}
+    \setlength\itemsep{1em} 
+    \item 2 models / algorithms benchmarked on a single data set.
+    \item 2 algorithms benchmarked on multiple data sets.
+    \item Multiple algorithms benchmarked on multiple data sets.
+\end{enumerate}
+
+
+
+
+    
 \end{frame}
 
 % \begin{frame}{Hypothesis Testing - General Procedure}
@@ -193,8 +237,7 @@
     % A paired t-test to compare two different models $\fh_1$ and $\fh_2$ w.r.t. a performance measure calculated on a test set of size $n_{\text{test}}$:
     
     \begin{itemize}
-        \setlength\itemsep{1em}
-        \item Does model $\widehat{f}_1$ outperform $\widehat{f}_2$ on $ \Dtest$?
+        \item Given a holdout test set $\Dtest$, can we assume a difference in performance between $\widehat{f}_1$ and $\widehat{f}_2$ generalizes to other data?
         $$H_0: \widehat{\text{GE}}(\widehat{f}_1, L, \Dtest) = \widehat{\text{GE}}(\widehat{f}_2, L, \Dtest) \text{ vs. } H_1: \widehat{\text{GE}}(\widehat{f}_1, L, \Dtest) \neq \widehat{\text{GE}}(\widehat{f}_2, L, \Dtest)$$
         \item Test statistic: 
             $$
@@ -203,15 +246,15 @@
         $$
         $$d_i = L(\yi, \fh_1 (\xi)) - L(\yi, \fh_2 (\xi))\qquad \bar{d} = \sum\limits_{i=1}^{n} d_i \qquad (\xi, \yi) \in \Dtest$$
         \item The two-matched samples t-test (or paired t-test) has multiple requirements:
-        \begin{itemize}
-            \item \textbf{iid of loss values:} %Samples need to be iid samples from the underlying population 
-            Only the case for a hold-out set but not for CV as loss is based on models that use overlapping obs. across CV folds.%, which, for instance, is not the case for cross-validation.
+        \begin{enumerate}
+            \item \textbf{Loss values need to be iid samples} %Samples need to be iid samples from the underlying population 
+            % Only the case for a hold-out set but not for CV as loss is based on models that use overlapping obs. across CV folds.%, which, for instance, is not the case for cross-validation.
             
             \item \textbf{(Pseudo-) normality of loss values:} 
             Requires a minimum of $\approx$ 30 loss values or loss values following a normal distribution.
             \item \textbf{Equal variances:} Assumes equal variances of both populations. %(if not, apply Welch test).
-            \end{itemize}
-        \end{itemize}
+        \end{enumerate}
+    \end{itemize}
 \end{frame}
 % xx
 
@@ -381,9 +424,9 @@ $$
         \item Non-parametric and suitable for any performance measure.
         \item $H_0$: Model 1 and 2 have tied ranks in model performance. \\ 
         $H_1$: Model 1 and 2 have different ranks in performance.
-        \item Consider $B$ data sets. Let $\widehat{\text{GE}}(\widehat{f}_k, L, \Dtestb)$  denote the GE estimate for model $k$ and data set $b$. The difference $d_b$ between GE estimates on the $b$-th data set is:
+        \item Consider $B$ data sets. Let $\widehat{\text{GE}}(\widehat{f}_k, \rho, \Dtestb)$  denote the GE estimate for model $k$ and data set $b$. The difference $d_b$ between GE estimates on the $b$-th data set is:
         $$
-        d_b = \widehat{\text{GE}}(\widehat{f}_1, L, \Dtestb) - \widehat{\text{GE}}(\widehat{f}_2, L, \Dtestb)
+        d_b = \widehat{\text{GE}}(\widehat{f}_1, \rho, \Dtestb) - \widehat{\text{GE}}(\widehat{f}_2, \rho, \Dtestb)
         $$
         \item Let $R^{+}$ denote the rank sum for data sets where algorithm B outperforms algorithm A and vice versa for $R^{-}$:
         $$
@@ -733,5 +776,8 @@ where $q_{\alpha}$ is based on the studentized range statistic divided by $\sqrt
 % \end{frame}
 
 % xx
+
+
+
 \endlecture
 \end{document}
