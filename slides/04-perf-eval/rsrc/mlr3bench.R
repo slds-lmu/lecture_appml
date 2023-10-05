@@ -53,7 +53,7 @@ aggr_wide = aggr %>%
   select(c(task_id, learner_id, classif.ce)) %>%
   pivot_wider(names_from = learner_id, values_from = classif.ce)
 aggr_wide
-colnames(aggr_wide) = c("featureless",  "cv_glmnet", "rpart", "ranger", "kknn", "svm")
+colnames(aggr_wide) = c("data set", "featureless",  "cv_glmnet", "rpart", "ranger", "kknn", "svm")
 library(xtable)
 print(xtable(aggr_wide, type = "latex"), file = "slides/04-perf-eval/rsrc/friedman_benchmark_results.tex")
 
