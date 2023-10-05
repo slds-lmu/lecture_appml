@@ -587,7 +587,11 @@ $$
 
 \begin{frame}{Friedman Test}
 
-\textbf{Example of a benchmark of 6 mlr3 learners (with default hyperparameters) on 16 classification tasks, using the classification error as performance measure:}
+\begin{itemize}
+\item Example of a benchmark of 6 mlr3 learners (with default hyperparameters) on 16 classification tasks, using the classification error as performance measure.
+
+\item We first rank each algorithm on each data set (the lower the rank in parantheses, the better the performance):
+\end{itemize}
 % \textbf{Illustrative example ($M < 15$ and $K < 5$ here, so test statistic not $\chi^2$-distributed):}
     
     % \begin{table}[!ht]
@@ -632,30 +636,52 @@ $$
 
 \begin{frame}{Friedman test}
 
-Suppose we want to evaluate $M$ data sets and $K$ algorithms. The Friedman test first ranks algorithms for each data set separately:
+% Suppose we want to evaluate $M$ data sets and $K$ algorithms. The Friedman test first ranks algorithms for each data set separately:
 
-\begin{itemize}
-  \item Separately rank each algorithm for each dataset from best-performing (lowest rank) to worst-performing (highest rank), using any performance measure.
-  \item If there is a $d$-way tie after rank $r$, assign a rank of $ \left[(r+1) + (r+2) + ... + (r+d)\right] /d $ to all tied classifiers.
-  \item Let $R_{mk}$ denote the rank of algorithm $k$ on data set $m$.
-\end{itemize}
+% \begin{itemize}
+%   \item Separately rank each algorithm for each dataset from best-performing (lowest rank) to worst-performing (highest rank), using any performance measure.
+%   \item If there is a $d$-way tie after rank $r$, assign a rank of $ \left[(r+1) + (r+2) + ... + (r+d)\right] /d $ to all tied classifiers.
+%   \item Let $R_{mk}$ denote the rank of algorithm $k$ on data set $m$.
+% \end{itemize}
 
-After ranking algorithms, calculate the following quantities:
+After ranking algorithms, we calculate the following quantities (where $M$ denotes the number of data sets and $K$ the number of algorithms):
 
 \begin{itemize}
   \item The overall mean rank:
-  $ \bar{R} = \frac{1}{mk} \sum_{k=1}^{K} \sum_{m=1}^{M} R_{mk}$
+  \begin{flalign*}
+     & \bar{R} = \frac{1}{mk} \sum_{k=1}^{K} \sum_{m=1}^{M} R_{mk} 
+      = \frac{1}{96} \sum_{k=1}^{6} \sum_{m=1}^{16} R_{mk} \approx 3.427 &
+  \end{flalign*}
   \item The total sum of squares:
-  $ SS_{Total} = M \sum_{k=1}^{K} (\bar{R}_{.k} - \bar{R})^2 $, where $\bar{R}_{.k} =  \frac{1}{M} \sum_{m=1}^{M} R_{mk}$.
+  \begin{flalign*}    
+    & SS_{Total} = M \sum_{k=1}^{K} (\bar{R}_{.k} - \bar{R})^2 = 16 \sum_{k=1}^{6} (\bar{R}_{.k} - 3.427)^2 \approx 179.427 & \\ 
+  & \text{with the mean rank for the $k$-th algorithm } \bar{R}_{.k} = \frac{1}{M} \sum_{m=1}^{M} R_{mk} = \frac{1}{16} \sum_{m=1}^{16} R_{mk} &
+  \end{flalign*}
   \item The error sum of squares:
-  $ SS_{Error} = \frac{1}{M(K-1)} \sum_{m=1}^{M} \sum_{k=1}^{K} (R_{mk} - \bar{R})^2 $
+    \begin{flalign*}  
+        & SS_{Error} = \frac{1}{M(K-1)} \sum_{m=1}^{M} \sum_{k=1}^{K} (R_{mk} - \bar{R})^2 = \frac{1}{80} \sum_{m=1}^{16} \sum_{k=1}^{6} (R_{mk} - 3.427)^2\approx 3.394 & 
+    \end{flalign*}
 \end{itemize}
 
-The Friedman test statistic is calculated as:
-
-$$T_{\text{Friedman}} = \frac{SS_{Total}}{SS_{Error}} \sim \chi_{K-1}^2 \text{ for large \textit{M} ($>15$) and \textit{K} ($>5$)}$$
 \end{frame}
 
+\begin{frame}{Friedman Test}
+
+\begin{itemize}
+\itemsep2em
+\item The Friedman test statistic is calculated as:
+
+$$T_{\text{Friedman}} = \frac{SS_{Total}}{SS_{Error}} = \frac{178.427}{3.427} \approx 52.872
+$$
+\item For sufficiently large \textit{M} ($>15$) and \textit{K} ($>5$): $$
+T_{\text{Friedman}} \sim \chi_{K-1}^2
+$$
+\item The  $(1-\alpha)$ quantile of $\chi_{5}^2$ corresponds to 11.075, leading us to reject $H_0$.
+\item We assume there is at least one algorithm performing better than the remaining algorithms. Which one(s) needs to be determined with pairwise post-hoc tests.
+
+\end{itemize}
+
+\end{frame}
 
 % \begin{frame}{Friedman test}
 % % So far we have only compared 2 models / algorithms on one dataset. The \textbf{Friedman test} can be used to compare multiple classifiers on multiple datasets. The hypotheses to be tested are:
