@@ -102,6 +102,7 @@ ranktable_short_wide = aggr %>%
   select(c(task_id, learner_id, ce_rank)) %>%
   pivot_wider(names_from = learner_id, values_from = ce_rank)
 ranktable_short_wide
+colnames(ranktable_short_wide) = c("task_id", "rpart", "ranger")
 
 library(xtable)
 print(
