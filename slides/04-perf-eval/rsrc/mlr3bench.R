@@ -101,7 +101,8 @@ ranktable_short_wide = aggr %>%
   mutate(ce_rank = paste(round(classif.ce, 4), " (", rank_on_task, ")", sep =  "")) %>%
   select(c(task_id, learner_id, ce_rank)) %>%
   pivot_wider(names_from = learner_id, values_from = ce_rank)
-ranktable_short_wide
+ranktable = ranktable_short_wide[1:6, ]
+
 colnames(ranktable_short_wide) = c("task_id", "rpart", "ranger")
 
 library(xtable)
