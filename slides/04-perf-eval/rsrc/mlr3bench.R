@@ -48,23 +48,14 @@ aggr = bmr$aggregate()
 print(aggr)
 
 # autoplot(bmr)
-aggr
-aggr_wide = aggr %>%
-  select(c(task_id, learner_id, classif.ce)) %>%
-  pivot_wider(names_from = learner_id, values_from = classif.ce)
-aggr_wide
-colnames(aggr_wide) = c("data set", "featureless",  "cv_glmnet", "rpart", "ranger", "kknn", "svm")
-library(xtable)
-print(xtable(aggr_wide, type = "latex"), file = "slides/04-perf-eval/rsrc/friedman_benchmark_results.tex")
-
-class(aggr)
 library(mlr3benchmark)
 obj1 = as_benchmark_aggr(bmr, measures = msr("classif.ce"))
 
 library(tidyverse)
 ranktable = aggr %>%
   group_by(task_id) %>%
-  mutate(rank_on_task = dense_rank(classif.ce))
+  mutate(rank_on_task = rank(classif.ce)) %>%
+  mutate(ce_rank = paste(round(classif.ce, 4), " (", rank_on_task, ")", sep =  ""))
 
 ranktable
 
@@ -85,5 +76,22 @@ sserror
 
 friedmanstat = sstotal / sserror
 friedmanstat
+qchisq( .99, df = 5)        # 7 degrees of freedom
 
 obj1$friedman_posthoc()
+
+aggr_wide = ranktable %>%
+  select(c(task_id, learner_id, ce_rank)) %>%
+  pivot_wider(names_from = learner_id, values_from = ce_rank)
+aggr_wide
+
+
+colnames(aggr_wide) = c("data set", "featureless",  "cv_glmnet", "rpart", "ranger", "kknn", "svm")
+library(xtable)
+print(
+  xtable(
+    aggr_wide,
+    type = "latex",
+    digits = 4
+  ),
+  file = "slides/04-perf-eval/rsrc/friedman_benchmark_results.tex")
