@@ -11,7 +11,6 @@ otasks = list_oml_tasks(
   number_missing_values = 0
 )
 
-# < 1.2 filtern
 
 otasks$name
 otasks = otasks %>%
@@ -48,8 +47,8 @@ aggr = bmr$aggregate()
 print(aggr)
 
 # autoplot(bmr)
-library(mlr3benchmark)
-obj1 = as_benchmark_aggr(bmr, measures = msr("classif.ce"))
+# library(mlr3benchmark)
+# obj1 = as_benchmark_aggr(bmr, measures = msr("classif.ce"))
 
 library(tidyverse)
 ranktable = aggr %>%
@@ -57,7 +56,6 @@ ranktable = aggr %>%
   mutate(rank_on_task = rank(classif.ce)) %>%
   mutate(ce_rank = paste(round(classif.ce, 4), " (", rank_on_task, ")", sep =  ""))
 
-ranktable
 
 averageranks = ranktable %>%
   group_by(learner_id) %>%
@@ -66,6 +64,7 @@ averageranks = ranktable %>%
 averageranks
 
 meanrank = (1 / nrow(ranktable)) * sum(ranktable$rank_on_task)
+meanrank
 
 sstotal = length(tasklist) *
   sum((averageranks$average_rank_on_task- meanrank)^2)
@@ -85,8 +84,7 @@ aggr_wide = ranktable %>%
   pivot_wider(names_from = learner_id, values_from = ce_rank)
 aggr_wide
 
-
-colnames(aggr_wide) = c("data set", "featureless",  "cv_glmnet", "rpart", "ranger", "kknn", "svm")
+colnames(aggr_wide) = c("task_id", "featureless",  "cv_glmnet", "rpart", "ranger", "kknn", "svm")
 library(xtable)
 print(
   xtable(
@@ -95,3 +93,23 @@ print(
     digits = 4
   ),
   file = "slides/04-perf-eval/rsrc/friedman_benchmark_results.tex")
+
+ranktable_short_wide = aggr %>%
+  filter(learner_id == "encode.classif.rpart" | learner_id == "encode.classif.ranger") %>%
+  group_by(task_id) %>%
+  mutate(rank_on_task = rank(classif.ce)) %>%
+  mutate(ce_rank = paste(round(classif.ce, 4), " (", rank_on_task, ")", sep =  "")) %>%
+  select(c(task_id, learner_id, ce_rank)) %>%
+  pivot_wider(names_from = learner_id, values_from = ce_rank)
+ranktable_short_wide
+
+library(xtable)
+print(
+  xtable(
+    ranktable_short_wide,
+    type = "latex",
+    digits = 4
+  ),
+  file = "slides/04-perf-eval/rsrc/friedman_benchmark_results_short.tex")
+
+
