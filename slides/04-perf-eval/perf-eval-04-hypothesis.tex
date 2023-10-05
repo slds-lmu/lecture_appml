@@ -441,6 +441,17 @@ $$
 \end{frame}
 
 
+\begin{frame}{Second Benchmarking Scenario}
+% https://docs.google.com/presentation/d/1hRPhxdXPvF2J2xXR_aDiG4Y3GxvMbNvujkPuJ-tsHRY/edit?usp=sharing
+\vfill
+\centering
+\large{Two algorithms on multiple data sets}
+    \begin{figure}
+        \includegraphics[width = 0.6\textwidth]{slides/04-perf-eval/figure/2algos_multipledatasets.png}
+    \end{figure}
+\vfill
+\end{frame}
+
 \begin{frame}{Wilcoxon Signed Rank Test}
     \begin{itemize}
         % \item The Wilcoxon signed rank test ranks differences in performance of two classifiers, ignores the signs, and then compares ranks for positive and negative differences.
@@ -460,17 +471,6 @@ $$
         T_{\text{Wilcoxon}} = \frac{\min(R^{+}, R^{-})   - \frac{1}{4}M(M + 1)}{\sqrt{\frac{1}{24}M(M + 1)(2M + 1)}}
         $$
     \end{itemize}
-\end{frame}
-
-\begin{frame}{Second Benchmarking Scenario}
-% https://docs.google.com/presentation/d/1hRPhxdXPvF2J2xXR_aDiG4Y3GxvMbNvujkPuJ-tsHRY/edit?usp=sharing
-\vfill
-\centering
-\large{Two algorithms on multiple data sets}
-    \begin{figure}
-        \includegraphics[width = 0.6\textwidth]{slides/04-perf-eval/figure/2algos_multipledatasets.png}
-    \end{figure}
-\vfill
 \end{frame}
 
 \begin{frame}{Wilcoxon Signed Rank Test}
@@ -650,16 +650,16 @@ After ranking algorithms, we calculate the following quantities (where $M$ denot
   \item The overall mean rank:
   \begin{flalign*}
      & \bar{R} = \frac{1}{mk} \sum_{k=1}^{K} \sum_{m=1}^{M} R_{mk} 
-      = \frac{1}{96} \sum_{k=1}^{6} \sum_{m=1}^{16} R_{mk} \approx 3.427 &
+      = \frac{1}{96} \sum_{k=1}^{6} \sum_{m=1}^{16} R_{mk} = 3.5 &
   \end{flalign*}
   \item The total sum of squares:
   \begin{flalign*}    
-    & SS_{Total} = M \sum_{k=1}^{K} (\bar{R}_{.k} - \bar{R})^2 = 16 \sum_{k=1}^{6} (\bar{R}_{.k} - 3.427)^2 \approx 179.427 & \\ 
+    & SS_{Total} = M \sum_{k=1}^{K} (\bar{R}_{.k} - \bar{R})^2 = 16 \sum_{k=1}^{6} (\bar{R}_{.k} - 3.427)^2 \approx 187.281 & \\ 
   & \text{with the mean rank for the $k$-th algorithm } \bar{R}_{.k} = \frac{1}{M} \sum_{m=1}^{M} R_{mk} = \frac{1}{16} \sum_{m=1}^{16} R_{mk} &
   \end{flalign*}
   \item The error sum of squares:
     \begin{flalign*}  
-        & SS_{Error} = \frac{1}{M(K-1)} \sum_{m=1}^{M} \sum_{k=1}^{K} (R_{mk} - \bar{R})^2 = \frac{1}{80} \sum_{m=1}^{16} \sum_{k=1}^{6} (R_{mk} - 3.427)^2\approx 3.394 & 
+        & SS_{Error} = \frac{1}{M(K-1)} \sum_{m=1}^{M} \sum_{k=1}^{K} (R_{mk} - \bar{R})^2 = \frac{1}{80} \sum_{m=1}^{16} \sum_{k=1}^{6} (R_{mk} - 3.427)^2\approx 3.481 & 
     \end{flalign*}
 \end{itemize}
 
@@ -671,7 +671,7 @@ After ranking algorithms, we calculate the following quantities (where $M$ denot
 \itemsep2em
 \item The Friedman test statistic is calculated as:
 
-$$T_{\text{Friedman}} = \frac{SS_{Total}}{SS_{Error}} = \frac{178.427}{3.427} \approx 52.872
+$$T_{\text{Friedman}} = \frac{SS_{Total}}{SS_{Error}} \approx 52.872
 $$
 \item For sufficiently large \textit{M} ($>15$) and \textit{K} ($>5$): $$
 T_{\text{Friedman}} \sim \chi_{K-1}^2
