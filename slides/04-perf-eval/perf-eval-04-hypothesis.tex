@@ -472,41 +472,44 @@ $$
         $$
     \end{itemize}
 \end{frame}
-\begin{frame}{Frame Title}
-
-{   
-    \scriptsize
-    \include{slides/04-perf-eval/rsrc/friedman_benchmark_results_short}
-}
+\begin{frame}{Wilcoxon Signed Rank Test}
+    \begin{itemize}
+        \item A benchmark of 2 learners (with default hyperparameters) on 16 classification tasks, using the classification error as performance measure.
+        \item We first rank each algorithm on each data set (the lower the rank in parantheses, the better the performance).
+    \end{itemize}
+    {   
+        \scriptsize
+        \include{slides/04-perf-eval/rsrc/friedman_benchmark_results_short}
+    }
 \end{frame}
 \begin{frame}{Wilcoxon Signed Rank Test}
 % https://edisciplinas.usp.br/pluginfile.php/4129451/mod_resource/content/1/model_selection_evaluation.pdf
-\textbf{Example:} AUC of two algorithms on multiple data sets
+% \textbf{Example:} AUC of two algorithms on multiple data sets
 
-\begin{table}[!ht]
-    \scriptsize
-    \centering
-    \begin{tabular}{|l|l|l|}
-    \hline
-        \textbf{data set} & \textbf{algorithm 1} & \textbf{algorithm 2} \\ \hline\hline
-        adult & 0.763 & \textbf{0.768} \\ \hline 
-        % breast\_cancer & 0.599 & 0.591 & \\ \hline
-        breast\_cancer\_wisconsin & 0.954 & \textbf{0.971} \\ \hline
-        % cmc & 0.628 & 0.661 & \\ \hline
-        ionosphere & 0.882 & \textbf{0.888} \\ \hline
-        % iris & 0.936 & 0.931 & \\ \hline
-        % liver\_disorders & 0.661 & 0.668 & \\ \hline
-        lung\_cancer & \textbf{0.583} & \textbf{0.583} \\ \hline
-        % lymphography & 0.775 & 0.838 & \\ \hline
-        mushroom & \textbf{1.000} & \textbf{1.000} \\ \hline
-        % primary\_tumor & 0.940 & 0.962 & \\ \hline
-        % rheum & 0.619 & 0.666 & \\ \hline
-        % voting & 0.972 & 0.981 & \\ \hline
-        wine & 0.957 & \textbf{0.978} \\ \hline
-    \end{tabular}
-\end{table}
+% \begin{table}[!ht]
+%     \scriptsize
+%     \centering
+%     \begin{tabular}{|l|l|l|}
+%     \hline
+%         \textbf{data set} & \textbf{algorithm 1} & \textbf{algorithm 2} \\ \hline\hline
+%         adult & 0.763 & \textbf{0.768} \\ \hline 
+%         % breast\_cancer & 0.599 & 0.591 & \\ \hline
+%         breast\_cancer\_wisconsin & 0.954 & \textbf{0.971} \\ \hline
+%         % cmc & 0.628 & 0.661 & \\ \hline
+%         ionosphere & 0.882 & \textbf{0.888} \\ \hline
+%         % iris & 0.936 & 0.931 & \\ \hline
+%         % liver\_disorders & 0.661 & 0.668 & \\ \hline
+%         lung\_cancer & \textbf{0.583} & \textbf{0.583} \\ \hline
+%         % lymphography & 0.775 & 0.838 & \\ \hline
+%         mushroom & \textbf{1.000} & \textbf{1.000} \\ \hline
+%         % primary\_tumor & 0.940 & 0.962 & \\ \hline
+%         % rheum & 0.619 & 0.666 & \\ \hline
+%         % voting & 0.972 & 0.981 & \\ \hline
+%         wine & 0.957 & \textbf{0.978} \\ \hline
+%     \end{tabular}
+% \end{table}
 $$
-R^{+} = 5\qquad R^{-} = 1\qquad \min(R^{+}, R^{-}) = 1
+R^{+} = 14\qquad R^{-} = 1\qquad \min(R^{+}, R^{-}) = 1
 $$
 $$
 T_{\text{Wilcoxon}} = \frac{1 - \frac{1}{4}6(6 + 1)}{\sqrt{\frac{1}{24}6(6 + 1)(12 + 1)}} = - 1.99 
