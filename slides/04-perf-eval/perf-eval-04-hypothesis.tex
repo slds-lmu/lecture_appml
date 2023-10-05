@@ -2,13 +2,23 @@
 \usepackage{../../style/lmu-lecture}
 % Defines macros and environments
 \input{../../style/common.tex}
-\newcommand{\Dtestb}{\mathcal{D}_{\text{test}}^{(b)}}
+\newcommand{\Dtestm}{\mathcal{D}_{\text{test}, m}}
 \title{Applied Machine Learning}
 % \author{LMU}
 %\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
 \date{}
 
 \begin{document}
+
+\newcommand{\titlefigure}{figure/performance_vs_interpretability}
+\newcommand{\learninggoals}{
+\item What questions can we answer with benchmarks?
+\item What value do hypothesis tests add?
+\item Benchmarking scenarios and relevant tests}
+
+\lecturechapter{Hypothesis Testing}
+\lecture{Applied Machine Learning}
+
 
 % https://sebastianraschka.com/pdf/lecture-notes/stat479fs18/11_eval-algo_slides.pdf
 
@@ -63,22 +73,34 @@ Hypothesis tests can (a) quantify evidence that a difference in model performanc
 
 \end{frame}
 
-\begin{frame}{Scenarios in Benchmarking}
+% \begin{frame}{Scenarios in Benchmarking}
 
-We can think of 3 different scenarios, which all require different testing strategies:
-\vspace{0.25cm}
-\begin{enumerate}
-    \setlength\itemsep{1em} 
-    \item 2 models / algorithms benchmarked on a single data set.
-    \item 2 algorithms benchmarked on multiple data sets.
-    \item Multiple algorithms benchmarked on multiple data sets.
-\end{enumerate}
+% We can think of 3 different scenarios, which all require different testing strategies:
+% \vspace{0.25cm}
+% \begin{enumerate}
+%     \setlength\itemsep{1em} 
+%     \item 2 models / algorithms benchmarked on a single data set.
+%     \item 2 algorithms benchmarked on multiple data sets.
+%     \item Multiple algorithms benchmarked on multiple data sets.
+% \end{enumerate}
 
 
 
 
     
+% \end{frame}
+
+\begin{frame}{First Benchmarking Scenario}
+% https://docs.google.com/presentation/d/1hRPhxdXPvF2J2xXR_aDiG4Y3GxvMbNvujkPuJ-tsHRY/edit?usp=sharing
+\vfill
+\centering
+\large{Two algorithms on 1 data set}
+    \begin{figure}
+        \includegraphics[width = 0.6\textwidth]{slides/04-perf-eval/figure/2algos_1dataset.png}
+    \end{figure}
+\vfill
 \end{frame}
+
 
 % \begin{frame}{Hypothesis Testing - General Procedure}
 
@@ -242,7 +264,7 @@ We can think of 3 different scenarios, which all require different testing strat
         \item Test statistic: 
             $$
             T_{\text{t-test}} = \sqrt{n_{test}} \frac{\bar{d}}{\sigma_{d}} \sim t(n_{test} - 1), \text{ with }
-            \sigma_{d} = \sqrt{\frac{1}{n_{test} - 1}\sum_{i=1}^{n_{test}} \left(d_i - \bar{d} \right)^2}
+            \sigma_{d} = \sqrt{\frac{1}{n_{\text{test}} - 1}\sum_{i=1}^{n_{test}} \left(d_i - \bar{d} \right)^2}
         $$
         $$d_i = L(\yi, \fh_1 (\xi)) - L(\yi, \fh_2 (\xi))\qquad \bar{d} = \sum\limits_{i=1}^{n} d_i \qquad (\xi, \yi) \in \Dtest$$
         \item The two-matched samples t-test (or paired t-test) has multiple requirements:
@@ -424,19 +446,30 @@ $$
         \item Non-parametric and suitable for any performance measure.
         \item $H_0$: Model 1 and 2 have tied ranks in model performance. \\ 
         $H_1$: Model 1 and 2 have different ranks in performance.
-        \item Consider $B$ data sets. Let $\widehat{\text{GE}}(\widehat{f}_k, \rho, \Dtestb)$  denote the GE estimate for model $k$ and data set $b$. The difference $d_b$ between GE estimates on the $b$-th data set is:
+        \item Consider $M$ data sets. Let $\widehat{\text{GE}}(\widehat{f}_k, \rho, \Dtestm)$  denote the GE estimate for model $k$ and data set $m$. The difference $d_b$ between GE estimates on the $m$-th data set is:
         $$
-        d_b = \widehat{\text{GE}}(\widehat{f}_1, \rho, \Dtestb) - \widehat{\text{GE}}(\widehat{f}_2, \rho, \Dtestb)
+        d_m = \widehat{\text{GE}}(\widehat{f}_1, \rho, \Dtestm) - \widehat{\text{GE}}(\widehat{f}_2, \rho, \Dtestm)
         $$
         \item Let $R^{+}$ denote the rank sum for data sets where algorithm B outperforms algorithm A and vice versa for $R^{-}$:
         $$
-        R^{+} = \sum_{d_b > 0} \text{rank}(d_b) + \frac{1}{2} \sum_{d_b = 0} \text{rank}(d_b) \quad\quad R^{-} = \sum_{d_b < 0} \text{rank}(d_b) + \frac{1}{2} \sum_{d_b = 0} \text{rank}(d_b)
+        R^{+} = \sum_{d_m > 0} \text{rank}(d_m) + \frac{1}{2} \sum_{d_m = 0} \text{rank}(d_m) \quad\quad R^{-} = \sum_{d_m < 0} \text{rank}(d_m) + \frac{1}{2} \sum_{d_m = 0} \text{rank}(d_m)
         $$
         \item The test statistic does not follow a closed-form distribution, but probabilities can be derived from a distribution table:
         $$
-        T_{\text{Wilcoxon}} = \frac{\min(R^{+}, R^{-})   - \frac{1}{4}B(B + 1)}{\sqrt{\frac{1}{24}B(B + 1)(2B + 1)}}
+        T_{\text{Wilcoxon}} = \frac{\min(R^{+}, R^{-})   - \frac{1}{4}M(M + 1)}{\sqrt{\frac{1}{24}M(M + 1)(2M + 1)}}
         $$
     \end{itemize}
+\end{frame}
+
+\begin{frame}{Second Benchmarking Scenario}
+% https://docs.google.com/presentation/d/1hRPhxdXPvF2J2xXR_aDiG4Y3GxvMbNvujkPuJ-tsHRY/edit?usp=sharing
+\vfill
+\centering
+\large{Two algorithms on multiple data sets}
+    \begin{figure}
+        \includegraphics[width = 0.6\textwidth]{slides/04-perf-eval/figure/2algos_multipledatasets.png}
+    \end{figure}
+\vfill
 \end{frame}
 
 \begin{frame}{Wilcoxon Signed Rank Test}
@@ -505,6 +538,16 @@ $$
 
 % \end{frame}
 
+\begin{frame}{Third Benchmarking Scenario}
+% https://docs.google.com/presentation/d/1hRPhxdXPvF2J2xXR_aDiG4Y3GxvMbNvujkPuJ-tsHRY/edit?usp=sharing
+\vfill
+\centering
+\large{Multiple algorithms on multiple data sets}
+    \begin{figure}
+        \includegraphics[width = 0.6\textwidth]{slides/04-perf-eval/figure/multiplalgos_multipledatasets.png}
+    \end{figure}
+\vfill
+\end{frame}
 
 \begin{frame}{Comparing Multiple Models}
 
@@ -550,64 +593,92 @@ $$
 % \item $H_1:$ The average rank for at least one algorithm is different.
 % \end{itemize}
 
-Suppose we want to evaluate $B$ data sets and $K$ algorithms. The Friedman test first ranks algorithms for each data set separately:
+Suppose we want to evaluate $M$ data sets and $K$ algorithms. The Friedman test first ranks algorithms for each data set separately:
 
 \begin{itemize}
   \item Separately rank each algorithm for each dataset from best-performing (lowest rank) to worst-performing (highest rank), using any performance measure.
   \item If there is a $d$-way tie after rank $r$, assign a rank of $ \left[(r+1) + (r+2) + ... + (r+d)\right] /d $ to all tied classifiers.
-  \item Let $R_{bk}$ denote the rank of algorithm $k$ on data set $b$.
+  \item Let $R_{mk}$ denote the rank of algorithm $k$ on data set $m$.
 \end{itemize}
 
 After ranking algorithms, calculate the following quantities:
 
 \begin{itemize}
   \item The overall mean rank:
-  $ \bar{R} = \frac{1}{bk} \sum_{k=1}^{K} \sum_{b=1}^{B} R_{bk}$
+  $ \bar{R} = \frac{1}{mk} \sum_{k=1}^{K} \sum_{m=1}^{M} R_{mk}$
   \item The total sum of squares:
-  $ SS_{Total} = B \sum_{k=1}^{K} (\bar{R}_{.k} - \bar{R})^2 $, where $\bar{R}_{.k} =  \frac{1}{B} \sum_{b=1}^{B} R_{bk}$.
+  $ SS_{Total} = M \sum_{k=1}^{K} (\bar{R}_{.k} - \bar{R})^2 $, where $\bar{R}_{.k} =  \frac{1}{M} \sum_{m=1}^{M} R_{mk}$.
   \item The error sum of squares:
-  $ SS_{Error} = \frac{1}{B(K-1)} \sum_{b=1}^{B} \sum_{k=1}^{K} (R_{bk} - \bar{R})^2 $
+  $ SS_{Error} = \frac{1}{M(K-1)} \sum_{m=1}^{M} \sum_{k=1}^{K} (R_{mk} - \bar{R})^2 $
 \end{itemize}
 
 The Friedman test statistic is calculated as:
 
-$$T_{\text{Friedman}} = \frac{SS_{Total}}{SS_{Error}} \sim \chi_{K-1}^2 \text{ for large \textit{B} ($>15$) and \textit{K} ($>5$)}$$
+$$T_{\text{Friedman}} = \frac{SS_{Total}}{SS_{Error}} \sim \chi_{K-1}^2 \text{ for large \textit{M} ($>15$) and \textit{K} ($>5$)}$$
 \end{frame}
 
 \begin{frame}{Friedman Test}
 
-\textbf{Illustrative example ($B < 15$ and $K < 5$ here, so test statistic not $\chi^2$-distributed):}
+\textbf{Example:}
+% \textbf{Illustrative example ($M < 15$ and $K < 5$ here, so test statistic not $\chi^2$-distributed):}
     
-    \begin{table}[!ht]
-        \scriptsize
-        \centering
-        \begin{tabular}{|l|l|l|l|l|}
-        \hline
-            \textbf{data set} & \textbf{algorithm 1} & \textbf{algorithm 2}  & \textbf{algorithm 3} & \textbf{algorithm 4} \\ \hline\hline
-            adult & 0.763 (4) & 0.768 (3) & 0.771 (2) & 0.798 (1) \\ \hline 
-            % breast\_cancer & 0.599 & 0.591 & \\ \hline
-            breast\_cancer\_wisconsin & 0.954 (4) & 0.971 (1) & 0.968 (2) & 0.967 (3) \\ \hline
-            % cmc & 0.628 & 0.661 & \\ \hline
-            ionosphere & 0.882 (4) & 0.888 (2) & 0.886 (3) & 0.898 (1) \\ \hline
-            % iris & 0.936 & 0.931 & \\ \hline
-            % liver\_disorders & 0.661 & 0.668 & \\ \hline
-            lung\_cancer & 0.583 (2.5) & 0.583 (2.5) & 0.563 (4) & 0.625 (1) \\ \hline
-            % lymphography & 0.775 & 0.838 & \\ \hline
-            mushroom & 1.000 (2.5) & 1.000 (2.5) & 1.000 (2.5) & 1.000 (2.5) \\ \hline
-            % primary\_tumor & 0.940 & 0.962 & \\ \hline
-            % rheum & 0.619 & 0.666 & \\ \hline
-            % voting & 0.972 & 0.981 & \\ \hline
-            wine & 0.957 (3) & 0.978 (1) & 0.946 (4) & 0.970 (2) \\ \hline
-        \end{tabular}
-    \end{table}
-\begin{align*}
-    \bar{R} &= \frac{1}{6 \cdot 4} \sum_{k=1}^{4} \sum_{b=1}^{6} R_{bk} = \frac{60}{24} = 2.5 \\
-    SS_{Total} &= 6 \sum_{k=1}^{4} (\bar{R}_{.k} - 2.5)^2 = 6 \cdot \left(3.333^2 + 2^2 + 2.916^2 + 1.75^2 \right) \approx 160.047
-    % , where \bar{R}_{.k} =  \frac{1}{B} \sum_{b=1}^{B} R_{bk} 
-    \\
-    SS_{Error} &= \frac{1}{6(4-1)} \sum_{b=1}^{6} \sum_{k=1}^{4} (R_{bk} - \bar{R})^2 = 1.375 \\
-    T_{\text{Friedman}} &= \frac{SS_{Total}}{SS_{Error}} = \frac{160.047}{1.375} \approx 116.4 > 7.815 \Rightarrow \text{Reject $H_0$!}
-\end{align*}
+    % \begin{table}[!ht]
+    %     \scriptsize
+    %     \centering
+    %     \begin{tabular}{|l|l|l|l|l|}
+    %     \hline
+    %         \textbf{data set} & \textbf{algorithm 1} & \textbf{algorithm 2}  & \textbf{algorithm 3} & \textbf{algorithm 4} \\ \hline\hline
+    %         adult & 0.763 (4) & 0.768 (3) & 0.771 (2) & 0.798 (1) \\ \hline 
+    %         % breast\_cancer & 0.599 & 0.591 & \\ \hline
+    %         breast\_cancer\_wisconsin & 0.954 (4) & 0.971 (1) & 0.968 (2) & 0.967 (3) \\ \hline
+    %         % cmc & 0.628 & 0.661 & \\ \hline
+    %         ionosphere & 0.882 (4) & 0.888 (2) & 0.886 (3) & 0.898 (1) \\ \hline
+    %         % iris & 0.936 & 0.931 & \\ \hline
+    %         % liver\_disorders & 0.661 & 0.668 & \\ \hline
+    %         lung\_cancer & 0.583 (2.5) & 0.583 (2.5) & 0.563 (4) & 0.625 (1) \\ \hline
+    %         % lymphography & 0.775 & 0.838 & \\ \hline
+    %         mushroom & 1.000 (2.5) & 1.000 (2.5) & 1.000 (2.5) & 1.000 (2.5) \\ \hline
+    %         % primary\_tumor & 0.940 & 0.962 & \\ \hline
+    %         % rheum & 0.619 & 0.666 & \\ \hline
+    %         % voting & 0.972 & 0.981 & \\ \hline
+    %         wine & 0.957 (3) & 0.978 (1) & 0.946 (4) & 0.970 (2) \\ \hline
+    %     \end{tabular}
+    % \end{table}
+% \begin{align*}
+%     \bar{R} &= \frac{1}{6 \cdot 4} \sum_{k=1}^{4} \sum_{m=1}^{6} R_{mk} = \frac{60}{24} = 2.5 \\
+%     SS_{Total} &= 6 \sum_{k=1}^{4} (\bar{R}_{.k} - 2.5)^2 = 6 \cdot \left(3.333^2 + 2^2 + 2.916^2 + 1.75^2 \right) \approx 160.047
+%     % , where \bar{R}_{.k} =  \frac{1}{B} \sum_{b=1}^{B} R_{bk} 
+%     \\
+%     SS_{Error} &= \frac{1}{6(4-1)} \sum_{m=1}^{6} \sum_{k=1}^{4} (R_{mk} - \bar{R})^2 = 1.375 \\
+%     T_{\text{Friedman}} &= \frac{SS_{Total}}{SS_{Error}} = \frac{160.047}{1.375} \approx 116.4 > 7.815 \Rightarrow \text{Reject $H_0$!}
+% \end{align*}
+
+\begin{table}
+\scriptsize
+\begin{tabular}{rlrrrrrr}
+  \hline
+ & task\_id & encode.classif.featureless & encode.classif.cv\_glmnet & encode.classif.rpart & encode.classif.ranger & encode.classif.kknn & encode.classif.svm \\ 
+  \hline
+1 & mfeat-morphological & 0.10 & 0.00 & 0.01 & 0.00 & 0.00 & 0.00 \\ 
+  2 & banknote-authentication & 0.44 & 0.01 & 0.03 & 0.01 & 0.00 & 0.00 \\ 
+  3 & socmob & 0.22 & 0.06 & 0.07 & 0.06 & 0.16 & 0.07 \\ 
+  4 & space\_ga & 0.50 & 0.16 & 0.21 & 0.16 & 0.19 & 0.16 \\ 
+  5 & delta\_elevators & 0.51 & 0.12 & 0.13 & 0.12 & 0.14 & 0.12 \\ 
+  6 & analcatdata\_supreme & 0.24 & 0.01 & 0.01 & 0.01 & 0.02 & 0.02 \\ 
+  7 & delta\_ailerons & 0.47 & 0.06 & 0.06 & 0.06 & 0.06 & 0.06 \\ 
+  8 & pollen & 0.52 & 0.52 & 0.51 & 0.50 & 0.52 & 0.52 \\ 
+  9 & fri\_c0\_1000\_5 & 0.53 & 0.15 & 0.18 & 0.11 & 0.13 & 0.10 \\ 
+  10 & fri\_c1\_1000\_5 & 0.46 & 0.39 & 0.15 & 0.09 & 0.12 & 0.10 \\ 
+  11 & phoneme & 0.29 & 0.26 & 0.17 & 0.10 & 0.12 & 0.16 \\ 
+  12 & puma8NH & 0.50 & 0.17 & 0.20 & 0.17 & 0.22 & 0.17 \\ 
+  13 & wilt & 0.05 & 0.04 & 0.02 & 0.02 & 0.03 & 0.02 \\ 
+  14 & car & 0.30 & 0.05 & 0.04 & 0.03 & 0.17 & 0.02 \\ 
+  15 & fri\_c2\_1000\_5 & 0.42 & 0.26 & 0.11 & 0.08 & 0.10 & 0.07 \\ 
+  16 & kin8nm & 0.49 & 0.27 & 0.28 & 0.16 & 0.16 & 0.11 \\ 
+   \hline
+\end{tabular}
+\end{table}
+
 
 
 \end{frame}
@@ -675,10 +746,10 @@ $$T_{\text{Friedman}} = \frac{SS_{Total}}{SS_{Error}} \sim \chi_{K-1}^2 \text{ f
 \begin{itemize}
 \setlength\itemsep{1em}
 \item The post-hoc Nemenyi test is used after an omnibus test (like the Friedman test) rejects the null hypothesis.
-\item Runs all $\frac{K(K-1)}{2}$ pairwise comparisons for $B$ data sets and $K$ algorithms.
-\item Calculates the average rank of $k$-th algorithm on all $B$ data sets: 
+\item Runs all $\frac{K(K-1)}{2}$ pairwise comparisons for $M$ data sets and $K$ algorithms.
+\item Calculates the average rank of $k$-th algorithm on all $M$ data sets: 
 $$
-\bar{R}_{.k} =\frac{1}{B} \sum_{b=1}^B R_{bk}
+\bar{R}_{.k} =\frac{1}{M} \sum_{m=1}^M R_{mk}
 $$
 \item $H_0: \bar{R}_{.k_1} = \bar{R}_{.k_2}$ versus 
 $H_1: \bar{R}_{.k_1} \neq \bar{R}_{.k_2}$
@@ -688,7 +759,7 @@ T_{\text{Nemenyi}} = \bar{R}_{.k_1} - \bar{R}_{.k_2}
 $$
 with critical value to reject $H_0$:
 $$ 
-T_{\text{Nemenyi}} \geq q_{\alpha} \sqrt{\frac{K(K + 1)}{6B}}
+T_{\text{Nemenyi}} \geq q_{\alpha} \sqrt{\frac{K(K + 1)}{6M}}
 $$
 where $q_{\alpha}$ is based on the studentized range statistic divided by $\sqrt{2}$.
 % \item For any two algorithms, we compute the test statistic as:
@@ -706,8 +777,8 @@ where $q_{\alpha}$ is based on the studentized range statistic divided by $\sqrt
 \textbf{Example (for one pairwise comparison):}
 
 \begin{align*}
-    \bar{R}_{.2} &= \frac{1}{6} \sum_{b=1}^B R_{b2} = \frac{13}{6} \\
-    \bar{R}_{.3} &= \frac{1}{6} \sum_{b=1}^B R_{b3} = \frac{17.5}{6} \\
+    \bar{R}_{.2} &= \frac{1}{6} \sum_{m=1}^M R_{m_2} = \frac{13}{6} \\
+    \bar{R}_{.3} &= \frac{1}{6} \sum_{m=1}^M R_{m_3} = \frac{17.5}{6} \\
     % T_{\text{Nemenyi}} &= \frac{\frac{13 - 17.5}{6}}{\sqrt{\frac{4(4+1)}{36}}} \approx - 1 
     T_{\text{Nemenyi}} &= \frac{-4.5}{6} = -0.75
 \end{align*}
@@ -732,7 +803,7 @@ where $q_{\alpha}$ is based on the studentized range statistic divided by $\sqrt
     \item Instead of pairwise comparisons, we now compare all algorithms with one baseline algorithm (i.e., $K-1$ comparisons).
     \item The test statistic is the same as before:
     $$
-        T_{\text{Bonferroni-Dunn}} = \frac{\bar{R}_{.k_1} - \bar{R}_{.k_{\text{baseline}}}}{\sqrt{\frac{K(K+1)}{6B}}}
+        T_{\text{Bonferroni-Dunn}} = \frac{\bar{R}_{.k_1} - \bar{R}_{.k_{\text{baseline}}}}{\sqrt{\frac{K(K+1)}{6M}}}
     $$
     % \item 
     % The performances of $j_1$ and $j_2$ differ significantly if $|q| > q_{\alpha}$, where the
