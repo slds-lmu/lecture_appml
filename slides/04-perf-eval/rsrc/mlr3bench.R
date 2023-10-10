@@ -117,7 +117,7 @@ library(ggplot2)
 aggr.ggplot = aggr %>%
   group_by(task_id) %>%
   arrange(classif.ce, .by_group = TRUE) %>%
-  mutate(position = -rank(classif.ce)) %>%
+  mutate(position = rank(classif.ce)) %>%
   mutate(learner_id = replace(learner_id, learner_id == "encode.classif.featureless", "featureless")) %>%
   mutate(learner_id = replace(learner_id, learner_id == "encode.classif.ranger", "ranger")) %>%
   mutate(learner_id = replace(learner_id, learner_id == "encode.classif.kknn", "kknn")) %>%
@@ -125,21 +125,26 @@ aggr.ggplot = aggr %>%
   mutate(learner_id = replace(learner_id, learner_id == "encode.classif.svm", "svm")) %>%
   mutate(learner_id = replace(learner_id, learner_id == "encode.classif.cv_glmnet", "cv_glmnet"))
 
-cbb_palette = c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+cbb_palette = c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#CC79A7")
+
+task_order = lapply(tasklist, FUN = function(x) x$data_name)
 
 benchplot = ggplot(
   aggr.ggplot,
-  aes(x = task_id, y = classif.ce, group = position)) +
+  aes(x = factor(task_id, level = task_order), y = classif.ce, group = position)) +
   geom_col(
+    color = "black",
+    linewidth = 0.2,
     aes(fill = learner_id),
     position = position_dodge(),
     width = 0.75) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
   scale_fill_manual(values = cbb_palette)
+benchplot
 
 ggsave(
   filename = "slides/04-perf-eval/figure/benchmarkcolplot.png",
   plot = benchplot,
-  width = 8, height = 4)
+  width = 9, height = 6)
 
