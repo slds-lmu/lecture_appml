@@ -417,17 +417,17 @@ $$
   %\renewcommand{\arraystretch}{1.5}
 %\hspace*{\fill}
   \begin{tabular}{cc|cc}
-      & & \multicolumn{2}{c}{Random Forest} \\
+      & & \multicolumn{2}{c}{\textbf{ranger}} \\
       & & correct & wrong \\
       \hline
-      \multirow{2}{*}{Tree} & correct & 30 & 5 \\
-      & wrong & 17 & 42 \\
+      \multirow{2}{*}{\textbf{rpart}} & correct & 561 & 2 \\
+      & wrong & 46 & 16 \\
   \end{tabular}
 \end{center}
 
 Calculate the test statistic:
 
-$$T_{\text{McNemar}} =  \frac{(|5-17| - 1)^2}{5 + 17} = 5.5 
+$$T_{\text{McNemar}} =  \frac{(|2 - 46| - 1)^2}{2 + 46} \approx 38.52 
 $$
 % > 3.841 = \chi^2_{1,0.95}.$$
 \begin{itemize}
@@ -592,7 +592,7 @@ $$
 \begin{frame}{Friedman Test}
 
 \begin{itemize}
-\item Example of a benchmark of 6 mlr3 learners (with default hyperparameters) on 16 classification tasks, using the classification error as performance measure.
+\item Example of a benchmark of 6 mlr3 learners (with default hyperparameters) on 16 classification tasks, using the classification error as performance measure:
 
 \end{itemize}
 % \textbf{Illustrative example ($M < 15$ and $K < 5$ here, so test statistic not $\chi^2$-distributed):}
@@ -633,7 +633,7 @@ $$
     \include{slides/04-perf-eval/rsrc/friedman_benchmark_results_short}
 }
     \centering
-    \includegraphics[width = 0.7\textwidth]{slides/04-perf-eval/figure/benchmarkrankplot.png}
+    \includegraphics[width = 0.65\textwidth]{slides/04-perf-eval/figure/benchmarkrankplot.png}
 
 \end{frame}
 
