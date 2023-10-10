@@ -474,15 +474,11 @@ $$
 \end{frame}
 \begin{frame}{Wilcoxon Signed Rank Test}
     \begin{itemize}
-        \item A benchmark of 2 learners (with default hyperparameters) on 16 classification tasks, using the classification error as performance measure.
-        \item We first rank each algorithm on each data set (the lower the rank in parantheses, the better the performance).
-    \end{itemize}
+        \item A benchmark of rpart and ranger (with default hyperparameters) on 6 classification tasks, using the classification error as performance measure (rank in parantheses, the lower the better):
     {   
         \scriptsize
         \include{slides/04-perf-eval/rsrc/friedman_benchmark_results_short}
     }
-\end{frame}
-\begin{frame}{Wilcoxon Signed Rank Test}
 % https://edisciplinas.usp.br/pluginfile.php/4129451/mod_resource/content/1/model_selection_evaluation.pdf
 % \textbf{Example:} AUC of two algorithms on multiple data sets
 
@@ -509,12 +505,11 @@ $$
 %     \end{tabular}
 % \end{table}
 $$
-R^{+} = 14\qquad R^{-} = 1\qquad \min(R^{+}, R^{-}) = 1
-$$
-$$
-T_{\text{Wilcoxon}} = \frac{1 - \frac{1}{4}6(6 + 1)}{\sqrt{\frac{1}{24}6(6 + 1)(12 + 1)}} = - 1.99 
-$$
-\begin{itemize}
+    R^{+} = 4\qquad R^{-} = 1\qquad \min(R^{+}, R^{-}) = 1
+    $$
+    $$
+    T_{\text{Wilcoxon}} = \frac{1 - \frac{1}{4}6(6 + 1)}{\sqrt{\frac{1}{24}6(6 + 1)(12 + 1)}} = - 1.99 
+    $$
     \item For $\alpha = 0.05$, the critical value is 0.
     \item $T_{\text{Wilcoxon}} < 0 \Rightarrow$ reject $H_0$! 
     \item There is evidence that the two algorithms do not perform equally well.
@@ -758,7 +753,7 @@ $$
 \item Runs all $\frac{K(K-1)}{2}$ pairwise comparisons for $M$ data sets and $K$ algorithms.
 \item Calculates the average rank of $k$-th algorithm on all $M$ data sets: 
 $$
-\bar{R}_{.k} =\frac{1}{M} \sum_{m=1}^M R_{mk}
+\bar{R}_{.k} =\frac{1}{M} \sum_{m=1}^M R_{m, k}
 $$
 \item $H_0: \bar{R}_{.k_1} = \bar{R}_{.k_2}$ versus 
 $H_1: \bar{R}_{.k_1} \neq \bar{R}_{.k_2}$
@@ -783,13 +778,13 @@ where $q_{\alpha}$ is based on the studentized range statistic divided by $\sqrt
 
 \begin{frame}{Post-Hoc Nemenyi Test}
 
-\textbf{Example (for one pairwise comparison):}
+\textbf{Example (for pairwise comparison between rpart and ranger):}
 
 \begin{align*}
-    \bar{R}_{.2} &= \frac{1}{6} \sum_{m=1}^M R_{m_2} = \frac{13}{6} \\
-    \bar{R}_{.3} &= \frac{1}{6} \sum_{m=1}^M R_{m_3} = \frac{17.5}{6} \\
+    \bar{R}_{.rpart} &= \frac{1}{6} \sum_{m=1}^{16} R_{m, \text{rpart}} = 3.53 \\
+    \bar{R}_{.\text{ranger}} &= \frac{1}{6} \sum_{m=1}^{16} R_{m, \text{ranger}} = 1.59 \\
     % T_{\text{Nemenyi}} &= \frac{\frac{13 - 17.5}{6}}{\sqrt{\frac{4(4+1)}{36}}} \approx - 1 
-    T_{\text{Nemenyi}} &= \frac{-4.5}{6} = -0.75
+    T_{\text{Nemenyi}} &= 1.59 - 3.53 = -1.94
 \end{align*}
 \begin{itemize}
     \item For $\alpha = 0.05$, critical difference in average ranks is 2.569.
