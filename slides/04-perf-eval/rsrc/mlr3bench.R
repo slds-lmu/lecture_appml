@@ -140,7 +140,8 @@ benchplot = ggplot(
     width = 0.75) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  scale_fill_manual(values = cbb_palette)
+  scale_fill_manual(values = cbb_palette) +
+  xlab("task_id")
 benchplot
 
 ggsave(
