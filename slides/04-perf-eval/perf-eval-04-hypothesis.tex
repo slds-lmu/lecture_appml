@@ -594,7 +594,6 @@ $$
 \begin{itemize}
 \item Example of a benchmark of 6 mlr3 learners (with default hyperparameters) on 16 classification tasks, using the classification error as performance measure.
 
-\item We first rank each algorithm on each data set:
 \end{itemize}
 % \textbf{Illustrative example ($M < 15$ and $K < 5$ here, so test statistic not $\chi^2$-distributed):}
     
@@ -630,19 +629,21 @@ $$
 % \end{align*}
 
 {
-    \scriptsize
+    \tiny
     \include{slides/04-perf-eval/rsrc/friedman_benchmark_results_short}
 }
+    \centering
+    \includegraphics[width = 0.7\textwidth]{slides/04-perf-eval/figure/benchmarkrankplot.png}
 
 \end{frame}
 
-\begin{frame}{Friedman test}
-    \includegraphics[width = \textwidth]{slides/04-perf-eval/figure/benchmarkcolplot.png}
-\end{frame}
+% \begin{frame}{Friedman test}
+%     \includegraphics[width = \textwidth]{slides/04-perf-eval/figure/benchmarkcolplot.png}
+% \end{frame}
 
-\begin{frame}{Friedman test}
-    \includegraphics[width = 0.5\textwidth]{slides/04-perf-eval/figure/benchmarkrankplot.png}
-\end{frame}
+% \begin{frame}{Friedman test}
+%     \includegraphics[width = 0.5\textwidth]{slides/04-perf-eval/figure/benchmarkrankplot.png}
+% \end{frame}
 
 
 % Suppose we want to evaluate $M$ data sets and K$ algorithms. The Friedman test first ranks algorithms for each data set separately:
