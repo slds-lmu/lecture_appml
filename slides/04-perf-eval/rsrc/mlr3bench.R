@@ -97,6 +97,15 @@ print(
   ),
   file = "slides/04-perf-eval/rsrc/friedman_benchmark_results.tex")
 
+print(
+  xtable(
+    aggr_wide[1:4, ],
+    type = "latex",
+    digits = 4
+  ),
+  file = "slides/04-perf-eval/rsrc/friedman_benchmark_results_short.tex")
+
+
 ranktable_short_wide = aggr %>%
   filter(learner_id == "rpart" | learner_id == "ranger") %>%
   group_by(task_id) %>%
