@@ -11,7 +11,6 @@ otasks = list_oml_tasks(
   number_missing_values = 0
 )
 
-
 otasks$name
 otasks = otasks %>%
   filter(data_id != 720) %>%
@@ -47,8 +46,6 @@ aggr = bmr$aggregate()
 print(aggr)
 
 # autoplot(bmr)
-# library(mlr3benchmark)
-# obj1 = as_benchmark_aggr(bmr, measures = msr("classif.ce"))
 
 library(tidyverse)
 ranktable = aggr %>%
@@ -77,6 +74,8 @@ friedmanstat = sstotal / sserror
 friedmanstat
 qchisq( .99, df = 5)        # 7 degrees of freedom
 
+library(mlr3benchmark)
+obj1 = as_benchmark_aggr(bmr, measures = msr("classif.ce"))
 obj1$friedman_posthoc()
 
 aggr_wide = ranktable %>%
@@ -101,7 +100,7 @@ ranktable_short_wide = aggr %>%
   mutate(ce_rank = paste(round(classif.ce, 4), " (", rank_on_task, ")", sep =  "")) %>%
   select(c(task_id, learner_id, ce_rank)) %>%
   pivot_wider(names_from = learner_id, values_from = ce_rank)
-ranktable = ranktable_short_wide[1:6, ]
+ranktable_short_wide = ranktable_short_wide[1:6, ]
 
 colnames(ranktable_short_wide) = c("task_id", "rpart", "ranger")
 
@@ -114,4 +113,33 @@ print(
   ),
   file = "slides/04-perf-eval/rsrc/friedman_benchmark_results_short.tex")
 
+library(ggplot2)
+aggr.ggplot = aggr %>%
+  group_by(task_id) %>%
+  arrange(classif.ce, .by_group = TRUE) %>%
+  mutate(position = -rank(classif.ce)) %>%
+  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.featureless", "featureless")) %>%
+  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.ranger", "ranger")) %>%
+  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.kknn", "kknn")) %>%
+  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.rpart", "rpart")) %>%
+  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.svm", "svm")) %>%
+  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.cv_glmnet", "cv_glmnet"))
+
+cbb_palette = c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+benchplot = ggplot(
+  aggr.ggplot,
+  aes(x = task_id, y = classif.ce, group = position)) +
+  geom_col(
+    aes(fill = learner_id),
+    position = position_dodge(),
+    width = 0.75) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  scale_fill_manual(values = cbb_palette)
+
+ggsave(
+  filename = "slides/04-perf-eval/figure/benchmarkcolplot.png",
+  plot = benchplot,
+  width = 8, height = 4)
 
