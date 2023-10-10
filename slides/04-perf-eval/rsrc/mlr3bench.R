@@ -50,14 +50,12 @@ aggr = aggr %>%
   mutate(learner_id = replace(learner_id, learner_id == "encode.classif.rpart", "rpart")) %>%
   mutate(learner_id = replace(learner_id, learner_id == "encode.classif.svm", "svm")) %>%
   mutate(learner_id = replace(learner_id, learner_id == "encode.classif.cv_glmnet", "cv_glmnet"))
-# autoplot(bmr)
 
 library(tidyverse)
 ranktable = aggr %>%
   group_by(task_id) %>%
   mutate(rank_on_task = rank(classif.ce)) %>%
   mutate(ce_rank = paste(round(classif.ce, 4), " (", rank_on_task, ")", sep =  ""))
-
 
 averageranks = ranktable %>%
   group_by(learner_id) %>%
@@ -103,7 +101,7 @@ print(
     type = "latex",
     digits = 4
   ),
-  file = "slides/04-perf-eval/rsrc/friedman_benchmark_results_short.tex")
+  file = "slides/04-perf-eval/rsrc/friedman_benchmark_results_rpart_ranger.tex")
 
 
 ranktable_short_wide = aggr %>%
@@ -173,3 +171,87 @@ ggsave(
   plot = averagerankplot,
   width = 6, height = 4)
 
+# t test of rpart and ranger on strikes task
+
+rr = aggr$resample_result
+rr.rpart = rr[which(aggr$task_id == "strikes")][[3]]
+rr.ranger = rr[which(aggr$task_id == "strikes")][[4]]
+
+rpart.predictions = as.data.table(rr.rpart$prediction())
+ranger.predictions = as.data.table(rr.ranger$prediction())
+
+conf.mat = rpart.predictions
+colnames(conf.mat) = c("id", "truth", "rpart")
+conf.mat$ranger = ranger.predictions$response
+
+conf.mat = conf.mat %>%
+  mutate(
+    rpart_correct = case_when(
+      truth == "P" & rpart == "P" |
+      truth == "N" & rpart == "N"
+      ~ 1,
+      .default = 0)) %>%
+  mutate(
+    ranger_correct = case_when(
+      truth == "P" & ranger == "P" |
+        truth == "N" & ranger == "N"
+      ~ 1,
+      .default = 0)) %>%
+  mutate(
+    both_correct = case_when(
+      rpart_correct == 1 & ranger_correct == 1
+      ~ 1,
+      .default = 0)) %>%
+  mutate(
+    both_wrong = case_when(
+      rpart_correct == 0 & ranger_correct == 0
+      ~ 1,
+      .default = 0)) %>%
+  mutate(
+    only_rpart_correct = case_when(
+      rpart_correct == 1 & ranger_correct == 0
+      ~ 1,
+      .default = 0)) %>%
+  mutate(
+    only_ranger_correct = case_when(
+      rpart_correct == 0 & ranger_correct == 1
+      ~ 1,
+      .default = 0)) %>%
+  mutate(
+    rpart_loss = case_when(
+      rpart_correct == 1
+      ~ 0,
+      .default = 1)) %>%
+  mutate(
+    ranger_loss = case_when(
+      ranger_correct == 1
+      ~ 0,
+      .default = 1)) %>%
+  mutate(
+    diff_loss = rpart_loss - ranger_loss
+  )
+
+
+# t-test
+
+mean_diff_loss = conf.mat %>%
+  summarize(diff_loss = mean(diff_loss))
+
+t_statistic = sqrt((1 / (nrow(conf.mat) - 1)) * sum((conf.mat$diff_loss - as.numeric(mean_diff_loss))^2))
+
+
+
+# McNemar
+
+conf.summary = conf.mat %>%
+  summarize(
+    both_correct = sum(both_correct),
+    both_wrong = sum(both_wrong),
+    only_rpart_correct = sum(only_rpart_correct),
+    only_ranger_correct = sum(only_ranger_correct),
+)
+
+conf.summary
+
+mcnemar_stat = (abs(conf.summary$only_rpart_correct - conf.summary$only_ranger_correct) - 1)^2 / (conf.summary$only_rpart_correct + conf.summary$only_ranger_correct)
+mcnemar_stat
