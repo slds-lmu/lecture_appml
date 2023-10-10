@@ -117,7 +117,7 @@ library(ggplot2)
 aggr.ggplot = aggr %>%
   group_by(task_id) %>%
   arrange(classif.ce, .by_group = TRUE) %>%
-  mutate(position = rank(classif.ce)) %>%
+  mutate(position = rank(classif.ce, ties.method= "min")) %>%
   mutate(learner_id = replace(learner_id, learner_id == "encode.classif.featureless", "featureless")) %>%
   mutate(learner_id = replace(learner_id, learner_id == "encode.classif.ranger", "ranger")) %>%
   mutate(learner_id = replace(learner_id, learner_id == "encode.classif.kknn", "kknn")) %>%
