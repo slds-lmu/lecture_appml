@@ -43,8 +43,13 @@ set.seed(123)
 bmr = benchmark(design)
 # save(bmr, file = "slides/04-perf-eval/rsrc/friedman_example_benchmark.Rdata")
 aggr = bmr$aggregate()
-print(aggr)
-
+aggr = aggr %>%
+  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.featureless", "featureless")) %>%
+  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.ranger", "ranger")) %>%
+  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.kknn", "kknn")) %>%
+  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.rpart", "rpart")) %>%
+  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.svm", "svm")) %>%
+  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.cv_glmnet", "cv_glmnet"))
 # autoplot(bmr)
 
 library(tidyverse)
@@ -83,7 +88,6 @@ aggr_wide = ranktable %>%
   pivot_wider(names_from = learner_id, values_from = ce_rank)
 aggr_wide
 
-colnames(aggr_wide) = c("task_id", "featureless",  "cv_glmnet", "rpart", "ranger", "kknn", "svm")
 library(xtable)
 print(
   xtable(
@@ -94,15 +98,13 @@ print(
   file = "slides/04-perf-eval/rsrc/friedman_benchmark_results.tex")
 
 ranktable_short_wide = aggr %>%
-  filter(learner_id == "encode.classif.rpart" | learner_id == "encode.classif.ranger") %>%
+  filter(learner_id == "rpart" | learner_id == "ranger") %>%
   group_by(task_id) %>%
   mutate(rank_on_task = rank(classif.ce)) %>%
   mutate(ce_rank = paste(round(classif.ce, 4), " (", rank_on_task, ")", sep =  "")) %>%
   select(c(task_id, learner_id, ce_rank)) %>%
   pivot_wider(names_from = learner_id, values_from = ce_rank)
 ranktable_short_wide = ranktable_short_wide[1:6, ]
-
-colnames(ranktable_short_wide) = c("task_id", "rpart", "ranger")
 
 library(xtable)
 print(
@@ -117,13 +119,7 @@ library(ggplot2)
 aggr.ggplot = aggr %>%
   group_by(task_id) %>%
   arrange(classif.ce, .by_group = TRUE) %>%
-  mutate(position = rank(classif.ce, ties.method= "min")) %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.featureless", "featureless")) %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.ranger", "ranger")) %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.kknn", "kknn")) %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.rpart", "rpart")) %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.svm", "svm")) %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.cv_glmnet", "cv_glmnet"))
+  mutate(position = rank(classif.ce, ties.method= "first"))
 
 cbb_palette = c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#CC79A7")
 
@@ -148,4 +144,23 @@ ggsave(
   filename = "slides/04-perf-eval/figure/benchmarkcolplot.png",
   plot = benchplot,
   width = 9, height = 6)
+
+averageranks = averageranks %>%
+  arrange(average_rank_on_task)
+
+averagerankplot = ggplot(averageranks, aes(x = factor(learner_id, level = learner_id), y = average_rank_on_task)) +
+  geom_col(aes(fill = learner_id),
+           position = position_dodge()) +
+  xlab("learner_id") +
+  ylab("average rank") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  scale_fill_manual(values = cbb_palette)
+
+averagerankplot
+
+ggsave(
+  filename = "slides/04-perf-eval/figure/benchmarkrankplot.png",
+  plot = averagerankplot,
+  width = 6, height = 4)
 
