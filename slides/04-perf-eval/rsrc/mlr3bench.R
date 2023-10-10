@@ -99,7 +99,7 @@ print(
 
 print(
   xtable(
-    aggr_wide[1:3, ],
+    aggr_wide[1:2, ],
     type = "latex",
     digits = 4
   ),
