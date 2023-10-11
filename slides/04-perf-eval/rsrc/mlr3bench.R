@@ -76,11 +76,23 @@ sserror
 
 friedmanstat = sstotal / sserror
 friedmanstat
-qchisq( .99, df = 5)        # 7 degrees of freedom
-
+# sanity check
 library(mlr3benchmark)
 obj1 = as_benchmark_aggr(bmr, measures = msr("classif.ce"))
+obj1$friedman_test()
+# critical value for Friedman omnibus test
+qchisq( .95, df = 5)
+
+# post hoc tests
 obj1$friedman_posthoc()
+
+
+mean_diff_rpart_ranger = averageranks[averageranks$learner_id == "rpart", 2] - averageranks[averageranks$learner_id == "ranger", 2]
+mean_diff_rpart_ranger
+student_range = qtukey(p = 0.99, df = 5, nmeans = 16, nranges = 2) / 2
+# critical value
+student_range * sqrt((6 * (6 + 1)) / (6 * 16))
+# reject H_0!
 
 aggr_wide = ranktable %>%
   select(c(task_id, learner_id, ce_rank)) %>%
@@ -88,21 +100,21 @@ aggr_wide = ranktable %>%
 aggr_wide
 
 library(xtable)
-print(
-  xtable(
-    aggr_wide,
-    type = "latex",
-    digits = 4
-  ),
-  file = "slides/04-perf-eval/rsrc/friedman_benchmark_results.tex")
+# print(
+#   xtable(
+#     aggr_wide,
+#     type = "latex",
+#     digits = 4
+#   ),
+#   file = "slides/04-perf-eval/rsrc/friedman_benchmark_results.tex")
 
-print(
-  xtable(
-    aggr_wide[1:2, ],
-    type = "latex",
-    digits = 4
-  ),
-  file = "slides/04-perf-eval/rsrc/friedman_benchmark_results_short.tex")
+# print(
+#   xtable(
+#     aggr_wide[1:2, ],
+#     type = "latex",
+#     digits = 4
+#   ),
+#   file = "slides/04-perf-eval/rsrc/friedman_benchmark_results_short.tex")
 
 
 ranktable_wide_rpart_ranger = aggr %>%
@@ -115,13 +127,13 @@ ranktable_wide_rpart_ranger = aggr %>%
 ranktable_wide_rpart_ranger = ranktable_wide_rpart_ranger[1:6, ]
 
 library(xtable)
-print(
-  xtable(
-    ranktable_wide_rpart_ranger,
-    type = "latex",
-    digits = 4
-  ),
-  file = "slides/04-perf-eval/rsrc/friedman_benchmark_results_rpart_ranger.tex")
+# print(
+#   xtable(
+#     ranktable_wide_rpart_ranger,
+#     type = "latex",
+#     digits = 4
+#   ),
+#   file = "slides/04-perf-eval/rsrc/friedman_benchmark_results_rpart_ranger.tex")
 
 library(ggplot2)
 aggr.ggplot = aggr %>%
@@ -183,7 +195,6 @@ rpart.model = mlr_learners$get("classif.rpart")
 rpart.model$predict_type = "prob"
 rpart.model$train(strikes.task)
 rpart.predictions = rpart.model$predict_newdata(newdata = strikes.task$data())$print()
-
 
 ranger.model = mlr_learners$get("classif.ranger")
 ranger.model$predict_type = "prob"
@@ -255,25 +266,28 @@ conf.mat.subset = conf.mat %>%
   select(id, truth, rpart_prob, ranger_prob, rpart_loss, ranger_loss, diff_loss)
 conf.mat.subset
 
-library(xtable)
-print(
-  xtable(
-    conf.mat.subset,
-    type = "latex",
-    digits = 4
-  ),
-  file = "slides/04-perf-eval/rsrc/conf.mat.tex")
+# library(xtable)
+# print(
+#   xtable(
+#     conf.mat.subset,
+#     type = "latex",
+#     digits = 4
+#   ),
+#   include.rownames = FALSE,
+#   file = "slides/04-perf-eval/rsrc/rpart_ranger_strikes_task.tex")
 
 # t-test
 
 mean_diff_loss = conf.mat %>%
-  na.omit() %>%
+  ungroup() %>%
   summarize(diff_loss = mean(diff_loss))
 mean_diff_loss
 
-t_statistic = sqrt((1 / (nrow(conf.mat) - 1)) * sum((conf.mat$diff_loss - as.numeric(mean_diff_loss))^2))
-t_statistic
+t_var = sqrt((1 / (nrow(conf.mat) - 1)) * sum((conf.mat$diff_loss - as.numeric(mean_diff_loss))^2))
+t_var
 
+t_statistic = sqrt(nrow(conf.mat)) * (mean_diff_loss / t_var)
+t_statistic
 # lower critical value, reject H0 if t-stat smaller
 qt(0.025, df = nrow(conf.mat) - 1)
 # OR
