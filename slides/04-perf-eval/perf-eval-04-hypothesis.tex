@@ -317,7 +317,14 @@ Hypothesis tests can (a) quantify evidence that a difference in model performanc
 
 % \end{frame}
 
-
+\begin{frame}{Two-Matched-Samples T-Test}
+\begin{itemize}
+    \item Example: We evaluate learners \texttt{classif.rpart} and \texttt{classif.ranger} on the binary classification task \texttt{strikes}.
+    \item We use the logarithmic (also known as cross-entropy) loss.
+    
+\end{itemize}
+    
+\end{frame}
 \begin{frame}{McNemar Test for Classification}
 % https://slideplayer.com/slide/9574350/
 \begin{itemize}
@@ -472,6 +479,8 @@ $$
         $$
     \end{itemize}
 \end{frame}
+
+
 \begin{frame}{Wilcoxon Signed Rank Test}
     \begin{itemize}
         \item A benchmark of rpart and ranger (with default hyperparameters) on 6 classification tasks, using the classification error as performance measure:
