@@ -320,10 +320,14 @@ Hypothesis tests can (a) quantify evidence that a difference in model performanc
 \begin{frame}{Two-Matched-Samples T-Test}
 \begin{itemize}
     \item Example: We evaluate learners \texttt{classif.rpart} and \texttt{classif.ranger} on the binary classification task \texttt{strikes}.
-    \item We use the logarithmic (also known as cross-entropy) loss.
-    
+    \item We use the logarithmic (also known as cross-entropy) loss:
+    {
+        \scriptsize
+        \include{slides/04-perf-eval/rsrc/conf.mat}
+    }
 \end{itemize}
-    
+
+
 \end{frame}
 \begin{frame}{McNemar Test for Classification}
 % https://slideplayer.com/slide/9574350/
