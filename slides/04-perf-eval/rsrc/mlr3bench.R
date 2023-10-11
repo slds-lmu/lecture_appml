@@ -148,10 +148,10 @@ benchplot = ggplot(
   xlab("task_id")
 benchplot
 
-ggsave(
-  filename = "slides/04-perf-eval/figure/benchmarkcolplot.png",
-  plot = benchplot,
-  width = 9, height = 6)
+# ggsave(
+#   filename = "slides/04-perf-eval/figure/benchmarkcolplot.png",
+#   plot = benchplot,
+#   width = 9, height = 6)
 
 averageranks = averageranks %>%
   arrange(average_rank_on_task)
@@ -167,25 +167,43 @@ averagerankplot = ggplot(averageranks, aes(x = factor(learner_id, level = learne
 
 averagerankplot
 
-ggsave(
-  filename = "slides/04-perf-eval/figure/benchmarkrankplot.png",
-  plot = averagerankplot,
-  width = 6, height = 4)
+# ggsave(
+#   filename = "slides/04-perf-eval/figure/benchmarkrankplot.png",
+#   plot = averagerankplot,
+#   width = 6, height = 4)
 
 # t test of rpart and ranger on strikes task
 
 rr = aggr$resample_result
-rr.rpart = rr[which(aggr$task_id == "strikes")][[3]]
-rr.ranger = rr[which(aggr$task_id == "strikes")][[4]]
+strikes.task = rr[which(aggr$task_id == "strikes")][[3]]$task
+# rr.rpart = rr[which(aggr$task_id == "strikes")][[3]]
+# rr.ranger = rr[which(aggr$task_id == "strikes")][[4]]
 
-rpart.predictions = as.data.table(rr.rpart$prediction())
-ranger.predictions = as.data.table(rr.ranger$prediction())
+rpart.model = mlr_learners$get("classif.rpart")
+rpart.model$predict_type = "prob"
+rpart.model$train(strikes.task)
+rpart.predictions = rpart.model$predict_newdata(newdata = strikes.task$data())$print()
 
-conf.mat = rpart.predictions
-colnames(conf.mat) = c("id", "truth", "rpart")
+
+ranger.model = mlr_learners$get("classif.ranger")
+ranger.model$predict_type = "prob"
+ranger.model$train(strikes.task)
+ranger.predictions = ranger.model$predict_newdata(newdata = strikes.task$data())$print()
+
+conf.mat = rpart.predictions[ , c("row_ids", "truth", "response", "prob.P")]
+colnames(conf.mat) = c("id", "truth", "rpart", "rpart_prob")
 conf.mat$ranger = ranger.predictions$response
+conf.mat$ranger_prob = ranger.predictions$prob.P
+conf.mat
 
 conf.mat = conf.mat %>%
+  rowwise() %>%
+  mutate(
+    rpart_prob = max(.Machine$double.eps, min(1 - .Machine$double.eps, rpart_prob))
+  ) %>%
+  mutate(
+    ranger_prob = max(.Machine$double.eps, min(1 - .Machine$double.eps, ranger_prob))
+  ) %>%
   mutate(
     rpart_correct = case_when(
       truth == "P" & rpart == "P" |
@@ -219,28 +237,50 @@ conf.mat = conf.mat %>%
       ~ 1,
       .default = 0)) %>%
   mutate(
-    rpart_loss = case_when(
-      rpart_correct == 1
-      ~ 0,
-      .default = 1)) %>%
+    rpart_loss = -((ifelse(truth == "P", 1, 0) * log(rpart_prob)) + ((1-ifelse(truth == "P", 1, 0)) * log(1-rpart_prob)))
+    ) %>%
   mutate(
-    ranger_loss = case_when(
-      ranger_correct == 1
-      ~ 0,
-      .default = 1)) %>%
+    ranger_loss = -((ifelse(truth == "P", 1, 0) * log(ranger_prob)) + ((1-ifelse(truth == "P", 1, 0)) * log(1-ranger_prob)))
+  ) %>%
   mutate(
     diff_loss = rpart_loss - ranger_loss
   )
 
+conf.mat
+nrow(conf.mat)
+
+conf.mat.subset = conf.mat %>%
+  ungroup() %>%
+  slice(c(1, 2, 625)) %>%
+  select(id, truth, rpart_prob, ranger_prob, rpart_loss, ranger_loss, diff_loss)
+conf.mat.subset
+
+library(xtable)
+print(
+  xtable(
+    conf.mat.subset,
+    type = "latex",
+    digits = 4
+  ),
+  file = "slides/04-perf-eval/rsrc/conf.mat.tex")
 
 # t-test
 
 mean_diff_loss = conf.mat %>%
+  na.omit() %>%
   summarize(diff_loss = mean(diff_loss))
+mean_diff_loss
 
 t_statistic = sqrt((1 / (nrow(conf.mat) - 1)) * sum((conf.mat$diff_loss - as.numeric(mean_diff_loss))^2))
 t_statistic
 
+# lower critical value, reject H0 if t-stat smaller
+qt(0.025, df = nrow(conf.mat) - 1)
+# OR
+# upper critical value, reject H0 if t-stat larger
+qt(0.025, df = nrow(conf.mat) - 1)
+
+# do not reject H0 !
 
 # McNemar
 
@@ -257,3 +297,7 @@ conf.summary
 mcnemar_stat = (abs(conf.summary$only_rpart_correct - conf.summary$only_ranger_correct) - 1)^2 / (conf.summary$only_rpart_correct + conf.summary$only_ranger_correct)
 mcnemar_stat
 
+# critical value for alpha = 5%, reject H0 if mcnemar_stat larger
+qchisq(0.95, df = 1)
+
+# reject H0!
