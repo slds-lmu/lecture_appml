@@ -80,6 +80,16 @@ friedmanstat
 library(mlr3benchmark)
 obj1 = as_benchmark_aggr(bmr, measures = msr("classif.ce"))
 obj1$friedman_test()
+cd_plot = autoplot(ob, type = "cd", meas = "ce", minimize = TRUE)
+
+ggsave(
+  cd_plot,
+  file = "slides/04-perf-eval/figure/crit_diff_plot.png",
+  height = 2,
+  width = 10,
+  units = "in",
+  dpi = 300)
+
 # critical value for Friedman omnibus test
 qchisq( .95, df = 5)
 
@@ -89,7 +99,7 @@ obj1$friedman_posthoc()
 
 mean_diff_rpart_ranger = averageranks[averageranks$learner_id == "rpart", 2] - averageranks[averageranks$learner_id == "ranger", 2]
 mean_diff_rpart_ranger
-student_range = qtukey(p = 0.99, df = 5, nmeans = 16, nranges = 2) / 2
+student_range = qtukey(p = 0.95, df = 5, nmeans = 16, nranges = 5) / sqrt(2)
 # critical value
 student_range * sqrt((6 * (6 + 1)) / (6 * 16))
 # reject H_0!
@@ -209,12 +219,12 @@ conf.mat
 
 conf.mat = conf.mat %>%
   rowwise() %>%
-  mutate(
-    rpart_prob = max(.Machine$double.eps, min(1 - .Machine$double.eps, rpart_prob))
-  ) %>%
-  mutate(
-    ranger_prob = max(.Machine$double.eps, min(1 - .Machine$double.eps, ranger_prob))
-  ) %>%
+  # mutate(
+  #   rpart_prob = max(.Machine$double.eps, min(1 - .Machine$double.eps, rpart_prob))
+  # ) %>%
+  # mutate(
+  #   ranger_prob = max(.Machine$double.eps, min(1 - .Machine$double.eps, ranger_prob))
+  # ) %>%
   mutate(
     rpart_correct = case_when(
       truth == "P" & rpart == "P" |
@@ -248,17 +258,17 @@ conf.mat = conf.mat %>%
       ~ 1,
       .default = 0)) %>%
   mutate(
-    rpart_loss = -((ifelse(truth == "P", 1, 0) * log(rpart_prob)) + ((1-ifelse(truth == "P", 1, 0)) * log(1-rpart_prob)))
+    rpart_loss = (rpart_prob - ifelse(truth == "P", 1, 0))^2
     ) %>%
   mutate(
-    ranger_loss = -((ifelse(truth == "P", 1, 0) * log(ranger_prob)) + ((1-ifelse(truth == "P", 1, 0)) * log(1-ranger_prob)))
-  ) %>%
+    ranger_loss = (rpart_prob - ifelse(truth == "P", 1, 0))^2
+    ) %>%
   mutate(
     diff_loss = rpart_loss - ranger_loss
   )
 
 conf.mat
-nrow(conf.mat)
+
 
 conf.mat.subset = conf.mat %>%
   ungroup() %>%
@@ -299,6 +309,7 @@ qt(0.025, df = nrow(conf.mat) - 1)
 # McNemar
 
 conf.summary = conf.mat %>%
+  ungroup() %>%
   summarize(
     both_correct = sum(both_correct),
     both_wrong = sum(both_wrong),
