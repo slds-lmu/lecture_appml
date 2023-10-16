@@ -58,7 +58,7 @@ In contrast to other methods, stacking already combines predictions during train
     \SetKwInOut{Output}{Output}
 
     \Input{$\D = \Dset$}
-    \Output{Ensemble}
+    \Output{Stacked Ensemble $\fM$}
     
     \BlankLine
     \textbf{Step 1: Learn level 0 base models}\;\\
@@ -73,10 +73,10 @@ In contrast to other methods, stacking already combines predictions during train
     }
     
     \BlankLine
-    \textbf{Step 3: Learn level 1 model $\fM(\D^\prime)$}\;\\
-    \KwRet $\fM(\D^\prime)$\;
+    \textbf{Step 3: Train level 1 model $\fM$ on $\D^\prime$}\;\\
+    \KwRet $\fM$\;
 \end{algorithm}
-NB: We can either drop the original features or keep them when learning the level 1 model
+NB: We can either drop the original features or keep them when learning the level 1 model.
 
 \end{vbframe}
 
@@ -104,7 +104,7 @@ NB: We can either drop the original features or keep them when learning the leve
             \item minimizes information leakage
         \end{itemize}
         \vspace{1em}
-        Note: Stacking with a simple hold-out split instead of cross-validation is also known as \emph{blending}
+        NB: Stacking with a simple hold-out split instead of cross-validation is also known as \emph{blending}
     \end{column}
 \end{columns}
 \end{vbframe}
@@ -113,7 +113,7 @@ NB: We can either drop the original features or keep them when learning the leve
 
 \begin{vbframe}{Multilevel Stacking}
 So far: train level 0 base models, use predictions to train the level 1 model.\\
-Now: train multiple models at level 1, use predictions to train final level 2 model 
+Now: Also train multiple models at level 1, use predictions to train final level 2 model 
 \vspace{1em}
 \begin{columns}
     \begin{column}{0.5\textwidth}
@@ -138,6 +138,7 @@ Now: train multiple models at level 1, use predictions to train final level 2 mo
     \end{column}
 \end{columns}
 \vspace{1em}
+NB: In principle we can repeat this training of multiple models at the $k$-th level indefinitely creating infinitely deep stacked ensembles
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
@@ -147,6 +148,7 @@ Popular choices of level 1 or level 2 models in stacking include:
 \begin{itemize}
     \item linear / logistic regression 
     \item random forest (especially in the case of multilevel stacking)
+    \item GES (average the predictions of the models at the previous level)
 \end{itemize}
 \end{vbframe}
 

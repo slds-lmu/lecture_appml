@@ -852,12 +852,14 @@ where $q_{\alpha}$ is based on the studentized range statistic divided by $\sqrt
 
 \begin{frame}{Critical Difference Plot}
 
-    \begin{figure}
-        \centering
-        \includegraphics{slides/04-perf-eval/figure/crit_diff_plot.png}
-        \caption{Caption}
-        \label{fig:enter-label}
-    \end{figure}
+\begin{itemize}
+    \itemsep1em
+    \item The critical difference (CD) plot summarizes all pairwise tests in a single graph.
+    \item The CD is the pairwise difference in mean ranks required to reject $H_0$, thus indicating a significant difference in performance.
+    \item We can see the ordered mean ranks of all algorithms on a single line. If the distance between two algorithms exceeds the CD, the left algorithm significantly outperforms the right one.
+    \item For instance, the difference in mean ranks between ranger and the SVM does not exceed the CD but the one between ranger and rpart does. 
+\end{itemize}
+\includegraphics[width = \textwidth]{slides/04-perf-eval/figure/crit_diff_plot.png}
 \end{frame}
 
 \begin{frame}{Overview of different hypothesis tests}
