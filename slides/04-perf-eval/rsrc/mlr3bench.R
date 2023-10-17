@@ -23,13 +23,16 @@ normal_density_plot = ggplot(data = rv_standard_normal, aes(x = x, y = d, color 
     x = 0, xend = 0, y = 0, yend = max(rv_standard_normal$d)) +
   geom_segment(
     color = cbb_palette[3],
-    x = 2, xend = 2, y = 0, yend = max(rv_standard_normal$d))
+    x = 2, xend = 2, y = 0, yend = max(rv_standard_normal$d)) +
+  theme(
+    axis.title = element_text(size = 20),
+    axis.text = element_text(size = 20))
 normal_density_plot
-ggsave(
-  normal_density_plot,
-  file = "slides/04-perf-eval/figure/normal_densities.png",
-  width = 7,
-  height = 5)
+# ggsave(
+#   normal_density_plot,
+#   file = "slides/04-perf-eval/figure/normal_densities.png",
+#   width = 7,
+#   height = 5)
 
 
 #
@@ -122,7 +125,6 @@ cd_plot = autoplot(benchmark_aggr, type = "cd", meas = "ce", minimize = TRUE)
 # critical value for Friedman omnibus test
 
 # post hoc tests
-# obj1$friedman_posthoc()
 library(PMCMRplus)
 
 ce_table_wide = ranktable %>%
@@ -151,9 +153,15 @@ mean_diff_rpart_ranger = averageranks[averageranks$learner_id == "rpart", 2] - a
 # # critical mean rank difference
 # NSM3::cRangeNor(alpha = 0.05, k = 6)
 # qtukey(p = 0.05, df = Inf, nmeans = 6, lower.tail = FALSE / sqrt(2))
-crit_value_mean_rank_diff = (qtukey(p = 0.05, df = Inf, nmeans = 6, lower.tail = FALSE) / sqrt(2)) * (sqrt((6 * (6 + 1)) / (6 * 16)))
+crit_value_mean_rank_diff = (qtukey(p = 0.01, df = Inf, nmeans = 6, lower.tail = FALSE) / sqrt(2)) * (sqrt((6 * (6 + 1)) / (6 * 16)))
 crit_value_mean_rank_diff
 # reject H_0!
+
+# bonferroni dunn test
+dunn_stat = (abs(mean_diff_rpart_ranger$average_rank_on_task) / sqrt((6 * 7) / 6 * 16))
+# prob of observing dunn statistic under h0:
+pnorm(dunn_stat, 0, 1, lower.tail = FALSE)
+# do not reject H_0
 
 aggr_wide = ranktable %>%
   select(c(task_id, learner_id, ce_rank)) %>%
@@ -248,19 +256,19 @@ averagerankplot
 # t test of rpart and ranger on strikes task
 
 rr = aggr$resample_result
-strikes.task = rr[which(aggr$task_id == "strikes")][[3]]$task
+kin8nm.task = rr[which(aggr$task_id == "kin8nm")][[3]]$task
 # rr.rpart = rr[which(aggr$task_id == "strikes")][[3]]
 # rr.ranger = rr[which(aggr$task_id == "strikes")][[4]]
 
 rpart.model = mlr_learners$get("classif.rpart")
 rpart.model$predict_type = "prob"
-rpart.model$train(strikes.task)
-rpart.predictions = rpart.model$predict_newdata(newdata = strikes.task$data())$print()
+rpart.model$train(kin8nm.task)
+rpart.predictions = rpart.model$predict_newdata(newdata = kin8nm.task$data())$print()
 
 ranger.model = mlr_learners$get("classif.ranger")
 ranger.model$predict_type = "prob"
-ranger.model$train(strikes.task)
-ranger.predictions = ranger.model$predict_newdata(newdata = strikes.task$data())$print()
+ranger.model$train(kin8nm.task)
+ranger.predictions = ranger.model$predict_newdata(newdata = kin8nm.task$data())$print()
 
 conf.mat = rpart.predictions[ , c("row_ids", "truth", "response", "prob.P")]
 colnames(conf.mat) = c("id", "truth", "rpart", "rpart_prob")
@@ -312,7 +320,7 @@ conf.mat = conf.mat %>%
     rpart_loss = (rpart_prob - ifelse(truth == "P", 1, 0))^2
     ) %>%
   mutate(
-    ranger_loss = (rpart_prob - ifelse(truth == "P", 1, 0))^2
+    ranger_loss = (ranger_prob - ifelse(truth == "P", 1, 0))^2
     ) %>%
   mutate(
     diff_loss = rpart_loss - ranger_loss
@@ -323,7 +331,7 @@ conf.mat
 
 conf.mat.subset = conf.mat %>%
   ungroup() %>%
-  slice(c(1, 2, 625)) %>%
+  slice(c(1, 2, nrow(conf.mat))) %>%
   select(id, truth, rpart_prob, ranger_prob, rpart_loss, ranger_loss, diff_loss)
 conf.mat.subset
 
@@ -335,7 +343,7 @@ conf.mat.subset
 #     digits = 4
 #   ),
 #   include.rownames = FALSE,
-#   file = "slides/04-perf-eval/rsrc/rpart_ranger_strikes_task.tex")
+#   file = "slides/04-perf-eval/rsrc/rpart_ranger_kin8nm_task.tex")
 
 # t-test
 
