@@ -319,18 +319,18 @@ Hypothesis tests can (a) quantify evidence that a difference in model performanc
 
 \begin{frame}{Two-Matched-Samples T-Test}
 \begin{itemize}
-    \item \textbf{Example:} We evaluate learners \texttt{classif.rpart} and \texttt{classif.ranger} on the binary classification task \texttt{strikes}.
-    \item We use the logarithmic (also known as cross-entropy) loss:
+    \item \textbf{Example:} We evaluate learners \texttt{classif.rpart} and \texttt{classif.ranger} on the binary classification task \texttt{kin8nm}.
+    \item We use the Brier score as loss function:
     {
         \scriptsize
         \include{slides/04-perf-eval/rsrc/rpart_ranger_strikes_task}
     }
     \item The test statistic corresponds to:
     $$
-    T_{\text{t-test}} = \sqrt{625} \; \frac{-0.0281}{0.3584} = -1.958
+    T_{\text{t-test}} = \sqrt{8192 - 1} \; \frac{0.0016}{0.178} = 79.523
     $$
     \item For $\alpha = 0.05$, the critical values to reject $H_0$ are -1.9637 and 1.9637.
-    \item For the given significance level, there is not enough evidence to reject $H_0$. We assume both algorithms perform equally well on this population of data.
+    \item For the given significance level, there is enough evidence to reject $H_0$. We assume the is a difference in performance on this population of data.
 \end{itemize}
 
 
@@ -784,15 +784,11 @@ $$
 $$
 \item $H_0: \bar{R}_{.k_1} = \bar{R}_{.k_2}$ versus 
 $H_1: \bar{R}_{.k_1} \neq \bar{R}_{.k_2}$
-\item The test statistic corresponds to the difference in average ranks:
-$$
-T_{\text{Nemenyi}} = \bar{R}_{.k_1} - \bar{R}_{.k_2} 
-$$
-with critical value to reject $H_0$:
+\item The critical difference in mean ranks to reject $H_0$ corresponds to:
 $$ 
-T_{\text{Nemenyi}} \geq q_{\alpha} \sqrt{\frac{K(K + 1)}{6M}}
+\vert \bar{R}_{.k_1} - \bar{R}_{.k_2} \vert \geq \frac{q_{\alpha, \infty, K}}{\sqrt{2}} \sqrt{\frac{K(K + 1)}{6M}}
 $$
-where $q_{\alpha}$ is based on the studentized range statistic divided by $\sqrt{2}$.
+where $q_{\alpha, \infty, K}$ is the studentized range statistic for significance level $\alpha$, infinite degrees of freedom, and $K$ samples for each group (here, a group corresponds to one data set).
 % \item For any two algorithms, we compute the test statistic as:
 % $$T_{\text{Nemenyi}} = \frac{\bar{R}_{.k_1} - \bar{R}_{.k_2}}{\sqrt{\frac{K(K+1)}{6B}}}$$
 % with
@@ -811,12 +807,12 @@ where $q_{\alpha}$ is based on the studentized range statistic divided by $\sqrt
     \bar{R}_{.rpart} &= \frac{1}{6} \sum_{m=1}^{16} R_{m, \text{rpart}} = 3.53 \\
     \bar{R}_{.\text{ranger}} &= \frac{1}{6} \sum_{m=1}^{16} R_{m, \text{ranger}} = 1.59 \\
     % T_{\text{Nemenyi}} &= \frac{\frac{13 - 17.5}{6}}{\sqrt{\frac{4(4+1)}{36}}} \approx - 1 
-    T_{\text{Nemenyi}} &= 3.53 - 1.59 = 1.94
+    \vert \bar{R}_{.rpart} - \bar{R}_{.ranger} \vert &= 1.94
 \end{align*}
 \begin{itemize}
-    \item For $\alpha = 0.05$, critical difference in average ranks is 2.84.
-    \item $T_{\text{Nemenyi}} > 2.84 \Rightarrow$ Do not reject $H_0$!
-    \item There is not enough evidence to reject the claim that on more data sets, ranger and rpart would have the same average rank.
+    \item For $\alpha = 0.05$ and $K = 6$, the critical difference in average ranks is 1.88.
+    \item $\vert \bar{R}_{.rpart} - \bar{R}_{.ranger} \vert > 1.88$ $\Rightarrow$ Reject $H_0$!
+    \item There is enough evidence to reject the claim that on more data sets, ranger and rpart would have the same average rank.
 \end{itemize}
     % \begin{itemize}
     %     \item Under $H_0$, the probability of $T_{\text{Nemenyi}} < -0.99$ is 18.4\%. \item With a significance level of $\alpha = 0.05$, we cannot reject the null hypothesis.
@@ -832,10 +828,14 @@ where $q_{\alpha}$ is based on the studentized range statistic divided by $\sqrt
     \begin{itemize}
     \setlength\itemsep{1em}
     \item Instead of pairwise comparisons, we now compare all algorithms with one baseline algorithm (i.e., $K-1$ comparisons).
-    \item The test statistic is the same as before:
+    \item The Bonferroni-Dunn test uses a similar test statistic which is standard normally distributed under $H_0$:
     $$
-        T_{\text{Bonferroni-Dunn}} = \frac{\bar{R}_{.k_1} - \bar{R}_{.k_{\text{baseline}}}}{\sqrt{\frac{K(K+1)}{6M}}}
+        T_{\text{Bonferroni-Dunn}} = \frac{\bar{R}_{.k} - \bar{R}_{.baseline}}{\sqrt{\frac{K(K+1)}{6M}}}
     $$
+    % \item The test statistic is the same as before:
+    % $$
+    %     T_{\text{Bonferroni-Dunn}} = \frac{\bar{R}_{.k_1} - \bar{R}_{.k_{\text{baseline}}}}{\sqrt{\frac{K(K+1)}{6M}}}
+    % $$
     % \item 
     % The performances of $j_1$ and $j_2$ differ significantly if $|q| > q_{\alpha}$, where the
     % .
@@ -844,7 +844,7 @@ where $q_{\alpha}$ is based on the studentized range statistic divided by $\sqrt
      $$
         \alpha_{\text{corrected}} = \frac{\alpha}{K - 1}
      $$
-     \item In our example, $\alpha_{\text{corrected}} = \frac{0.05}{5} = 0.01$. The difference in average ranks between rpart and ranger would need to be greater than 4.12 to reject $H_0$.
+     \item For instance, $\alpha = 0.05$ is adjusted to $\alpha_{\text{corrected}} = \frac{0.05}{5} = 0.01$.
      \item Power is greater for Bonferroni-Dunn than for Nemenyi due to only comparing to a control classifier and not between all algorithms. 
      \item Generally, we want to test whether a newly proposed method is better than an existing one and thus, the Bonferroni-Dunn test is preferable in most settings.
      \end{itemize}
@@ -857,7 +857,7 @@ where $q_{\alpha}$ is based on the studentized range statistic divided by $\sqrt
     \item The critical difference (CD) plot summarizes all pairwise tests in a single graph.
     \item The CD is the pairwise difference in mean ranks required to reject $H_0$, thus indicating a significant difference in performance.
     \item We can see the ordered mean ranks of all algorithms on a single line. If the distance between two algorithms exceeds the CD, the left algorithm significantly outperforms the right one.
-    \item For instance, the difference in mean ranks between ranger and the SVM does not exceed the CD but the one between ranger and rpart does. 
+    \item For instance, the difference in mean ranks between ranger and SVM does not exceed the CD; the difference between ranger and rpart does exceed the CD. 
 \end{itemize}
 \includegraphics[width = \textwidth]{slides/04-perf-eval/figure/crit_diff_plot.png}
 \end{frame}
