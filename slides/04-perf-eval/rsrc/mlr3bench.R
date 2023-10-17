@@ -2,7 +2,37 @@ library(mlr3oml)
 library(mlr3verse)
 library(mlr3learners)
 library(tidyverse)
+library(ggplot2)
 
+x1 = seq(-3, 3, 0.1)
+d1 = dnorm(x1, 0, 1)
+x2 = seq(-1, 5, 0.1)
+d2 = dnorm(x2, 2, 1)
+rv_standard_normal = data.frame(x = x1, d = d1, var = "x1")
+rv_standard_normal = rbind(rv_standard_normal, data.frame(x = x2, d = d2, var = "x2"))
+cbb_palette = c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#CC79A7")
+
+normal_density_plot = ggplot(data = rv_standard_normal, aes(x = x, y = d, color = var, linetype = var)) +
+  geom_line(linewidth = 1) +
+  theme_bw() +
+  scale_color_manual("", values = c(x1 = cbb_palette[2], x2 = cbb_palette[3])) +
+  scale_linetype_manual("", values = c("solid", "longdash")) +
+  theme(legend.position = "none") +
+  geom_segment(
+    color = cbb_palette[2],
+    x = 0, xend = 0, y = 0, yend = max(rv_standard_normal$d)) +
+  geom_segment(
+    color = cbb_palette[3],
+    x = 2, xend = 2, y = 0, yend = max(rv_standard_normal$d))
+normal_density_plot
+ggsave(
+  normal_density_plot,
+  file = "slides/04-perf-eval/figure/normal_densities.png",
+  width = 7,
+  height = 5)
+
+
+#
 otasks = list_oml_tasks(
   type = "classif",
   number_features = c(5, 10),
@@ -33,16 +63,15 @@ tasklist
 learners = lapply(c("classif.featureless",  "classif.cv_glmnet", "classif.rpart", "classif.ranger", "classif.kknn", "classif.svm"), lrn)
 poe = po("encode", method = "one-hot")
 learners = lapply(learners, FUN = function(x) {po("encode") %>>% x})
-learners
 
 resamplings = rsmp("cv", folds = 3)
 design = benchmark_grid(tasklist, learners, resamplings)
-print(design)
 
 # set.seed(123)
 # bmr = benchmark(design)
 # save(bmr, file = "slides/04-perf-eval/rsrc/friedman_example_benchmark.Rdata")
 load("slides/04-perf-eval/rsrc/friedman_example_benchmark.Rdata")
+
 aggr = bmr$aggregate()
 aggr = aggr %>%
   mutate(learner_id = replace(learner_id, learner_id == "encode.classif.featureless", "featureless")) %>%
@@ -76,32 +105,54 @@ sserror
 
 friedmanstat = sstotal / sserror
 friedmanstat
-# sanity check
+# sanity check with mlr3
 library(mlr3benchmark)
-obj1 = as_benchmark_aggr(bmr, measures = msr("classif.ce"))
-obj1$friedman_test()
-cd_plot = autoplot(ob, type = "cd", meas = "ce", minimize = TRUE)
+benchmark_aggr = as_benchmark_aggr(bmr, measures = msr("classif.ce"))
+benchmark_aggr$friedman_test()
+cd_plot = autoplot(benchmark_aggr, type = "cd", meas = "ce", minimize = TRUE)
 
-ggsave(
-  cd_plot,
-  file = "slides/04-perf-eval/figure/crit_diff_plot.png",
-  height = 2,
-  width = 10,
-  units = "in",
-  dpi = 300)
+# ggsave(
+  # cd_plot,
+  # file = "slides/04-perf-eval/figure/crit_diff_plot.png",
+  # height = 2,
+  # width = 10,
+  # units = "in",
+  # dpi = 300)
 
 # critical value for Friedman omnibus test
-qchisq( .95, df = 5)
 
 # post hoc tests
-obj1$friedman_posthoc()
+# obj1$friedman_posthoc()
+library(PMCMRplus)
 
+ce_table_wide = ranktable %>%
+  select(c(task_id, learner_id, classif.ce)) %>%
+  pivot_wider(names_from = learner_id, values_from = classif.ce) %>%
+  ungroup() %>%
+  select(-task_id) %>%
+  as.matrix()
+ce_table_wide
+# sanity check with stat package
+friedman.test(ce_table_wide)
+# posthoc nemenyi test
+# ?frdAllPairsNemenyiTest
+rownames(ce_table_wide) = LETTERS[1:nrow(ce_table_wide)]
+nemenyi_test = frdAllPairsNemenyiTest(y = ce_table_wide)
+nemenyi_test$statistic
+nemenyi_test$p.value
 
 mean_diff_rpart_ranger = averageranks[averageranks$learner_id == "rpart", 2] - averageranks[averageranks$learner_id == "ranger", 2]
-mean_diff_rpart_ranger
-student_range = qtukey(p = 0.95, df = 5, nmeans = 16, nranges = 5) / sqrt(2)
-# critical value
-student_range * sqrt((6 * (6 + 1)) / (6 * 16))
+# mean_diff_rpart_ranger / sqrt(16 * 6 * 7 / 12)
+#
+# nemenyi_stat = (abs(mean_diff_rpart_ranger$average_rank_on_task) / sqrt((6 * 7) / 6 * 16)) * sqrt(2)
+# nemenyi_stat
+#
+# 1 - ptukey(nemenyi_stat, nmeans = 6, df = Inf)
+# # critical mean rank difference
+# NSM3::cRangeNor(alpha = 0.05, k = 6)
+# qtukey(p = 0.05, df = Inf, nmeans = 6, lower.tail = FALSE / sqrt(2))
+crit_value_mean_rank_diff = (qtukey(p = 0.05, df = Inf, nmeans = 6, lower.tail = FALSE) / sqrt(2)) * (sqrt((6 * (6 + 1)) / (6 * 16)))
+crit_value_mean_rank_diff
 # reject H_0!
 
 aggr_wide = ranktable %>%
@@ -326,3 +377,4 @@ mcnemar_stat
 qchisq(0.95, df = 1)
 
 # reject H0!
+
