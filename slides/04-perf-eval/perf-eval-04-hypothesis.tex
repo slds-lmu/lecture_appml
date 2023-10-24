@@ -323,7 +323,7 @@ Hypothesis tests can (a) quantify evidence that a difference in model performanc
     \item We use the Brier score as loss function:
     {
         \scriptsize
-        \include{slides/04-perf-eval/rsrc/rpart_ranger_strikes_task}
+        \include{slides/04-perf-eval/rsrc/rpart_ranger_kin8nm_task}
     }
     \item The test statistic corresponds to:
     $$
@@ -437,21 +437,21 @@ $$
       & & \multicolumn{2}{c}{\textbf{ranger}} \\
       & & correct & wrong \\
       \hline
-      \multirow{2}{*}{\textbf{rpart}} & correct & 561 & 2 \\
-      & wrong & 46 & 16 \\
+      \multirow{2}{*}{\textbf{rpart}} & correct & 5942 & 1 \\
+      & wrong & 2232 & 17 \\
   \end{tabular}
 \end{center}
 
 Calculate the test statistic:
 
-$$T_{\text{McNemar}} =  \frac{(|2 - 46| - 1)^2}{2 + 46} \approx 38.52 
+$$T_{\text{McNemar}} =  \frac{(|1 - 2232| - 1)^2}{1 + 2232} \approx 2227 
 $$
 % > 3.841 = \chi^2_{1,0.95}.$$
 \begin{itemize}
     \item For $\alpha = 0.5$, the critical value is 3.841.
     \item $T_{\text{McNemar}} > 3.841 \Rightarrow$ Reject $H_0$.
     \item We conclude that the tree and random forest do not have the same performance on this population of data.
-    \item The t-test performs on observation-wise loss values, while the McNemar test performs on aggregate classification errors. Both tests can have different results!
+    \item The t-test performs on observation-wise loss values, while the McNemar test performs on aggregate classification errors.
 \end{itemize}
 % We can reject $H_0$ at a significance level of 0.05, i.e., we reject the hypothesis that the tree and the random forest have the same performance.
 % and assume that our tree and our random forest classify the data differently
@@ -474,13 +474,13 @@ $$
     \begin{itemize}
         % \item The Wilcoxon signed rank test ranks differences in performance of two classifiers, ignores the signs, and then compares ranks for positive and negative differences.
         \item Non-parametric and suitable for any performance measure.
-        \item $H_0$: Model 1 and 2 have tied ranks in model performance. \\ 
-        $H_1$: Model 1 and 2 have different ranks in performance.
-        \item Consider $M$ data sets. Let $\widehat{\text{GE}}(\widehat{f}_k, \rho, \Dtestm)$  denote the GE estimate for model $k$ and data set $m$. The difference $d_b$ between GE estimates on the $m$-th data set is:
+        \item $H_0$: Algs. 1 and 2 have tied ranks in model performance. \\ 
+        $H_1$: Algs. 1 and 2 have different ranks in performance.
+        \item Consider $M$ data sets with performance $\widehat{\text{GE}}(\widehat{f}_k, \rho, \Dtestm)$ for model $k$ and data set $m$. The difference $d_m$ between GE estimates on the $m$-th data set is:
         $$
         d_m = \widehat{\text{GE}}(\widehat{f}_1, \rho, \Dtestm) - \widehat{\text{GE}}(\widehat{f}_2, \rho, \Dtestm)
         $$
-        \item Let $R^{+}$ denote the rank sum for data sets where algorithm B outperforms algorithm A and vice versa for $R^{-}$:
+        \item Let $R^{+}$ denote the rank sum for data sets where algorithm 1 outperforms algorithm 2 and vice versa for $R^{-}$:
         $$
         R^{+} = \sum_{d_m > 0} \text{rank}(d_m) + \frac{1}{2} \sum_{d_m = 0} \text{rank}(d_m) \quad\quad R^{-} = \sum_{d_m < 0} \text{rank}(d_m) + \frac{1}{2} \sum_{d_m = 0} \text{rank}(d_m)
         $$
@@ -530,8 +530,8 @@ $$
     $$
     T_{\text{Wilcoxon}} = \frac{1 - \frac{1}{4}6(6 + 1)}{\sqrt{\frac{1}{24}6(6 + 1)(12 + 1)}} = - 1.99 
     $$
-    \item For $\alpha = 0.05$, the critical value is 0.
-    \item $T_{\text{Wilcoxon}} < 0 \Rightarrow$ reject $H_0$! 
+    \item For $\alpha = 0.05$, the critical value (two-sided) is 1.
+    \item $T_{\text{Wilcoxon}} < 1 \Rightarrow$ reject $H_0$! 
     \item There is evidence that the two algorithms do not perform equally well.
 \end{itemize}
 
@@ -810,7 +810,10 @@ where $q_{\alpha, \infty, K}$ is the studentized range statistic for significanc
     \vert \bar{R}_{.rpart} - \bar{R}_{.ranger} \vert &= 1.94
 \end{align*}
 \begin{itemize}
-    \item For $\alpha = 0.05$ and $K = 6$, the critical difference in average ranks is 1.88.
+    \item For $\alpha = 0.05$ and $K = 6$, the critical difference in average ranks is:
+    $$ 
+    \vert \bar{R}_{.\text{rpart}} - \bar{R}_{..\text{ranger}} \vert \geq \frac{4.02}{\sqrt{2}} \sqrt{\frac{6(6 + 1)}{6 \cdot 16}}
+     = 1.88 $$
     \item $\vert \bar{R}_{.rpart} - \bar{R}_{.ranger} \vert > 1.88$ $\Rightarrow$ Reject $H_0$!
     \item There is enough evidence to reject the claim that on more data sets, ranger and rpart would have the same average rank.
 \end{itemize}
@@ -820,6 +823,18 @@ where $q_{\alpha, \infty, K}$ is the studentized range statistic for significanc
     % \end{itemize}
 \end{frame}
 
+
+\begin{frame}{Critical Difference Plot}
+
+\begin{itemize}
+    \itemsep1em
+    \item The critical difference (CD) plot summarizes all pairwise tests in a single graph.
+    \item The CD is the pairwise difference in mean ranks required to reject $H_0$, thus indicating a significant difference in performance.
+    \item We can see the ordered mean ranks of all algorithms on a single line. If the distance between two algorithms exceeds the CD, the left algorithm significantly outperforms the right one.
+    \item \textbf{Continuing example:} The difference in mean ranks between ranger and the SVM does not exceed the CD; the difference between ranger and rpart does. 
+\end{itemize}
+\includegraphics[width = 1.3\textwidth]{slides/04-perf-eval/figure/crit_diff_plot.png}
+\end{frame}
 
 \begin{frame}{Post-hoc Bonferroni-Dunn test}
     
@@ -846,20 +861,8 @@ where $q_{\alpha, \infty, K}$ is the studentized range statistic for significanc
      $$
      \item For instance, $\alpha = 0.05$ is adjusted to $\alpha_{\text{corrected}} = \frac{0.05}{5} = 0.01$.
      \item Power is greater for Bonferroni-Dunn than for Nemenyi due to only comparing to a control classifier and not between all algorithms. 
-     \item Generally, we want to test whether a newly proposed method is better than an existing one and thus, the Bonferroni-Dunn test is preferable in most settings.
+     % \item Generally, we want to test whether a newly proposed method is better than an existing one and thus, the Bonferroni-Dunn test is preferable in most settings.
      \end{itemize}
-\end{frame}
-
-\begin{frame}{Critical Difference Plot}
-
-\begin{itemize}
-    \itemsep1em
-    \item The critical difference (CD) plot summarizes all pairwise tests in a single graph.
-    \item The CD is the pairwise difference in mean ranks required to reject $H_0$, thus indicating a significant difference in performance.
-    \item We can see the ordered mean ranks of all algorithms on a single line. If the distance between two algorithms exceeds the CD, the left algorithm significantly outperforms the right one.
-    \item For instance, the difference in mean ranks between ranger and SVM does not exceed the CD; the difference between ranger and rpart does exceed the CD. 
-\end{itemize}
-\includegraphics[width = \textwidth]{slides/04-perf-eval/figure/crit_diff_plot.png}
 \end{frame}
 
 \begin{frame}{Overview of different hypothesis tests}

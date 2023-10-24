@@ -231,12 +231,12 @@ Assume we performed 10 iterations of GES:
     \{1: random forest, 2: k-NN, 3: log. reg.\}
     \item (Hypothetical) ensemble selection vector after 10 iterations:\\
     $(2, 1, 1, 1, 1, 1, 1, 2, 1, 1)$
-    \item Corresponding performance values (BACC) of the ensemble constructed based on the $i$-th iteration:\\
+    \item Corresponding performance values (BACC on the validation set) of the ensemble constructed based on the $i$-th iteration:\\
     $(0.776, 0.788, 0.817, 0.830, 0.830, \textbf{0.846}, 0.830, 0.830, \textbf{0.846}, 0.830$
     \item We select the ensemble based on the $6$-th iteration\\
     $\rightarrow$ selection vector of $(2, 1, 1, 1, 1, 1)$\\
-    $\rightarrow$ $\w = (\frac{5}{6}, \frac{1}{6}, 0)^\intercal \approx (0.833, 0.167, 0)^\intercal$
-\end{itemize}
+    $\rightarrow \mathbf{w} = \left( \frac{5}{6}, \frac{1}{6}, 0 \right)^\intercal \approx \left( \underbrace{0.833}_{\text{random forest}}, \underbrace{0.167}_{\text{k-NN}}, \underbrace{0}_{\text{log. reg}} \right)^\intercal$
+    \end{itemize}
 \end{vbframe}
 
 %------------------------------------------------------------------------------
