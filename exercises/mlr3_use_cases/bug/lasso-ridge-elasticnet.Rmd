@@ -1,0 +1,427 @@
+---
+title: ""
+subtitle: "LASSO, Ridge, Elastic-Net"
+output:
+  prettydoc::html_pretty:
+    theme: hpstr
+    toc: yes
+    toc_depth: 2
+    css: ../_template/prettydoc-hpstr.css
+    self_contained: yes
+---
+
+```{r, include=FALSE}
+sys.source("setup.R", envir = knitr::knit_global())
+set.seed(123)
+# Komisch ist hier das unsere slides lambda1 und lambda2 als elnet penalty parameter haben, hier die glmnet implementation aber nur alpha das steuert. Auch ist der lambda parameter hier nicht in unseren slides erklaert
+```
+
+---
+title: "Supervised Learning III"
+subtitle: "LASSO, Ridge, Elastic-Net"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 2
+    css: ../../courses/_setup/css/style-usecase.css
+    self_contained: yes
+---
+
+# Goal
+
+You will learn how to model elastic nets, in particular the special cases LASSO and Ridge Regression.
+Elastic nets are often times used to regularize a linear model.
+You will see in the exercise why and when regularization may be desirable.
+Additionally, you will compare different elastic nets and tune them.
+We will work with `mlr3` but the additional exercise also introduces you to the standard `R` interface of the `glmnnet` package.
+
+# German Credit Data
+
+As in many previous use cases, we work with the German credit data.
+We define the task as always before.
+We want to classify the credit risk.
+
+```{r}
+library(mlr3verse)
+task = tsk("german_credit")
+```
+
+The data has several features.
+This makes feature selection and shrinkage method highly applicable.
+
+```{r}
+table(task$col_info$type)
+```
+
+# Exercise: Train an elastic net
+
+Elastic nets are implemented in the `R` package `glmnet`.
+`mlr3` wraps this package.
+The implementation has two main hyperparameters, which define the strength of the penalization (`lambda`) and the kind of penalization (`alpha`).
+
+We use `mlr3` to build a L1 regularized model (LASSO) and then compare it to other elastic nets.
+
+## Initialize an elastic net learner
+
+Create an elastic net learner using the previous introduction.
+
+<details>
+  <summary>**Show Hint 1:**</summary>
+  Check `as.data.table(mlr_learners)` to find the appropriate learner.
+  </details>
+<details>
+  <summary>**Show Hint 2:**</summary>
+  Make sure to install the `glmnet` package and create the learner using the `lrn` function of the `mlr3` package. You may load the `mlr3verse` package first.
+  </details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution
+<details>
+  <summary>Click me:</summary>
+
+```{r}
+l1_learner = lrn("classif.glmnet")
+``` 
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Use the right hyperparameter values to obtain a LASSO learner
+
+A L1 regularized model (LASSO) is a special case of the elastic net learner you just created.
+Change the hyperparameter of the elastic net learner to obtain a LASSO learner that only does L1 penalization.
+
+<details>
+  <summary>**Show Hint 1:**</summary>
+  The help page of the `?glmnet::glmnet` function may be helpful to find out which hyperparameter needs to be changed.
+  </details>
+<details>
+  <summary>**Show Hint 2:**</summary>
+  Set `alpha` to 1 in the `param_set`, which results in a LASSO learner (see description of the `alpha` argument in the help page `?glmnet::glmnet`).
+  </details>
+  
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution
+<details>
+  <summary>Click me:</summary>
+  
+```{r}
+# Set the hyperparameter of the existing learner
+l1_learner$param_set$values = list(alpha = 1)
+# Alternative: Directly define the LASSO learner
+l1_learner = lrn("classif.glmnet", alpha = 1)
+l1_learner$param_set$values
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Make sure the learner can be applied to the task
+
+The LASSO learner (using `glmnet`) cannot deal with features of type `factor` and `ordered` (e.g., see the `$feature_types` slot of the created learner object which shows all supported feature types of the learner).
+However, the German credit task has several features of type `factor` and `ordered` (e.g., see the `$feature_types` slot of the task object which shows all features and their type).
+For this reason, the created learner can not be applied as it is to our current task. 
+To solve this issue, we can one-hot-encode the categorical features (of type `factor`) and transform the ordinal features (of type `ordered`) to integers.
+Using `mlr3`, we have two options:
+
+1. We could modify the current task with a pre-processing `PipeOp` (from the `mlr3pipelines` package) so that it contains one-hot-encoded (instead of `factor`) features and integer features instead of `ordered` factors.
+2. We could extend the learner by creating a ML pipeline, i.e., combining the learner with a pre-processing `PipeOp` to one-hot-encode categorical features and another `PipeOp` to transform ordered factors to integers (you will learn this later).
+
+Solve this exercise using the first option described above and train a LASSO learner on the German credit task.
+
+<details>
+  <summary>**Show Hint 1:**</summary>
+  -  Use the `mlr3pipelines` package to define the two `PipeOp` functions `po("encode")` and `po("colapply")`. The former should perform one-hot-encoding only for `factor` features and the latter should transform only the `ordered` factors to integer values.
+  - Make sure you use the `affect_columns` argument to limit the columns to which the `PipeOp` should be applied to. See also the `Parameters` section of the corresponding help pages `po("encode")$help()` and `po("colapply")$help()` to find out how to perform one-hot-encoding only for `factor`s and integer conversion for `ordered` factors (e.g., by applying the `as.integer` function).
+  </details>
+<details>
+  <summary>**Show Hint 2:**</summary>
+```{r eval = FALSE}
+# Define the two PipeOps using proper values for ...:
+po_one_hot = po("encode", method = ..., 
+  affect_columns = selector_type(...))
+po_ord_int = po("colapply", applicator = ..., 
+  affect_columns = selector_type(...))
+
+# Create a new task with one-hot-encoded features by applying the PipeOp:
+task # display current task
+task_one_hot = po_one_hot$train(...)[[1]]
+task_one_hot # task has no factor features
+# Transform the remaining ordered features to integer by applying the "colapply" PipeOp:
+task_new = po_ord_int$train(...)[[1]]
+task_new # task has no factor and no ordered features
+```
+  </details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution
+<details>
+  <summary>Click me:</summary>
+  
+```{r}
+po_one_hot = po("encode", method = "one-hot", 
+  affect_columns = selector_type("factor"))
+po_ord_int = po("colapply", applicator = as.integer, 
+  affect_columns = selector_type("ordered"))
+
+# Create a new task with one-hot-encoded features by applying the PipeOp:
+task
+task_one_hot = po_one_hot$train(list(task))[[1]]
+# Transform ordered features to integer by applying the "colapply" PipeOp:
+task_new = po_ord_int$train(list(task_one_hot))[[1]]
+task_new
+
+# Alternative: Combine two PipeOp into a graph that sequentially applies both PipeOp's
+po = po_one_hot %>>% po_ord_int
+plot(po)
+task_new = po$train(task)[[1]]
+task_new
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Train and interprete the LASSO model
+
+Use `mlr3` to train the model on the modified task.
+Plot the coefficient path of the resulting model using the `plot` function on the fitted model included in the learner (i.e., on the created `glmnet` object).
+Give a short interpretation of the resulting plot.
+
+<details>
+  <summary>**Show Hint 1:**</summary>
+  After having trained the learner, the `mlr3` learner object will store the `glmnet` object in a `$model` slot of the learner.
+  </details>
+<details>
+  <summary>**Show Hint 2:**</summary>
+  Use the `plot` function on the resulting `glmnet` object, which can be accessed by the `$model` slot of the learner after having trained the model.
+  </details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution
+<details>
+  <summary>Click me:</summary>
+
+```{r}
+l1_learner$train(task_new)
+plot(l1_learner$model)
+```
+
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Tune the LASSO penalization parameter `lambda`
+
+Create a tuning instance and find an optimal $\lambda$ value for the LASSO learner using the classification error as performance measure.
+Specify a grid for different $\lambda$ values using the code below.
+Use grid-search and 5-fold cross validation for tuning.
+Note that the execution might take a few minutes.
+
+```{r}
+lambda_grid = exp(seq(from = -7, to = -2, by = 0.25))
+```
+
+<details>
+  <summary>**Show Hint 1:**</summary>
+  Use the `to_tune` and `tune` functions.
+  </details>
+<details>
+  <summary>**Show Hint 2:**</summary>
+```{r eval = FALSE}
+set.seed(...) # use a seed for reproducible results
+# Currently we have set a fixed value for the alpha parameter
+l1_learner$param_set$values
+# Add lambda grid to be tuned for using `to_tune`
+l1_learner$param_set$values$lambda = to_tune(...)
+tune(
+  method = "grid_search",
+  task = task_new,
+  learner = l1_learner,
+  ...)
+```
+  </details>
+  
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution
+<details>
+  <summary>Click me:</summary>
+
+```{r}
+set.seed(1)
+l1_learner$param_set$values$lambda = to_tune(lambda_grid)
+instance = tune(
+  method = "grid_search",
+  task = task_new,
+  learner = l1_learner,
+  resampling = rsmp("cv", folds = 5),
+  measure = msr("classif.ce")
+)
+result = as.data.table(instance$archive)
+result 
+
+library(ggplot2)
+ggplot(data = result, mapping = aes(x = as.numeric(lambda), y = classif.ce)) + 
+  geom_line() + 
+  geom_point()
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Refit the model
+
+Refit the LASSO model on all available data with the optimal lambda value w.r.t. the classification error.
+How many non-zero does the model have?
+
+<details>
+  <summary>**Show Hint 1:**</summary>
+  Look at `instance$archive$best()` to obtain the best value for `lambda` and refit the LASSO learner using this value.
+  </details>
+<details>
+  <summary>**Show Hint 2:**</summary>
+  After re-fitting the learner, look at the learner's `$model$beta` slot and count the non-zero coefficients.
+  </details>
+
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution
+<details>
+  <summary>Click me:</summary>
+
+```{r}
+lambda.best = as.numeric(instance$archive$best()$lambda)
+learner_l1_tuned = lrn("classif.glmnet", alpha = 1, lambda = lambda.best)
+learner_l1_tuned$train(task_new)
+table(as.numeric(learner_l1_tuned$model$beta) != 0)
+``` 
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+<!-- ## Alternative elastic nets -->
+
+<!-- Build two elastic nets. -->
+<!-- One using only a L2 regularization (ridge regression) and the other one with a combined L1-L2 regularization. -->
+<!-- Use the same lambda values for all three models and compare the resulting coefficients with each other. -->
+
+<!-- <details> -->
+<!--   <summary>**Show Hint 1:**</summary> -->
+<!--   Fit both models in the same fashion as the one with L1 regularization. -->
+<!--   A comparison can be a data.frame or a plot. -->
+<!--   </details> -->
+<!-- <details> -->
+<!--   <summary>**Show Hint 2:**</summary> -->
+<!-- `coeff_l1 = as.numeric(graph_learner$model$classif.glmnet$model$beta)` -->
+<!--   </details> -->
+
+<!-- ```{r, eval = !show.solution, echo = FALSE, results='asis'} -->
+<!-- cat("<!--") -->
+<!-- ``` -->
+
+<!-- ### Solution -->
+<!-- <details> -->
+<!--   <summary>Click me:</summary> -->
+
+<!-- ```{r} -->
+<!-- graph_learner_l2 = as_learner(graph) -->
+<!-- graph_learner_l2$param_set$values$classif.glmnet.alpha = 0 -->
+<!-- graph_learner_l2$param_set$values$classif.glmnet.lambda = -->
+<!--   instance$archive$best()$classif.glmnet.lambda -->
+<!-- graph_learner_l2$train(task_new) -->
+
+<!-- graph_learner_en = as_learner(graph) -->
+<!-- graph_learner_en$param_set$values$classif.glmnet.alpha = 0.5 -->
+<!-- graph_learner_en$param_set$values$classif.glmnet.lambda = -->
+<!--   instance$archive$best()$classif.glmnet.lambda -->
+<!-- graph_learner_en$train(task_new) -->
+
+<!-- coeff_l1 <- as.numeric(graph_learner$model$classif.glmnet$model$beta) -->
+<!-- coeff_l2 <- as.numeric(graph_learner_l2$model$classif.glmnet$model$beta) -->
+<!-- coeff_en <- as.numeric(graph_learner_en$model$classif.glmnet$model$beta) -->
+
+<!-- coeffs <- data.frame(l1 = coeff_l1, l2 = coeff_l2, elastic_net = coeff_en) -->
+<!-- coeffs -->
+<!-- ``` -->
+
+# Extra: Fitting elastic nets without `mlr3`
+
+You can also directly model an elastic net using the `glmnet` package.
+The `glmnet` package has a function `cv.glmnet` that optimizes the `lambda` parameter using cross-validation (see `?cv.glmnet`).
+
+Repeat the tuning exercise of the L1 regularized elastic net (LASSO) using the `cv.glmnet` function.
+Use the data of the previously pre-processed task with one-hot-encoded features and integer-transformed ordered factors.
+<!-- Use the PipeOps created in the previous exercise to supply them to the `cv.glmnet` function. -->
+
+<details>
+  <summary>**Show Hint 1:**</summary>
+  `glmnet` requires that all features are contained in a matrix `x`.
+  For binary classification, you need to specify a proper `family` in `glmnet` and pass the target `y` as a factor.
+  </details>
+<details>
+  <summary>**Show Hint 2:**</summary>
+```{r eval = FALSE}
+library(glmnet)
+data = as.data.frame(task_new$data())
+y = ...
+x = as.matrix(...)
+#tbd
+cv.glmnet(x = x, y = y, lambda = ..., family = ..., type.measure = ...)
+```
+  </details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution
+<details>
+  <summary>Click me:</summary>
+
+```{r}
+library(glmnet)
+data = as.data.frame(task_new$data())
+y = data$credit_risk
+x = as.matrix(data[, setdiff(colnames(data), "credit_risk")])
+model_glmnet = cv.glmnet(x = x, y = y, alpha = 1, lambda = lambda_grid, family = "binomial", type.measure = "class")
+
+library(ggplot2)
+ggplot(mapping = aes(x = model_glmnet$lambda, y = model_glmnet$cvm)) + 
+  geom_line() + 
+  geom_point()
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+# What we learnt
+
+We learnt how to set up an elastic net in `mlr3` and how to tune and interpret it.
+We focussed on the LASSO model and finding the best penalization parameter for it.
+Additionally, we learnt how to access the `glmnet` object and inspect the results.
+

@@ -1,0 +1,426 @@
+---
+title: "Data Preprocessing - Feature Selection"
+subtitle: "Ranking Features by Importance"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 2
+    css: ../../courses/_setup/css/style-usecase.css
+    self_contained: yes
+---
+
+<!-- #FIXME: mlr3 codestyle -->
+
+```{r, echo = FALSE}
+show.solution = TRUE
+```
+
+```{r, include = FALSE}
+# Just some preparation
+knitr::opts_chunk$set(
+  cache = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  echo = TRUE,
+  R.options = list(width = 120)
+)
+lgr::get_logger("mlr3")$set_threshold("warn")
+# SET BBOTK TO 'info' IF YOU PLAY AROUND WITH THIS!
+lgr::get_logger("bbotk")$set_threshold("info")
+```
+
+# Goals
+
+Learn how to rank features of a supervised task by their importance / strength of relationship with the target variable.
+
+# German Credit Data
+
+## Description
+
+- Data from 1973 to 1975 from a large regional bank in southern Germany classifying credits described by a set of attributes to good or bad credit risks.
+- Stratified sample of 1000 credits (300 bad ones and 700 good ones).
+- Customers with good credit risks perfectly complied with the conditions of the contract while customers with bad credit risks did not comply with the contract as required.
+- Available in `"data/german_credit.csv"`
+
+## Data Dictionary
+
+n = 1,000 observations of credits
+
+- `credit_risk`: Has the credit contract been complied with (good) or not (bad)?
+- `age`: Age of debtor in years
+- `amount`: Credit amount in DM
+- `credit_history`: History of compliance with previous or concurrent credit contracts
+- `duration`: Credit duration in months
+- `employment_duration`: Duration of debtor's employment with current employer
+- `foreign_worker`: Whether the debtor is a foreign worker
+- `housing`: Type of housing the debtor lives in
+- `installment_rate`: Credit installments as a percentage of debtor's disposable income
+- `job`: Quality of debtor's job
+- `number_credits`: Number of credits including the current one the debtor has (or had) at this bank
+- `other_debtors`: Whether there is another debtor or a guarantor for the credit
+- `other_installment_plans`: Installment plans from providers other than the credit-giving bank
+- `people_liable`: Number of persons who financially depend on the debtor
+- `personal_status_sex`: Combined information on sex and marital status
+- `present_residence`: Length of time (in years) the debtor lives in the present residence
+- `property`: The debtor's most valuable property
+- `purpose`: Purpose for which the credit is needed
+- `savings`: Debtor's saving
+- `status`: Status of the debtor's checking account with the bank
+- `telephone`: Whether there is a telephone landline registered on the debtor's name
+
+# A Brief Introduction to mlr3 Tasks
+
+So far, we only worked with data in the form of a `data.frame` object.
+As we will later do almost all exercises using `mlr3`, we briefly introduce the concept of a `mlr3` `Task` here.
+This will be helpful for two reasons: 1) You already make yourself familiar with the `mlr3` ecosystem 2) Feature
+importance can be easily calculated via the `mlr3filters` package (and preprocessing as done in the next use case is
+heavily simplified by using `mlr3pipelines`).
+Nevertheless, we will also discuss how the calculation of feature importance can be performed ''manually'', i.e.,
+without relying on the `mlr3` ecosystem.
+
+First, we load the German credit dataset:
+
+```{r}
+credit = read.csv("data/german_credit.csv", header = TRUE, stringsAsFactors = TRUE)
+```
+
+Later, we will be interested in classifying the credit risk (binary **target** variable, `"bad"` vs. `"good"`) by using
+the other columns as so-called **features**.
+
+A `mlr3` `Task` encapsulates data with meta-information, such as the name of the target variable and the type of the
+learning problem (in our example this would be a **classification** task, where the target is a factor label with
+relatively few distinct values).
+
+To create a `TaskClassif` (the `mlr3` `Task` object for a supervised classification problem) based on the German credit data, we can simply do:
+
+```{r}
+library(mlr3)
+task_credit = as_task_classif(credit, target = "credit_risk", id = "german_credit")
+print(task_credit)
+```
+
+By setting `target = "credit_risk"`, we specify the correct column in the data containing the target variable.
+`id = "german_credit"` simply assigns the task the ID `"german_credit"`.
+
+The `print()` method gives a short summary of the task: It has 1000 observations and 21 columns of which 20 are features.
+17 features are categorical (i.e., factors) and 3 features are integer.
+
+By using the `Task$data()` method, we get access to the data (in the form of a `data.table`):
+
+```{r}
+task_credit$data()
+```
+
+Note that a `mlr3` `Task` object comes with plenty of functionality in the form of fields, methods and active bindings, see `?Task`, e.g., to get a summary of all feature names, you can use:
+
+```{r}
+task_credit$feature_names
+```
+
+
+# Exercises
+
+## Exercise 1: Information about feature types
+
+How can you obtain information about the types of features of the task (similarly like in the data dictionary above)?
+
+<details>
+<summary>**Hint:**</summary>
+
+Inspect the active binding fields of the task object (see, `?Task`)
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r}
+task_credit$feature_types
+```
+
+</details>
+
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Exercise 2: Finding a suitable feature filter
+
+Feature filters are comprised of a set of methods for feature selection that aim at quantifying the ''usefulness'' of a feature in a supervised task.
+Often, it is desirable to reduce the number of features to both decrease the computational cost of fitting a learner and in some cases even improving the performance of the model.
+
+Based on the metric of a feature filter, features can be ranked and the ones with the strongest relationship with the target variable can be selected to be included in the modelling process.
+Typically, feature filters are used when a large number of similar features are available, e.g., in the context of sensory data.
+Nevertheless, feature filters also are useful when only a medium number of features is available, as they allow for quantifying the importance of a feature in a supervised setting providing insight into the relationship of a feature and the target variable.
+
+<!-- #FIXME: comment / additional info + link on IML -->
+
+Here, we will use feature filters to illuminate the strength of the relationship between features and the target variable to be then able to select features manually to be used in a logistic regression.
+As an example, suppose you want to include only two features in your model.
+Based on in total 20 available features, there remain 190 pairs that could be tried (and if you want to include three features, then 1140 triplets could be tried).
+We can use feature filters to both determine the number of features to be included and which features to include.
+
+<!-- #FIXME: comment /additional info + link on logistic regression -->
+
+Within the `mlr3` ecosystem, feature filters are implemented in the `mlr3filters` package and are typically used in combination with `mlr3pipelines` to be able to include the whole preprocessing step in pipeline.
+Here, we will do the preprocessing without using a pipeline.
+Make yourself familiar with the `mlr3filters` package ([link](https://mlr3filters.mlr-org.com/)).
+Which `Filter`s can be used with the task we created above?
+
+<details>
+<summary>**Hint:**</summary>
+
+You must match the type of the task (classification or regression) and the type of the features to the task type and feature types supported by a `Filter`.
+
+The website linked above includes a table that provides detailed information for each `Filter`.
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+Our task is a classification task and we have `integer`, and `factor` and features:
+
+```{r}
+task_credit$task_type
+unique(task_credit$feature_types$type)
+```
+
+Looking at the table [here](https://mlr3filters.mlr-org.com/), potential filters are:
+
+`cmim`, `disr`, `importance`, `information_gain`, `jmi`, `jmim`, `mim`, `mrmr`, `njmim`, `performance`, `permutation`, `relief`, `selected_features`.
+
+You can read their documentation by looking at `?mlr_filters_<id>`, (`<id>` should be replaced with the filter id, e.g., `cmim`).
+
+Note that `importance`, `performance`, `permutation`, and `selected_features` are special in the sense that they require `Learner`s themselves.
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Exercise 2: Use an information gain filter to selected features manually
+
+We now want to use an `information_gain` filter.
+This filter quantifies the gain in information by considering the following difference: `H(Target) + H(Feature) - H(Target, Feature)`
+Here, `H(X)` is the Shannon entropy for variable `X` and `H(X, Y)` is the joint Shannon entropy for variable `X` conditioned on `Y`.
+
+Create an information gain filter and compute the information gain for each feature.
+
+Visualize the score for each feature and decide how many and which features to include.
+
+<details>
+<summary>**Hint 1:**</summary>
+
+Use `flt("information_gain")` to create an `information_gain` filter and calculate the filter scores of the features.
+
+See `?mlr_filters_information_gain` for more details on how to use a filter.
+
+For visualization, you can, for example, create a scree plot (similar as in principle component analysis) that plots the filter score for each feature on the y-axis and the features on the x-axis.
+
+Using a rule of thumb, e.g., the ''elbow rule'' you can determine the number of features to include.
+
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+
+```{r, eval = FALSE}
+library(mlr3filters)
+library(mlr3viz)
+filter = flt(...)
+filter$calculate()
+autoplot(...)
+```
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r}
+library(mlr3filters)
+library(mlr3viz)
+filter = flt("information_gain")
+filter$calculate(task_credit)
+autoplot(filter)  # status, credit_history and savings
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Exercise 3: Use the subset of features to fit a logistic regression
+
+Based on the features you selected in the previous exercise, fit a logistic regression to the selected features (not using `mlr3`, bust simply `glm()`).
+
+<details>
+<summary>**Hint 1:**</summary>
+
+Logistic regression via `glm()` requires you to specify the `family` (error distribution and link function).
+
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+
+```{r, eval = FALSE}
+logreg = glm(formula = ..., family = ..., data = task_credit$data())
+summary(logreg)  # inspect the model
+```
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r}
+logreg = glm(formula = credit_risk ~ status + credit_history + savings, family = binomial(), data = task_credit$data())
+summary(logreg)  # inspect the model
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Advanced: Compare the logistic regression model obtained using the subset of features vs. using all features
+
+We now want to compare the logistic regression model obtained using the subset of features compared to using all features.
+
+<details>
+<summary>**Hint 1:**</summary>
+
+Using all features in the formula interface can be done via `"y ~ ."` (this corresponds to using all other columns in the data except y as features).
+
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+
+```{r, eval = FALSE}
+logreg_full = glm(formula = ..., family = ..., data = ...)
+summary(logreg_full)  # inspect the model
+```
+
+</details>
+
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r}
+logreg_full = glm(formula = credit_risk ~ ., family = binomial(), data = task_credit$data())
+summary(logreg_full)  # inspect the model
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Advanced: Compare feature rankings obtained with an information gain filter vs. stepwise AIC selection
+
+In this final exercise, we want to compare features obtained when using an information gain filter compared to the features obtained when using a stepwise AIC selection of logistic regression models.
+
+The Akaike information criterion (AIC) is an estimator of the prediction error of a model and takes both the model complexity (number of free parameters, k) and the model fit (maximum value of the likelihood function, L) into account:
+
+`AIC = 2k - log(L)`
+
+If we compare two models, a lower AIC indicates a better model.
+
+Stepwise selection (`?step`) is an iterative algorithm to select a formula-based model via the AIC criteria.
+
+Here, we want to perform a backward selection, i.e., we start with the full (additive) model (including all features but no interaction terms) and at each iteration of the algorithm, a feature can be dropped if it decreases the AIC of the model.
+
+Start with the full (additive) model (including all features but no interaction terms) and perform a stepwise backwards AIC selection (`?step`).
+
+Which features are included in the final model?
+
+Do they differ with the features we selected via the information gain filter?
+
+If yes, can you guess why?
+
+<details>
+<summary>**Hint 1:**</summary>
+We already fitted the full model in the exercise above.
+
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+
+```{r, eval = FALSE}
+stepwise = MASS::stepAIC(logreg_full, direction = ...)
+
+```
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r}
+stepwise = MASS::stepAIC(logreg_full, direction = "backward")
+stepwise$formula
+```
+
+The final model obtained via a stepwise backward selection contains 14 features:
+
+`amount`, `credit_history`, `duration`, `foreign_worker`, `housing`, `installment_rate`, `other_debtors`, `other_installment_plans`, `personal_status_sex`, `present_residence`, `purpose`, `savings`, `status`, `telephone`.
+
+All three features we selected via the information gain filter, are also included.
+
+Reasons why the information gain filter and the stepwise selection differ could be:
+
+The stepwise selection was performed backwards (known to result in more complex models).
+
+The stepwise selection is model-based and relies on the inductive bias of logistic regression, whereas information gain filters are model agnostic and rather a heuristic.
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+# Summary
+
+You have learned how to use feature filters to rank the importance of features in a supervised setting and how to subset a task accordingly and fit a logistic regression on selected features.
+
+Ideally, feature selection is directly incorporated into the learning procedure by making use of a pipeline so that performance estimation after feature selection is not biased.
+
+In later exercises, we will see how the performance of a whole pipeline can be properly evaluated.
