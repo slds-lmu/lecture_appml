@@ -4,12 +4,16 @@
 % Defines macros and environments
 \input{../../style/common.tex}
 
-\title{Applied Machine Learning}
-% \author{LMU}
-%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
-\date{}
-
 \begin{document}
+
+\newcommand{\titlefigure}{figure/calibrationplot}
+\newcommand{\learninggoals}{
+\item What is calibration and discrimination?
+\item Why or when are they important?
+\item Standard approaches to diagnose whether a model is well-calibrated.}
+
+\lecturechapter{Calibration versus Discrimination}
+\lecture{Applied Machine Learning}
 
 % scikitlearn calibration 
 % https://scikit-learn.org/stable/modules/calibration.html
@@ -40,6 +44,17 @@
     
 \end{itemize}
 
+\end{frame}
+
+\begin{frame}{Calibration in the Large}
+    % https://docs.google.com/presentation/d/1Drnq0Av_5KLfnwbRLnp-Tklgxc93C7BT_UXRCydtoes/edit#slide=id.p
+    \vspace*{-1pt}
+    \makebox[\linewidth]{\includegraphics[page=1, width=\textwidth]{slides/04-perf-eval/figure/calibration_large_vs_small.pdf}}
+\end{frame}
+
+\begin{frame}{Calibration in the Small}
+    \vspace*{-1pt}
+    \makebox[\linewidth]{\includegraphics[page=2, width=\textwidth]{slides/04-perf-eval/figure/calibration_large_vs_small.pdf}}
 \end{frame}
 
 \begin{frame}{Why and When Is Calibration Important?}
@@ -293,17 +308,18 @@
 \begin{frame}{Sources of Miscalibration}
 % https://classifier-calibration.github.io/assets/slides/clacal_tutorial_ecmlpkdd_2020_intro.pdf
 \begin{itemize}
-    \itemsep2em
-     \item Miscalibration is related to accuracy: if the average class probability is higher or lower than accuracy, the model is said to be over- or underconfident.
+    \itemsep1em
+    \item Calibration is a characteristic of a learner, e.g., tree-based learners such as CART or random forests seldom produce probabilities close to 0 or 1 due to averaging class values. 
+    \item Miscalibration is related to accuracy: if the average class probability is higher or lower than accuracy, the model is said to be over- or underconfident.
     \item \textbf{Underconfidence:} Probabilities are underestimating true incidences. This typically gives a sigmoidal reliability diagram.
     $\Rightarrow$ We need to pull probabilities away from the center.
     \item \textbf{Overconfidence:} Probabilities are overestimating true incidences.  This typically gives an inverse-sigmoidal reliability diagram. $\Rightarrow$ We need to push probabilities toward the center.
     \item \textbf{Predicament:} Under- and overconfidence can coexist for different classes, requiring a simultaneous increase and decrease in different class probabilities.
 
 \end{itemize}
+\end{frame}
 
-
-
+\begin{frame}{How to Prevent Miscalibration}
 
 \end{frame}
 
