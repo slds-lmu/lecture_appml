@@ -1,0 +1,3 @@
+[submodule "lucture_iml"]
+	path = lucture_iml
+	url = https://github.com/slds-lmu/lecture_iml.git
