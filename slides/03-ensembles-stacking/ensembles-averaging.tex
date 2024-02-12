@@ -13,6 +13,7 @@
 \begin{document}
 \newcommand{\titlefigure}{slides/03-ensembles-stacking/figure/bagging.png}
 \newcommand{\learninggoals}{
+\item What is Ensembling?
 \item Bagging and Boosting Recap
 \item Model Averaging
 }
@@ -24,7 +25,21 @@
 
 % ------------------------------------------------------------------------------
 
-\begin{vbframe}{Bagging}
+\begin{vbframe}{What is Ensembling?}
+
+In general:
+\vspace{1em}
+\begin{itemize}
+    \item Combine the predictions of models
+    \item Make weak learners strong
+    \item Make strong learners stronger
+\end{itemize}
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Recap: Bagging}
 
 Bootstrap Aggregating: Training multiple instances of the same base model on different subsets of the training data, obtained through random sampling with replacement $\rightarrow$ homogeneous ensembling
 \vspace{1em}
@@ -55,27 +70,37 @@ Popular use case: Construction of RF using trees as base models
 
 % ------------------------------------------------------------------------------
 
-\begin{vbframe}{Bagging}
+\begin{vbframe}{Recap: Bagging}
 
 Why resampled data?
-
-\begin{itemize}
-    \item Bias vs. variance trade-off
-    \begin{itemize}
-        \item Variance reduction 
-            through averaging
-        \item Bias of model is increased as less (unique) data are seen  
-    \end{itemize}
-    \item Works well for unstable learners
-\end{itemize}
 \vspace{1em}
-NB: RF also uses col subsampling.
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+        \vspace{-1em}
+        \begin{figure}
+            \centering
+            \includegraphics{slides/03-ensembles-stacking/figure/bagging.png}
+            %\caption{Caption}
+            % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
+            \label{fig:bagging}
+        \end{figure}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+        Bias vs. variance trade-off
+        \begin{itemize}
+            \item Variance reduction through averaging
+            \item Bias of model is (if at all) slightly increased as less data are seen 
+        \end{itemize}
+        Works well for unstable learners.\\
+        NB: RF also uses col subsampling
+    \end{column}
+\end{columns}
 
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
 
-\begin{vbframe}{Boosting}
+\begin{vbframe}{Recap: Boosting}
 Iterative technique that adjusts the weights of the training instances based on their misclassification rate or residual errors or pseudo-residuals, and sequentially trains subsequent base models (weak learners) to focus on the misclassified or poorly predicted instances.
 \vspace{1em}
 Well known frameworks:
@@ -85,6 +110,7 @@ Well known frameworks:
     \item XGBoost (Extreme Gradient Boosting)
     \item LightGBM (fast and memory efficient Gradient Boosting)
     \item CatBoost (native support for categorical features)
+    \item Model Based Boosting
 \end{itemize}
 \vspace{1em}
 Different from other ensembling methods as ensemble is built sequentially.
@@ -102,15 +128,13 @@ Different from other ensembling methods as ensemble is built sequentially.
 
 % ------------------------------------------------------------------------------
 
-\begin{vbframe}{Notation}
-Let us introduce some general notation:
-\vspace{1em}
-    \begin{itemize}
-        \item $\{\bl[1], \ldots, \bl[M]\} \subseteq \mathcal{H}_{1} \times \ldots \times \mathcal{H}_{M}$ set of $M$ models trained on training data $\mathcal{D}$
-        \item $\sbl[m]: \mathcal{X} \rightarrow [0, 1]^{g}$ probability predictions under the $m$-th model when doing classification (w.l.o.g. we assume $g = 1$ in the following and $\sbl[m]$ returning the probabilities of the positive class)
-        \item $\hbl[m]: \mathcal{X} \rightarrow \mathcal{Y}$ hard label predictions under the $m$-th model when doing classification or regression
-        \item $\fMx = G(\blx[1], \ldots, \blx[M])$ prediction of an ensemble model obtained via aggregating function $G$
-    \end{itemize}
+\begin{vbframe}{General Notation for Ensembling}
+\begin{itemize}
+    \item $\{\bl[1], \ldots, \bl[M]\} \subseteq \mathcal{H}_{1} \times \ldots \times \mathcal{H}_{M}$ set of $M$ models trained on training data $\mathcal{D}$
+    \item $\sbl[m]: \mathcal{X} \rightarrow [0, 1]^{g}$ probability predictions under the $m$-th model when doing classification (w.l.o.g. we assume $g = 1$ in the following and $\sbl[m]$ returning the probabilities of the positive class)
+    \item $\hbl[m]: \mathcal{X} \rightarrow \mathcal{Y}$ hard label predictions under the $m$-th model when doing classification or regression
+    \item $\fMx = G(\blx[1], \ldots, \blx[M])$ prediction of an ensemble model obtained via aggregating function $G$
+\end{itemize}
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
