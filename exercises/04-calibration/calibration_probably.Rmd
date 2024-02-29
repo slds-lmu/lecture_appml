@@ -11,7 +11,7 @@ output:
 ---
 
 ```{r, include=FALSE}
-sys.source("setup.R", envir = knitr::knit_global())
+sys.source("../setup/setup.R", envir = knitr::knit_global())
 set.seed(123)
 ```
 
@@ -158,7 +158,8 @@ brier_class(predictions_test_calibrated, class, .pred_PS)
 
 hist(predictions_test_calibrated$.pred_PS, breaks = (0:10)/10)
 
-cal_plot_breaks(predictions_test_calibrated, truth = class, num_breaks = 10)
+b = cal_plot_breaks(predictions_test_calibrated, truth = class, num_breaks = 10)
+b$data
 cal_plot_breaks(predictions_test_calibrated, truth = class, num_breaks = 5)
 ```
 

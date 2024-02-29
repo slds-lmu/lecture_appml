@@ -153,7 +153,7 @@ mean_diff_rpart_ranger = averageranks[averageranks$learner_id == "rpart", 2] - a
 # # critical mean rank difference
 # NSM3::cRangeNor(alpha = 0.05, k = 6)
 # qtukey(p = 0.05, df = Inf, nmeans = 6, lower.tail = FALSE / sqrt(2))
-crit_value_mean_rank_diff = (qtukey(p = 0.01, df = Inf, nmeans = 6, lower.tail = FALSE) / sqrt(2)) * (sqrt((6 * (6 + 1)) / (6 * 16)))
+crit_value_mean_rank_diff = (qtukey(p = 0.05, df = Inf, nmeans = 6, lower.tail = FALSE) / sqrt(2)) * (sqrt((6 * (6 + 1)) / (6 * 16)))
 crit_value_mean_rank_diff
 # reject H_0!
 
@@ -194,6 +194,7 @@ ranktable_wide_rpart_ranger = aggr %>%
   select(c(task_id, learner_id, ce_rank)) %>%
   pivot_wider(names_from = learner_id, values_from = ce_rank)
 ranktable_wide_rpart_ranger = ranktable_wide_rpart_ranger[1:6, ]
+ranktable_wide_rpart_ranger
 
 library(xtable)
 # print(
@@ -328,6 +329,12 @@ conf.mat = conf.mat %>%
 
 conf.mat
 
+conf.mat %>%
+  select(c(rpart_loss, ranger_loss)) %>%
+
+
+ggplot(conf.mat %>% select(c(rpart_loss, ranger_loss))) +
+  geom_density()
 
 conf.mat.subset = conf.mat %>%
   ungroup() %>%
