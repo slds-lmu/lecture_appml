@@ -16,3 +16,9 @@ Notation an Anfang
 12/45 wie 9/45 resampling; archiv erklaeren
 14/45 animation: ruhig wie oben; besser; counter
 44/45
+
+
+Stacking:
+* wie funktioniert AutoGluon / performance auf AMLB
+* einfache Animation, stacking mit CV
+* bsp dass stacking funktioniert
