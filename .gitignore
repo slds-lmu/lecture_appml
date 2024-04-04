@@ -12,6 +12,7 @@
 *.snm
 *.toc
 *.pdf
+*.html
 !**/figure_man/*.pdf
 !**/figure/*.pdf
 !slides-pdf/*.pdf
@@ -23,4 +24,3 @@
 .Rproj.user
 .Rproj
 *.Rproj
-
