@@ -107,6 +107,8 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
+With `data.table`:
+
 ```{r}
 dt = merge(cv3$instance, task_gc$data()[, row_id := .I], by = "row_id")
 dt[, .(class_ratio = sum(credit_risk == "bad") /
@@ -117,6 +119,14 @@ Indeed, we can see that the target class is distributed similarly within each CV
 
 ```{r}
 dt[, .(class_ratio = sum(credit_risk == "bad") / sum(credit_risk == "good"))]
+```
+
+With base R:
+
+```{r}
+dt <- merge(cv3$instance, transform(task_gc$data(), row_id = seq_len(nrow(task_gc$data()))), by = "row_id")
+aggregate(credit_risk ~ fold, data = dt, FUN = function(x) sum(x == "bad") / sum(x == "good"))
+with(dt, sum(credit_risk == "bad") / sum(credit_risk == "good"))
 ```
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
@@ -214,10 +224,22 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
+With `data.table`:
 ```{r}
 dt = merge(task_bc$data(), cv5$instance, by.x = "Id", by.y = "row_id")
 dt = dt[, .(unique_folds = length(unique(fold))), by = Id]
 dt[unique_folds > 1, ]
+```
+
+With base R:
+```{r}
+dt <- aggregate(fold ~ Id,
+                 data = merge(task_bc$data(),
+                              cv5$instance,
+                              by.x = "Id",
+                              by.y = "row_id"),
+                 FUN = function(x) length(unique(x)))
+dt[dt$fold > 1,]
 ```
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
@@ -263,7 +285,7 @@ MeasureRegrThresholdAcc = R6::R6Class("MeasureRegrThresholdAcc",
 1. In the first two lines we name the class, here `MeasureRegrThresholdAcc`, and then state this is a regression measure that inherits from `MeasureRegr`.
 2. We initialize the class by stating its unique ID is `"thresh_acc"`, that it does not require any external packages (`packages = character()`) and that it has no special properties (`properties = character()`).
 3. We then pass specific details of the loss function which are: it measures the quality of a `"response"` type prediction, its values range between `(0, 1)`, and that the loss is optimized as its maximum (`minimize = FALSE`).
-4. Finally, we define the score itself as a private method called `.score` where we pass the predictions to the function we defined just above.
+4. Finally, we define the score itself as a private method called `.score` where we pass the predictions to the function we defined just above. The private method is a function assigned to the R6 class `MeasureRegrThresholdAcc`, such that one can (internally) call `object$.score(prediction,...)` for an object of class `MeasureRegrThresholdAcc`. The method is "private" as it is not intended to be visible for the end user. 
 
 Once you have defined your custom measure, you can add it to the `mlr3measures` dictionary like this:
 
@@ -273,14 +295,7 @@ mlr3::mlr_measures$add("regr.thresh_acc", MeasureRegrThresholdAcc)
 
 ## 3.1 MSE-MAE
 
-Define you own risk measure for regression, the maximum of MSE and MAE: $f(y, \hat{y}) = \frac{1}{n} \sum_{i=1}^n \max((y_i - \hat{y}_i)^2,|y_i - \hat{y}_i|)$, using the code skeleton supplied above. Add it to the `mlr3measures` dictionary and use it to evaluate the following model prediction:
-
-```{r}
-tsk_mtcars = tsk("mtcars")
-split = partition(tsk_mtcars)
-lrn_ranger = lrn("regr.ranger")$train(tsk_mtcars, split$train)
-prediction = lrn_ranger$predict(tsk_mtcars, split$test)
-```
+Define you own risk measure for regression, the maximum of MSE and MAE: $f(y, \hat{y}) = \frac{1}{n} \sum_{i=1}^n \max((y_i - \hat{y}_i)^2,|y_i - \hat{y}_i|)$, using the code skeleton supplied above.
 
 <details>
 <summary>**Hint 1:**</summary>
@@ -326,7 +341,29 @@ MeasureRegrMaxMseMae = R6::R6Class("MeasureRegrMaxMseMae",
   )
 )
 ```
-Now, add to dictionary and evaluate on predictions:
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## 3.2 Evaluate a custom measure
+
+Add your custom measure to the `mlr3measures` dictionary and use it to evaluate the following model prediction:
+
+```{r}
+tsk_mtcars = tsk("mtcars")
+split = partition(tsk_mtcars)
+lrn_ranger = lrn("regr.ranger")$train(tsk_mtcars, split$train)
+prediction = lrn_ranger$predict(tsk_mtcars, split$test)
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
 
 ```{r}
 mlr3::mlr_measures$add("regr.max_mse_mae", MeasureRegrMaxMseMae)
