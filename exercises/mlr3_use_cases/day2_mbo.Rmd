@@ -16,7 +16,7 @@ sys.source("../setup/setup.R", envir = knitr::knit_global())
 
 # Goal
 
-After this exercise, you should be able to control the resampling process when using `mlr3` in order to account for data specificities, such as class imbalances in classification settings or grouping phenomena. Further, you will have learned how to construct and utilize custom measures for performance evaluation within `mlr3`.
+After this exercise, you should be able to navigate the building blocks of Bayesian optimization (BO) using `bbotk` and `mlr3mbo` for general black box optimization problems, and more specifically, hyperparameter optimization (HPO).
 
 # Introduction
 
@@ -78,7 +78,7 @@ generate_design_grid(domain, resolution = 3)$data
 
 As you can see, this is more or less a simple `data.table` that encodes the set of hyperparameter configurations we want to evaluate first, before any of the real BO magic starts.
 
-**Task: Construct a more refined initial design, using `paradox` to implement a Sobol design with 30 points, which has better coverage properties than grid or random search.**
+**Task: Construct a more refined initial design, using `paradox` to implement a Sobol design with 30 points, which has better coverage properties than grid or random search. If you are interested in why the Sobol design has favorable properties, you can take a look at the original paper by Niederreiter ([1988](https://doi.org/10.1016/0022-314X(88)90025-X)).**
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("<!--")
@@ -151,12 +151,14 @@ cat("-->")
 
 A surrogate model wraps a regression learner that models the unknown black box function based on observed data. In `mlr3mbo`, the `SurrogateLearner` is a higher-level `R6` class inheriting from the base Surrogate class, designed to construct and manage the surrogate model, including automatic construction of the `TaskRegr` that the learner should be trained on at each iteration of the BO loop.
 
-Any regression learner in `mlr3` can be used. However, most acquisition functions depend on both mean and standard deviation predictions from the surrogate model, the latter of which requires the `"se"` `predict_type` to be supported. Therefore not all learners are suitable for all scenarios. Typical choices  are random forests or Gaussian processes `(lrn("regr.km"))`, which we will use here.
+Any regression learner in `mlr3` can be used. However, most acquisition functions depend on both mean and standard deviation predictions from the surrogate model, the latter of which requires the `"se"` `predict_type` to be supported. Therefore not all learners are suitable for all scenarios. Typical choices  are random forests or Gaussian processes `(lrn("regr.km"))`, which we will use here. You can learn more about Gaussian processes in Williams and Rasmussen ([2006](https://gaussianprocess.org/gpml/chapters/RW.pdf)). 
 
 ```{r}
 lrn_gp = lrn("regr.km", covtype = "matern5_2", optim.method = "BFGS",
   control = list(trace = FALSE))
 ```
+
+The Matérn covariance function is a kernel used in Gaussian processes to model the smoothness of the random function, offering a flexible class of smoothness parameters. The BFGS algorithm is a type of quasi-Newton method used for optimization, particularly effective in maximizing the likelihood in Gaussian process models by efficiently finding parameter estimates.
 
 A `SurrogateLearner` can be constructed by passing a `LearnerRegr` object to the sugar function `srlrn()`, alongside the archive of the instance:
 
