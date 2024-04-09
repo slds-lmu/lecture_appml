@@ -216,7 +216,25 @@ instance$result
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("-->")
 ```
+## Analyzing the tuning archive
 
+Inspect the archive of hyperparameters evaluated during the tuning process with `instance$archive`. Create a simple plot with the goal of illustrating the association between the hyperparametere `k` and the estimated classification error.
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+```{r}
+plot(x = instance$archive$data$k, y = instance$archive$data$classif.ce)
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
 
 ## Visualizing hyperparameters
 
