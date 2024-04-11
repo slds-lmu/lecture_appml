@@ -325,11 +325,48 @@ ps(
 cat("-->")
 ```
 
+## Hyperparameter transformations
+
+When tuning non-negative hyperparameters with a broad range, using a logarithmic scale can be more efficient. This approach works especially well if we want to test many small values, but also a few very large ones. By selecting values on a logarithmic scale and then exponentiating them, we ensure a concentrated exploration of smaller values while still considering the possibility of very large values, allowing for a targeted and efficient search in finding optimal hyperparameter configurations.
+
+A simple way to do this is to pass `logscale = TRUE` when using `to_tune()` to define the parameter search space while constructing the learner:
+
+```{r}
+lrn("classif.svm", cost = to_tune(1e-5, 1e5, logscale = TRUE))$
+  param_set$search_space()
+```
+
+To manually create the same transformation, we can pass the transformation to the more general `trafo` argument in `p_dbl()` and related functions and set the bounds using the `log()` function. For the following search space, implement a logarithmic transformation. the output should look exactly as the search space above.
+
+```{r, eval = FALSE}
+# Change this to a log trafo:
+ps(cost = p_dbl(1e-5, 1e5))
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+```{r}
+search_space = ps(cost = p_dbl(log(1e-5), log(1e5),
+  trafo = function(x) exp(x))) # alternatively: 'trafo = exp'
+search_space
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
 # Summary
 
 - In this use-case we learned how to define search spaces for learner HPs.
-- Based on this search space, we defined a tuning strategy to try 40 random configurations.
+- Based on this search space, we defined a tuning strategy to try a number of random configurations.
 - We visualized the tested configurations to get an idea how the HP effect the performance of our learner.
+- We learned about scale transformations in tuning.
 - Finally we added a transformation to favor a certain range in the parameter space.
 
 # Further information
