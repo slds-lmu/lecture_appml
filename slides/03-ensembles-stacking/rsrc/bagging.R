@@ -34,11 +34,11 @@ tree = lrn("regr.rpart", minsplit = 5)
 tree$id = "tree"
 
 bagging100 = GraphLearner$new(ppl("greplicate",
-  po("subsample") %>>%
-  po("learner", lrn("regr.rpart", minsplit = 5)),
-  n = 100
-) %>>%
-  po("regravg"),
+    po("subsample") %>>%
+      po("learner", lrn("regr.rpart", minsplit = 5)),
+    n = 100
+  ) %>>%
+    po("regravg"),
   id = "bagging10"
 )
 
@@ -53,7 +53,6 @@ x_test = test_data$x
 y_test = do.call(cbind, test_data$y)
 
 results = map(list(tree, bagging100), function(learner) {
- 
   y_predict = matrix(0, nrow = n_test, ncol = n_repeat)
 
   for (i in seq_len(n_repeat)) {
@@ -74,20 +73,14 @@ results = map(list(tree, bagging100), function(learner) {
   y_noise = apply(y_test, MARGIN = 1L, FUN = var)
   y_bias = (f(x_test) - apply(y_predict, MARGIN = 1L, FUN = mean)) ^ 2
   y_var = apply(y_predict, MARGIN = 1L, FUN = var)
-  
-  
   list(learner_id = learner$id, y_error = y_error, y_noise = y_noise, y_bias = y_bias, y_var = y_var, y_predict = y_predict)
 })
 
-
-# FIXME: automate, prettify labels and legends, ...
-
 p_top = ggplot() +
   geom_line(data = data.table(x = x_test, y = f(x_test)), aes(x = x, y = y, colour = "f(x)")) +
-  geom_point(data = data.table(x = tasks[[1]]$data(cols = "x")[[1]], y = tasks[[1]]$data(cols = "y")[[1]]), aes(x = x, y = y, colour = "y ~ f(x) + e")) + 
+  geom_point(data = data.table(x = tasks[[1]]$data(cols = "x")[[1]], y = tasks[[1]]$data(cols = "y")[[1]]), aes(x = x, y = y, colour = "y = f(x) + e")) +
   geom_step(data = data.table(x = x_test, y = results[[1]]$y_predict[, 1]), aes(x = x, y = y, colour = "y^(x)")) +
   geom_step(data = data.table(x = x_test, y = apply(results[[1]]$y_predict, MARGIN = 1L, FUN = mean)), aes(x = x, y = y, colour = "E[y^(x)]"))
-
 
 for (i in seq_len(n_repeat)[-1]) {
   p_top = p_top + geom_step(data = data.table(x = x_test, y = results[[1]]$y_predict[, i]), aes(x = x, y = y), colour = "red", alpha = 0.05)
@@ -95,10 +88,11 @@ for (i in seq_len(n_repeat)[-1]) {
 
 p_top = p_top +
   theme_minimal() +
-  theme(legend.position = "bottom") +
+  theme(legend.position = "bottom", plot.title = element_text(size = 22), legend.text = element_text(size = 16)) +
   labs(x = "x", y = "", title = "Tree") +
   scale_colour_manual(name = "",
-    values = c("f(x)" = "black", "y ~ f(x) + e" = "blue", "y^(x)" = "red", "E[y^(x)]" = "mediumturquoise"))
+    values = c("f(x)" = "black", "y = f(x) + e" = "blue", "y^(x)" = "red", "E[y^(x)]" = "mediumturquoise"),
+    labels = c(expression(f(x)), expression(y == f(x) + e), expression(hat(y)), expression(E(hat(y)))))
 
 p_bottom = ggplot() +
   geom_line(data = data.table(x = x_test, y = results[[1]]$y_error), aes(x = x, y = y, colour = "error(x)")) +
@@ -108,11 +102,12 @@ p_bottom = ggplot() +
 
 p_bottom = p_bottom +
   theme_minimal() +
-  theme(legend.position = "bottom") +
+  theme(legend.position = "bottom", legend.text = element_text(size = 16)) +
   labs(x = "x", y = "") +
   ylim(c(0, 0.15)) +
   scale_colour_manual(name = "",
-    values = c("error(x)" = "red", "bias(x)^2" = "blue", "variance(x)" = "darkgreen", "noise(x)" = "mediumturquoise"))
+    values = c("error(x)" = "red", "bias(x)^2" = "blue", "variance(x)" = "darkgreen", "noise(x)" = "mediumturquoise"),
+    labels = c(expression(error(x)), expression(bias(x)^2), expression(variance(x)), expression(noise(x))))
 
 p = plot_grid(p_top, p_bottom, nrow = 2, ncol = 1)
 
@@ -120,10 +115,9 @@ ggsave("../figure_man/bagging_variance_bias_tree.png")
 
 p_top = ggplot() +
   geom_line(data = data.table(x = x_test, y = f(x_test)), aes(x = x, y = y, colour = "f(x)")) +
-  geom_point(data = data.table(x = tasks[[1]]$data(cols = "x")[[1]], y = tasks[[1]]$data(cols = "y")[[1]]), aes(x = x, y = y, colour = "y ~ f(x) + e")) + 
+  geom_point(data = data.table(x = tasks[[1]]$data(cols = "x")[[1]], y = tasks[[1]]$data(cols = "y")[[1]]), aes(x = x, y = y, colour = "y = f(x) + e")) +
   geom_step(data = data.table(x = x_test, y = results[[2]]$y_predict[, 1]), aes(x = x, y = y, colour = "y^(x)")) +
   geom_step(data = data.table(x = x_test, y = apply(results[[2]]$y_predict, MARGIN = 1L, FUN = mean)), aes(x = x, y = y, colour = "E[y^(x)]"))
-
 
 for (i in seq_len(n_repeat)[-1]) {
   p_top = p_top + geom_step(data = data.table(x = x_test, y = results[[2]]$y_predict[, i]), aes(x = x, y = y), colour = "red", alpha = 0.05)
@@ -131,10 +125,11 @@ for (i in seq_len(n_repeat)[-1]) {
 
 p_top = p_top +
   theme_minimal() +
-  theme(legend.position = "bottom") +
+  theme(legend.position = "bottom", plot.title = element_text(size = 22), legend.text = element_text(size = 16)) +
   labs(x = "x", y = "", title = "Bagging 100 Trees") +
   scale_colour_manual(name = "",
-    values = c("f(x)" = "black", "y ~ f(x) + e" = "blue", "y^(x)" = "red", "E[y^(x)]" = "mediumturquoise"))
+    values = c("f(x)" = "black", "y = f(x) + e" = "blue", "y^(x)" = "red", "E[y^(x)]" = "mediumturquoise"),
+    labels = c(expression(f(x)), expression(y == f(x) + e), expression(hat(y)), expression(E(hat(y)))))
 
 p_bottom = ggplot() +
   geom_line(data = data.table(x = x_test, y = results[[2]]$y_error), aes(x = x, y = y, colour = "error(x)")) +
@@ -144,13 +139,13 @@ p_bottom = ggplot() +
 
 p_bottom = p_bottom +
   theme_minimal() +
-  theme(legend.position = "bottom") +
+  theme(legend.position = "bottom", legend.text = element_text(size = 16)) +
   labs(x = "x", y = "") +
   ylim(c(0, 0.15)) +
   scale_colour_manual(name = "",
-    values = c("error(x)" = "red", "bias(x)^2" = "blue", "variance(x)" = "darkgreen", "noise(x)" = "mediumturquoise"))
+    values = c("error(x)" = "red", "bias(x)^2" = "blue", "variance(x)" = "darkgreen", "noise(x)" = "mediumturquoise"),
+    labels = c(expression(error(x)), expression(bias(x)^2), expression(variance(x)), expression(noise(x))))
 
 p = plot_grid(p_top, p_bottom, nrow = 2, ncol = 1)
 
 ggsave("../figure_man/bagging_variance_bias_100_trees.png")
-

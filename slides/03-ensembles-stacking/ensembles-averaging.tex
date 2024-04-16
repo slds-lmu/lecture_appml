@@ -27,14 +27,26 @@
 
 \begin{vbframe}{What is Ensembling?}
 
-In general:
 \vspace{1em}
-\begin{itemize}
-    \item Combine the predictions of models
-    \item Make weak learners strong
-    \item Make strong learners stronger
-    \item Also: Ensembling effectively \textit{solves} the problem of model selection
-\end{itemize}
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+        \vspace{-1em}
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.75\textwidth]{slides/03-ensembles-stacking/figure/Ensembling.pdf}
+            %\caption{Caption}
+            \label{fig:ensembling}
+        \end{figure}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+        \begin{itemize}
+            \item Combine the predictions of models
+            \item Make weak learners strong
+            \item Make strong learners stronger
+            \item Also: Ensembling effectively \textit{solves} the problem of model selection
+        \end{itemize}
+    \end{column}
+\end{columns}
 
 \end{vbframe}
 
@@ -42,7 +54,7 @@ In general:
 
 \begin{vbframe}{Recap: Bagging}
 
-Bootstrap Aggregating: Training multiple instances of the same base model on different subsets of the training data, obtained through random sampling with replacement $\rightarrow$ homogeneous ensembling
+Bootstrap Aggregating: Training multiple instances of the same base model on different subsets of the training data, obtained through random sampling with replacement $\rightarrow$ homogeneous
 \vspace{1em}
 \begin{columns}
     \begin{column}{0.6\textwidth}
@@ -72,57 +84,43 @@ Popular use case: Construction of RF using trees as base models
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Recap: Bagging}
-
-Why ?
-\vspace{1em}
-\begin{columns}
-    \begin{column}{0.6\textwidth}
-        \vspace{-1em}
-        \begin{figure}
-            \centering
-            \includegraphics{slides/03-ensembles-stacking/figure_man/bagging_variance_bias_tree.png}
-            %\caption{Caption}
-            % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
-            \label{fig:bagging_tree}
-        \end{figure}
-    \end{column}
-    \begin{column}{0.4\textwidth}
-        Bias vs. variance trade-off
-        \begin{itemize}
-            \item Error = Variance + Bias + Noise
-        \end{itemize}
-    \end{column}
-\end{columns}
+Bias vs. variance: Error = Variance + Bias + Noise
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{slides/03-ensembles-stacking/figure_man/bagging_variance_bias_tree.png}
+    %\caption{Caption}
+    \label{fig:bagging_tree}
+\end{figure}
 
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Recap: Bagging}
-
-Why ?
-\vspace{1em}
+Bias vs. variance bagging: Variance reduction through averaging; Bias of model is slightly increased as less data are seen\\
 \begin{columns}
-    \begin{column}{0.6\textwidth}
+    \begin{column}{0.5\textwidth}
+        \vspace{-1em}
+        \begin{figure}
+            \centering
+            \includegraphics{slides/03-ensembles-stacking/figure_man/bagging_variance_bias_tree.png}
+            %\caption{Caption}
+            \label{fig:bagging_tree2}
+        \end{figure}
+    \end{column}
+    \begin{column}{0.5\textwidth}
         \vspace{-1em}
         \begin{figure}
             \centering
             \includegraphics{slides/03-ensembles-stacking/figure_man/bagging_variance_bias_100_trees.png}
             %\caption{Caption}
-            % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
             \label{fig:bagging_trees}
         \end{figure}
     \end{column}
-    \begin{column}{0.4\textwidth}
-        Bias vs. variance trade-off
-        \begin{itemize}
-            \item Variance reduction through averaging
-            \item Bias of model is slightly increased as less data are seen 
-        \end{itemize}
-        Works well for unstable learners.\\
-        NB: RF also uses col subsampling
-    \end{column}
 \end{columns}
+Works well for unstable learners\\
+\vspace{1em}
+NB: RF also uses col subsampling
 
 \end{vbframe}
 
@@ -141,9 +139,8 @@ Well known frameworks:
     \item Model Based Boosting
 \end{itemize}
 \vspace{1em}
-Different from other ensembling methods as ensemble is built sequentially.
+Ensemble is built sequentially
 %Steps:
-
 %begin{itemize}
 %\item Initial model training:
 %\item Weight update
@@ -168,19 +165,19 @@ Different from other ensembling methods as ensemble is built sequentially.
 % ------------------------------------------------------------------------------
 \begin{vbframe}{Model Averaging}
 
-Definition: Combine predictions of multiple (different) models to make a final prediction $\rightarrow$ heterogeneous ensembling
+Combine predictions of multiple (different) models to make a final prediction $\rightarrow$ heterogeneous
 \begin{columns}
-    \begin{column}{0.5\textwidth}
+    \begin{column}{0.6\textwidth}
         \vspace{-1em}
         \begin{figure}
             \centering
-            \includegraphics{slides/03-ensembles-stacking/figure/voting.png}
+            \includegraphics[width=0.7\textwidth]{slides/03-ensembles-stacking/figure/voting.png}
             %\caption{Caption}
             % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
             \label{fig:voting}
         \end{figure}
     \end{column}
-    \begin{column}{0.5\textwidth}
+    \begin{column}{0.4\textwidth}
         Steps:
         \begin{enumerate}
             \item Base model training
@@ -188,12 +185,6 @@ Definition: Combine predictions of multiple (different) models to make a final p
         \end{enumerate}
     \end{column}
 \end{columns}
-\vspace{1em}
-\end{vbframe}
-
-% ------------------------------------------------------------------------------
-
-\begin{vbframe}{Model Averaging}
 Classification: majority voting (hard voting) / model averaging (soft voting)
 \begin{itemize}
     \item $\fMx = \text{mode}(\{\hblx[1], \ldots, \hblx[M]\})$ assuming hard label predictions
@@ -204,23 +195,24 @@ Regression: model averaging
 \begin{itemize}
     \item $\fMx = \frac{1}{M} \sum_{m = 1}^{M} \hblx[m]$
 \end{itemize}
+\vspace{1em}
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Weighted Model Averaging}
-Assume a set of $M$ different models trained on $\D$.\\
+Assume a set of $M$ different models obtained from data $\D$ using a resampling $\mathcal{J}$.\\
 \vspace{1em}
-We can also introduce weights $\mathbf{w} = (w_{1}, \ldots, w_{M}), \text{usually: } 0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$ accounting for the contribution of each individual model to the prediction of the ensemble (e.g., predicting positive class probabilities):\\
+Introduce weights $\mathbf{w} = (w_{1}, \ldots, w_{M}), \text{usually: } 0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$ for the contribution of each individual model to the prediction of the ensemble (e.g., predicting positive class probabilities):\\
 \vspace{1em}
 $\fMwx = \frac{1}{M} \sum_{m = 1}^{M} w_{m} \cdot \sblx[m]$\\
-\vspace{1em}
-Find the optimal weight vector $\mathbf{w}^{*}$ so that the estimated (via a resampling method $\mathcal{J}$) generalization error (based on a performance metric $\rho$ or loss function $L$) of the ensemble is optimal:\\
-$$\wstar \coloneqq \argoptlim_{\w \in \R^{M}} \GEh\left(\fMw, \mathcal{J}, \rho\right)$$
-%$\argoptlim_{\mathbf{w} \in \R^{M}} \frac{1}{n} \sum_{i = 1}^{n} L(y^{(i)}, \fMwxi)$\\
+\begin{figure}
+    \centering
+    \includegraphics[width=0.375\textwidth]{slides/03-ensembles-stacking/figure/Weighted_Model_Averaging.pdf}
+    %\caption{Caption}
+    \label{fig:weighted_model_averaging}
+\end{figure}
 
-\vspace{1em}
-If performance metric/loss function unknown a priori (e.g. as in AutoML) $\rightarrow$ black box
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
@@ -228,42 +220,53 @@ If performance metric/loss function unknown a priori (e.g. as in AutoML) $\right
 \begin{vbframe}{Example: Weighted Model Averaging}
 % rsrc/ensembles_averaging.R
 We fit different learners on the sonar task and evaluate their performance using balanced accuracy (BACC) via a simple holdout (2/3 vs. 1/3) stratified for the target:
-\begin{itemize}
-    \item random forest: BACC = 0.761
-    \item k-NN ($k = 7$): BACC = 0.776
-    \item logistic regression: BACC = 0.707
-\end{itemize}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lc}
+\hline
+\textbf{Learner} & \textbf{BACC} (Test) \\
+\hline
+RF & 0.834 \\
+k-NN (k=7) & 0.792 \\
+Log. Reg. & 0.695 \\
+Model Averaging (Equal Weights) & 0.796 \\
+Model Averaging ($\w = (0.75, 0.05, 0.20)^\intercal)$ & 0.810 \\
+\hline
+\end{tabular}
+\label{table:learners_test}
+\end{table}
 \vspace{1em}
-Model averaging with equal weights, $w_{i} = \frac{1}{3}~\forall i \in \{1, \ldots 3\}$: BACC = 0.765\\
+How can we find 'good' weights?\\
 \vspace{1em}
-Different weight vector, $\w = (0.85, 0.10, 0.05)^\intercal$: BACC = 0.815\\
+NB: Model averaging with equal weights will not result in better performance out of the box; depends on types of learners, their diversity in predictions, ...
 \end{vbframe}
 
-\begin{vbframe}{Weighted Model Averaging}
-Difficulty of the optimization problem depends on the performance metric/loss function:
+\begin{vbframe}{Weighted Model Averaging Continued}
+Find the optimal weight vector $\mathbf{w}^{*}$ s.t. the estimated generalization error (based on a performance metric $\rho$ or loss function $L$) of the ensemble is optimal:\\
+$$\wstar \coloneqq \argoptlim_{\w \in \R^{M}} \GEh\left(\fMw, \mathcal{J}, \rho\right)$$
+%$\argoptlim_{\mathbf{w} \in \R^{M}} \frac{1}{n} \sum_{i = 1}^{n} L(y^{(i)}, \fMwxi)$\\
+\vspace{1em}
+Performance metric/loss function unknown a priori (e.g. as in AutoML) $\rightarrow$ black box optimization problem\\
+\vspace{1em}
+Difficulty of the optimization problem depends on the metric/loss function:
 \begin{itemize}
-    \item MSE (regression) $L_{\mathrm{MSE}}(y^{(i)}, \fMwxi) = (y^{(i)} - \fMwxi)^{2}$
-    \item Constraints of the form $0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$
-    \item Then $\argminlim_{\w \in \R^{M}} \GEh(\fMw, \mathcal{J}, L_{\mathrm{MSE}})$ s.t. $0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$ can be written as a quadratic program
-    \item 0-1 loss (binary classification), then the optimization problem is np-hard
+    \item MSE (regression) $L_{\mathrm{MSE}}(y^{(i)}, \fMwxi) = (y^{(i)} - \fMwxi)^{2}$;\\
+          Constraints of the form $0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$;\\
+        $\argminlim_{\w \in \R^{M}} \GEh(\fMw, \mathcal{J}, L_{\mathrm{MSE}})$ s.t. $0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$ can be written as a quadratic program
+    \item 0-1 loss (binary classification); the optimization problem is np-hard
 \end{itemize}
 \vspace{1em}
-In practice, we rely on the following methods to solve the optimization problem:
-\begin{itemize}
-    \item black box optimizers
-    \item greedy ensemble selection
-    \item linear model $\rightarrow$ stacking
-\end{itemize}
+In practice, we use black box optimizers, greedy ensemble selection, or a linear model (stacking)
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Greedy Ensemble Selection}
-Assume a set of $M$ different base models trained on $\D$.\\
+Assume a set of $M$ different models obtained from data $\D$ using a resampling $\mathcal{J}$.\\
 We now want to optimize the weights used in weighted model averaging.\\
 \vspace{1em}
 Greedy ensemble selection (GES) is one of the most popular methods to do so:\\\
-\vspace{1em}
 \begin{enumerate}
     \item Start with the empty ensemble
     \item Add the base model that maximizes the ensembles' performance metric on a hillclimb (validation) set
@@ -271,53 +274,61 @@ Greedy ensemble selection (GES) is one of the most popular methods to do so:\\\
     \item Return the ensemble from the set of generated ensembles that has the best performance on the validation set
 \end{enumerate}
 \vspace{1em}
-NB: ensemble selection effectively optimizes the weights on an integer domain (i.e., base models are selected one or multiple times or not at all\footnote{This also has the (positive) side-effect of resulting in a sparse weight vector}.)
+NB: GES optimizes the weights on an integer domain (i.e., base models are selected one or multiple times or not at all\footnote{This has the (positive) side-effect of resulting in a sparse weight vector}.)
 \end{vbframe}
 
 %------------------------------------------------------------------------------
 
-\foreach \slide in {1,...,31} {
-    \begin{vbframe}{Example: Greedy Ensemble Selection}
-        \includegraphics[page=\slide, width=\textwidth]{slides/03-ensembles-stacking/figure/GES.pdf}
-    \end{vbframe}
-}
+\begin{vbframe}{Example: GES}
+\begin{table}[h]
+\footnotesize
+\centering
+\begin{tabular}{lccccc}
+\hline
+\textbf{Iter} & \textbf{Sel. Learners} & \textbf{Current BACC} (Valid) & \multicolumn{3}{c}{\textbf{BACC if Learner added} (Valid)}\\ \cline{4-6}
+& & & RF & k-NN & Log. Reg.\\ \hline
+1  & $\{$RF: 0, k-NN: 0, Log. Reg.: 0$\}$ & NA    & \textbf{0.837} & 0.809 & 0.766\\
+2  & $\{$RF: 1, k-NN: 0, Log. Reg.: 0$\}$ & 0.837 & \textbf{0.837} & 0.809 & 0.766\\
+3  & $\{$RF: 2, k-NN: 0, Log. Reg.: 0$\}$ & 0.837 & \textbf{0.837} & 0.809 & 0.809\\
+4  & $\{$RF: 3, k-NN: 0, Log. Reg.: 0$\}$ & 0.837 & \textbf{0.837} & 0.769 & 0.832\\
+5  & $\{$RF: 4, k-NN: 0, Log. Reg.: 0$\}$ & 0.837 & 0.837 & 0.792 & \textbf{0.855}\\
+6  & $\{$RF: 4, k-NN: 0, Log. Reg.: 1$\}$ & 0.855 & 0.897 & \textbf{0.917} & 0.809\\
+7  & $\{$RF: 4, k-NN: 1, Log. Reg.: 1$\}$ & \textbf{0.917} & \textbf{0.917} & 0.895 & 0.809\\
+8  & $\{$RF: 5, k-NN: 1, Log. Reg.: 1$\}$ & 0.917 & \textbf{0.897} & 0.875 & 0.875\\
+9  & $\{$RF: 6, k-NN: 1, Log. Reg.: 1$\}$ & 0.897 & \textbf{0.877} & 0.875 & 0.875\\
+10 & $\{$RF: 7, k-NN: 1, Log. Reg.: 1$\}$ & 0.877 & 0.857 & 0.855 & \textbf{0.917}\\
+11 & $\{$RF: 7, k-NN: 1, Log. Reg.: 2$\}$ & 0.917 & ... & ... & ...\\
+\hline
+\end{tabular}
+\label{table:learners_valid_test}
+\end{table}
+Best iteration: 6 with BACC (Valid) of $0.917$\\
+$\rightarrow$ $\{$RF: 4, k-NN: 1, Log. Reg.: 1$\}$\\
+$\rightarrow$ $\wstar = (\frac{4}{6}, \frac{1}{6}, \frac{1}{6})^\intercal$
+\end{vbframe}
 
 %------------------------------------------------------------------------------
 
 \begin{vbframe}{Example: Conclusion}
-Validation Performance:
-\begin{itemize}
-    \item random forest: 0.761, k-NN: 0.776, logistic regression: 0.707
-    \item weighted model averaging equal weights ($\w = (\frac{1}{3}, \frac{1}{3}, \frac{1}{3})^\intercal$): 0.765
-    \item weighted model averaging custom weights ($\w = (0.85, 0.10, 0.05)^\intercal$): 0.815
-    \item GES with resulting weights $\w = (\frac{5}{6}, \frac{1}{6}, 0)^\intercal$: 0.846
-\end{itemize}
+\begin{table}[h]
+\centering
+\begin{tabular}{lcc}
+\hline
+\textbf{Learner} & \textbf{BACC} (Valid) & \textbf{BACC} (Test) \\
+\hline
+RF & 0.837 & 0.834 \\
+k-NN (k=7) & 0.809 & 0.792 \\
+Log. Reg. & 0.766 & 0.695 \\
+Model Averaging (Equal Weights) & 0.832 & 0.796 \\
+Model Averaging ($\w = (0.75, 0.05, 0.20)^\intercal)$ & 0.875 & 0.810 \\
+Model Averaging (GES: $\wstar = (\frac{4}{6}, \frac{1}{6}, \frac{1}{6})^\intercal$) & 0.917 & 0.864\\
+\hline
+\end{tabular}
+\label{table:learners_valid_test}
+\end{table}
 \vspace{1em}
-Caveat: Optimizing weights can (and often does) overfit to the validation data\\
-\vspace{1em}
-Test Performance:
-\begin{itemize}
-    \item
-    \item 
-    \item
-\end{itemize}
+NB: Optimizing weights can (and often does) overfit to the validation data; especially if standard black box optimizers are used\\
 \end{vbframe}
-
-%\begin{vbframe}{Example: Sonar Task}
-% rsrc/ensembles_averaging.R
-%Assume we performed 10 iterations of GES:
-%\begin{itemize}
-%    \item Selection IDs:\\
-%    \{1: random forest, 2: k-NN, 3: log. reg.\}
-%    \item (Hypothetical) ensemble selection vector after 10 iterations:\\
-%    $(2, 1, 1, 1, 1, 1, 1, 2, 1, 1)$
-%    \item Corresponding performance values (BACC on the validation set) of the ensemble constructed based on the $i$-th iteration:\\
-%    $(0.776, 0.788, 0.817, 0.830, 0.830, \textbf{0.846}, 0.830, 0.830, \textbf{0.846}, 0.830$
-%    \item We select the ensemble based on the $6$-th iteration\\
-%    $\rightarrow$ selection vector of $(2, 1, 1, 1, 1, 1)$\\
-%    $\rightarrow \mathbf{w} = \left( \frac{5}{6}, \frac{1}{6}, 0 \right)^\intercal \approx \left( \underbrace{0.833}_{\text{random forest}}, \underbrace{0.167}_{\text{k-NN}}, \underbrace{0}_{\text{log. reg}} \right)^\intercal$
-%    \end{itemize}
-%\end{vbframe}
 
 %------------------------------------------------------------------------------
 
@@ -326,6 +337,7 @@ Test Performance:
 %    \item Stacking books from Lennart P.
 %    \item Maybe reference the whole diversity is good in ensembling debate etc.
 %    \item GES paper Caruana 2004
+%    \item Lennart P. 2 papers
 %\end{itemize}
 \end{vbframe}
 
