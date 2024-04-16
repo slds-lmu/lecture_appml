@@ -411,6 +411,48 @@ misclassified by our logistic regression model.
 cat("-->")
 ```
 
+## Predicting probabilities instead of labels
+
+Similarly, we can assess the performance of our model using the AUC. However, this requires predicted probabilities instead of predicted labels. Evaluate the model using the AUC. To do so, retrain the model with a learner that returns probabilities.
+
+<details>
+<summary>**Hint 1:**</summary>
+
+You can generate predictions with probabilities by specifying a `predict_type` argument inside the `lrn()` function call when constructing a learner.
+
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+
+You can get an overview of performance measures in mlr3 using `as.data.table(msr())`.
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+```{r}
+# Train a learner
+logreg = lrn("classif.log_reg", predict_type = "prob")
+logreg$train(task)
+# Generate predictions
+pred_logreg = logreg$predict_newdata(test_set)
+# Evaluate performance using AUC
+measure = msrs(c("classif.auc"))
+pred_logreg$score(measure)
+```
+
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
 # Summary
 
 In this exercise sheet we learned how to fit a logistic regression model on
