@@ -187,7 +187,7 @@ As we have a classification task here, make sure you properly specify the class 
 <details>
 <summary>**Hint 1:**</summary>
 
-Use either `TaskClassif$new()` or `as_task_classif()`.
+Use e.g. `as_task_classif()` to create a classification task.
 
 </details>
 
@@ -196,7 +196,7 @@ Use either `TaskClassif$new()` or `as_task_classif()`.
 
 ```{r, eval=FALSE}
 library(mlr3verse)
-task = TaskClassif$new("german_credit", backend = ..., target = ..., positive = ...)
+task = as_task_classif(x = ..., target = ..., ... = "good")
 ```
 
 </details>
@@ -235,7 +235,7 @@ Fit a logistic regression model to the `german_credit` training task.
 <details>
 <summary>**Hint 1:**</summary>
 
-Use `lrn()` or `LearnerClassif$new()` to initialize a `Learner` object.
+Use `lrn()` to initialize a `Learner` object.
 The short cut and therefore input to this method is `"classif.log_reg"`.
 
 To train a model, use the `$train()` method of your instantiated learner
