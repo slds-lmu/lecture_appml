@@ -268,10 +268,9 @@ termination criteria we choose 40 evaluations.</p>
 (<code>msr(&quot;classif.ce&quot;)</code> for classification and
 <code>msr(&quot;classif.mse&quot;)</code> for regression)</li>
 </ul>
-The tuning instance is then defined by calling
-<code>TuningInstanceSingleCrit$new()</code>. The random search
-optimization algorithm is obtained from <code>tnr()</code> with the
-corresponding key as argument. Furthermore, we allow parallel
+The tuning instance is then defined by calling <code>ti()</code>. The
+random search optimization algorithm is obtained from <code>tnr()</code>
+with the corresponding key as argument. Furthermore, we allow parallel
 computations and set the batch size as well as the number of cores to
 four.
 </details>
@@ -299,7 +298,7 @@ computations using four cores:</p>
 <span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a></span>
 <span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>terminator <span class="ot">=</span> <span class="fu">trm</span>(..., <span class="at">... =</span> 40L)</span>
 <span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a></span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>instance <span class="ot">=</span> TuningInstanceSingleCrit<span class="sc">$</span><span class="fu">new</span>(</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>instance <span class="ot">=</span> <span class="fu">ti</span>(</span>
 <span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>  <span class="at">task =</span> ...,</span>
 <span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>  <span class="at">learner =</span> ...,</span>
 <span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>  <span class="at">resampling =</span> ...,</span>
@@ -337,7 +336,7 @@ resampling = rsmp("cv", folds = 3L)
 
 terminator = trm("evals", n_evals = 40L)
 
-instance = TuningInstanceSingleCrit$new(
+instance = ti(
   task = task,
   learner = lrn_knn,
   resampling = resampling,
@@ -366,7 +365,7 @@ task = tsk("german_credit")
 lrn_knn = lrn("classif.kknn", k = to_tune(1, 100), scale = to_tune())
 ```
 
-This adjust the parameter set (`lrn_knn$param_set`) attached to the learner and flags it as "tunable". The tuning then makes use of that search space if no `search_space` is given in the `TuningInstanceSingleCrit$new()` construction:
+This adjust the parameter set (`lrn_knn$param_set`) attached to the learner and flags it as "tunable". The tuning then makes use of that search space if no `search_space` is given in the `ti()` construction:
 
 
 ```r
@@ -374,7 +373,7 @@ resampling = rsmp("cv", folds = 3L)
 
 terminator = trm("evals", n_evals = 40L)
 
-instance = TuningInstanceSingleCrit$new(
+instance = ti(
   task = task,
   learner = lrn_knn,
   resampling = resampling,

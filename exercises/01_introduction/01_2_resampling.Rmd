@@ -112,7 +112,7 @@ After having created a resampling instance, use it to apply the chosen resamplin
   </details>
 <details>
   <summary>**Show Hint 2:**</summary>
-  The key ingredients for `resample()` are a task (created by `TaskRegr$new()` or `tsk()`), a learner (created by `lrn()`) and a resampling strategy (created by `rsmp()`), e.g.,
+  The key ingredients for `resample()` are a task (created by `tsk()`), a learner (created by `lrn()`) and a resampling strategy (created by `rsmp()`), e.g.,
   
   `resample(task = task, learner = log_reg, resampling = cv5)`
 

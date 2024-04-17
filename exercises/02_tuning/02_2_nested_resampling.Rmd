@@ -30,7 +30,7 @@ Nested resampling evaluates a learner combined with a tuning strategy to correct
 
 ## The AutoTuner
 
-For this exercise, we use the same setup as for the tuning use-case with a 3-fold CV, `msr("classif.ce")` as performance measure, a random search, and a termination combination of 40 evaluations. Define an `AutoTuner` with `AutoTuner$new()` and train it on the `german_credit` task:
+For this exercise, we use the same setup as for the tuning use-case with a 3-fold CV, `msr("classif.ce")` as performance measure, a random search, and a termination combination of 40 evaluations. Define an `AutoTuner` with `auto_tuner()` and train it on the `german_credit` task:
 
 ```{r}
 library(mlr3verse)
@@ -44,7 +44,7 @@ The [`AutoTuner`](https://mlr3tuning.mlr-org.com/reference/AutoTuner.html) class
 
 <details>
 <summary>**Hint 1**</summary>
-The `AutoTuner` is defined by `AutoTuner$new()` by specifying the `learner`, `resampling`, `measure`, `terminator`, `search_space`, and the `tuner`. The `AutoTuner` then behaves like a normal learner. We can use `$train` to fit the `AutoTuner` (tuning + model fit on best HPC) with the `Autotuner`.
+The `AutoTuner` is defined by `auto_tuner()` by specifying the `learner`, `resampling`, `measure`, `terminator`, `search_space`, and the `tuner`. The `AutoTuner` then behaves like a normal learner. We can use `$train` to fit the `AutoTuner` (tuning + model fit on best HPC) with the `AutoTuner`.
 </details>
 
 <details>
@@ -70,7 +70,7 @@ terminator = trm("evals", n_evals = 40L)
 tuner = tnr("random_search", batch_size = 4L)
 
 # AutoTuner definition:
-at = AutoTuner$new(
+at = auto_tuner(
   learner = ...,
   resampling = ...,
   measure = ...,
@@ -112,7 +112,7 @@ terminator = trm("evals", n_evals = 40L)
 tuner = tnr("random_search", batch_size = 4L)
 
 # AutoTuner definition:
-at = AutoTuner$new(
+at = auto_tuner(
   learner = lrn_knn,
   resampling = resampling,
   measure = msr("classif.ce"),

@@ -93,7 +93,7 @@ The elements required for the tuning are:
 - Search space: See previous exercise
 - We use the default performance measure (`msr("classif.ce")` for classification and `msr("classif.mse")` for regression)
 
-The tuning instance is then defined by calling `TuningInstanceSingleCrit$new()`. 
+The tuning instance is then defined by calling `ti()`. 
 The random search optimization algorithm is obtained from `tnr()` with the corresponding key as argument.
 Furthermore, we allow parallel computations and set the batch size as well as the number of cores to four.
 </details>
@@ -121,7 +121,7 @@ resampling = rsmp(...)
 
 terminator = trm(..., ... = 40L)
 
-instance = TuningInstanceSingleCrit$new(
+instance = ti(
   task = ...,
   learner = ...,
   resampling = ...,
@@ -162,7 +162,7 @@ resampling = rsmp("cv", folds = 3L)
 
 terminator = trm("evals", n_evals = 40L)
 
-instance = TuningInstanceSingleCrit$new(
+instance = ti(
   task = task,
   learner = lrn_knn,
   resampling = resampling,
@@ -190,14 +190,14 @@ task = tsk("german_credit")
 lrn_knn = lrn("classif.kknn", k = to_tune(1, 100), scale = to_tune())
 ```
 
-This adjust the parameter set (`lrn_knn$param_set`) attached to the learner and flags it as "tunable". The tuning then makes use of that search space if no `search_space` is given in the `TuningInstanceSingleCrit$new()` construction:
+This adjust the parameter set (`lrn_knn$param_set`) attached to the learner and flags it as "tunable". The tuning then makes use of that search space if no `search_space` is given in the `ti()` construction:
 
 ```{r, eval=FALSE}
 resampling = rsmp("cv", folds = 3L)
 
 terminator = trm("evals", n_evals = 40L)
 
-instance = TuningInstanceSingleCrit$new(
+instance = ti(
   task = task,
   learner = lrn_knn,
   resampling = resampling,

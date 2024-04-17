@@ -651,15 +651,15 @@ predicting a probability for the creditworthiness of customers).</p>
 <summary>
 <strong>Hint 1:</strong>
 </summary>
-<p>Use either <code>TaskClassif$new()</code> or
-<code>as_task_classif()</code>.</p>
+<p>Use e.g. <code>as_task_classif()</code> to create a classification
+task.</p>
 </details>
 <details>
 <summary>
 <strong>Hint 2:</strong>
 </summary>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(mlr3verse)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>task <span class="ot">=</span> TaskClassif<span class="sc">$</span><span class="fu">new</span>(<span class="st">&quot;german_credit&quot;</span>, <span class="at">backend =</span> ..., <span class="at">target =</span> ..., <span class="at">positive =</span> ...)</span></code></pre></div>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>task <span class="ot">=</span> <span class="fu">as_task_classif</span>(<span class="at">x =</span> ..., <span class="at">target =</span> ..., <span class="at">... =</span> <span class="st">&quot;good&quot;</span>)</span></code></pre></div>
 </details>
 <!--
 
@@ -702,9 +702,9 @@ training task.</p>
 <summary>
 <strong>Hint 1:</strong>
 </summary>
-<p>Use <code>lrn()</code> or <code>LearnerClassif$new()</code> to
-initialize a <code>Learner</code> object. The short cut and therefore
-input to this method is <code>&quot;classif.log_reg&quot;</code>.</p>
+<p>Use <code>lrn()</code> to initialize a <code>Learner</code> object.
+The short cut and therefore input to this method is
+<code>&quot;classif.log_reg&quot;</code>.</p>
 <p>To train a model, use the <code>$train()</code> method of your
 instantiated learner with the task of the previous exercise as an
 input.</p>

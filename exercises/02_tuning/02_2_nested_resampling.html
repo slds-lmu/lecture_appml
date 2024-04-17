@@ -198,8 +198,8 @@ because information on the resampling splits may favour specific HPCs
 <p>For this exercise, we use the same setup as for the tuning use-case
 with a 3-fold CV, <code>msr(&quot;classif.ce&quot;)</code> as performance measure,
 a random search, and a termination combination of 40 evaluations. Define
-an <code>AutoTuner</code> with <code>AutoTuner$new()</code> and train it
-on the <code>german_credit</code> task:</p>
+an <code>AutoTuner</code> with <code>auto_tuner()</code> and train it on
+the <code>german_credit</code> task:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(mlr3verse)</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>task <span class="ot">=</span> <span class="fu">tsk</span>(<span class="st">&quot;german_credit&quot;</span>)</span></code></pre></div>
 <details>
@@ -217,13 +217,13 @@ best HPC and fit a model with that HPs to the full data set.
 <summary>
 <strong>Hint 1</strong>
 </summary>
-The <code>AutoTuner</code> is defined by <code>AutoTuner$new()</code> by
+The <code>AutoTuner</code> is defined by <code>auto_tuner()</code> by
 specifying the <code>learner</code>, <code>resampling</code>,
 <code>measure</code>, <code>terminator</code>,
 <code>search_space</code>, and the <code>tuner</code>. The
 <code>AutoTuner</code> then behaves like a normal learner. We can use
 <code>$train</code> to fit the <code>AutoTuner</code> (tuning + model
-fit on best HPC) with the <code>Autotuner</code>.
+fit on best HPC) with the <code>AutoTuner</code>.
 </details>
 <details>
 <summary>
@@ -249,7 +249,7 @@ fit on best HPC) with the <code>Autotuner</code>.
 <span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>tuner <span class="ot">=</span> <span class="fu">tnr</span>(<span class="st">&quot;random_search&quot;</span>, <span class="at">batch_size =</span> 4L)</span>
 <span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a></span>
 <span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co"># AutoTuner definition:</span></span>
-<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>at <span class="ot">=</span> AutoTuner<span class="sc">$</span><span class="fu">new</span>(</span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>at <span class="ot">=</span> <span class="fu">auto_tuner</span>(</span>
 <span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a>  <span class="at">learner =</span> ...,</span>
 <span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>  <span class="at">resampling =</span> ...,</span>
 <span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>  <span class="at">measure =</span> ...,</span>
@@ -288,7 +288,7 @@ terminator = trm("evals", n_evals = 40L)
 tuner = tnr("random_search", batch_size = 4L)
 
 # AutoTuner definition:
-at = AutoTuner$new(
+at = auto_tuner(
   learner = lrn_knn,
   resampling = resampling,
   measure = msr("classif.ce"),
