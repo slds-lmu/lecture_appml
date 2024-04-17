@@ -228,7 +228,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 plot(x = instance$archive$data$k, y = instance$archive$data$classif.ce)
 ```
 

@@ -1,6 +1,6 @@
 ---
-title: "Supervised Learning I"
-subtitle: "Resampling with mlr3"
+title: "Applied Machine Learning"
+subtitle: "In-class exercise 01-2"
 output:
   prettydoc::html_pretty:
     theme: hpstr

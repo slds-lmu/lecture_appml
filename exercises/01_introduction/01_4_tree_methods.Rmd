@@ -1,6 +1,6 @@
 ---
-title: "Supervised Learning II"
-subtitle: "Tree-based Models"
+title: "Applied Machine Learning"
+subtitle: "In-class exercise 01-4"
 output:
   prettydoc::html_pretty:
     theme: hpstr
