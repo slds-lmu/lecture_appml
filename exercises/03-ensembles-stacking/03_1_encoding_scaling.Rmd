@@ -1,37 +1,20 @@
 ---
-title: "Supervised Learning III"
-subtitle: "Categorical Feature Encoding and Scaling"
+title: "Applied Machine Learning"
+subtitle: "In-class exercise 03-1"
 output:
-  html_document:
+  prettydoc::html_pretty:
+    theme: hpstr
     toc: yes
     toc_depth: 2
-    css: ../../../../_setup/css/style-usecase.css
+    css: ../_template/prettydoc-hpstr.css
     self_contained: yes
 ---
 
-<!-- #FIXME: mlr3 codestyle -->
-
-```{r, echo = FALSE}
-if (!exists("show.solution")) {
-  show.solution = T
-}
+```{r, include=FALSE}
+sys.source("setup.R", envir = knitr::knit_global())
 ```
 
-```{r, include = FALSE}
-# Just some preparation
-knitr::opts_chunk$set(
-  cache = FALSE,
-  warning = FALSE,
-  message = FALSE,
-  echo = TRUE,
-  R.options = list(width = 120)
-)
-lgr::get_logger("mlr3")$set_threshold("warn")
-# SET BBOTK TO 'info' IF YOU PLAY AROUND WITH THIS!
-lgr::get_logger("bbotk")$set_threshold("info")
-```
-
-# Goals
+# Goal
 
 Learn how to do preprocessing steps directly on a mlr3 `Task` object and how to combine a preprocessing with a learner to create a simple linear ML pipeline that first applies the preprocessing and then trains a learner.
 

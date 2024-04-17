@@ -1,6 +1,6 @@
 ---
-title: ""
-subtitle: "XGboost"
+title: "Applied Machine Learning"
+subtitle: "In-class exercise 03-2"
 output:
   prettydoc::html_pretty:
     theme: hpstr
@@ -12,7 +12,6 @@ output:
 
 ```{r, include=FALSE}
 sys.source("setup.R", envir = knitr::knit_global())
-set.seed(123)
 ```
 
 # Goal
@@ -34,7 +33,7 @@ The dataset is available at the UCI repository as
 We first load the `.csv` file from the directory.
 
 ```{r}
-credit = read.csv("data/german_credit.csv", header = TRUE, stringsAsFactors = TRUE)
+credit = read.csv("../data/german_credit.csv", header = TRUE, stringsAsFactors = TRUE)
 ```
 
 To apply the XGBoost algorithm to the `credit` dataset, categorical features 

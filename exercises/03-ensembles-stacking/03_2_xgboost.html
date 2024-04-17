@@ -12,7 +12,7 @@
 
 
 
-<title>Supervised Learning III</title>
+<title>Applied Machine Learning</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -145,8 +145,8 @@ pointer-events: auto;
 <article class="hentry">
 <header class="header-title">
 <div class="header-title-wrap">
-<h1 class="title toc-ignore entry-title">Supervised Learning III</h1>
-<h2 class="subtitle">Bayesian Optimization</h2>
+<h1 class="title toc-ignore entry-title">Applied Machine Learning</h1>
+<h2 class="subtitle">In-class exercise 03-2</h2>
 </div><!-- /.header-title-wrap -->
 </header>
 
@@ -155,480 +155,667 @@ pointer-events: auto;
 <div id="TOC" class="toc">
 <ul>
 <li><a href="#goal" id="toc-goal">Goal</a></li>
-<li><a href="#introduction" id="toc-introduction">Introduction</a></li>
-<li><a href="#prerequisites" id="toc-prerequisites">Prerequisites</a></li>
-<li><a href="#building-blocks-of-bo" id="toc-building-blocks-of-bo">1
-Building Blocks of BO</a>
+<li><a href="#german-credit-dataset" id="toc-german-credit-dataset">German Credit Dataset</a>
 <ul>
-<li><a href="#initial-design" id="toc-initial-design">1.1 Initial
-design</a></li>
-<li><a href="#generate-data-from-initial-design" id="toc-generate-data-from-initial-design">1.2 Generate data from
-initial design</a></li>
-<li><a href="#train-surrogate-model" id="toc-train-surrogate-model">1.3
-Train surrogate model</a></li>
-<li><a href="#define-an-acquisition-function" id="toc-define-an-acquisition-function">1.4 Define an acquisition
-function</a></li>
-<li><a href="#optimize-acquisition-function" id="toc-optimize-acquisition-function">1.5 Optimize acquisition
-function</a></li>
+<li><a href="#preprocessing" id="toc-preprocessing">Preprocessing</a></li>
 </ul></li>
-<li><a href="#automating-bo-with-optimizermbo" id="toc-automating-bo-with-optimizermbo">2 Automating BO with
-<code>OptimizerMbo</code></a></li>
-<li><a href="#bo-for-hpo-with-tunermbo" id="toc-bo-for-hpo-with-tunermbo">3 BO for HPO with
-<code>TunerMbo</code></a></li>
+<li><a href="#exercises" id="toc-exercises">Exercises:</a>
+<ul>
+<li><a href="#initialize-a-xgboost-learner" id="toc-initialize-a-xgboost-learner">Initialize a XGBoost
+Learner</a></li>
+<li><a href="#performance-assessment-using-cross-validation" id="toc-performance-assessment-using-cross-validation">Performance
+Assessment using Cross-validation</a></li>
+<li><a href="#overview-of-hyperparameters" id="toc-overview-of-hyperparameters">Overview of
+Hyperparameters</a></li>
+<li><a href="#tune-hyperparameters" id="toc-tune-hyperparameters">Tune
+Hyperparameters</a></li>
+<li><a href="#inspect-the-the-best-performing-setup" id="toc-inspect-the-the-best-performing-setup">Inspect the the Best
+Performing Setup</a></li>
+<li><a href="#set-up-an-xgboost-learner-with-early-stopping" id="toc-set-up-an-xgboost-learner-with-early-stopping">Set up an XGBoost
+Learner with Early Stopping</a></li>
+<li><a href="#training-on-credit-data" id="toc-training-on-credit-data">Training on Credit Data</a></li>
+<li><a href="#extra-nested-resampling" id="toc-extra-nested-resampling">Extra: Nested Resampling</a></li>
+</ul></li>
 <li><a href="#summary" id="toc-summary">Summary</a></li>
 </ul>
 </div>
 
 <div id="goal" class="section level1">
 <h1>Goal</h1>
-<p>After this exercise, you should be able to control the resampling
-process when using <code>mlr3</code> in order to account for data
-specificities, such as class imbalances in classification settings or
-grouping phenomena. Further, you will have learned how to construct and
-utilize custom measures for performance evaluation within
-<code>mlr3</code>.</p>
+<p>Our goal for this exercise sheet is to understand how to apply and
+work with XGBoost. The XGBoost algorithm has a large range of
+hyperparameters. We learn specifically how to tune these hyperparameters
+to optimize our XGBoost model for the task at hand.</p>
 </div>
-<div id="introduction" class="section level1">
-<h1>Introduction</h1>
-<p>This section is a deep dive into Bayesian optimization (BO), also
-known as Model Based Optimization (MBO). BO is more complex than other
-tuning methods, so we will motivate theory and methodology first.</p>
-<p><strong>Black Box Optimization</strong></p>
-<p>In hyperparameter optimization, learners are passed a hyperparameter
-configuration and evaluated on a given task via a resampling technique
-to estimate its generalization performance with the goal to find the
-optimal hyperparameter configuration. In general, this is a black box
-optimization problem, which considers the optimization of a function
-whose mathematical structure is unknown or unexploitable. The only thing
-we can observe is the generalization performance of the function given a
-hyperparameter configuration. As evaluating the performance of a learner
-can take a lot of time, HPO is an expensive black box optimization
-problem.</p>
-<p><strong>Bayesian Optimization</strong></p>
-<p>There is many ways of doing black box optimization, grid and random
-search being examples for simple strategies. Bayesian optimization are a
-class of black box optimization algorithms that rely on a ‘surrogate
-model’ trained on observed data to model the black box function. This
-surrogate model tries to capture the unknown function between
-hyperparameter configuations and generalization performance using
-limited observed data. During each iteration, BO algorithms employ an
-‘acquisition function’ to determine the next candidate point for
-evaluation. This function measures the expected ‘utility’ of each point
-within the search space based on the prediction of the surrogate model.
-The algorithm then selects the candidate point with the best acquisition
-function value and evaluates the black box function at that point to
-then update the surrogate model. This iterative process continues until
-a termination criterion is met, such as reaching a pre-specified maximum
-number of evaluations or achieving a desired level of performance. BO is
-a powerful method that often results in good optimization performance,
-especially if the cost of the black box evaluation becomes expensive and
-the optimization budget is tight.</p>
-<p>In the rest of this section, we will first provide an introduction to
-black box optimization with the bbotk package and then introduce the
-building blocks of BO algorithms and examine their interplay and
-interaction during the optimization process before we assemble these
-building blocks in a ready to use black box optimizer with
-<code>mlr3mbo</code>.</p>
+<div id="german-credit-dataset" class="section level1">
+<h1>German Credit Dataset</h1>
+<p>As in previous exercises, we use the German credit dataset of
+Prof. Dr. Hans Hoffman of the University of Hamburg in 1994. By using
+XGBoost, we want to classify people as a good or bad credit risk based
+on 20 personal, demographic and financial features. The dataset is
+available at the UCI repository as <a href="https://archive.ics.uci.edu/ml/datasets/Statlog+%28German+Credit+Data%29">Statlog
+(German Credit Data) Data Set</a>.</p>
+<div id="preprocessing" class="section level2">
+<h2>Preprocessing</h2>
+<p>We first load the <code>.csv</code> file from the directory.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>credit <span class="ot">=</span> <span class="fu">read.csv</span>(<span class="st">&quot;../data/german_credit.csv&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>, <span class="at">stringsAsFactors =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p>To apply the XGBoost algorithm to the <code>credit</code> dataset,
+categorical features need to be converted into numeric features
+e.g. using one-hot-encoding. We use a factor encoding
+<code>PipeOp</code> from <code>mlr3pipelines</code> to do so.</p>
+<p>First, we setup a classification task from the data:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(mlr3verse)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>task <span class="ot">=</span> TaskClassif<span class="sc">$</span><span class="fu">new</span>(<span class="st">&quot;credit&quot;</span>, <span class="at">backend =</span> credit, <span class="at">target =</span> <span class="st">&quot;credit_risk&quot;</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>task<span class="sc">$</span>positive <span class="ot">=</span> <span class="st">&quot;good&quot;</span></span></code></pre></div>
+<p>Next, we can initialize a factor encoding and apply it to the task at
+hand.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>poe <span class="ot">=</span> <span class="fu">po</span>(<span class="st">&quot;encode&quot;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>task <span class="ot">=</span> poe<span class="sc">$</span><span class="fu">train</span>(<span class="fu">list</span>(task))[[<span class="dv">1</span>]]</span></code></pre></div>
 </div>
-<div id="prerequisites" class="section level1">
-<h1>Prerequisites</h1>
-<p>Let’s load the packages required for this exercise:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(bbotk)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(mlr3verse)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(mlr3mbo)</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span></code></pre></div>
-<p>Before we apply BO to hyperparamter optimization (HPO), we try to
-optimize the following simple sinusoidal function:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>sinus_1D <span class="ot">=</span> <span class="cf">function</span>(xs) <span class="dv">2</span> <span class="sc">*</span> xs<span class="sc">$</span>x1 <span class="sc">*</span> <span class="fu">sin</span>(<span class="dv">14</span> <span class="sc">*</span> xs<span class="sc">$</span>x1) <span class="sc">*</span> <span class="fu">sin</span>(xs<span class="sc">$</span>x2) <span class="sc">*</span> xs<span class="sc">$</span>x2</span></code></pre></div>
 </div>
-<div id="building-blocks-of-bo" class="section level1">
-<h1>1 Building Blocks of BO</h1>
-<p>Bayesian optimization (BO) usually follows this process:</p>
+<div id="exercises" class="section level1">
+<h1>Exercises:</h1>
+<p>Now that we have a preprocessed, one-hot-encoded dataset and can now
+train a XGBoost model.</p>
+<div id="initialize-a-xgboost-learner" class="section level2">
+<h2>Initialize a XGBoost Learner</h2>
+<p>Initialize a XGBoost <code>mlr3</code> learner with 100 iterations.
+Make sure that that you have installed the <code>xgboost</code> R
+package.</p>
+<details>
+<summary>
+<strong>Details on iterations:</strong>
+</summary>
+<p>The number of iterations must always be chosen by the user, since the
+hyperparameter has no proper default value in mlr3.</p>
+<p>“No proper default value” means that <code>mlr3</code> has an
+adjusted default of 1 iteration to avoid errors when constructing the
+learner. One single iteration is, in general, not a good default, since
+we only conduct a single boosting step.</p>
+<p>There is a trade-off between underfitting (not enough iterations) and
+overfitting (too many iterations). Therefore, it is always better to
+tune such a hyperparameter. In this exercise, we chose 100 iterations
+because we believe it is an upper bound for the number of iterations. We
+will later conduct early stopping to avoid overfitting.</p>
+</details>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<p>The number of iterations can be specified via the
+<code>nrounds</code> hyperparameter of the <code>classif.xgboost</code>
+learner, set this hyperparameter to <code>100</code>.</p>
+</details>
+<details>
+<summary>
+<strong>Hint 2:</strong>
+</summary>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>xgboost_lrn <span class="ot">=</span> <span class="fu">lrn</span>(..., <span class="at">nrounds =</span> ...)</span></code></pre></div>
+</details>
+<!--
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+
+```r
+xgboost_lrn = lrn("classif.xgboost", nrounds = 100L)
+```
+
+-->
+</div>
+<div id="performance-assessment-using-cross-validation" class="section level2">
+<h2>Performance Assessment using Cross-validation</h2>
+<p>Use 5-fold cross-validation to estimate the generalization error of
+the XGBoost learner with 100 boosting iterations on the one-hot-encoded
+credit task. Measure the performance of the learner using the
+classification error. Set up a seed to make your results reproducible
+(e.g., <code>set.seed(8002L)</code>).</p>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<p>Specifically, you need to conduct three steps:</p>
 <ol style="list-style-type: decimal">
-<li><p>Generate and evaluate an initial design</p></li>
-<li><p>Loop:</p>
-<ul>
-<li>2.1. Fit a surrogate model on the archive of all observations made
-so far to model the unknown black box function.</li>
-<li>2.2. Optimize an acquisition function to determine which points of
-the search space are promising candidate(s) that should be evaluated
-next.</li>
-<li>2.3. Evaluate the next candidate(s) and update the archive of all
-observations made so far.</li>
-<li>2.4. Check if a given termination criterion is met, if not go back
-to 2.1.</li>
-</ul></li>
+<li>Specify a <code>Resampling</code> object using
+<code>rsmp()</code>.</li>
+<li>Use this object together with the task and learner specified above
+as an input to the <code>resample()</code> method.</li>
+<li>Measure the performance with the <code>$aggregate()</code> method of
+the resulting <code>ResampleResult</code> object.</li>
 </ol>
-<p>The acquisition function relies on the mean and standard deviation
-prediction of the surrogate model and requires no evaluation of the true
-black box function, making it comparably cheap to optimize. A good
-acquisition function will balance exploiting knowledge about regions
-where we observed that performance is good and the surrogate model has
-low uncertainty with exploring regions where it has not yet evaluated
-points and as a result the uncertainty of the surrogate model is
-high.</p>
-<p>BO is a highly modular algorithm: as long as the above structure is
-in place, then the surrogate models, acquisition functions, and
-acquisition function optimizers are all interchangeable to a certain
-extent. The design of <code>mlr3mbo</code> reflects this modularity,
-with the base class for <code>OptimizerMbo</code> holding all the key
-elements: the BO algorithm loop structure (<code>loop_function</code>),
-surrogate model (<code>Surrogate</code>), acquisition function
-(<code>AcqFunction</code>), and acquisition function optimizer
-(<code>AcqOptimizer</code>). Let’s explore the interplay and interaction
-of these building blocks during optimization.</p>
-<div id="initial-design" class="section level2">
-<h2>1.1 Initial design</h2>
-<p>The initial set of points that is evaluated before a surrogate model
-can be fit is referred to as the initial design. <code>mlr3mbo</code>
-allows you to either construct this manually or let a
-<code>loop_function</code> do this for you. We will demonstrate the
-first method here.</p>
-<p>To construct an initial design, we will use one of the four design
-generators available in <code>paradox</code>. Let’s try grid search
-first, assuming an initial design of nine points on a domain of two
-numeric variables ranging from 0 to 1:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>domain <span class="ot">=</span> <span class="fu">ps</span>(<span class="at">x1 =</span> <span class="fu">p_dbl</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">x2 =</span> <span class="fu">p_dbl</span>(<span class="dv">0</span>, <span class="dv">1</span>))</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">generate_design_grid</span>(domain, <span class="at">resolution =</span> <span class="dv">3</span>)<span class="sc">$</span>data</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="do">##     x1  x2</span></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="do">## 1: 0.0 0.0</span></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="do">## 2: 0.0 0.5</span></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="do">## 3: 0.0 1.0</span></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="do">## 4: 0.5 0.0</span></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="do">## 5: 0.5 0.5</span></span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="do">## 6: 0.5 1.0</span></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="do">## 7: 1.0 0.0</span></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="do">## 8: 1.0 0.5</span></span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="do">## 9: 1.0 1.0</span></span></code></pre></div>
-<p>As you can see, this is more or less a simple <code>data.table</code>
-that encodes the set of hyperparameter configurations we want to
-evaluate first, before any of the real BO magic starts.</p>
-<p><strong>Task: Construct a more refined initial design, using
-<code>paradox</code> to implement a Sobol design with 30 points, which
-has better coverage properties than grid or random search.</strong></p>
+</details>
+<details>
+<summary>
+<strong>Hint 2:</strong>
+</summary>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">set.seed</span>(8002L)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>resampling <span class="ot">=</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, ...)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>rr <span class="ot">=</span> <span class="fu">resample</span>(<span class="at">task =</span> ..., <span class="at">learner =</span> ..., <span class="at">resampling =</span> ...)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>rr<span class="sc">$</span><span class="fu">aggregate</span>()</span></code></pre></div>
+</details>
+<!--
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+
+```r
+set.seed(8002L)
+resampling = rsmp("cv", folds = 5L)
+rr = resample(task = task, learner = xgboost_lrn, resampling = resampling)
+rr$aggregate()
+## classif.ce 
+##      0.253
+```
+
+-->
+</div>
+<div id="overview-of-hyperparameters" class="section level2">
+<h2>Overview of Hyperparameters</h2>
+<p>Apart from the number of iterations (<code>nrounds</code>), the
+XGBoost learner has a several other hyperparameters which were kept to
+their default values in the previous exercise. Extract an overview of
+all hyperparameters from the initalized XGBoost learner (previous
+exercise) as well as its default values.</p>
+<p>Given the extracted hyperparameter list above and the help page of
+<code>xgboost</code> (<code>?xgboost</code>), answer the following
+questions:</p>
+<ul>
+<li>Does the learner rely on a tree or a linear booster by default?</li>
+<li>Do more hyperparameters exist for the tree or the linear
+booster?</li>
+<li>What do <code>max_depth</code> and <code>eta</code> mean and what
+are their default values?</li>
+<li>Does a larger value for <code>eta</code> imply a larger value for
+<code>nrounds</code>?</li>
+</ul>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<p>The hyperparameters and their default values could be extracted by
+the <code>$param_set</code> field of the XGBoost learner. Alternatively,
+you could call the help page of <code>LearnerClassifXgboost</code>.</p>
+</details>
+<details>
+<summary>
+<strong>Hint 2:</strong>
+</summary>
+<p>You can answer all questions concerning defaults with the output of
+the <code>$param_set</code>. A description of the hyperparameters could
+be found on the <code>xgboost</code> help page (<code>?xgboost</code>).
+The help page also offers an answer to the last question concerning the
+connection between <code>eta</code> and <code>nrounds</code>.</p>
+</details>
+<!--
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+The `param_set` field gives an overview of the hyperparameters and their default values: 
+
+```r
+xgboost_lrn$param_set
+## <ParamSet>
+##                              id    class lower upper nlevels         default                  parents value
+##  1:                       alpha ParamDbl     0   Inf     Inf               0                               
+##  2:               approxcontrib ParamLgl    NA    NA       2           FALSE                               
+##  3:                  base_score ParamDbl  -Inf   Inf     Inf             0.5                               
+##  4:                     booster ParamFct    NA    NA       3          gbtree                               
+##  5:                   callbacks ParamUty    NA    NA     Inf       <list[0]>                               
+##  6:           colsample_bylevel ParamDbl     0     1     Inf               1                               
+##  7:            colsample_bynode ParamDbl     0     1     Inf               1                               
+##  8:            colsample_bytree ParamDbl     0     1     Inf               1                               
+##  9: disable_default_eval_metric ParamLgl    NA    NA       2           FALSE                               
+## 10:       early_stopping_rounds ParamInt     1   Inf     Inf                                               
+## 11:          early_stopping_set ParamFct    NA    NA       3            none                           none
+## 12:                         eta ParamDbl     0     1     Inf             0.3                               
+## 13:                 eval_metric ParamUty    NA    NA     Inf  <NoDefault[3]>                               
+## 14:            feature_selector ParamFct    NA    NA       5          cyclic                  booster      
+## 15:                       feval ParamUty    NA    NA     Inf                                               
+## 16:                       gamma ParamDbl     0   Inf     Inf               0                               
+## 17:                 grow_policy ParamFct    NA    NA       2       depthwise              tree_method      
+## 18:     interaction_constraints ParamUty    NA    NA     Inf  <NoDefault[3]>                               
+## 19:              iterationrange ParamUty    NA    NA     Inf  <NoDefault[3]>                               
+## 20:                      lambda ParamDbl     0   Inf     Inf               1                               
+## 21:                 lambda_bias ParamDbl     0   Inf     Inf               0                  booster      
+## 22:                     max_bin ParamInt     2   Inf     Inf             256              tree_method      
+## 23:              max_delta_step ParamDbl     0   Inf     Inf               0                               
+## 24:                   max_depth ParamInt     0   Inf     Inf               6                               
+## 25:                  max_leaves ParamInt     0   Inf     Inf               0              grow_policy      
+## 26:                    maximize ParamLgl    NA    NA       2                                               
+## 27:            min_child_weight ParamDbl     0   Inf     Inf               1                               
+## 28:                     missing ParamDbl  -Inf   Inf     Inf              NA                               
+## 29:        monotone_constraints ParamUty    NA    NA     Inf               0                               
+## 30:              normalize_type ParamFct    NA    NA       2            tree                  booster      
+## 31:                     nrounds ParamInt     1   Inf     Inf  <NoDefault[3]>                            100
+## 32:                     nthread ParamInt     1   Inf     Inf               1                              1
+## 33:                  ntreelimit ParamInt     1   Inf     Inf                                               
+## 34:           num_parallel_tree ParamInt     1   Inf     Inf               1                               
+## 35:                   objective ParamUty    NA    NA     Inf binary:logistic                               
+## 36:                    one_drop ParamLgl    NA    NA       2           FALSE                  booster      
+## 37:                outputmargin ParamLgl    NA    NA       2           FALSE                               
+## 38:                 predcontrib ParamLgl    NA    NA       2           FALSE                               
+## 39:                   predictor ParamFct    NA    NA       2   cpu_predictor                               
+## 40:             predinteraction ParamLgl    NA    NA       2           FALSE                               
+## 41:                    predleaf ParamLgl    NA    NA       2           FALSE                               
+## 42:               print_every_n ParamInt     1   Inf     Inf               1                  verbose      
+## 43:                process_type ParamFct    NA    NA       2         default                               
+## 44:                   rate_drop ParamDbl     0     1     Inf               0                  booster      
+## 45:                refresh_leaf ParamLgl    NA    NA       2            TRUE                               
+## 46:                     reshape ParamLgl    NA    NA       2           FALSE                               
+## 47:                 sample_type ParamFct    NA    NA       2         uniform                  booster      
+## 48:             sampling_method ParamFct    NA    NA       2         uniform                  booster      
+## 49:                   save_name ParamUty    NA    NA     Inf                                               
+## 50:                 save_period ParamInt     0   Inf     Inf                                               
+## 51:            scale_pos_weight ParamDbl  -Inf   Inf     Inf               1                               
+## 52:          seed_per_iteration ParamLgl    NA    NA       2           FALSE                               
+## 53:                   skip_drop ParamDbl     0     1     Inf               0                  booster      
+## 54:                strict_shape ParamLgl    NA    NA       2           FALSE                               
+## 55:                   subsample ParamDbl     0     1     Inf               1                               
+## 56:                       top_k ParamInt     0   Inf     Inf               0 booster,feature_selector      
+## 57:                    training ParamLgl    NA    NA       2           FALSE                               
+## 58:                 tree_method ParamFct    NA    NA       5            auto                  booster      
+## 59:      tweedie_variance_power ParamDbl     1     2     Inf             1.5                objective      
+## 60:                     updater ParamUty    NA    NA     Inf  <NoDefault[3]>                               
+## 61:                     verbose ParamInt     0     2       3               1                              0
+## 62:                   watchlist ParamUty    NA    NA     Inf                                               
+## 63:                   xgb_model ParamUty    NA    NA     Inf                                               
+##                              id    class lower upper nlevels         default                  parents value
+```
+
+Together with the help page of `xgboost` the answers to the above questions are: 
+
+- Does the learner rely on a tree or a linear booster per default?
+
+The `booster` hyperparameter reveals that it relies on a `gbtree` and, therefore, 
+a tree booster per default.
+
+- Do more hyperparameters exist for the tree or the linear booster?
+
+According to the help page of `xgboost`, tree boosters have more hyperparameters than 
+the linear booster (only three are mentioned for the latter: `lambda`, `lambda_bias` and `alpha` for 
+regularization of the linear booster).
+
+- What do `max_depth`, `eta` and `nrounds` mean and what are their default values?
+
+`max_depth` and `eta` affect the tree booster: `max_depth` gives the 
+depth of the tree with a default of 6 and `eta` specifies the learning rate, i.e., 
+how each tree contributes to the overall model, the default is `0.3`.
+
+- Does a larger value for `eta` imply a larger value for `nrounds`? 
+
+A larger value of `eta` implies a lower value of `nrounds` according to the
+help page. Since each tree contributes more to the overall model due to a larger 
+`eta`, the boosting 
+model also starts to overfit faster which necessitates a lower value for `nrounds`.
+
+-->
+</div>
+<div id="tune-hyperparameters" class="section level2">
+<h2>Tune Hyperparameters</h2>
+<p>Tune the the depth of tree of the <code>xgboost</code> learner on the
+German credit data using random search</p>
+<ul>
+<li>with the search space for <code>max_depth</code> between 1 and 8 and
+for <code>eta</code> between 0.2 and 0.4</li>
+<li>with 20 evaluations as termination criterion</li>
+<li>the classification error <code>msr(&quot;classif.ce&quot;)</code> as
+performance measure</li>
+<li>3-fold CV as resampling strategy.</li>
+</ul>
+<p>Set a seed for reproducibility (e.g.,
+<code>set.seed(8002L)</code>).</p>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<p>Specifically, you should conduct the following steps:</p>
+<ol style="list-style-type: decimal">
+<li>Setup a search space with <code>ps()</code> consisting of a
+<code>p_int()</code> for <code>max_depth</code> and <code>p_dbl()</code>
+for <code>eta</code>.</li>
+<li>Setup the classification error as a tuning measure with
+<code>msr()</code>.</li>
+<li>Initialize cross-validation as the resampling strategy using
+<code>rsmp()</code>.</li>
+<li>Setup 10 evaluations as the termination criterion using
+<code>trm()</code>.</li>
+<li>Initialize a <code>TuningInstanceSingleCrit</code> object using
+<code>$new()</code> and the objects produced in steps 1.-4. as well as
+the task and learner as an input.</li>
+<li>Define random search as the tuner object using
+<code>tnr()</code>.</li>
+<li>Call the <code>$optimize()</code> method of the tuner object with
+the initialized <code>TuningInstanceSingleCrit</code> as an input.</li>
+</ol>
+</details>
+<details>
+<summary>
+<strong>Hint 2:</strong>
+</summary>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">set.seed</span>(8002L)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>search_space <span class="ot">=</span> <span class="fu">ps</span>(</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="at">max_depth =</span> <span class="fu">...</span>(1L, 8L),</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="at">eta =</span> <span class="fu">...</span>(<span class="fl">0.2</span>, <span class="fl">0.4</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>)</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>measure <span class="ot">=</span> <span class="fu">msr</span>(<span class="st">&quot;classif....&quot;</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>resampling <span class="ot">=</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> ...)</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>terminator <span class="ot">=</span> <span class="fu">trm</span>(<span class="st">&quot;evals&quot;</span>, <span class="at">n_evals =</span> ...)</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>instance_random <span class="ot">=</span> TuningInstanceSingleCrit<span class="sc">$</span><span class="fu">new</span>(</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>  <span class="at">task =</span> ..., </span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>  <span class="at">learner =</span> ..., </span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>  <span class="at">measure =</span> ..., </span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>  <span class="at">resampling =</span> ..., </span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>  <span class="at">terminator =</span> ..., </span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>  <span class="at">search_space =</span> ...</span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>)</span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a> </span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>tuner_random <span class="ot">=</span> <span class="fu">tnr</span>(...)</span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a>tuner_random<span class="sc">$</span><span class="fu">optimize</span>(...)</span></code></pre></div>
+</details>
+<!--
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+Define all tuning related objects
+
+
+```r
+set.seed(8002L)
+
+search_space = ps(
+  max_depth = p_int(1L, 8L),
+  eta = p_dbl(0.2, 0.4)
+)
+measure = msr("classif.ce")
+resampling = rsmp("cv", folds = 3L)
+terminator = trm("evals", n_evals = 20L)
+```
+
+Instantiate a tuning instance
+
+
+```r
+instance_random = TuningInstanceSingleCrit$new(
+  task = task, 
+  learner = xgboost_lrn, 
+  measure = measure, 
+  resampling = resampling, 
+  terminator = terminator, 
+  search_space = search_space
+)
+```
+
+Use random search as the tuning approach
+
+
+```r
+tuner_random = tnr("random_search")
+tuner_random$optimize(instance_random)
+```
+
+-->
+</div>
+<div id="inspect-the-the-best-performing-setup" class="section level2">
+<h2>Inspect the the Best Performing Setup</h2>
+<p>Which tree depth was the best performing one?</p>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<p>Inspect the tuned instance (of class
+<code>TuningInstanceSingleCrit</code>, it was the input to
+<code>$optimize()</code>). Look, for example, at the
+<code>$result</code> field.</p>
+</details>
+<details>
+<summary>
+<strong>Hint 2:</strong>
+</summary>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>instance_random<span class="sc">$</span>result</span></code></pre></div>
+</details>
+<!--
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+
+```r
+instance_random$result
+##    max_depth       eta learner_param_vals  x_domain classif.ce
+## 1:         1 0.2517648          <list[6]> <list[2]>  0.2509845
+```
+
+The best performing instance had `eta` set to 0.2517648  
+and `max_depth` set to 1. 
+
+-->
+</div>
+<div id="set-up-an-xgboost-learner-with-early-stopping" class="section level2">
+<h2>Set up an XGBoost Learner with Early Stopping</h2>
+<p>Now that we derived the best hyperparameter for the maximum depth and
+eta, we could train our final model. To avoid overfitting we conduct
+early stopping - meaning that the algorithm stops as soon as a the
+performance does not improve for a given number of rounds to avoid
+overfitting. The performance for stopping should be assessed via a
+validation dataset.</p>
+<p>Set up an XGBoost learner with the following hyperparameters:</p>
+<ul>
+<li><code>max_depth</code> and <code>eta</code> set to the best
+configurations according to the previous tuning task.</li>
+<li><code>nrounds</code> set to 100L.</li>
+<li>The number of early stopping rounds set to 5 (this could be tuned,
+as well, but we simplify things) in order to stop earlier if there was
+no improvement in the previous 5 iterations.</li>
+<li>A <code>watchlist</code> consisting of a list with elements
+<code>train</code> and <code>eval</code> with the following input:</li>
+</ul>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;xgboost&quot;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">set.seed</span>(2001L)</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>evalid <span class="ot">=</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>task<span class="sc">$</span>nrow, 100L)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>trainid <span class="ot">=</span> <span class="fu">setdiff</span>(<span class="dv">1</span><span class="sc">:</span>task<span class="sc">$</span>nrow, evalid)</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>ylab <span class="ot">=</span> task<span class="sc">$</span><span class="fu">data</span>()<span class="sc">$</span>credit_risk</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>train <span class="ot">=</span> <span class="fu">xgb.DMatrix</span>(<span class="fu">as.matrix</span>(task<span class="sc">$</span><span class="fu">data</span>(<span class="at">cols =</span> task<span class="sc">$</span>feature_names)[trainid, ]), <span class="at">label =</span> ylab[trainid])</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>eval <span class="ot">=</span> <span class="fu">xgb.DMatrix</span>(<span class="fu">as.matrix</span>(task<span class="sc">$</span><span class="fu">data</span>(<span class="at">cols =</span> task<span class="sc">$</span>feature_names)[evalid, ]), <span class="at">label =</span> ylab[evalid])</span></code></pre></div>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<p>Specify the hyperparameters within <code>lrn()</code>. The number of
+rounds could be specified with <code>early_stopping_rounds</code>.</p>
+</details>
+<details>
+<summary>
+<strong>Hint 2:</strong>
+</summary>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">lrn</span>(<span class="st">&quot;...&quot;</span>, <span class="at">nrounds =</span> ..., </span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  <span class="at">max_depth =</span> instance_random<span class="sc">$</span>result<span class="sc">$</span>..., </span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="at">eta =</span> instance_random<span class="sc">$</span>result<span class="sc">$</span>..., </span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">early_stopping_rounds =</span> ..., <span class="at">watchlist =</span> <span class="fu">list</span>(</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>    <span class="at">train =</span> train, </span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>    <span class="at">eval =</span> eval</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  )</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>) </span></code></pre></div>
+</details>
+<!--
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+
+```r
+xgboost_lrn2 = lrn("classif.xgboost", nrounds = 100L, 
+  max_depth = instance_random$result$max_depth, 
+  eta = instance_random$result$eta, 
+  early_stopping_rounds = 5L, watchlist = list(
+    train = train, 
+    eval = eval
+  )
+) 
+```
+
+-->
+</div>
+<div id="training-on-credit-data" class="section level2">
+<h2>Training on Credit Data</h2>
+<p>Train the XGBoost learner from the previous exercise on the credit
+dataset. How many iterations were conducted before the boosting
+algorithm stopped?</p>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<p>By calling <code>$train()</code> a model is trained which can be
+accessed via <code>$model</code>. This model has a field
+<code>$niter</code> - the number of conducted iterations.</p>
+</details>
+<details>
+<summary>
+<strong>Hint 2:</strong>
+</summary>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>xgboost<span class="sc">$</span><span class="fu">train</span>(...)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>xgboost<span class="sc">$</span>...<span class="sc">$</span>niter</span></code></pre></div>
+</details>
+<!--
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+
+```r
+xgboost_lrn2$train(task)
+xgboost_lrn2$model$niter
+## [1] 22
+```
+
+On average, the classification error over the 3 cross-validation folds 
+is 0.253. Therefore, it is sighlty lower than the one of the default hyperparameter 
+learner.
+
+-->
+</div>
+<div id="extra-nested-resampling" class="section level2">
+<h2>Extra: Nested Resampling</h2>
+<p>To receive an unbiased performance estimate when tuning
+hyperparameters and using early stopping, conduct nested resampling
+with</p>
+<ul>
+<li>3-fold cross-validation for the outer and inner resampling
+loop.</li>
+<li>a search space for <code>max_depth</code> between 1 and 8 and
+<code>eta</code> between 0.2 and 0.4.</li>
+<li>random search with 20 evaluations</li>
+<li>the classification error <code>msr(&quot;classif.ce&quot;)</code> as
+performance measure.</li>
+</ul>
+<p>Extract the performance estimate on the outer resampling folds.</p>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<p>Specifically, you need to conduct the following steps:</p>
+<ol style="list-style-type: decimal">
+<li>Initialize a search space for <code>max_depth</code> and
+<code>eta</code> using <code>ps()</code>.</li>
+<li>Initialize an <code>AutoTuner</code> with the xgboost model from the
+previous exercise an an input. The <code>AutoTuner</code> reflects the
+inner resampling loop. It should be initialized for 3-fold CV, random
+search with 20 evaluations and the classification error as performance
+measure.</li>
+<li>Specify a <code>Resampling</code> object using
+<code>rsmp()</code>.</li>
+<li>Use this object with the credit task and <code>AutoTuner</code> as
+an input to <code>resample()</code>.</li>
+<li>Extract the results via <code>$aggregate()</code>.</li>
+</ol>
+</details>
+<details>
+<summary>
+<strong>Hint 2:</strong>
+</summary>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>tune_ps <span class="ot">=</span> <span class="fu">ps</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>  <span class="at">max_depth =</span> <span class="fu">p_int</span>(..., ...),</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="at">eta =</span> <span class="fu">p_dbl</span>(..., ...)</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>)</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>at <span class="ot">=</span> AutoTuner<span class="sc">$</span><span class="fu">new</span>(xgboost_lrn2, </span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>  <span class="at">resampling =</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> ...),</span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>  <span class="at">search_space =</span> ...,</span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>  <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">&quot;...&quot;</span>),</span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>  <span class="at">terminator =</span> <span class="fu">trm</span>(<span class="st">&quot;none&quot;</span>),</span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>  <span class="at">tuner =</span> <span class="fu">tnr</span>(<span class="st">&quot;...&quot;</span>, <span class="at">resolution =</span> 5L))</span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a>resampling <span class="ot">=</span> <span class="fu">rsmp</span>(<span class="st">&quot;...&quot;</span>, <span class="at">folds =</span> ...)</span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a></span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="fu">set.seed</span>(8002L)</span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a>nestrr <span class="ot">=</span> <span class="fu">resample</span>(<span class="at">task =</span> ..., <span class="at">learner =</span> ..., <span class="at">resampling =</span> resampling)</span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a>nestrr<span class="sc">$</span><span class="fu">aggregate</span>()</span></code></pre></div>
+</details>
 <div id="solution" class="section level3">
 <h3>Solution:</h3>
 <details>
 <summary>
-<strong>Click me:</strong>
+Click me:
 </summary>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>sobol_design <span class="ot">=</span> <span class="fu">generate_design_sobol</span>(domain, <span class="at">n =</span> <span class="dv">30</span>)<span class="sc">$</span>data</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">head</span>(sobol_design)</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="do">##           x1        x2</span></span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="do">## 1: 0.6209494 0.3531295</span></span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="do">## 2: 0.1209494 0.8531295</span></span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="do">## 3: 0.8709494 0.6031295</span></span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="do">## 4: 0.3709494 0.1031295</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="do">## 5: 0.2459494 0.4781295</span></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="do">## 6: 0.7459494 0.9781295</span></span></code></pre></div>
+<p>At first, we setup a search space for tuning
+<code>max_depth</code></p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>tune_ps <span class="ot">=</span> <span class="fu">ps</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>  <span class="at">max_depth =</span> <span class="fu">p_int</span>(1L, 8L),</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  <span class="at">eta =</span> <span class="fu">p_dbl</span>(<span class="fl">0.2</span>, <span class="fl">0.4</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>)</span></code></pre></div>
+<p>Next, we setup the inner resampling loop and the tuning approach
+using an <code>AutoTuner</code></p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>at <span class="ot">=</span> AutoTuner<span class="sc">$</span><span class="fu">new</span>(xgboost_lrn2, </span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>  <span class="at">resampling =</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> 3L),</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  <span class="at">search_space =</span> tune_ps,</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">&quot;classif.ce&quot;</span>),</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>  <span class="at">terminator =</span> <span class="fu">trm</span>(<span class="st">&quot;evals&quot;</span>, <span class="at">n_evals =</span> 20L),</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>  <span class="at">tuner =</span> <span class="fu">tnr</span>(<span class="st">&quot;random_search&quot;</span>))</span></code></pre></div>
+<p>Then, we can setup an outer resampling loop and call
+<code>resample()</code>.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>resampling <span class="ot">=</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> 3L)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="fu">set.seed</span>(8002L)</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>nestrr <span class="ot">=</span> <span class="fu">resample</span>(<span class="at">task =</span> task, <span class="at">learner =</span> at, <span class="at">resampling =</span> resampling)</span></code></pre></div>
+<p>We can extract the results via <code>$aggregate()</code></p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>nestrr<span class="sc">$</span><span class="fu">aggregate</span>()</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="do">## classif.ce </span></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="do">##  0.2600115</span></span></code></pre></div>
+<p>We obtain a higher classification error than we received without
+nested resampling.</p>
+<p>–&gt;</p>
 </div>
-</div>
-<div id="generate-data-from-initial-design" class="section level2">
-<h2>1.2 Generate data from initial design</h2>
-<p>To generate training data for our surrogate model, we need a few more
-things:</p>
-<ul>
-<li>An <code>Objective</code> function that wraps the actual mapping
-from a domain (all possible function inputs) to a codomain (all possible
-function outputs). Objective functions can be created using different
-classes, all of which inherit from <code>Objective</code>. Here, we will
-use <code>ObjectiveRFun</code>.</li>
-</ul>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># We have already defined our domain, but will do here again:</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>domain <span class="ot">=</span> <span class="fu">ps</span>(<span class="at">x1 =</span> <span class="fu">p_dbl</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">x2 =</span> <span class="fu">p_dbl</span>(<span class="dv">0</span>, <span class="dv">1</span>))</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co"># Our codomain:</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>codomain <span class="ot">=</span> <span class="fu">ps</span>(<span class="at">y =</span> <span class="fu">p_dbl</span>(<span class="at">tags =</span> <span class="st">&quot;minimize&quot;</span>))</span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co"># Our objective: </span></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>objective <span class="ot">=</span> ObjectiveRFun<span class="sc">$</span><span class="fu">new</span>(sinus_1D, <span class="at">domain =</span> domain, <span class="at">codomain =</span> codomain)</span></code></pre></div>
-<p>Further:</p>
-<ul>
-<li><code>OptimInstanceSingleCrit</code> to construct an optimization
-instance that describes the optimization problem and stores the
-results</li>
-<li><code>Optimizer</code> which is used to construct and configure
-optimization algorithms. Optimization Instance</li>
-</ul>
-<p>Let’s define our optimization instance and evaluate it on our initial
-Sobol design:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>instance <span class="ot">=</span> OptimInstanceSingleCrit<span class="sc">$</span><span class="fu">new</span>(objective,</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="at">terminator =</span> <span class="fu">trm</span>(<span class="st">&quot;evals&quot;</span>, <span class="at">n_evals =</span> <span class="dv">20</span>))</span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>instance<span class="sc">$</span><span class="fu">eval_batch</span>(sobol_design)</span></code></pre></div>
-<p><strong>Task: Extract the training archive data from the tuning
-instance to find the data that we will now use to train our surrogate
-model with in the first iteration.</strong></p>
-<div id="solution-1" class="section level3">
-<h3>Solution:</h3>
-<details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>instance<span class="sc">$</span>archive<span class="sc">$</span>data</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="do">##             x1         x2              y  x_domain           timestamp batch_nr</span></span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="do">##  1: 0.62094945 0.35312951  0.10130973475 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="do">##  2: 0.12094945 0.85312951  0.15430307423 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="do">##  3: 0.87094945 0.60312951 -0.21720269569 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="do">##  4: 0.37094945 0.10312951 -0.00698324321 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="do">##  5: 0.24594945 0.47812951 -0.03215570187 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="do">##  6: 0.74594945 0.97812951 -1.03044722698 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="do">##  7: 0.49594945 0.72812951  0.29472069478 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="do">##  8: 0.99594945 0.22812951  0.10084236052 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="do">##  9: 0.43344945 0.29062951 -0.01539541454 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="do">## 10: 0.93344945 0.79062951  0.50475921283 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="do">## 11: 0.18344945 0.54062951  0.05537398368 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="do">## 12: 0.68344945 0.04062951 -0.00032262900 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="do">## 13: 0.05844944 0.16562951  0.00233028511 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="do">## 14: 0.55844945 0.66562951  0.45882279485 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="do">## 15: 0.80844945 0.41562951 -0.25733560369 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="do">## 16: 0.30844945 0.91562951 -0.41356232957 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="do">## 17: 0.27719945 0.38437951 -0.05383437592 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="do">## 18: 0.77719945 0.88437951 -1.05634688119 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="do">## 19: 0.52719945 0.13437951  0.01689706980 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="do">## 20: 0.02719944 0.63437951  0.00760149590 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="do">## 21: 0.40219945 0.75937951 -0.25531082605 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="do">## 22: 0.90219945 0.25937951  0.00772777653 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="do">## 23: 0.65219945 0.50937951  0.09388572387 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="do">## 24: 0.15219945 0.00937951  0.00002268884 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="do">## 25: 0.33969945 0.57187951 -0.21008195590 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="do">## 26: 0.83969945 0.07187951 -0.00628260506 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="do">## 27: 0.08969945 0.32187951  0.01736872763 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a><span class="do">## 28: 0.58969945 0.82187951  0.65341360154 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a><span class="do">## 29: 0.46469945 0.19687951  0.00790205122 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a><span class="do">## 30: 0.96469945 0.69687951  0.69660808856 &lt;list[2]&gt; 2024-04-04 16:01:13        1</span></span>
-<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a><span class="do">##             x1         x2              y  x_domain           timestamp batch_nr</span></span></code></pre></div>
-</div>
-</div>
-<div id="train-surrogate-model" class="section level2">
-<h2>1.3 Train surrogate model</h2>
-<p>A surrogate model wraps a regression learner that models the unknown
-black box function based on observed data. In <code>mlr3mbo</code>, the
-<code>SurrogateLearner</code> is a higher-level <code>R6</code> class
-inheriting from the base Surrogate class, designed to construct and
-manage the surrogate model, including automatic construction of the
-<code>TaskRegr</code> that the learner should be trained on at each
-iteration of the BO loop.</p>
-<p>Any regression learner in <code>mlr3</code> can be used. However,
-most acquisition functions depend on both mean and standard deviation
-predictions from the surrogate model, the latter of which requires the
-<code>&quot;se&quot;</code> <code>predict_type</code> to be supported. Therefore
-not all learners are suitable for all scenarios. Typical choices are
-random forests or Gaussian processes <code>(lrn(&quot;regr.km&quot;))</code>,
-which we will use here.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>lrn_gp <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;regr.km&quot;</span>, <span class="at">covtype =</span> <span class="st">&quot;matern5_2&quot;</span>, <span class="at">optim.method =</span> <span class="st">&quot;BFGS&quot;</span>,</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  <span class="at">control =</span> <span class="fu">list</span>(<span class="at">trace =</span> <span class="cn">FALSE</span>))</span></code></pre></div>
-<p>A <code>SurrogateLearner</code> can be constructed by passing a
-<code>LearnerRegr</code> object to the sugar function
-<code>srlrn()</code>, alongside the archive of the instance:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>surrogate <span class="ot">=</span> <span class="fu">srlrn</span>(lrn_gp, <span class="at">archive =</span> instance<span class="sc">$</span>archive)</span></code></pre></div>
-<p>Internally, the regression learner is fit on a <code>TaskRegr</code>
-where features are the variables of the domain and the target is the
-codomain, the data is from the archive of the <code>OptimInstance</code>
-that is to be optimized.</p>
-<p><strong>Task: Update the surrogate model, which essentially fits the
-gaussian process. Then, inspect the trained random forest model that is
-contained within the surrogate:</strong></p>
-<details>
-<summary>
-<strong>Hint 1:</strong>
-</summary>
-<p>Fitting the surrogate model will require calling one of the methods
-of <code>surrogate</code>. See <code>?surrogate</code> for help.</p>
-</details>
-<div id="solution-2" class="section level3">
-<h3>Solution:</h3>
-<details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>surrogate<span class="sc">$</span><span class="fu">update</span>()</span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>surrogate<span class="sc">$</span>learner<span class="sc">$</span>model</span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="do">## NULL</span></span></code></pre></div>
-</div>
-</div>
-<div id="define-an-acquisition-function" class="section level2">
-<h2>1.4 Define an acquisition function</h2>
-<p>An acquisition function relies on the prediction of a surrogate model
-and quantifies the expected ‘utility’ of each point of the search space
-if it were to be evaluated in the next iteration.</p>
-<p>A popular example is the <strong>expected improvement</strong>, which
-tells us how much we can expect a candidate point to improve over the
-best function value observed so far (the ‘incumbent’), given the
-performance prediction of the surrogate model. Calculating the expected
-improvement requires mean and standard deviation predictions from the
-model.</p>
-<p>In <code>mlr3mbo</code>, acquisition functions are stored in the
-<code>mlr_acqfunctions</code> dictionary and can be constructed with
-<code>acqf()</code>, passing the key of the method you want to use and
-our surrogate learner. In our running example, we will use the expected
-improvement to choose the next candidate for evaluation.</p>
-<p><strong>Task: Construct an aquisition function object using expected
-improvement. Then, update the aquisition function object.</strong></p>
-<div id="solution-3" class="section level3">
-<h3>Solution:</h3>
-<details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>acq_function <span class="ot">=</span> <span class="fu">acqf</span>(<span class="st">&quot;ei&quot;</span>, <span class="at">surrogate =</span> surrogate)</span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>acq_function<span class="sc">$</span><span class="fu">update</span>()</span></code></pre></div>
-<p>The best y-value the acquisition function has seen so far:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>acq_function<span class="sc">$</span>y_best</span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="do">## [1] -1.056347</span></span></code></pre></div>
-</div>
-</div>
-<div id="optimize-acquisition-function" class="section level2">
-<h2>1.5 Optimize acquisition function</h2>
-<p>Why would we need to optimize the acquisition function? Well, the
-acquisition function can tell us how “promising” an arbitrary
-hyperparameter configuration is. If we want to find the “most promising”
-hyperparameter configuration, we again need to optimize the acquisition
-function. Consequently the optimization problem of the acquisition
-function is handled as a black box optimization problem itself, but it
-is a much cheaper one than the original.</p>
-<p>An acquisition function optimizer of class <code>AcqOptimizer</code>
-is used to optimize the acquisition function by efficiently searching
-the space of potential candidates within a limited computational budget.
-Widely used approaches for optimizing acquisition functions include
-derivative-free global optimization methods, such as the DIRECT
-algorithm. Consequently the optimization problem of the acquisition
-function can be handled as a black box optimization problem itself, but
-a much cheaper one than the original.</p>
-<p><code>AcqOptimizer</code> objects are constructed with
-<code>acqo()</code>, which takes as input an <code>Optimizer</code>, a
-Terminator, and the acquisition function. Optimizers are stored in the
-<code>mlr_optimizers</code> dictionary and can be constructed with the
-sugar function <code>opt()</code>. Let’s select an optimizer first:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>optimizer <span class="ot">=</span> <span class="fu">opt</span>(<span class="st">&quot;nloptr&quot;</span>, <span class="at">algorithm =</span> <span class="st">&quot;NLOPT_GN_ORIG_DIRECT&quot;</span>)</span></code></pre></div>
-<p><strong>Task: Construct an acquisition function optimizer using the
-optimizer above, a termination criterion of your choice and the
-acquisition function from the previous exercise. Then, call $optimize()
-on the optimizer to suggest the next candidate hyperparameter
-configuration.</strong></p>
-<div id="solution-4" class="section level3">
-<h3>Solution:</h3>
-<details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>acq_optimizer <span class="ot">=</span> <span class="fu">acqo</span>(</span>
-<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>  <span class="at">optimizer =</span> optimizer,</span>
-<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>  <span class="at">terminator =</span> <span class="fu">trm</span>(<span class="st">&quot;evals&quot;</span>, <span class="at">n_evals =</span> <span class="dv">200</span>),</span>
-<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>  <span class="at">acq_function =</span> acq_function</span>
-<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>)</span>
-<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a></span>
-<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>candidate <span class="ot">=</span> acq_optimizer<span class="sc">$</span><span class="fu">optimize</span>()</span>
-<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>candidate</span>
-<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="do">##          x1        x2  x_domain     acq_ei .already_evaluated</span></span>
-<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="do">## 1: 0.777854 0.9999238 &lt;list[2]&gt; 0.07737823              FALSE</span></span></code></pre></div>
-<p>This is the next hyperparameter configuration we would want to
-evaluate. This restarts the loop: add it to the archive, train surrogate
-model, optimize the acquisition function with the new surrogate model,
-get the next candidate, etc. We would do this until some termination
-criterion is met.</p>
-</div>
-</div>
-</div>
-<div id="automating-bo-with-optimizermbo" class="section level1">
-<h1>2 Automating BO with <code>OptimizerMbo</code></h1>
-<p>We have now shown how to run a single iteration of the BO algorithm
-loop manually. In practice, one would use <code>OptimizerMbo</code> to
-put all these pieces together to automate the process. To determine the
-behavior of the BO algorithm on a global level, we need a <strong>loop
-function</strong>. We use the Efficient Global Optimization (EGO)
-algorithm, aka <code>bayesopt_ego</code> provided by
-<code>mlr_loop_functions</code>. You do not need to pass any of these
-building blocks to each other manually as the <code>opt()</code>
-constructor will do this for you:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>loop_function <span class="ot">=</span> mlr_loop_functions<span class="sc">$</span><span class="fu">get</span>(<span class="st">&quot;bayesopt_ego&quot;</span>)</span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a></span>
-<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>surrogate <span class="ot">=</span> <span class="fu">srlrn</span>(<span class="fu">lrn</span>(<span class="st">&quot;regr.km&quot;</span>,</span>
-<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>                      <span class="at">covtype =</span> <span class="st">&quot;matern5_2&quot;</span>,</span>
-<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>                      <span class="at">optim.method =</span> <span class="st">&quot;BFGS&quot;</span>,</span>
-<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>                      <span class="at">control =</span> <span class="fu">list</span>(<span class="at">trace =</span> <span class="cn">FALSE</span>)))</span>
-<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a></span>
-<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>acq_function <span class="ot">=</span> <span class="fu">acqf</span>(<span class="st">&quot;ei&quot;</span>)</span>
-<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a></span>
-<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a>acq_optimizer <span class="ot">=</span> <span class="fu">acqo</span>(<span class="fu">opt</span>(<span class="st">&quot;nloptr&quot;</span>,</span>
-<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a>                         <span class="at">algorithm =</span> <span class="st">&quot;NLOPT_GN_ORIG_DIRECT&quot;</span>),</span>
-<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a>                         <span class="at">terminator =</span> <span class="fu">trm</span>(<span class="st">&quot;evals&quot;</span>, <span class="at">n_evals =</span> <span class="dv">100</span>))</span>
-<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a></span>
-<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a>optimizer <span class="ot">=</span> <span class="fu">opt</span>(<span class="st">&quot;mbo&quot;</span>,</span>
-<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a>  <span class="at">loop_function =</span> loop_function,</span>
-<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a>  <span class="at">surrogate =</span> surrogate,</span>
-<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a>  <span class="at">acq_function =</span> acq_function,</span>
-<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a>  <span class="at">acq_optimizer =</span> acq_optimizer)</span></code></pre></div>
-<p><strong>Task: Use the MBO optimizer constructed above to solve the
-optimization problem. To do so, define an optimization instance (as in
-1.2) and an initial design (as in 1.1). Then, evaluate the optimization
-instance on the initial design (as in 1.2). Then, call
-<code>optimizer$optimize()</code> on the instance.</strong></p>
-<div id="solution-5" class="section level3">
-<h3>Solution:</h3>
-<details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>instance <span class="ot">=</span> OptimInstanceSingleCrit<span class="sc">$</span><span class="fu">new</span>(objective,</span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>  <span class="at">terminator =</span> <span class="fu">trm</span>(<span class="st">&quot;evals&quot;</span>, <span class="at">n_evals =</span> <span class="dv">100</span>))</span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>sobol_design <span class="ot">=</span> <span class="fu">generate_design_sobol</span>(domain, <span class="at">n =</span> <span class="dv">100</span>)<span class="sc">$</span>data</span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>instance<span class="sc">$</span><span class="fu">eval_batch</span>(sobol_design)</span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>optimizer<span class="sc">$</span><span class="fu">optimize</span>(instance)</span>
-<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="do">##           x1        x2  x_domain          y</span></span>
-<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="do">## 1: 0.8061805 0.8231794 &lt;list[2]&gt; -0.9323896</span></span></code></pre></div>
-</div>
-</div>
-<div id="bo-for-hpo-with-tunermbo" class="section level1">
-<h1>3 BO for HPO with <code>TunerMbo</code></h1>
-<p><code>mlr3mbo</code> can be used for HPO by making use of
-<code>TunerMbo</code>, which is a wrapper around
-<code>OptimizerMbo</code> and works in the exact same way. As an
-example, we want to tune the cost and gamma parameters of
-<code>lrn(&quot;classif.svm&quot;)</code> with a radial kernel on
-<code>tsk(&quot;sonar&quot;)</code> with three-fold CV.</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>lrn_svm <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;classif.svm&quot;</span>, <span class="at">kernel =</span> <span class="st">&quot;radial&quot;</span>,</span>
-<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">&quot;C-classification&quot;</span>,</span>
-<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>  <span class="at">cost  =</span> <span class="fu">to_tune</span>(<span class="fl">1e-5</span>, <span class="fl">1e5</span>, <span class="at">logscale =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>  <span class="at">gamma =</span> <span class="fu">to_tune</span>(<span class="fl">1e-5</span>, <span class="fl">1e5</span>, <span class="at">logscale =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>)</span>
-<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a></span>
-<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a>tuner <span class="ot">=</span> <span class="fu">tnr</span>(<span class="st">&quot;mbo&quot;</span>,</span>
-<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a>  <span class="at">loop_function =</span> bayesopt_ego,</span>
-<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a>  <span class="at">surrogate =</span> surrogate,</span>
-<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a>  <span class="at">acq_function =</span> acq_function,</span>
-<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a>  <span class="at">acq_optimizer =</span> acq_optimizer)</span></code></pre></div>
-<p><strong>Task: Run the tuner on the lrn_svm for the sonar task and
-3-fold CV. Use misclassification error as performance measure. What is
-the best HP configuration?</strong></p>
-<details>
-<summary>
-<strong>Hint 1:</strong>
-</summary>
-<p>See <code>?mlr3tuning::tune</code> for help.</p>
-</details>
-<div id="solution-6" class="section level3">
-<h3>Solution:</h3>
-<details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>instance <span class="ot">=</span> <span class="fu">tune</span>(tuner,</span>
-<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>                <span class="fu">tsk</span>(<span class="st">&quot;sonar&quot;</span>),</span>
-<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>                lrn_svm,</span>
-<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>                <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> <span class="dv">3</span>),</span>
-<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>                <span class="fu">msr</span>(<span class="st">&quot;classif.ce&quot;</span>), <span class="dv">25</span>)</span>
-<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a></span>
-<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a>instance<span class="sc">$</span>result</span>
-<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a><span class="do">##        cost     gamma learner_param_vals  x_domain classif.ce</span></span>
-<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a><span class="do">## 1: 11.46555 -3.695507          &lt;list[4]&gt; &lt;list[2]&gt;   0.115528</span></span></code></pre></div>
 </div>
 </div>
 <div id="summary" class="section level1">
 <h1>Summary</h1>
-<p>We have learned how Bayesian Optimization can be used to solve black
-box optimization problems, and HPO problems specifically. Rather than
-simply spending a compute budget on evaluating arbitrary configurations,
-we optimize an acquisition function based on a surrogate model that maps
-hyperparameter configurations to their estimated generalization
-performance, to iteratively suggest new candidates.</p>
+<p>In this exercise sheet, we learned how to apply a XGBoost learner to
+the credit dataset. By using resampling, we estimated the performance.
+XGBoost has a lot of hyperparameters and we only had a closer look on
+two of them. We also saw how early stopping could be facilitated which
+should help to avoid overfitting of the XGBoost model.</p>
+<p>Interestingly, we obtained best results, when we used 100 iterations,
+without tuning or early stopping. However, performance differences were
+quite small - if we set a different seed, we might see a different
+ranking. Furthermore, we could extend our tuning search space such that
+more hyperparameters are considered to increase overall performance of
+the learner for the task at hand. Of course, this also requires more
+budget for the tuning (e.g., more evaluations of random search).</p>
 </div>
 </div><!-- /.entry-content -->
 </article>

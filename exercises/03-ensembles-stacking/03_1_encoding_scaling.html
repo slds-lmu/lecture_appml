@@ -12,7 +12,7 @@
 
 
 
-<title>Supervised Learning II</title>
+<title>Applied Machine Learning</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -145,8 +145,8 @@ pointer-events: auto;
 <article class="hentry">
 <header class="header-title">
 <div class="header-title-wrap">
-<h1 class="title toc-ignore entry-title">Supervised Learning II</h1>
-<h2 class="subtitle">Resampling: Stratified and Blocked</h2>
+<h1 class="title toc-ignore entry-title">Applied Machine Learning</h1>
+<h2 class="subtitle">In-class exercise 03-1</h2>
 </div><!-- /.header-title-wrap -->
 </header>
 
@@ -155,26 +155,26 @@ pointer-events: auto;
 <div id="TOC" class="toc">
 <ul>
 <li><a href="#goal" id="toc-goal">Goal</a></li>
-<li><a href="#prerequisites" id="toc-prerequisites">Prerequisites</a></li>
-<li><a href="#stratified-resampling" id="toc-stratified-resampling">1
-Stratified Resampling</a>
+<li><a href="#german-credit-data" id="toc-german-credit-data">German
+Credit Data</a>
 <ul>
-<li><a href="#set-stratification-variable" id="toc-set-stratification-variable">1.1 Set stratification
-variable</a></li>
-<li><a href="#create-resampling-procedure" id="toc-create-resampling-procedure">1.2 Create resampling
-procedure</a></li>
-<li><a href="#sanity-check" id="toc-sanity-check">1.3 Sanity
-check</a></li>
+<li><a href="#description" id="toc-description">Description</a></li>
+<li><a href="#data-dictionary" id="toc-data-dictionary">Data
+Dictionary</a></li>
 </ul></li>
-<li><a href="#block-resampling" id="toc-block-resampling">2 Block
-Resampling</a>
+<li><a href="#recap-mlr3-tasks" id="toc-recap-mlr3-tasks">Recap mlr3
+Tasks</a></li>
+<li><a href="#exercises" id="toc-exercises">Exercises</a>
 <ul>
-<li><a href="#count-groups" id="toc-count-groups">2.1 Count
-groups</a></li>
-<li><a href="#set-up-block-resampling" id="toc-set-up-block-resampling">2.2 Set up block resampling</a></li>
-<li><a href="#instantiate-resampling" id="toc-instantiate-resampling">2.3 Instantiate resampling</a></li>
-<li><a href="#sanity-check-1" id="toc-sanity-check-1">2.4 Sanity
-check</a></li>
+<li><a href="#exercise-1-preprocess-a-task-with-one-hot-encoding" id="toc-exercise-1-preprocess-a-task-with-one-hot-encoding">Exercise 1:
+Preprocess a Task (with One-Hot Encoding)</a></li>
+<li><a href="#exercise-2-create-a-simple-ml-pipeline-with-one-hot-encoding" id="toc-exercise-2-create-a-simple-ml-pipeline-with-one-hot-encoding">Exercise
+2: Create a Simple ML Pipeline (with One-Hot Encoding)</a></li>
+<li><a href="#exercise-3-feature-transformation-for-decision-trees" id="toc-exercise-3-feature-transformation-for-decision-trees">Exercise
+3: Feature Transformation for Decision Trees</a></li>
+<li><a href="#exercise-4-benchmark-k-nn-and-decison-tree-with-scaling-and-box-cox-transformation" id="toc-exercise-4-benchmark-k-nn-and-decison-tree-with-scaling-and-box-cox-transformation">Exercise
+4: Benchmark k-NN and Decison Tree with Scaling and Box-Cox
+Transformation</a></li>
 </ul></li>
 <li><a href="#summary" id="toc-summary">Summary</a></li>
 </ul>
@@ -182,261 +182,483 @@ check</a></li>
 
 <div id="goal" class="section level1">
 <h1>Goal</h1>
-<p>After this exercise, you should be able to control the resampling
-process when using <code>mlr3</code> in order to account for data
-specificities, such as class imbalances in classification settings or
-grouping phenomena.</p>
+<p>Learn how to do preprocessing steps directly on a mlr3
+<code>Task</code> object and how to combine a preprocessing with a
+learner to create a simple linear ML pipeline that first applies the
+preprocessing and then trains a learner.</p>
 </div>
-<div id="prerequisites" class="section level1">
-<h1>Prerequisites</h1>
-<p>We load the most important packages and use a fixed seed for
-reproducibility.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(mlr3verse)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(mlbench)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">7832</span>)</span></code></pre></div>
+<div id="german-credit-data" class="section level1">
+<h1>German Credit Data</h1>
+<div id="description" class="section level2">
+<h2>Description</h2>
+<ul>
+<li>Data from 1973 to 1975 from a large regional bank in southern
+Germany classifying credits described by a set of attributes to good or
+bad credit risks.</li>
+<li>Stratified sample of 1000 credits (300 bad ones and 700 good
+ones).</li>
+<li>Customers with good credit risks perfectly complied with the
+conditions of the contract while customers with bad credit risks did not
+comply with the contract as required.</li>
+<li>Available in <code>tsk(&quot;german_credit&quot;)</code>.</li>
+</ul>
 </div>
-<div id="stratified-resampling" class="section level1">
-<h1>1 Stratified Resampling</h1>
-<p>In classification tasks, the ratio of the target class distribution
-should be similar in each train/test split, which is achieved by
-stratification. This is particularly useful in the case of imbalanced
-classes and small data sets.</p>
-<p>Stratification can also be performed with respect to explanatory
-categorical variables to ensure that all subgroups are represented in
-all training and test sets.</p>
-<p>In <code>mlr3</code>, each <code>task</code> has a slot
-<code>$col_roles</code>. This slot shows general roles certain features
-will have throughout different stages of the machine learning process.
-At least, the <code>$col_roles</code> slot shows which variables will be
-used as <code>feature</code> and as <code>target</code>. However, the
-<code>$col_roles</code> slot can be more diverse and some variables
-might even serve multiple roles. For example,
-<code>task$col_roles$stratum</code> specify the variable used for
-stratification. In this exercise, we will illustrate this using the
-<code>german_credit</code> data:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>task_gc <span class="ot">=</span> <span class="fu">tsk</span>(<span class="st">&quot;german_credit&quot;</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>task_gc<span class="sc">$</span>col_roles</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="do">## $feature</span></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="do">##  [1] &quot;age&quot;                     &quot;amount&quot;                  &quot;credit_history&quot;          &quot;duration&quot;               </span></span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="do">##  [5] &quot;employment_duration&quot;     &quot;foreign_worker&quot;          &quot;housing&quot;                 &quot;installment_rate&quot;       </span></span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="do">##  [9] &quot;job&quot;                     &quot;number_credits&quot;          &quot;other_debtors&quot;           &quot;other_installment_plans&quot;</span></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="do">## [13] &quot;people_liable&quot;           &quot;personal_status_sex&quot;     &quot;present_residence&quot;       &quot;property&quot;               </span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="do">## [17] &quot;purpose&quot;                 &quot;savings&quot;                 &quot;status&quot;                  &quot;telephone&quot;              </span></span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="do">## $target</span></span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="do">## [1] &quot;credit_risk&quot;</span></span>
-<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="do">## $name</span></span>
-<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="do">## character(0)</span></span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="do">## $order</span></span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="do">## character(0)</span></span>
-<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="do">## $stratum</span></span>
-<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="do">## character(0)</span></span>
-<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="do">## $group</span></span>
-<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="do">## character(0)</span></span>
-<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="do">## $weight</span></span>
-<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a><span class="do">## character(0)</span></span></code></pre></div>
-<div id="set-stratification-variable" class="section level2">
-<h2>1.1 Set stratification variable</h2>
-<p>Modify the <code>task_gc</code> object such that the target variable
-<code>credit_risk</code> is used to for stratification.</p>
+<div id="data-dictionary" class="section level2">
+<h2>Data Dictionary</h2>
+<p>n = 1,000 observations of credits</p>
+<ul>
+<li><code>credit_risk</code>: Has the credit contract been complied with
+(good) or not (bad)?</li>
+<li><code>age</code>: Age of debtor in years</li>
+<li><code>amount</code>: Credit amount in DM</li>
+<li><code>credit_history</code>: History of compliance with previous or
+concurrent credit contracts</li>
+<li><code>duration</code>: Credit duration in months</li>
+<li><code>employment_duration</code>: Duration of debtor’s employment
+with current employer</li>
+<li><code>foreign_worker</code>: Whether the debtor is a foreign
+worker</li>
+<li><code>housing</code>: Type of housing the debtor lives in</li>
+<li><code>installment_rate</code>: Credit installments as a percentage
+of debtor’s disposable income</li>
+<li><code>job</code>: Quality of debtor’s job</li>
+<li><code>number_credits</code>: Number of credits including the current
+one the debtor has (or had) at this bank</li>
+<li><code>other_debtors</code>: Whether there is another debtor or a
+guarantor for the credit</li>
+<li><code>other_installment_plans</code>: Installment plans from
+providers other than the credit-giving bank</li>
+<li><code>people_liable</code>: Number of persons who financially depend
+on the debtor</li>
+<li><code>personal_status_sex</code>: Combined information on sex and
+marital status</li>
+<li><code>present_residence</code>: Length of time (in years) the debtor
+lives in the present residence</li>
+<li><code>property</code>: The debtor’s most valuable property</li>
+<li><code>purpose</code>: Purpose for which the credit is needed</li>
+<li><code>savings</code>: Debtor’s saving</li>
+<li><code>status</code>: Status of the debtor’s checking account with
+the bank</li>
+<li><code>telephone</code>: Whether there is a telephone landline
+registered on the debtor’s name</li>
+</ul>
+</div>
+</div>
+<div id="recap-mlr3-tasks" class="section level1">
+<h1>Recap mlr3 Tasks</h1>
+<!-- First, we load the German credit dataset: -->
+<!-- ```{r} -->
+<!-- credit = read.csv("data/german_credit.csv", header = TRUE, stringsAsFactors = TRUE) -->
+<!-- ``` -->
+<!-- Later, we will be interested in classifying the credit risk (binary **target** variable, `"bad"` vs. `"good"`) by using the other columns as so-called **features**. -->
+<p>A <code>mlr3</code> <code>Task</code> encapsulates data with
+meta-information, such as the name of the target variable and the type
+of the learning problem (in our example this would be a
+<strong>classification</strong> task, where the target is a factor label
+with relatively few distinct values).</p>
+<!-- To create a `TaskClassif` (the `mlr3` `Task` object for a supervised classification problem) based on the German credit data, we can use either `TaskClassif$new()` or `as_task_classif()`: -->
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(mlr3)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>task <span class="ot">=</span> <span class="fu">tsk</span>(<span class="st">&quot;german_credit&quot;</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>task</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="do">## &lt;TaskClassif:german_credit&gt; (1000 x 21): German Credit</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="do">## * Target: credit_risk</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="do">## * Properties: twoclass</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="do">## * Features (20):</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="do">##   - fct (14): credit_history, employment_duration, foreign_worker, housing, job, other_debtors,</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="do">##     other_installment_plans, people_liable, personal_status_sex, property, purpose, savings, status,</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="do">##     telephone</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="do">##   - int (3): age, amount, duration</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="do">##   - ord (3): installment_rate, number_credits, present_residence</span></span></code></pre></div>
+<!-- By setting `target = "credit_risk"`, we specify the correct column in the data containing the target variable. `id = "german_credit"` simply assigns the task the ID `"german_credit"`. -->
+<p>The <code>print()</code> method gives a short summary of the task: It
+has 1000 observations and 21 columns of which 20 are features. 17
+features are categorical (i.e., factors) and 3 features are integer.</p>
+<p>By using the <code>$data()</code> method, we get access to the data
+(in the form of a <code>data.table</code>):</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">str</span>(task<span class="sc">$</span><span class="fu">data</span>())</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="do">## Classes &#39;data.table&#39; and &#39;data.frame&#39;:   1000 obs. of  21 variables:</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="do">##  $ credit_risk            : Factor w/ 2 levels &quot;good&quot;,&quot;bad&quot;: 1 2 1 1 2 1 1 1 1 2 ...</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="do">##  $ age                    : int  67 22 49 45 53 35 53 35 61 28 ...</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="do">##  $ amount                 : int  1169 5951 2096 7882 4870 9055 2835 6948 3059 5234 ...</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="do">##  $ credit_history         : Factor w/ 5 levels &quot;delay in paying off in the past&quot;,..: 5 3 5 3 4 3 3 3 3 5 ...</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="do">##  $ duration               : int  6 48 12 42 24 36 24 36 12 30 ...</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="do">##  $ employment_duration    : Factor w/ 5 levels &quot;unemployed&quot;,&quot;&lt; 1 yr&quot;,..: 5 3 4 4 3 3 5 3 4 1 ...</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="do">##  $ foreign_worker         : Factor w/ 2 levels &quot;no&quot;,&quot;yes&quot;: 1 1 1 1 1 1 1 1 1 1 ...</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="do">##  $ housing                : Factor w/ 3 levels &quot;for free&quot;,&quot;rent&quot;,..: 2 2 2 3 3 3 2 1 2 2 ...</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="do">##  $ installment_rate       : Ord.factor w/ 4 levels &quot;&gt;= 35&quot;&lt;&quot;25 &lt;= ... &lt; 35&quot;&lt;..: 4 2 2 2 3 2 3 2 2 4 ...</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="do">##  $ job                    : Factor w/ 4 levels &quot;unemployed/unskilled - non-resident&quot;,..: 3 3 2 3 3 2 3 4 2 4 ...</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="do">##  $ number_credits         : Ord.factor w/ 4 levels &quot;1&quot;&lt;&quot;2-3&quot;&lt;&quot;4-5&quot;&lt;..: 2 1 1 1 2 1 1 1 1 2 ...</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="do">##  $ other_debtors          : Factor w/ 3 levels &quot;none&quot;,&quot;co-applicant&quot;,..: 1 1 1 3 1 1 1 1 1 1 ...</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="do">##  $ other_installment_plans: Factor w/ 3 levels &quot;bank&quot;,&quot;stores&quot;,..: 3 3 3 3 3 3 3 3 3 3 ...</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="do">##  $ people_liable          : Factor w/ 2 levels &quot;0 to 2&quot;,&quot;3 or more&quot;: 1 1 2 2 2 2 1 1 1 1 ...</span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="do">##  $ personal_status_sex    : Factor w/ 4 levels &quot;male : divorced/separated&quot;,..: 3 2 3 3 3 3 3 3 1 4 ...</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="do">##  $ present_residence      : Ord.factor w/ 4 levels &quot;&lt; 1 yr&quot;&lt;&quot;1 &lt;= ... &lt; 4 yrs&quot;&lt;..: 4 2 3 4 4 4 4 2 4 2 ...</span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="do">##  $ property               : Factor w/ 4 levels &quot;unknown / no property&quot;,..: 1 1 1 2 4 4 2 3 1 3 ...</span></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="do">##  $ purpose                : Factor w/ 11 levels &quot;others&quot;,&quot;car (new)&quot;,..: 4 4 7 3 1 7 3 2 4 1 ...</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="do">##  $ savings                : Factor w/ 5 levels &quot;unknown/no savings account&quot;,..: 5 1 1 1 1 5 3 1 4 1 ...</span></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="do">##  $ status                 : Factor w/ 4 levels &quot;no checking account&quot;,..: 1 2 4 1 1 4 4 2 4 2 ...</span></span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="do">##  $ telephone              : Factor w/ 2 levels &quot;no&quot;,&quot;yes (under customer name)&quot;: 2 1 1 1 1 2 1 2 1 1 ...</span></span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="do">##  - attr(*, &quot;.internal.selfref&quot;)=&lt;externalptr&gt;</span></span></code></pre></div>
+<p>Note that a <code>mlr3</code> <code>Task</code> object comes with
+plenty of functionality in the form of fields, methods and active
+bindings, see <code>?Task</code>, e.g., to get a summary of all feature
+names, you can use:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>task<span class="sc">$</span>feature_names</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="do">##  [1] &quot;age&quot;                     &quot;amount&quot;                  &quot;credit_history&quot;          &quot;duration&quot;               </span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="do">##  [5] &quot;employment_duration&quot;     &quot;foreign_worker&quot;          &quot;housing&quot;                 &quot;installment_rate&quot;       </span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="do">##  [9] &quot;job&quot;                     &quot;number_credits&quot;          &quot;other_debtors&quot;           &quot;other_installment_plans&quot;</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="do">## [13] &quot;people_liable&quot;           &quot;personal_status_sex&quot;     &quot;present_residence&quot;       &quot;property&quot;               </span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="do">## [17] &quot;purpose&quot;                 &quot;savings&quot;                 &quot;status&quot;                  &quot;telephone&quot;</span></span></code></pre></div>
+<p>To obtain information about the types of features of the task
+(similarly like in the data dictionary above), we can inspect the active
+binding fields of the task object (see, <code>?Task</code>):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>task<span class="sc">$</span>feature_types</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="do">##                          id    type</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="do">##  1:                     age integer</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="do">##  2:                  amount integer</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="do">##  3:          credit_history  factor</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="do">##  4:                duration integer</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="do">##  5:     employment_duration  factor</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="do">##  6:          foreign_worker  factor</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="do">##  7:                 housing  factor</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="do">##  8:        installment_rate ordered</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="do">##  9:                     job  factor</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="do">## 10:          number_credits ordered</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="do">## 11:           other_debtors  factor</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="do">## 12: other_installment_plans  factor</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="do">## 13:           people_liable  factor</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="do">## 14:     personal_status_sex  factor</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="do">## 15:       present_residence ordered</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="do">## 16:                property  factor</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="do">## 17:                 purpose  factor</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="do">## 18:                 savings  factor</span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="do">## 19:                  status  factor</span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="do">## 20:               telephone  factor</span></span></code></pre></div>
+</div>
+<div id="exercises" class="section level1">
+<h1>Exercises</h1>
+<div id="exercise-1-preprocess-a-task-with-one-hot-encoding" class="section level2">
+<h2>Exercise 1: Preprocess a Task (with One-Hot Encoding)</h2>
+<p>Use the one-hot encoding <code>PipeOp</code> to convert all
+categorical features from the <code>german_credit</code> task into a
+preprocessed task containing 0-1 indicator variables for each category
+level instead of categorical features.</p>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<p>Load the <code>mlr3pipelines</code> package and get an overview of
+possible <code>PipeOp</code> that can be used for different
+preprocessing steps by printing <code>mlr_pipeops</code> or the first
+two columns of the corresponding table
+<code>as.data.table(mlr_pipeops)[,1:2]</code>. Look for a <strong>factor
+encoding</strong> and pass the corresponding <code>key</code> for factor
+encoding to the <code>po()</code> function (see also the help page
+<code>?PipeOpEncode</code>). Then, use the <code>$train()</code> method
+of the <code>PipeOp</code> object which expects a <strong>list</strong>
+containing the task to be converted as input and produces a
+<strong>list</strong> containing the converted task.</p>
+</details>
+<details>
+<summary>
+<strong>Hint 2:</strong>
+</summary>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">library</span>(mlr3pipelines)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co"># Create a PipeOp object that applies one-hot encoding</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>poe <span class="ot">=</span> <span class="fu">po</span>(...) </span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co"># Apply a created PipeOp to e.g. preprocess an input</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>encoded_task <span class="ot">=</span> poe<span class="sc">$</span><span class="fu">train</span>(<span class="at">input =</span> ...)<span class="sc">$</span>output</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="fu">str</span>(...<span class="sc">$</span><span class="fu">data</span>())</span></code></pre></div>
+</details>
 <!--
 
 ### Solution:
+
 <details>
-<summary>**Click me:**</summary>
+<summary>Click me:</summary>
 
 
 ```r
-task_gc$col_roles$stratum = "credit_risk"
-```
-
-After the specification of `task$col_roles$stratum`, the active binding `task$strata` will show the number of observations in each group and the corresponding row ids:
-
-
-```r
-task_gc$strata
+library(mlr3pipelines)
+poe = po("encode", method = "one-hot")
+# Use the $help() method to open a help page of any PipeOp object
+# poe$help()
+encoded_task = poe$train(input = list(task))$output
+str(encoded_task$data())
 ```
 
 -->
 </div>
-<div id="create-resampling-procedure" class="section level2">
-<h2>1.2 Create resampling procedure</h2>
-<p>Next, specify a 3-fold cross validation and instantiate the
-resampling on the task.</p>
+<div id="exercise-2-create-a-simple-ml-pipeline-with-one-hot-encoding" class="section level2">
+<h2>Exercise 2: Create a Simple ML Pipeline (with One-Hot Encoding)</h2>
+<p>Some learners cannot handle categorical features such as the the
+<code>xgboost</code> learner (which gives an error message when applied
+to a task containing categorical features):</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">library</span>(mlr3verse)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>lrnxg <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;classif.xgboost&quot;</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>lrnxg<span class="sc">$</span><span class="fu">train</span>(task)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="do">## Error: &lt;TaskClassif:german_credit&gt; has the following unsupported feature types: factor, ordered</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>lrnxg<span class="sc">$</span><span class="fu">predict</span>(task)</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="do">## Error: &lt;TaskClassif:german_credit&gt; has the following unsupported feature types: factor, ordered</span></span></code></pre></div>
+<p>Combine the <code>xgboost</code> learner with a preprocessing step
+that applies one-hot encoding to create a ML pipeline that first
+converts all categorical features to 0-1 indicator variables and then
+applies the <code>xgboost</code> learner. Train the ML pipeline on the
+<code>german_credit</code> task and make predictions on the training
+data.</p>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<p>You can create a <code>Graph</code> that combines a
+<code>PipeOp</code> object with a learner object (or further
+<code>PipeOp</code> objects) by concatenating them using the
+<code>%&gt;&gt;%</code> operator. The <code>Graph</code> contains all
+information of a sequential ML pipeline. Convert the <code>Graph</code>
+into a <code>GraphLearner</code> to be able to run the whole ML pipeline
+like a usual learner object with which we can train, predict, resample,
+and benchmark the <code>GraphLearner</code> as we have learned. See also
+the help page <code>?GraphLearner</code>.</p>
+</details>
+<details>
+<summary>
+<strong>Hint 2:</strong>
+</summary>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">library</span>(mlr3verse)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>lrnxg <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;classif.xgboost&quot;</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>poe <span class="ot">=</span> <span class="fu">po</span>(...)</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>graph <span class="ot">=</span> ...</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>glrn <span class="ot">=</span> GraphLearner<span class="sc">$</span><span class="fu">new</span>(...)</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co"># Alternative: glrn = as_learner(...) </span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>...<span class="sc">$</span><span class="fu">train</span>(...)</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>...<span class="sc">$</span><span class="fu">predict</span>(...)</span></code></pre></div>
+</details>
 <!--
 
 ### Solution:
+
 <details>
-<summary>**Click me:**</summary>
+<summary>Click me:</summary>
 
 
 ```r
-cv3 = rsmp("cv", folds = 3)
-cv3$instantiate(task_gc)
-cv3$instance
+library(mlr3verse)
+lrnxg = lrn("classif.xgboost")
+poe = po("encode", method = "one-hot")
+graph = poe %>>% lrnxg
+
+glrn = GraphLearner$new(graph) # Alternative: glrn = as_learner(graph) 
+glrn$train(task)
+glrn$predict(task)
 ```
 
 -->
 </div>
-<div id="sanity-check" class="section level2">
-<h2>1.3 Sanity check</h2>
-<p>As a sanity check, the target class distribution should be similar
-within each CV fold. Compute and check the target class distribution
-within each fold.</p>
+<div id="exercise-3-feature-transformation-for-decision-trees" class="section level2">
+<h2>Exercise 3: Feature Transformation for Decision Trees</h2>
+<p>The structure of a decision tree is insensitive to monotonic
+transformations of the features (and scaling is a monotonic
+transformation). This means that although the scaled features are
+different to non-scaled features, the decision tree will have the same
+structure (the values of the split points for numeric feature might be
+different as the numeric features will have a different scale, but the
+structure of the decision tree will stay the same).</p>
+<p>Do the following tasks:</p>
+<ol style="list-style-type: decimal">
+<li>Use the <code>PipeOp</code> to scale all numeric features from the
+<code>german_credit</code> task and create a preprocessed task the
+scaled numeric features. Do this for standard scaling
+(i.e. normalization by centering and scaling) and for box-cox
+transformation. You can look up the corresponding keys by inspecting the
+table <code>as.data.table(mlr_pipeops)[,1:2]</code>. Create the
+preprocessed tasks <code>task_scaled</code> and <code>task_boxcox</code>
+and check the values of the numeric features. You may have to first
+install the <code>bestNormalize</code> package for the boxcox
+transformation.</li>
+</ol>
+<details>
+<summary>
+<strong>Hint for task 1:</strong>
+</summary>
+Proceed as in Exercise 1, but use <code>scale</code> and
+<code>boxcox</code> instead of <code>encode</code> as keys in the
+<code>po()</code> function. If installing the <code>bestNormalize</code>
+package does not work, you can also select a different scaling approach
+such as <code>scalemaxabs</code> or <code>scalerange</code>.
+</details>
+<ol start="2" style="list-style-type: decimal">
+<li>Create two ML pipelines, one that combines the
+<code>classif.rpart</code> learner with the standard scaling and another
+one that combines <code>classif.rpart</code> learner with the boxcox
+scaling. Then use the <code>classif.rpart</code> learner and the two ML
+pipelines on the <code>german_credit</code> task to fit 3 different
+decision trees (one trained on the raw task and the other two trained on
+the scaled and box-cox transformed task). Visualize the decision tree
+structure using the <code>rpart.plot</code> function from the
+<code>rpart.plot</code> package.</li>
+</ol>
+<details>
+<summary>
+<strong>Hint for task 2:</strong>
+</summary>
+Proceed as in Exercise 2 to create two <code>GraphLearner</code>s, one
+with <code>po(&quot;scale&quot;)</code> and the other one with
+<code>po(&quot;boxcox&quot;)</code>. Then, train the <code>classif.rpart</code>
+learner and the two <code>GraphLearner</code>s on the
+<code>german_credit</code> task. Apply the <code>rpart.plot</code>
+function to the trained model objects to compare the structure of the
+decision trees. Note: While for the <code>classif.rpart</code> learner,
+the model object is directly contained in the <code>$model</code> slot
+of the learner after training, the <code>$model</code> slot of the two
+<code>GraphLearners</code> is a list and you have to access the trained
+model via <code>$model$classif.rpart$model</code>.
+</details>
 <!--
 
-### Solution:
-<details>
-<summary>**Click me:**</summary>
 
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+1. Solution of first task:
 
 ```r
-dt = merge(cv3$instance, task_gc$data()[, row_id := .I], by = "row_id")
-dt[, .(class_ratio = sum(credit_risk == "bad") /
-  sum(credit_risk == "good")), by = fold]
+library(mlr3pipelines)
+pos = po("scale")
+pobc = po("boxcox")
+
+numfeat = task$feature_types$id[task$feature_types$type == "integer"]
+task_scaled = pos$train(list(task))$output
+task_scaled$data(cols = numfeat)
+task_boxcox = pobc$train(list(task))$output
+task_boxcox$data(cols = numfeat)
 ```
 
-Indeed, we can see that the target class is distributed similarly within each CV fold, matching the overall class distribution:
+2. Solution of second task showing that the decision tree strucuture is exactly the same (although the split points of the numeric features such as `amount` and `duration` are different due to the transformed features):
+
+```r
+library(mlr3pipelines)
+rp = lrn("classif.rpart")
+rpscale = as_learner(pos %>>% rp)
+rpboxcox = as_learner(pobc %>>% rp)
+
+rp$train(task)
+rpscale$train(task)
+rpboxcox$train(task)
+
+library(rpart.plot)
+rpart.plot(rp$model)
+rpart.plot(rpscale$model$classif.rpart$model)
+rpart.plot(rpboxcox$model$classif.rpart$model)
+```
 
 
 ```r
-dt[, .(class_ratio = sum(credit_risk == "bad") / sum(credit_risk == "good"))]
+# Alternative solution using the transformed tasks:
+rp = lrn("classif.rpart")
+
+library(rpart.plot)
+rp$train(task)
+rpart.plot(rp$model)
+
+rp$train(task_scaled)
+rpart.plot(rp$model)
+
+rp$train(task_boxcox)
+rpart.plot(rp$model)
 ```
 
 -->
 </div>
-</div>
-<div id="block-resampling" class="section level1">
-<h1>2 Block Resampling</h1>
-<p>An additional concern when specifying resampling is respecting the
-natural grouping of the data. Blocking refers to the situation where
-subsets of observations belong together and must not be separated during
-resampling. Hence, for one train/test set pair the entire block is
-either in the training set or in the test set.</p>
-<p>In the following example, wel will consider the
-<code>BreastCancer</code> data set from the <code>mlbench</code>
-package:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">data</span>(BreastCancer, <span class="at">package =</span> <span class="st">&quot;mlbench&quot;</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>task_bc <span class="ot">=</span> <span class="fu">as_task_classif</span>(BreastCancer, <span class="at">target =</span> <span class="st">&quot;Class&quot;</span>, <span class="at">positive =</span> <span class="st">&quot;malignant&quot;</span>)</span></code></pre></div>
-<p>In this data set, several observations have the same <code>Id</code>
-(sample code number), which implies these are samples taken from the
-same patient at different times.</p>
-<div id="count-groups" class="section level2">
-<h2>2.1 Count groups</h2>
-<p>Let’s count how many observation actually have the same
-<code>Id</code> more than once.</p>
+<div id="exercise-4-benchmark-k-nn-and-decison-tree-with-scaling-and-box-cox-transformation" class="section level2">
+<h2>Exercise 4: Benchmark k-NN and Decison Tree with Scaling and Box-Cox
+Transformation</h2>
+<p>In the previous exercise we saw that scaling does not affect a
+decision tree structure. That is scaling numeric features of a decision
+tree will not have any (strong) effect on the performance. However, for
+some learners, scaling numeric features is important, especially if they
+are based on computing distances such as the k-NN learner (because
+scaling will convert all numeric features into a comparable scale).</p>
+<p>In this exercise we want to conduct a benchmark that illustrates
+these claims. Consider the k-NN learner without scaling
+<code>lrn(&quot;classif.kknn&quot;, scale = FALSE)</code> and the decision tree
+<code>lrn(&quot;classif.rpart&quot;)</code>. Combine these two learners once with
+<code>po(&quot;scale&quot;)</code> (for normalization, i.e., substracting the mean
+and dividing by the standard deviation) and once with
+<code>po(&quot;boxcox&quot;)</code> for box-cox transformation of the numeric
+features. Then, setup a benchmark to compare their performance
+(including the non-scaled k-NN
+<code>lrn(&quot;classif.kknn&quot;, scale = FALSE)</code> and decision tree
+<code>lrn(&quot;classif.rpart&quot;)</code>) using 10-fold cross-validation. In
+total, you will benchmark 6 learners, the 4 ML pipelines and the 2
+learners. For reproducibility, use the seed
+<code>set.seed(2023)</code>.</p>
+<details>
+<summary>
+<strong>Hint:</strong>
+</summary>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">library</span>(mlr3pipelines)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2023</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>lrns <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="fu">lrn</span>(<span class="st">&quot;classif.kknn&quot;</span>, <span class="at">scale =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  <span class="fu">po</span>(<span class="st">&quot;scale&quot;</span>) <span class="sc">%&gt;&gt;%</span> ...,</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>  <span class="fu">po</span>(<span class="st">&quot;boxcox&quot;</span>) <span class="sc">%&gt;&gt;%</span> ..,</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>  <span class="fu">lrn</span>(<span class="st">&quot;classif.rpart&quot;</span>),</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>  ... <span class="sc">%&gt;&gt;%</span> <span class="fu">lrn</span>(...),</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>  ... <span class="sc">%&gt;&gt;%</span> ...</span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>)</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>design <span class="ot">=</span> <span class="fu">benchmark_grid</span>(...)</span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>bmr <span class="ot">=</span> <span class="fu">benchmark</span>(...)</span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>bmr<span class="sc">$</span><span class="fu">aggregate</span>()</span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="fu">autoplot</span>(bmr)</span></code></pre></div>
+</details>
 <!--
 
 ### Solution:
+
 <details>
-<summary>**Click me:**</summary>
+<summary>Click me:</summary>
 
 
 ```r
-sum(table(BreastCancer$Id) > 1)
-```
+library(mlr3pipelines)
+pos = po("scale")
+pobc = po("boxcox")
 
-There are 46 `Id`s with more than one observation (row).
+set.seed(2023)
+lrns = list(
+  lrn("classif.kknn", scale = FALSE),
+  pos %>>% lrn("classif.kknn", scale = FALSE),
+  pobc %>>% lrn("classif.kknn", scale = FALSE),
+  lrn("classif.rpart"),
+  pos %>>% lrn("classif.rpart"),
+  pobc %>>% lrn("classif.rpart")
+)
 
--->
-<p>The model trained on this data set will be used to predict cancer
-status of new patients. Hence, we have to make sure that each Id occurs
-exactly in one fold, so that all observations with the same Id should be
-either used for training or for evaluating the model. This way, we get
-less biased performance estimates via k-fold cross validation. This can
-be achieved by block cross validation.</p>
-</div>
-<div id="set-up-block-resampling" class="section level2">
-<h2>2.2 Set up block resampling</h2>
-<p>Similarly to stratified resampling, block resampling uses
-<code>task$col_roles$group</code> to specify the name of a grouping
-variable included in the feature set. Now, set the column
-<code>Id</code> as grouping variable in the <code>task</code>
-object.</p>
-<!--
-
-### Solution:
-<details>
-<summary>**Click me:**</summary>
-
-
-```r
-task_bc$col_roles$group = "Id"
+cv = rsmp("cv", folds = 10)
+design = benchmark_grid(list(task), lrns, cv)
+bmr = benchmark(design)
+bmr$aggregate()
+autoplot(bmr)
 ```
 
 -->
-</div>
-<div id="instantiate-resampling" class="section level2">
-<h2>2.3 Instantiate resampling</h2>
-<p>Next, set up a 5-fold CV and instantiate it on the task.</p>
-<!--
-
-### Solution:
-<details>
-<summary>**Click me:**</summary>
-
-
-```r
-cv5 = rsmp("cv", folds = 5)
-cv5$instantiate(task_bc)
-cv5$instance
-##      row_id fold
-##   1:      9    1
-##   2:     10    1
-##   3:     12    1
-##   4:     16    1
-##   5:     24    1
-##  ---            
-## 695:    656    5
-## 696:    662    5
-## 697:    666    5
-## 698:    673    5
-## 699:    686    5
-```
-
--->
-</div>
-<div id="sanity-check-1" class="section level2">
-<h2>2.4 Sanity check</h2>
-<p>If the specified blocking groups are respected, each <code>Id</code>
-appears only in exactly one fold. To inspect if blocking was successful
-when generating the folds, count how often each <code>Id</code> appears
-in a specific fold and print the <code>Id</code>s that appear in more
-than one fold.</p>
-<!--
-
-### Solution:
-<details>
-<summary>**Click me:**</summary>
-
-
-```r
-dt = merge(task_bc$data(), cv5$instance, by.x = "Id", by.y = "row_id")
-dt = dt[, .(unique_folds = length(unique(fold))), by = Id]
-dt[unique_folds > 1, ]
-```
-
--->
-<p>As expected, the table is empty as there are no Id’s present in more
-than one fold.</p>
 </div>
 </div>
 <div id="summary" class="section level1">
 <h1>Summary</h1>
-<ul>
-<li>Stratified resampling helps with balancing classes and features
-within CV folds, to ensure each fold represents the data well
-enough.</li>
-<li>Block resampling reduces bias in generalization error estimates by
-ensuring that observations from the same group end up in the same
-fold.</li>
-</ul>
+<p>We learned how to apply preprocessing steps such as factor encoding
+or scaling directly on a task. Furthermore, we have also seen how to
+create a <code>GraphLearner</code> which applies a ML pipeline on a task
+that first does all preprocessing steps defined in the
+<code>Graph</code> and then trains a learner on the preprocessed task.
+We also saw that scaling is important for the k-NN learner but not for a
+decision tree as neither the decision tree structure nor the performance
+of the decision tree changes.</p>
 </div>
 </div><!-- /.entry-content -->
 </article>

@@ -1,6 +1,6 @@
 ---
-title: "Supervised Learning III"
-subtitle: "Bayesian Optimization"
+title: "Applied Machine Learning"
+subtitle: "Homework exercise 02-1"
 output:
   prettydoc::html_pretty:
     theme: hpstr
@@ -11,7 +11,7 @@ output:
 ---
 
 ```{r, include=FALSE}
-sys.source("../setup/setup.R", envir = knitr::knit_global())
+sys.source("setup.R", envir = knitr::knit_global())
 ```
 
 # Goal
@@ -139,7 +139,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 instance$archive$data
 ```
 
@@ -185,7 +185,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 surrogate$update()
 surrogate$learner$model
 ```
@@ -212,14 +212,14 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 acq_function = acqf("ei", surrogate = surrogate)
 acq_function$update()
 ```
 
 The best y-value the acquisition function has seen so far:
 
-```{r}
+```{r, eval = show.solution}
 acq_function$y_best
 ```
 
@@ -249,7 +249,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 acq_optimizer = acqo(
   optimizer = optimizer,
   terminator = trm("evals", n_evals = 200),
@@ -301,7 +301,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 instance = OptimInstanceSingleCrit$new(objective,
   terminator = trm("evals", n_evals = 100))
 sobol_design = generate_design_sobol(domain, n = 100)$data
@@ -348,7 +348,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 instance = tune(tuner,
                 tsk("sonar"),
                 lrn_svm,
