@@ -245,73 +245,71 @@ stratification. In this exercise, we will illustrate this using the
 <h2>1.1 Set stratification variable</h2>
 <p>Modify the <code>task_gc</code> object such that the target variable
 <code>credit_risk</code> is used to for stratification.</p>
-<div id="solution" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>task_gc<span class="sc">$</span>col_roles<span class="sc">$</span>stratum <span class="ot">=</span> <span class="st">&quot;credit_risk&quot;</span></span></code></pre></div>
-<p>After the specification of <code>task$col_roles$stratum</code>, the
-active binding <code>task$strata</code> will show the number of
-observations in each group and the corresponding row ids:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>task_gc<span class="sc">$</span>strata</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="do">##      N                row_id</span></span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="do">## 1: 700       1,3,4,6,7,8,...</span></span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="do">## 2: 300  2, 5,10,11,12,14,...</span></span></code></pre></div>
-</div>
+<summary>**Click me:**</summary>
+
+
+```r
+task_gc$col_roles$stratum = "credit_risk"
+```
+
+After the specification of `task$col_roles$stratum`, the active binding `task$strata` will show the number of observations in each group and the corresponding row ids:
+
+
+```r
+task_gc$strata
+```
+
+-->
 </div>
 <div id="create-resampling-procedure" class="section level2">
 <h2>1.2 Create resampling procedure</h2>
 <p>Next, specify a 3-fold cross validation and instantiate the
 resampling on the task.</p>
-<div id="solution-1" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>cv3 <span class="ot">=</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> <span class="dv">3</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>cv3<span class="sc">$</span><span class="fu">instantiate</span>(task_gc)</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>cv3<span class="sc">$</span>instance</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="do">##       row_id fold</span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="do">##    1:      7    1</span></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="do">##    2:      8    1</span></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="do">##    3:      9    1</span></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="do">##    4:     17    1</span></span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="do">##    5:     22    1</span></span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="do">##   ---            </span></span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="do">##  996:    959    3</span></span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="do">##  997:    967    3</span></span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="do">##  998:    980    3</span></span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="do">##  999:    984    3</span></span>
-<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="do">## 1000:    999    3</span></span></code></pre></div>
-</div>
+<summary>**Click me:**</summary>
+
+
+```r
+cv3 = rsmp("cv", folds = 3)
+cv3$instantiate(task_gc)
+cv3$instance
+```
+
+-->
 </div>
 <div id="sanity-check" class="section level2">
 <h2>1.3 Sanity check</h2>
 <p>As a sanity check, the target class distribution should be similar
 within each CV fold. Compute and check the target class distribution
 within each fold.</p>
-<div id="solution-2" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>dt <span class="ot">=</span> <span class="fu">merge</span>(cv3<span class="sc">$</span>instance, task_gc<span class="sc">$</span><span class="fu">data</span>()[, <span class="at">row_id :=</span> .I], <span class="at">by =</span> <span class="st">&quot;row_id&quot;</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>dt[, .(<span class="at">class_ratio =</span> <span class="fu">sum</span>(credit_risk <span class="sc">==</span> <span class="st">&quot;bad&quot;</span>) <span class="sc">/</span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="fu">sum</span>(credit_risk <span class="sc">==</span> <span class="st">&quot;good&quot;</span>)), by <span class="ot">=</span> fold]</span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="do">##    fold class_ratio</span></span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="do">## 1:    2   0.4291845</span></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="do">## 2:    3   0.4291845</span></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="do">## 3:    1   0.4273504</span></span></code></pre></div>
-<p>Indeed, we can see that the target class is distributed similarly
-within each CV fold, matching the overall class distribution:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>dt[, .(<span class="at">class_ratio =</span> <span class="fu">sum</span>(credit_risk <span class="sc">==</span> <span class="st">&quot;bad&quot;</span>) <span class="sc">/</span> <span class="fu">sum</span>(credit_risk <span class="sc">==</span> <span class="st">&quot;good&quot;</span>))]</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="do">##    class_ratio</span></span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="do">## 1:   0.4285714</span></span></code></pre></div>
-</div>
+<summary>**Click me:**</summary>
+
+
+```r
+dt = merge(cv3$instance, task_gc$data()[, row_id := .I], by = "row_id")
+dt[, .(class_ratio = sum(credit_risk == "bad") /
+  sum(credit_risk == "good")), by = fold]
+```
+
+Indeed, we can see that the target class is distributed similarly within each CV fold, matching the overall class distribution:
+
+
+```r
+dt[, .(class_ratio = sum(credit_risk == "bad") / sum(credit_risk == "good"))]
+```
+
+-->
 </div>
 </div>
 <div id="block-resampling" class="section level1">
@@ -324,8 +322,8 @@ either in the training set or in the test set.</p>
 <p>In the following example, wel will consider the
 <code>BreastCancer</code> data set from the <code>mlbench</code>
 package:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">data</span>(BreastCancer, <span class="at">package =</span> <span class="st">&quot;mlbench&quot;</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>task_bc <span class="ot">=</span> <span class="fu">as_task_classif</span>(BreastCancer, <span class="at">target =</span> <span class="st">&quot;Class&quot;</span>, <span class="at">positive =</span> <span class="st">&quot;malignant&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">data</span>(BreastCancer, <span class="at">package =</span> <span class="st">&quot;mlbench&quot;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>task_bc <span class="ot">=</span> <span class="fu">as_task_classif</span>(BreastCancer, <span class="at">target =</span> <span class="st">&quot;Class&quot;</span>, <span class="at">positive =</span> <span class="st">&quot;malignant&quot;</span>)</span></code></pre></div>
 <p>In this data set, several observations have the same <code>Id</code>
 (sample code number), which implies these are samples taken from the
 same patient at different times.</p>
@@ -333,23 +331,26 @@ same patient at different times.</p>
 <h2>2.1 Count groups</h2>
 <p>Let’s count how many observation actually have the same
 <code>Id</code> more than once.</p>
-<div id="solution-3" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">table</span>(BreastCancer<span class="sc">$</span>Id) <span class="sc">&gt;</span> <span class="dv">1</span>)</span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="do">## [1] 46</span></span></code></pre></div>
-<p>There are 46 <code>Id</code>s with more than one observation
-(row).</p>
+<summary>**Click me:**</summary>
+
+
+```r
+sum(table(BreastCancer$Id) > 1)
+```
+
+There are 46 `Id`s with more than one observation (row).
+
+-->
 <p>The model trained on this data set will be used to predict cancer
 status of new patients. Hence, we have to make sure that each Id occurs
 exactly in one fold, so that all observations with the same Id should be
 either used for training or for evaluating the model. This way, we get
 less biased performance estimates via k-fold cross validation. This can
 be achieved by block cross validation.</p>
-</div>
 </div>
 <div id="set-up-block-resampling" class="section level2">
 <h2>2.2 Set up block resampling</h2>
@@ -358,40 +359,48 @@ be achieved by block cross validation.</p>
 variable included in the feature set. Now, set the column
 <code>Id</code> as grouping variable in the <code>task</code>
 object.</p>
-<div id="solution-4" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>task_bc<span class="sc">$</span>col_roles<span class="sc">$</span>group <span class="ot">=</span> <span class="st">&quot;Id&quot;</span></span></code></pre></div>
-</div>
+<summary>**Click me:**</summary>
+
+
+```r
+task_bc$col_roles$group = "Id"
+```
+
+-->
 </div>
 <div id="instantiate-resampling" class="section level2">
 <h2>2.3 Instantiate resampling</h2>
 <p>Next, set up a 5-fold CV and instantiate it on the task.</p>
-<div id="solution-5" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>cv5 <span class="ot">=</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> <span class="dv">5</span>)</span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>cv5<span class="sc">$</span><span class="fu">instantiate</span>(task_bc)</span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>cv5<span class="sc">$</span>instance</span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="do">##       row_id fold</span></span>
-<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="do">##   1: 1015425    1</span></span>
-<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="do">##   2: 1041801    1</span></span>
-<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="do">##   3: 1049815    1</span></span>
-<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="do">##   4: 1059552    1</span></span>
-<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="do">##   5: 1084584    1</span></span>
-<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="do">##  ---             </span></span>
-<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="do">## 641: 1371920    5</span></span>
-<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="do">## 642:  536708    5</span></span>
-<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="do">## 643:  566346    5</span></span>
-<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="do">## 644:  603148    5</span></span>
-<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="do">## 645:  888820    5</span></span></code></pre></div>
-</div>
+<summary>**Click me:**</summary>
+
+
+```r
+cv5 = rsmp("cv", folds = 5)
+cv5$instantiate(task_bc)
+cv5$instance
+##      row_id fold
+##   1:      9    1
+##   2:     10    1
+##   3:     12    1
+##   4:     16    1
+##   5:     24    1
+##  ---            
+## 695:    656    5
+## 696:    662    5
+## 697:    666    5
+## 698:    673    5
+## 699:    686    5
+```
+
+-->
 </div>
 <div id="sanity-check-1" class="section level2">
 <h2>2.4 Sanity check</h2>
@@ -400,19 +409,22 @@ appears only in exactly one fold. To inspect if blocking was successful
 when generating the folds, count how often each <code>Id</code> appears
 in a specific fold and print the <code>Id</code>s that appear in more
 than one fold.</p>
-<div id="solution-6" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>dt <span class="ot">=</span> <span class="fu">merge</span>(task_bc<span class="sc">$</span><span class="fu">data</span>(), cv5<span class="sc">$</span>instance, <span class="at">by.x =</span> <span class="st">&quot;Id&quot;</span>, <span class="at">by.y =</span> <span class="st">&quot;row_id&quot;</span>)</span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>dt <span class="ot">=</span> dt[, .(<span class="at">unique_folds =</span> <span class="fu">length</span>(<span class="fu">unique</span>(fold))), by <span class="ot">=</span> Id]</span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>dt[unique_folds <span class="sc">&gt;</span> <span class="dv">1</span>, ]</span>
-<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="do">## Empty data.table (0 rows and 2 cols): Id,unique_folds</span></span></code></pre></div>
+<summary>**Click me:**</summary>
+
+
+```r
+dt = merge(task_bc$data(), cv5$instance, by.x = "Id", by.y = "row_id")
+dt = dt[, .(unique_folds = length(unique(fold))), by = Id]
+dt[unique_folds > 1, ]
+```
+
+-->
 <p>As expected, the table is empty as there are no Id’s present in more
 than one fold.</p>
-</div>
 </div>
 </div>
 <div id="summary" class="section level1">
