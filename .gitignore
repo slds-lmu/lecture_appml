@@ -12,7 +12,7 @@
 *.snm
 *.toc
 *.pdf
-*.html
+!mlr3-*.pdf
 !**/figure_man/*.pdf
 !**/figure/*.pdf
 !slides-pdf/*.pdf
