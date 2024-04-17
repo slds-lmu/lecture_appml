@@ -1,6 +1,6 @@
 ---
-title: "Supervised Learning II"
-subtitle: "Nested Resampling"
+title: "Applied Machine Learning"
+subtitle: "In-class exercise 02-2"
 output:
   prettydoc::html_pretty:
     theme: hpstr

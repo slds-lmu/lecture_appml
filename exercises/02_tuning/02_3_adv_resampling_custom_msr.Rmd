@@ -1,6 +1,6 @@
 ---
-title: "Supervised Learning II"
-subtitle: "Advanced Resampling and Custom Measures"
+title: "Applied Machine Learning"
+subtitle: "In-class exercise 02-3"
 output:
   prettydoc::html_pretty:
     theme: hpstr
@@ -11,7 +11,7 @@ output:
 ---
 
 ```{r, include=FALSE}
-sys.source("../setup/setup.R", envir = knitr::knit_global())
+sys.source("setup.R", envir = knitr::knit_global())
 ```
 
 # Goal
@@ -59,13 +59,13 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 task_gc$col_roles$stratum = "credit_risk"
 ```
 
 After the specification of `task$col_roles$stratum`, the active binding `task$strata` will show the number of observations in each group and the corresponding row ids:
 
-```{r}
+```{r, eval = show.solution}
 task_gc$strata
 ```
 
@@ -85,7 +85,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 cv3 = rsmp("cv", folds = 3)
 cv3$instantiate(task_gc)
 cv3$instance
@@ -109,7 +109,7 @@ cat("<!--")
 
 With `data.table`:
 
-```{r}
+```{r, eval = show.solution}
 dt = merge(cv3$instance, task_gc$data()[, row_id := .I], by = "row_id")
 dt[, .(class_ratio = sum(credit_risk == "bad") /
   sum(credit_risk == "good")), by = fold]
@@ -117,13 +117,13 @@ dt[, .(class_ratio = sum(credit_risk == "bad") /
 
 Indeed, we can see that the target class is distributed similarly within each CV fold, matching the overall class distribution:
 
-```{r}
+```{r, eval = show.solution}
 dt[, .(class_ratio = sum(credit_risk == "bad") / sum(credit_risk == "good"))]
 ```
 
 With base R:
 
-```{r}
+```{r, eval = show.solution}
 dt <- merge(cv3$instance, transform(task_gc$data(), row_id = seq_len(nrow(task_gc$data()))), by = "row_id")
 aggregate(credit_risk ~ fold, data = dt, FUN = function(x) sum(x == "bad") / sum(x == "good"))
 with(dt, sum(credit_risk == "bad") / sum(credit_risk == "good"))
@@ -158,7 +158,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 sum(table(BreastCancer$Id) > 1)
 ```
 
@@ -182,7 +182,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 task_bc$col_roles$group = "Id"
 ```
 
@@ -202,7 +202,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 cv5 = rsmp("cv", folds = 5)
 cv5$instantiate(task_bc)
 cv5$instance
@@ -225,14 +225,14 @@ cat("<!--")
 <summary>**Click me:**</summary>
 
 With `data.table`:
-```{r}
+```{r, eval = show.solution}
 dt = merge(task_bc$data(), cv5$instance, by.x = "Id", by.y = "row_id")
 dt = dt[, .(unique_folds = length(unique(fold))), by = Id]
 dt[unique_folds > 1, ]
 ```
 
 With base R:
-```{r}
+```{r, eval = show.solution}
 dt <- aggregate(fold ~ Id,
                  data = merge(task_bc$data(),
                               cv5$instance,
@@ -312,7 +312,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 MeasureRegrMaxMseMae = R6::R6Class("MeasureRegrMaxMseMae",
   inherit = mlr3::MeasureRegr, # regression measure
   public = list(
@@ -365,7 +365,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 mlr3::mlr_measures$add("regr.max_mse_mae", MeasureRegrMaxMseMae)
 prediction$score(msr("regr.max_mse_mae"))
 ```

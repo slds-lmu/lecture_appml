@@ -1,6 +1,6 @@
 ---
-title: "Supervised Learning II"
-subtitle: "Hyperparameter Tuning"
+title: "Applied Machine Learning"
+subtitle: "In-class exercise 02-1"
 output:
   prettydoc::html_pretty:
     theme: hpstr

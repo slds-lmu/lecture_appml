@@ -146,7 +146,7 @@ pointer-events: auto;
 <header class="header-title">
 <div class="header-title-wrap">
 <h1 class="title toc-ignore entry-title">Applied Machine Learning</h1>
-<h2 class="subtitle">In-class exercise 02-1</h2>
+<h2 class="subtitle">In-class exercise 02-3</h2>
 </div><!-- /.header-title-wrap -->
 </header>
 
@@ -155,249 +155,104 @@ pointer-events: auto;
 <div id="TOC" class="toc">
 <ul>
 <li><a href="#goal" id="toc-goal">Goal</a></li>
-<li><a href="#exercises" id="toc-exercises">Exercises</a>
+<li><a href="#prerequisites" id="toc-prerequisites">Prerequisites</a></li>
+<li><a href="#stratified-resampling" id="toc-stratified-resampling">1
+Stratified Resampling</a>
 <ul>
-<li><a href="#parameter-spaces" id="toc-parameter-spaces">Parameter
-spaces</a></li>
-<li><a href="#hyperparameter-optimization" id="toc-hyperparameter-optimization">Hyperparameter
-optimization</a></li>
-<li><a href="#analyzing-the-tuning-archive" id="toc-analyzing-the-tuning-archive">Analyzing the tuning
-archive</a></li>
-<li><a href="#visualizing-hyperparameters" id="toc-visualizing-hyperparameters">Visualizing
-hyperparameters</a></li>
-<li><a href="#hyperparameter-dependencies" id="toc-hyperparameter-dependencies">Hyperparameter
-dependencies</a></li>
-<li><a href="#hyperparameter-transformations" id="toc-hyperparameter-transformations">Hyperparameter
-transformations</a></li>
+<li><a href="#set-stratification-variable" id="toc-set-stratification-variable">1.1 Set stratification
+variable</a></li>
+<li><a href="#create-resampling-procedure" id="toc-create-resampling-procedure">1.2 Create resampling
+procedure</a></li>
+<li><a href="#sanity-check" id="toc-sanity-check">1.3 Sanity
+check</a></li>
+</ul></li>
+<li><a href="#block-resampling" id="toc-block-resampling">2 Block
+Resampling</a>
+<ul>
+<li><a href="#count-groups" id="toc-count-groups">2.1 Count
+groups</a></li>
+<li><a href="#set-up-block-resampling" id="toc-set-up-block-resampling">2.2 Set up block resampling</a></li>
+<li><a href="#instantiate-resampling" id="toc-instantiate-resampling">2.3 Instantiate resampling</a></li>
+<li><a href="#sanity-check-1" id="toc-sanity-check-1">2.4 Sanity
+check</a></li>
+</ul></li>
+<li><a href="#custom-performance-measures" id="toc-custom-performance-measures">3 Custom Performance Measures</a>
+<ul>
+<li><a href="#mse-mae" id="toc-mse-mae">3.1 MSE-MAE</a></li>
+<li><a href="#evaluate-a-custom-measure" id="toc-evaluate-a-custom-measure">3.2 Evaluate a custom
+measure</a></li>
 </ul></li>
 <li><a href="#summary" id="toc-summary">Summary</a></li>
-<li><a href="#further-information" id="toc-further-information">Further
-information</a></li>
 </ul>
 </div>
 
 <div id="goal" class="section level1">
 <h1>Goal</h1>
-<p>After this exercise, you should be able to define search spaces for
-learning algorithms and apply different hyperparameter (HP) optimization
-(HPO) techniques to search through the search space to find a
-well-performing hyperparameter configuration (HPC).</p>
+<p>After this exercise, you should be able to control the resampling
+process when using <code>mlr3</code> in order to account for data
+specificities, such as class imbalances in classification settings or
+grouping phenomena. Further, you will have learned how to construct and
+utilize custom measures for performance evaluation within
+<code>mlr3</code>.</p>
 </div>
-<div id="exercises" class="section level1">
-<h1>Exercises</h1>
-<p>Again, we are looking at the <code>german_credit</code> data set and
-corresponding task (you can quickly load the task with
-<code>tsk(&quot;german_credit&quot;)</code>). We want to train a k-NN model but
-ask ourselves what the best choice of <span class="math inline">\(k\)</span> might be? Furthermore, we are not sure
-how to set other HPs of the learner, e.g., if we should scale the data
-or not. In this exercise, we conduct HPO for k-NN to automatically find
-a good HPC.</p>
+<div id="prerequisites" class="section level1">
+<h1>Prerequisites</h1>
+<p>We load the most important packages and use a fixed seed for
+reproducibility.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(mlr3verse)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>task <span class="ot">=</span> <span class="fu">tsk</span>(<span class="st">&quot;german_credit&quot;</span>)</span></code></pre></div>
-<details>
-<summary>
-<strong>Recap</strong>
-</summary>
-k-NN is a machine learning method that predicts new data by averaging
-over the responses of the k nearest neighbors.
-</details>
-<div id="parameter-spaces" class="section level2">
-<h2>Parameter spaces</h2>
-<p>Define a meaningful search space for the HPs <code>k</code> and
-<code>scale</code>. You can checkout the help page
-<code>lrn(&quot;classif.kknn&quot;)$help()</code> for an overview of the k-NN
-learner.</p>
-<details>
-<summary>
-<strong>Hint 1</strong>
-</summary>
-Each learner has a slot <code>param_set</code> that contains all HPs
-that can be used for the tuning. In this use case we tune a learner with
-the key <code>&quot;classif.kknn&quot;</code>. The functions to define the search
-space are <code>ps</code> and <code>p_int</code>, <code>p_dbl</code>,
-<code>p_fct</code>, or <code>p_lgl</code> for HPs in the search space.
-</details>
-<details>
-<summary>
-<strong>Hint 2</strong>
-</summary>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(mlr3tuning)</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>search_space <span class="ot">=</span> <span class="fu">ps</span>(</span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="at">k =</span> <span class="fu">p_int</span>(...),</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="at">scale =</span> ...</span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>)</span></code></pre></div>
-</details>
-<!--
-
-### Solution
-
-<details>
-<summary>**Click me**</summary>
-
-```r
-library(mlr3tuning)
-
-search_space = ps(
-  k = p_int(1, 100),
-  scale = p_lgl()
-)
-```
-</details>
-
--->
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(mlbench)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">7832</span>)</span></code></pre></div>
 </div>
-<div id="hyperparameter-optimization" class="section level2">
-<h2>Hyperparameter optimization</h2>
-<p>Now, we want to tune the k-NN model with the search space from the
-previous exercise. As resampling strategy we use a 3 fold cross
-validation. The tuning strategy should be a random search. As
-termination criteria we choose 40 evaluations.</p>
-<details>
-<summary>
-<strong>Hint 1</strong>
-</summary>
-<p>The elements required for the tuning are:</p>
-<ul>
-<li>Task: German credit</li>
-<li>Algorithm: k-NN algorithm from <code>lrn()</code></li>
-<li>Resampling: 3-fold cross validation using <code>rsmp()</code></li>
-<li>Terminator: 40 evaluations using <code>trm()</code></li>
-<li>Search space: See previous exercise</li>
-<li>We use the default performance measure
-(<code>msr(&quot;classif.ce&quot;)</code> for classification and
-<code>msr(&quot;classif.mse&quot;)</code> for regression)</li>
-</ul>
-The tuning instance is then defined by calling
-<code>TuningInstanceSingleCrit$new()</code>. The random search
-optimization algorithm is obtained from <code>tnr()</code> with the
-corresponding key as argument. Furthermore, we allow parallel
-computations and set the batch size as well as the number of cores to
-four.
-</details>
-<details>
-<summary>
-<strong>Hint 2</strong>
-</summary>
-<p>The optimization algorithm is obtained from <code>tnr()</code> with
-the corresponding key as argument. Furthermore we allow parallel
-computations using four cores:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(mlr3)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">library</span>(mlr3learners)</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="fu">library</span>(mlr3tuning)</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>future<span class="sc">::</span><span class="fu">plan</span>(<span class="st">&quot;multicore&quot;</span>, <span class="at">workers =</span> 4L)</span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>task <span class="ot">=</span> <span class="fu">tsk</span>(...)</span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>lrn_knn <span class="ot">=</span> <span class="fu">lrn</span>(...)</span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>search_space <span class="ot">=</span> <span class="fu">ps</span>(</span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>  <span class="at">k =</span> <span class="fu">p_int</span>(<span class="dv">1</span>, <span class="dv">100</span>),</span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  <span class="at">scale =</span> <span class="fu">p_lgl</span>()</span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>)</span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>resampling <span class="ot">=</span> <span class="fu">rsmp</span>(...)</span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a></span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>terminator <span class="ot">=</span> <span class="fu">trm</span>(..., <span class="at">... =</span> 40L)</span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a></span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>instance <span class="ot">=</span> TuningInstanceSingleCrit<span class="sc">$</span><span class="fu">new</span>(</span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>  <span class="at">task =</span> ...,</span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>  <span class="at">learner =</span> ...,</span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>  <span class="at">resampling =</span> ...,</span>
-<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>  <span class="at">terminator =</span> ...,</span>
-<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a>  <span class="at">search_space =</span> ...</span>
-<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a>)</span>
-<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a></span>
-<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a>optimizer <span class="ot">=</span> <span class="fu">tnr</span>(...)</span>
-<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a>optimizer<span class="sc">$</span><span class="fu">...</span>(...)</span></code></pre></div>
-Finally, the optimization is started by passing the tuning instance to
-the <code>$optimize()</code> method of the tuner.
-</details>
-<!--
-
-### Solution
-
-<details>
-<summary>**Click me**</summary>
-
-```r
-library(mlr3)
-library(mlr3learners)
-library(mlr3tuning)
-
-future::plan("multicore", workers = 4L)
-
-task = tsk("german_credit")
-lrn_knn = lrn("classif.kknn")
-
-search_space = ps(
-  k = p_int(1, 100),
-  scale = p_lgl()
-)
-resampling = rsmp("cv", folds = 3L)
-
-terminator = trm("evals", n_evals = 40L)
-
-instance = TuningInstanceSingleCrit$new(
-  task = task,
-  learner = lrn_knn,
-  resampling = resampling,
-  terminator = terminator,
-  search_space = search_space
-)
-
-optimizer = tnr("random_search", batch_size = 4L)
-
-optimizer$optimize(instance)
-instance$result_y
-instance$result
-```
-</details>
-
-__Syntactic sugar to define the HP space__
-
-`mlr3` provides syntactic sugar to shorten the process of search space definition. To do so, it is possible to directly specify the HP range in the learner construction:
-
-<details>
-<summary>**Click me**</summary>
-
-```r
-task = tsk("german_credit")
-
-lrn_knn = lrn("classif.kknn", k = to_tune(1, 100), scale = to_tune())
-```
-
-This adjust the parameter set (`lrn_knn$param_set`) attached to the learner and flags it as "tunable". The tuning then makes use of that search space if no `search_space` is given in the `TuningInstanceSingleCrit$new()` construction:
-
-
-```r
-resampling = rsmp("cv", folds = 3L)
-
-terminator = trm("evals", n_evals = 40L)
-
-instance = TuningInstanceSingleCrit$new(
-  task = task,
-  learner = lrn_knn,
-  resampling = resampling,
-  terminator = terminator
-)
-
-optimizer = tnr("random_search", batch_size = 4L)
-
-optimizer$optimize(instance)
-instance$result_y
-instance$result
-```
-</details>
-
-
--->
-</div>
-<div id="analyzing-the-tuning-archive" class="section level2">
-<h2>Analyzing the tuning archive</h2>
-<p>Inspect the archive of hyperparameters evaluated during the tuning
-process with <code>instance$archive</code>. Create a simple plot with
-the goal of illustrating the association between the hyperparametere
-<code>k</code> and the estimated classification error.</p>
+<div id="stratified-resampling" class="section level1">
+<h1>1 Stratified Resampling</h1>
+<p>In classification tasks, the ratio of the target class distribution
+should be similar in each train/test split, which is achieved by
+stratification. This is particularly useful in the case of imbalanced
+classes and small data sets.</p>
+<p>Stratification can also be performed with respect to explanatory
+categorical variables to ensure that all subgroups are represented in
+all training and test sets.</p>
+<p>In <code>mlr3</code>, each <code>task</code> has a slot
+<code>$col_roles</code>. This slot shows general roles certain features
+will have throughout different stages of the machine learning process.
+At least, the <code>$col_roles</code> slot shows which variables will be
+used as <code>feature</code> and as <code>target</code>. However, the
+<code>$col_roles</code> slot can be more diverse and some variables
+might even serve multiple roles. For example,
+<code>task$col_roles$stratum</code> specify the variable used for
+stratification. In this exercise, we will illustrate this using the
+<code>german_credit</code> data:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>task_gc <span class="ot">=</span> <span class="fu">tsk</span>(<span class="st">&quot;german_credit&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>task_gc<span class="sc">$</span>col_roles</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="do">## $feature</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="do">##  [1] &quot;age&quot;                     &quot;amount&quot;                  &quot;credit_history&quot;          &quot;duration&quot;               </span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="do">##  [5] &quot;employment_duration&quot;     &quot;foreign_worker&quot;          &quot;housing&quot;                 &quot;installment_rate&quot;       </span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="do">##  [9] &quot;job&quot;                     &quot;number_credits&quot;          &quot;other_debtors&quot;           &quot;other_installment_plans&quot;</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="do">## [13] &quot;people_liable&quot;           &quot;personal_status_sex&quot;     &quot;present_residence&quot;       &quot;property&quot;               </span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="do">## [17] &quot;purpose&quot;                 &quot;savings&quot;                 &quot;status&quot;                  &quot;telephone&quot;              </span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="do">## $target</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="do">## [1] &quot;credit_risk&quot;</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="do">## $name</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="do">## character(0)</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="do">## $order</span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="do">## character(0)</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="do">## $stratum</span></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="do">## character(0)</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="do">## $group</span></span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="do">## character(0)</span></span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="do">## $weight</span></span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a><span class="do">## character(0)</span></span></code></pre></div>
+<div id="set-stratification-variable" class="section level2">
+<h2>1.1 Set stratification variable</h2>
+<p>Modify the <code>task_gc</code> object such that the target variable
+<code>credit_risk</code> is used to for stratification.</p>
 <!--
 
 ### Solution:
@@ -406,94 +261,273 @@ the goal of illustrating the association between the hyperparametere
 
 
 ```r
-plot(x = instance$archive$data$k, y = instance$archive$data$classif.ce)
+task_gc$col_roles$stratum = "credit_risk"
 ```
 
--->
-</div>
-<div id="visualizing-hyperparameters" class="section level2">
-<h2>Visualizing hyperparameters</h2>
-<p>To see how effective the tuning was, it is useful to look at the
-effect of the HPs on the performance. It also helps us to understand how
-important different HPs are. Therefore, access the archive of the tuning
-instance and visualize the effect.</p>
-<details>
-<summary>
-<strong>Hint 1</strong>
-</summary>
-Access the <code>archive</code> of the tuning instance to get all
-information about the tuning. You can use all known plotting techniques
-after transforming it to a <code>data.table</code>.
-</details>
-<details>
-<summary>
-<strong>Hint 2</strong>
-</summary>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>arx <span class="ot">=</span> <span class="fu">as...</span>(instance<span class="sc">$</span>...)</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a></span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>gg_k <span class="ot">=</span> <span class="fu">ggplot</span>(..., <span class="fu">aes</span>(...)) <span class="sc">+</span> <span class="fu">...</span>()</span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>gg_scale <span class="ot">=</span> <span class="fu">ggplot</span>(..., <span class="fu">aes</span>(...)) <span class="sc">+</span> <span class="fu">...</span>()</span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>gg_k <span class="sc">+</span> gg_scale <span class="sc">&amp;</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>)</span></code></pre></div>
-</details>
-<!--
+After the specification of `task$col_roles$stratum`, the active binding `task$strata` will show the number of observations in each group and the corresponding row ids:
 
-### Solution
-
-<details>
-<summary>**Click me**</summary>
 
 ```r
-arx = as.data.table(instance$archive)
-
-library(ggplot2)
-library(patchwork)
-
-gg_k = ggplot(arx, aes(x = k, y = classif.ce)) + geom_point()
-gg_scale = ggplot(arx, aes(x = scale, y = classif.ce, fill = scale)) + geom_boxplot()
-
-gg_k + gg_scale & theme(legend.position = "bottom")
-
-## ALTERNATIVE:
-
-# The `mlr3viz` automatically creates plots for getting an idea of the
-# effect of the HPs:
-
-library(mlr3viz)
-
-autoplot(instance)
+task_gc$strata
 ```
-
-The number of neighbours `k` and `scale` seem to have a big impact on the performance of the model. 
-</details>
 
 -->
 </div>
-<div id="hyperparameter-dependencies" class="section level2">
-<h2>Hyperparameter dependencies</h2>
-<p>When defining a hyperparameter search space via the <code>ps()</code>
-function, we sometimes encounter nested search spaces, also called
-hyperparameter dependencies. One example for this are SVMs. Here, the
-hyperparameter <code>degree</code> is only relevant if the
-hyperparameter <code>kernel</code> is set to <code>&quot;polynomial&quot;</code>.
-Therefore, we only have to consider different configurations for
-<code>degree</code> if we evaluate candidate configurations with
-polynomial kernel. Construct a search space for a SVM with
-hyperparameters <code>kernel</code> (candidates should be
-<code>&quot;polynomial&quot;</code> and <code>&quot;radial&quot;</code>) and
-<code>degree</code> (integer ranging from 1 to 3, but only for
-polynomial kernels), and account for the dependency structure.</p>
+<div id="create-resampling-procedure" class="section level2">
+<h2>1.2 Create resampling procedure</h2>
+<p>Next, specify a 3-fold cross validation and instantiate the
+resampling on the task.</p>
+<!--
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+
+```r
+cv3 = rsmp("cv", folds = 3)
+cv3$instantiate(task_gc)
+cv3$instance
+```
+
+-->
+</div>
+<div id="sanity-check" class="section level2">
+<h2>1.3 Sanity check</h2>
+<p>As a sanity check, the target class distribution should be similar
+within each CV fold. Compute and check the target class distribution
+within each fold.</p>
+<!--
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+With `data.table`:
+
+
+```r
+dt = merge(cv3$instance, task_gc$data()[, row_id := .I], by = "row_id")
+dt[, .(class_ratio = sum(credit_risk == "bad") /
+  sum(credit_risk == "good")), by = fold]
+```
+
+Indeed, we can see that the target class is distributed similarly within each CV fold, matching the overall class distribution:
+
+
+```r
+dt[, .(class_ratio = sum(credit_risk == "bad") / sum(credit_risk == "good"))]
+```
+
+With base R:
+
+
+```r
+dt <- merge(cv3$instance, transform(task_gc$data(), row_id = seq_len(nrow(task_gc$data()))), by = "row_id")
+aggregate(credit_risk ~ fold, data = dt, FUN = function(x) sum(x == "bad") / sum(x == "good"))
+with(dt, sum(credit_risk == "bad") / sum(credit_risk == "good"))
+```
+
+-->
+</div>
+</div>
+<div id="block-resampling" class="section level1">
+<h1>2 Block Resampling</h1>
+<p>An additional concern when specifying resampling is respecting the
+natural grouping of the data. Blocking refers to the situation where
+subsets of observations belong together and must not be separated during
+resampling. Hence, for one train/test set pair the entire block is
+either in the training set or in the test set.</p>
+<p>In the following example, wel will consider the
+<code>BreastCancer</code> data set from the <code>mlbench</code>
+package:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">data</span>(BreastCancer, <span class="at">package =</span> <span class="st">&quot;mlbench&quot;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>task_bc <span class="ot">=</span> <span class="fu">as_task_classif</span>(BreastCancer, <span class="at">target =</span> <span class="st">&quot;Class&quot;</span>, <span class="at">positive =</span> <span class="st">&quot;malignant&quot;</span>)</span></code></pre></div>
+<p>In this data set, several observations have the same <code>Id</code>
+(sample code number), which implies these are samples taken from the
+same patient at different times.</p>
+<div id="count-groups" class="section level2">
+<h2>2.1 Count groups</h2>
+<p>Let’s count how many observation actually have the same
+<code>Id</code> more than once.</p>
+<!--
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+
+```r
+sum(table(BreastCancer$Id) > 1)
+```
+
+There are 46 `Id`s with more than one observation (row).
+
+-->
+<p>The model trained on this data set will be used to predict cancer
+status of new patients. Hence, we have to make sure that each Id occurs
+exactly in one fold, so that all observations with the same Id should be
+either used for training or for evaluating the model. This way, we get
+less biased performance estimates via k-fold cross validation. This can
+be achieved by block cross validation.</p>
+</div>
+<div id="set-up-block-resampling" class="section level2">
+<h2>2.2 Set up block resampling</h2>
+<p>Similarly to stratified resampling, block resampling uses
+<code>task$col_roles$group</code> to specify the name of a grouping
+variable included in the feature set. Now, set the column
+<code>Id</code> as grouping variable in the <code>task</code>
+object.</p>
+<!--
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+
+```r
+task_bc$col_roles$group = "Id"
+```
+
+-->
+</div>
+<div id="instantiate-resampling" class="section level2">
+<h2>2.3 Instantiate resampling</h2>
+<p>Next, set up a 5-fold CV and instantiate it on the task.</p>
+<!--
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+
+```r
+cv5 = rsmp("cv", folds = 5)
+cv5$instantiate(task_bc)
+cv5$instance
+```
+
+-->
+</div>
+<div id="sanity-check-1" class="section level2">
+<h2>2.4 Sanity check</h2>
+<p>If the specified blocking groups are respected, each <code>Id</code>
+appears only in exactly one fold. To inspect if blocking was successful
+when generating the folds, count how often each <code>Id</code> appears
+in a specific fold and print the <code>Id</code>s that appear in more
+than one fold.</p>
+<!--
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+With `data.table`:
+
+```r
+dt = merge(task_bc$data(), cv5$instance, by.x = "Id", by.y = "row_id")
+dt = dt[, .(unique_folds = length(unique(fold))), by = Id]
+dt[unique_folds > 1, ]
+```
+
+With base R:
+
+```r
+dt <- aggregate(fold ~ Id,
+                 data = merge(task_bc$data(),
+                              cv5$instance,
+                              by.x = "Id",
+                              by.y = "row_id"),
+                 FUN = function(x) length(unique(x)))
+dt[dt$fold > 1,]
+```
+
+-->
+<p>As expected, the table is empty as there are no Id’s present in more
+than one fold.</p>
+</div>
+</div>
+<div id="custom-performance-measures" class="section level1">
+<h1>3 Custom Performance Measures</h1>
+<p>Many domain applications require custom measures for performance
+evaluations not supported in <code>mlr3</code>. You can inspect all
+available measures by calling <code>as.data.table(mlr_measures)</code>.
+Luckily, you can design your own measures for evaluating model
+performance. To do so, we simply create a new <code>R6</code> class that
+inherits either from <code>MeasureRegr</code> (for a regression measure)
+or <code>MeasureClassif</code> (for a classification measure). Let’s see
+how this works in practice. Let us consider a regression measure that
+scores a prediction as 1 if the difference between the true and
+predicted values is less than one standard deviation of the truth, or
+scores the prediction as 0 otherwise. In maths this would be defined as
+<span class="math inline">\(f(y, \hat{y}) = \frac{1}{n} \sum_{i=1}^n
+\mathbb{I}(|y_i - \hat{y}_i| &lt; \sigma_y)\)</span>, where <span class="math inline">\(\sigma_y\)</span> is the standard deviation of the
+truth and <span class="math inline">\(\mathbb{I}\)</span> is the
+indicator function. In this case, we need the following code to
+construct a corresponding measure class:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>MeasureRegrThresholdAcc <span class="ot">=</span> R6<span class="sc">::</span><span class="fu">R6Class</span>(<span class="st">&quot;MeasureRegrThresholdAcc&quot;</span>,</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="at">inherit =</span> mlr3<span class="sc">::</span>MeasureRegr, <span class="co"># regression measure</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="at">public =</span> <span class="fu">list</span>(</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>    <span class="at">initialize =</span> <span class="cf">function</span>() { <span class="co"># initialize class</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>      super<span class="sc">$</span><span class="fu">initialize</span>(</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>        <span class="at">id =</span> <span class="st">&quot;thresh_acc&quot;</span>, <span class="co"># unique ID</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>        <span class="at">packages =</span> <span class="fu">character</span>(), <span class="co"># no package dependencies</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>        <span class="at">properties =</span> <span class="fu">character</span>(), <span class="co"># no special properties</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>        <span class="at">predict_type =</span> <span class="st">&quot;response&quot;</span>, <span class="co"># measures response prediction</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>        <span class="at">range =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="co"># results in values between (0, 1)</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>        <span class="at">minimize =</span> <span class="cn">FALSE</span> <span class="co"># larger values are better</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>      )</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>    }</span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>  ),</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>  <span class="at">private =</span> <span class="fu">list</span>(</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>    <span class="co"># define score as private method</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>    <span class="at">.score =</span> <span class="cf">function</span>(prediction, ...) {</span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>      <span class="co"># define loss</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>      threshold_acc <span class="ot">=</span> <span class="cf">function</span>(truth, response) {</span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>        <span class="fu">mean</span>(<span class="fu">ifelse</span>(<span class="fu">abs</span>(truth <span class="sc">-</span> response) <span class="sc">&lt;</span> <span class="fu">sd</span>(truth), <span class="dv">1</span>, <span class="dv">0</span>))</span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>      }</span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>      <span class="co"># call loss function</span></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>      <span class="fu">threshold_acc</span>(prediction<span class="sc">$</span>truth, prediction<span class="sc">$</span>response)</span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a>    }</span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>  )</span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a>)</span></code></pre></div>
+<ol style="list-style-type: decimal">
+<li>In the first two lines we name the class, here
+<code>MeasureRegrThresholdAcc</code>, and then state this is a
+regression measure that inherits from <code>MeasureRegr</code>.</li>
+<li>We initialize the class by stating its unique ID is
+<code>&quot;thresh_acc&quot;</code>, that it does not require any external
+packages (<code>packages = character()</code>) and that it has no
+special properties (<code>properties = character()</code>).</li>
+<li>We then pass specific details of the loss function which are: it
+measures the quality of a <code>&quot;response&quot;</code> type prediction, its
+values range between <code>(0, 1)</code>, and that the loss is optimized
+as its maximum (<code>minimize = FALSE</code>).</li>
+<li>Finally, we define the score itself as a private method called
+<code>.score</code> where we pass the predictions to the function we
+defined just above. The private method is a function assigned to the R6
+class <code>MeasureRegrThresholdAcc</code>, such that one can
+(internally) call <code>object$.score(prediction,...)</code> for an
+object of class <code>MeasureRegrThresholdAcc</code>. The method is
+“private” as it is not intended to be visible for the end user.</li>
+</ol>
+<p>Once you have defined your custom measure, you can add it to the
+<code>mlr3measures</code> dictionary like this:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>mlr3<span class="sc">::</span>mlr_measures<span class="sc">$</span><span class="fu">add</span>(<span class="st">&quot;regr.thresh_acc&quot;</span>, MeasureRegrThresholdAcc)</span></code></pre></div>
+<div id="mse-mae" class="section level2">
+<h2>3.1 MSE-MAE</h2>
+<p>Define you own risk measure for regression, the maximum of MSE and
+MAE: <span class="math inline">\(f(y, \hat{y}) = \frac{1}{n}
+\sum_{i=1}^n \max((y_i - \hat{y}_i)^2,|y_i - \hat{y}_i|)\)</span>, using
+the code skeleton supplied above.</p>
 <details>
 <summary>
-<strong>Hint 1</strong>
+<strong>Hint 1:</strong>
 </summary>
-In the <code>p_fct</code>, <code>p_dbl</code>, … functions, we specify
-this using the <code>depends</code> argument, which takes a named
-argument of the form <code>&lt;param&gt; == value</code> or
-<code>&lt;param&gt; %in% &lt;vector&gt;</code>.
+<p>You need to change the code chunk containing the
+<code>MeasureRegrThresholdAcc</code> class definition in at least 7
+lines.</p>
 </details>
 <!--
 
@@ -503,45 +537,45 @@ argument of the form <code>&lt;param&gt; == value</code> or
 
 
 ```r
-ps(
-  kernel = p_fct(c("polynomial", "radial")),
-  degree = p_int(1, 3, depends = (kernel == "polynomial"))
+MeasureRegrMaxMseMae = R6::R6Class("MeasureRegrMaxMseMae",
+  inherit = mlr3::MeasureRegr, # regression measure
+  public = list(
+    initialize = function() { # initialize class
+      super$initialize(
+        id = "max_mse_mae", # unique ID
+        packages = character(), # no package dependencies
+        properties = character(), # no special properties
+        predict_type = "response", # measures response prediction
+        range = c(0, Inf), # results in values between (0, 1)
+        minimize = TRUE # smaller values are better
+      )
+    }
+  ),
+
+  private = list(
+    # define score as private method
+    .score = function(prediction, ...) {
+      # define loss
+      max_mse_mae = function(truth, response) {
+        mean(max((truth - response)^2, abs(truth - response)))
+      }
+      # call loss function
+      max_mse_mae(prediction$truth, prediction$response)
+    }
+  )
 )
-## <ParamSet>
-##        id    class lower upper nlevels        default parents value
-## 1: degree ParamInt     1     3       3 <NoDefault[3]>  kernel      
-## 2: kernel ParamFct    NA    NA       2 <NoDefault[3]>
 ```
 
 -->
 </div>
-<div id="hyperparameter-transformations" class="section level2">
-<h2>Hyperparameter transformations</h2>
-<p>When tuning non-negative hyperparameters with a broad range, using a
-logarithmic scale can be more efficient. This approach works especially
-well if we want to test many small values, but also a few very large
-ones. By selecting values on a logarithmic scale and then exponentiating
-them, we ensure a concentrated exploration of smaller values while still
-considering the possibility of very large values, allowing for a
-targeted and efficient search in finding optimal hyperparameter
-configurations.</p>
-<p>A simple way to do this is to pass <code>logscale = TRUE</code> when
-using <code>to_tune()</code> to define the parameter search space while
-constructing the learner:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">lrn</span>(<span class="st">&quot;classif.svm&quot;</span>, <span class="at">cost =</span> <span class="fu">to_tune</span>(<span class="fl">1e-5</span>, <span class="fl">1e5</span>, <span class="at">logscale =</span> <span class="cn">TRUE</span>))<span class="sc">$</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  param_set<span class="sc">$</span><span class="fu">search_space</span>()</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="do">## &lt;ParamSet&gt;</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="do">##      id    class     lower    upper nlevels        default value</span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="do">## 1: cost ParamDbl -11.51293 11.51293     Inf &lt;NoDefault[3]&gt;      </span></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="do">## Trafo is set.</span></span></code></pre></div>
-<p>To manually create the same transformation, we can pass the
-transformation to the more general <code>trafo</code> argument in
-<code>p_dbl()</code> and related functions and set the bounds using the
-<code>log()</code> function. For the following search space, implement a
-logarithmic transformation. the output should look exactly as the search
-space above.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># Change this to a log trafo:</span></span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">ps</span>(<span class="at">cost =</span> <span class="fu">p_dbl</span>(<span class="fl">1e-5</span>, <span class="fl">1e5</span>))</span></code></pre></div>
+<div id="evaluate-a-custom-measure" class="section level2">
+<h2>3.2 Evaluate a custom measure</h2>
+<p>Add your custom measure to the <code>mlr3measures</code> dictionary
+and use it to evaluate the following model prediction:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>tsk_mtcars <span class="ot">=</span> <span class="fu">tsk</span>(<span class="st">&quot;mtcars&quot;</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>split <span class="ot">=</span> <span class="fu">partition</span>(tsk_mtcars)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>lrn_ranger <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;regr.ranger&quot;</span>)<span class="sc">$</span><span class="fu">train</span>(tsk_mtcars, split<span class="sc">$</span>train)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>prediction <span class="ot">=</span> lrn_ranger<span class="sc">$</span><span class="fu">predict</span>(tsk_mtcars, split<span class="sc">$</span>test)</span></code></pre></div>
 <!--
 
 ### Solution:
@@ -550,13 +584,8 @@ space above.</p>
 
 
 ```r
-search_space = ps(cost = p_dbl(log(1e-5), log(1e5),
-  trafo = function(x) exp(x))) # alternatively: 'trafo = exp'
-search_space
-## <ParamSet>
-##      id    class     lower    upper nlevels        default value
-## 1: cost ParamDbl -11.51293 11.51293     Inf <NoDefault[3]>      
-## Trafo is set.
+mlr3::mlr_measures$add("regr.max_mse_mae", MeasureRegrMaxMseMae)
+prediction$score(msr("regr.max_mse_mae"))
 ```
 
 -->
@@ -565,32 +594,15 @@ search_space
 <div id="summary" class="section level1">
 <h1>Summary</h1>
 <ul>
-<li>In this use-case we learned how to define search spaces for learner
-HPs.</li>
-<li>Based on this search space, we defined a tuning strategy to try a
-number of random configurations.</li>
-<li>We visualized the tested configurations to get an idea how the HP
-effect the performance of our learner.</li>
-<li>We learned about scale transformations in tuning.</li>
-<li>Finally we added a transformation to favor a certain range in the
-parameter space.</li>
-</ul>
-</div>
-<div id="further-information" class="section level1">
-<h1>Further information</h1>
-<p>Other (more advanced) tuning algorithms:</p>
-<ul>
-<li><code>Simuated annealing</code>: Random HPC are sampled and accepted
-based on an acceptance probability function which states how likely an
-improvement in performance is. The method is implemented in
-<code>tnr(&quot;gensa&quot;)</code>.</li>
-<li><code>Model-based optimization (MBO)</code>: Guess the most
-promising HPC by estimating the expected improvement of new points.
-Available in <a href="https://mlr3mbo.mlr-org.com/"><code>mlr3mbo</code></a>.</li>
-<li><code>Multifidelity optimization/Successive halving algorithm</code>:
-This technique starts with multiple HPC and throws away unpromising
-candidates. This is repeated several times to efficiently use the tuning
-budget. The method is implemented in <a href="https://mlr3hyperband.mlr-org.com/"><code>mlr3hyperband</code></a>.</li>
+<li>Stratified resampling helps with balancing classes and features
+within CV folds, to ensure each fold represents the data well
+enough.</li>
+<li>Block resampling reduces bias in generalization error estimates by
+ensuring that observations from the same group end up in the same
+fold.</li>
+<li>Custom domain applications require custom performance measures. In
+<code>mlr3</code>, you can define custom measures by creating a new
+<code>R6</code> class.</li>
 </ul>
 </div>
 </div><!-- /.entry-content -->
