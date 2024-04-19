@@ -332,8 +332,8 @@ When tuning non-negative hyperparameters with a broad range, using a logarithmic
 A simple way to do this is to pass `logscale = TRUE` when using `to_tune()` to define the parameter search space while constructing the learner:
 
 ```{r}
-lrn("classif.svm", cost = to_tune(1e-5, 1e5, logscale = TRUE))$
-  param_set$search_space()
+lrn = lrn("classif.svm", cost = to_tune(1e-5, 1e5, logscale = TRUE))
+lrn$param_set$search_space()
 ```
 
 To manually create the same transformation, we can pass the transformation to the more general `trafo` argument in `p_dbl()` and related functions and set the bounds using the `log()` function. For the following search space, implement a logarithmic transformation. the output should look exactly as the search space above.
