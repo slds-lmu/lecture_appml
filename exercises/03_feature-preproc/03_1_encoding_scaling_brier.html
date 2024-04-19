@@ -251,7 +251,7 @@ registered on the debtor’s name</li>
 <!-- credit = read.csv("data/german_credit.csv", header = TRUE, stringsAsFactors = TRUE) -->
 <!-- ``` -->
 <!-- Later, we will be interested in classifying the credit risk (binary **target** variable, `"bad"` vs. `"good"`) by using the other columns as so-called **features**. -->
-<p>A <code>mlr3</code> <code>Task</code> encapsulates data with
+<p>An <code>mlr3</code> <code>Task</code> encapsulates data with
 meta-information, such as the name of the target variable and the type
 of the learning problem (in our example this would be a
 <strong>classification</strong> task, where the target is a factor label
@@ -259,7 +259,7 @@ with relatively few distinct values).</p>
 <!-- To create a `TaskClassif` (the `mlr3` `Task` object for a supervised classification problem) based on the German credit data, we can use either `TaskClassif$new()` or `as_task_classif()`: -->
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(mlr3)</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>task <span class="ot">=</span> <span class="fu">tsk</span>(<span class="st">&quot;german_credit&quot;</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>task</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">print</span>(task)</span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="do">## &lt;TaskClassif:german_credit&gt; (1000 x 21): German Credit</span></span>
 <span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="do">## * Target: credit_risk</span></span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="do">## * Properties: twoclass</span></span>

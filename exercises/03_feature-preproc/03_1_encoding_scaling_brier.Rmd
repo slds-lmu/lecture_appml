@@ -70,7 +70,7 @@ An `mlr3` `Task` encapsulates data with meta-information, such as the name of th
 ```{r}
 library(mlr3)
 task = tsk("german_credit")
-task
+print(task)
 ```
 
 <!-- By setting `target = "credit_risk"`, we specify the correct column in the data containing the target variable. `id = "german_credit"` simply assigns the task the ID `"german_credit"`. -->

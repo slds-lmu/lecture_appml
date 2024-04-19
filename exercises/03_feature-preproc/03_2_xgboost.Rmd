@@ -44,7 +44,7 @@ First, we setup a classification task from the data:
 
 ```{r}
 library(mlr3verse)
-task = TaskClassif$new("credit", backend = credit, target = "credit_risk")
+task = as_task_classif(credit, target = "credit_risk")
 task$positive = "good"
 ```
 
@@ -263,7 +263,7 @@ Specifically, you should conduct the following steps:
 2. Setup the classification error as a tuning measure with `msr()`. 
 3. Initialize cross-validation as the resampling strategy using `rsmp()`. 
 4. Setup 10 evaluations as the termination criterion using `trm()`. 
-5. Initialize a `TuningInstanceSingleCrit` object using `$new()` and the objects
+5. Initialize a `TuningInstanceSingleCrit` object using `ti()` and the objects
 produced in steps 1.-4. as well as the task and learner as an input. 
 6. Define random search as the tuner object using `tnr()`. 
 7. Call the `$optimize()` method of the tuner object with the initialized 
@@ -286,7 +286,7 @@ measure = msr("classif....")
 resampling = rsmp("cv", folds = ...)
 terminator = trm("evals", n_evals = ...)
 
-instance_random = TuningInstanceSingleCrit$new(
+instance_random = ti(
   task = ..., 
   learner = ..., 
   measure = ..., 
@@ -326,7 +326,7 @@ terminator = trm("evals", n_evals = 20L)
 Instantiate a tuning instance
 
 ```{r}
-instance_random = TuningInstanceSingleCrit$new(
+instance_random = ti(
   task = task, 
   learner = xgboost_lrn, 
   measure = measure, 
@@ -547,7 +547,7 @@ tune_ps = ps(
   eta = p_dbl(..., ...)
 )
 
-at = AutoTuner$new(xgboost_lrn2, 
+at = auto_tuner(xgboost_lrn2, 
   resampling = rsmp("cv", folds = ...),
   search_space = ...,
   measure = msr("..."),
@@ -580,7 +580,7 @@ Next, we setup the inner resampling loop and the tuning approach using
 an `AutoTuner`
 
 ```{r}
-at = AutoTuner$new(xgboost_lrn2, 
+at = auto_tuner(xgboost_lrn2, 
   resampling = rsmp("cv", folds = 3L),
   search_space = tune_ps,
   measure = msr("classif.ce"),
