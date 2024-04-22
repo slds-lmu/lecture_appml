@@ -131,9 +131,9 @@ arx = at$tuning_instance$archive
 arx = at$archive
 ```
 
-The fitted learner on the best parameter configuration is stored in `at$model$learner$model`:
+The trained learner on the best parameter configuration is stored in `at$learner`:
 ```{r, eval = show.solution}
-at$model$learner$model
+at$learner
 ```
 
 The configuration aligns with the result of the tuning (on the scale of the param set):
