@@ -55,25 +55,13 @@ n = 1,000 observations of credits
 
 # Recap mlr3 Tasks
 
-<!-- First, we load the German credit dataset: -->
-
-<!-- ```{r} -->
-<!-- credit = read.csv("data/german_credit.csv", header = TRUE, stringsAsFactors = TRUE) -->
-<!-- ``` -->
-
-<!-- Later, we will be interested in classifying the credit risk (binary **target** variable, `"bad"` vs. `"good"`) by using the other columns as so-called **features**. -->
-
 An `mlr3` `Task` encapsulates data with meta-information, such as the name of the target variable and the type of the learning problem (in our example this would be a **classification** task, where the target is a factor label with relatively few distinct values).
-
-<!-- To create a `TaskClassif` (the `mlr3` `Task` object for a supervised classification problem) based on the German credit data, we can use either `TaskClassif$new()` or `as_task_classif()`: -->
 
 ```{r}
 library(mlr3)
 task = tsk("german_credit")
 print(task)
 ```
-
-<!-- By setting `target = "credit_risk"`, we specify the correct column in the data containing the target variable. `id = "german_credit"` simply assigns the task the ID `"german_credit"`. -->
 
 The `print()` method gives a short summary of the task: It has 1000 observations and 21 columns of which 20 are features. 17 features are categorical (i.e., factors) and 3 features are integer.
 
@@ -347,19 +335,19 @@ pobc = po("boxcox")
 
 set.seed(2023)
 lrns = list(
-  lrn("classif.kknn", scale = FALSE),
-  pos %>>% lrn("classif.kknn", scale = FALSE),
-  pobc %>>% lrn("classif.kknn", scale = FALSE),
-  lrn("classif.rpart"),
-  pos %>>% lrn("classif.rpart"),
-  pobc %>>% lrn("classif.rpart")
+  lrn("classif.kknn", scale = FALSE, predict_type = "prob"),
+  pos %>>% lrn("classif.kknn", scale = FALSE, predict_type = "prob"),
+  pobc %>>% lrn("classif.kknn", scale = FALSE, predict_type = "prob"),
+  lrn("classif.rpart", predict_type = "prob"),
+  pos %>>% lrn("classif.rpart", predict_type = "prob"),
+  pobc %>>% lrn("classif.rpart", predict_type = "prob")
 )
 
 cv = rsmp("cv", folds = 10)
 design = benchmark_grid(list(task), lrns, cv)
 bmr = benchmark(design)
-bmr$aggregate()
-autoplot(bmr)
+bmr$aggregate(msr("classif.bbrier"))
+autoplot(bmr, measure = msr("classif.bbrier"))
 ```
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
