@@ -15,50 +15,81 @@
 \newcommand{\learninggoals}{
 \item The Hyperparameter Optimization Problem
 \item Grid Search, Random Search and Bayesian optimization
-\item Separation of Train and Test}
+\item The Untouched Test Set Principle}
 
-\lecturechapter{Hyperparameter Tuning}
+\lecturechapter{Applied Hyperparameter Tuning}
 \lecture{Applied Machine Learning}
 
-\section{Hyperparameter Optimization}
-\subsection{Motivation}
 
-% Contains 1-8
-\includepdf[pages={2-8}]{i2ml/slides-tuning-nutshell.pdf}
+\section{Hyperparameter Tuning}
 
-\begin{frame}{The Problem Statement}
-\begin{itemize}
-\setlength\itemsep{1em}
-    \item 
-\end{itemize}
-    
-\end{frame}
-\begin{frame}{Parameters vs Hyperparameters}
-
-There is a multitude of technical aspects we need to consider:
-\vspace{1em}
-\begin{itemize}
-\setlength\itemsep{1em}
-    \item \textbf{Model type:} 
-\end{itemize}
+\begin{frame}{}
+    \includepdf[pages={2},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-intro.pdf}
 \end{frame}
 
-\begin{frame}{Hyperparameter Types}
-
-\begin{itemize}
-\setlength\itemsep{2em}
-    \item 
-\end{itemize}
+\begin{frame}{}
+    \includepdf[pages={3},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-intro.pdf}
 \end{frame}
 
-\begin{frame}{Conditional Hyperparameters}
-
-\begin{itemize}
-\setlength\itemsep{2em}
-    \item 
-\end{itemize}
+\begin{frame}{}
+    \includepdf[pages={4},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-intro.pdf}
 \end{frame}
 
+\begin{frame}{}
+    \includepdf[pages={5},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-intro.pdf}
+\end{frame}
+
+\begin{frame}{}
+    \includepdf[pages={6},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-intro.pdf}
+\end{frame}
+
+\begin{frame}{}
+    \includepdf[pages={7},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-intro.pdf}
+\end{frame}
+
+\begin{frame}{}
+    \includepdf[pages={8},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-intro.pdf}
+\end{frame}
+
+\begin{frame}{}
+    \includepdf[pages={9},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-intro.pdf}
+\end{frame}
+
+\section{Hyperparameter Tuning Algorithms}
+
+\begin{frame}{}
+    \includepdf[pages={2},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-basicalgos.pdf}
+\end{frame}
+
+\begin{frame}{}
+    \includepdf[pages={4},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-basicalgos.pdf}
+\end{frame}
+
+\begin{frame}{}
+    \includepdf[pages={6},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-basicalgos.pdf}
+\end{frame}
+
+\begin{frame}{}
+    \includepdf[pages={7},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-basicalgos.pdf}
+\end{frame}
+
+\begin{frame}{Summary}
+    \begin{table}[]
+        \centering
+        \begin{tabular}{l|cc}
+            Property & Grid Search & Random Search \\
+            \midrule
+            Easy to implement & $\checkmark$ & $\checkmark$ \\
+            All parameter types possible & $\checkmark$ & $\checkmark$ \\
+            Parallelization is trivial & & $\checkmark$ \\
+            Does not suffer from the curse of dimensionality & & $\checkmark$ \\
+            Does not require discretization of hyperparameters & & $\checkmark$ \\
+            Anytime algorithm & & $\checkmark$
+        \end{tabular}
+    \end{table}
+\end{frame}
+
+\section{The Untouched Test Set Principle}
 \begin{frame}{The Untouched Test Set Principle}
 
 \begin{itemize}
@@ -91,6 +122,7 @@ There is a multitude of technical aspects we need to consider:
 \end{itemize}
 \end{frame}
 
+\section{Pipelines}
 \begin{frame}{Learn operations only on the training set}
 
 \begin{itemize}
