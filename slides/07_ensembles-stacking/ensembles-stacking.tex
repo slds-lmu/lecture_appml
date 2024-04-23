@@ -11,22 +11,23 @@
 \date{}
 
 \begin{document}
-\newcommand{\titlefigure}{slides/03-ensembles-stacking/figure/voting.png}
+\newcommand{\titlefigure}{slides/07_ensembles-stacking/figure/stacking.png}
 \newcommand{\learninggoals}{
-\item Stacking}
+\item What is Stacking?
+\item How can we stack multiple layers?}
 
 \lecturechapter{Ensembling Part II}
 \lecture{Applied Machine Learning}
 
 \begin{vbframe}{Stacking}
-Definition: Stacking (also stacked generalization or meta-ensemble), is an ensemble technique that involves training multiple base models (level 0) on the same data and using their predictions as input features for a level 1 model that makes the final ensemble prediction $\rightarrow$ heterogeneous ensembling
+Stacking (also stacked generalization or meta-ensemble) is an ensemble technique that involves training multiple base models (level 0) on the same data and using their predictions as input features for a level 1 model that makes the final ensemble prediction $\rightarrow$ heterogeneous ensembling
 \vspace{1em}
 \begin{columns}
     \begin{column}{0.5\textwidth}
         \vspace{-1em}
         \begin{figure}
             \centering
-            \includegraphics[width=0.9\textwidth]{slides/03-ensembles-stacking/figure/stacking.png}
+            \includegraphics[width=0.9\textwidth]{slides/07_ensembles-stacking/figure/stacking.png}
             %\caption{Caption}
             % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
             \label{fig:stacking}
@@ -53,11 +54,11 @@ In contrast to other methods, stacking already combines predictions during train
 \footnotesize
 \begin{algorithm}[H]
     \SetAlgoLined
-    \caption{Stacking}
+    \caption{Single Layer Stacking}
     \SetKwInOut{Input}{Input}
     \SetKwInOut{Output}{Output}
 
-    \Input{$\D = \Dset$}
+    \Input{Training data $\D = \Dset$}
     \Output{Stacked Ensemble $\fM$}
     
     \BlankLine
@@ -73,7 +74,7 @@ In contrast to other methods, stacking already combines predictions during train
     }
     
     \BlankLine
-    \textbf{Step 3: Train level 1 model $\fM$ on $\D^\prime$}\;\\
+    \textbf{Step 3: Fit level 1 model $\fM$ on $\D^\prime$}\;\\
     \KwRet $\fM$\;
 \end{algorithm}
 NB: We can either drop the original features or keep them when learning the level 1 model.
@@ -89,7 +90,7 @@ NB: We can either drop the original features or keep them when learning the leve
         \vspace{-1em}
         \begin{figure}
             \centering
-            \includegraphics[width=0.9\textwidth]{slides/03-ensembles-stacking/figure/stacking_cv.png}
+            \includegraphics[width=0.9\textwidth]{slides/07_ensembles-stacking/figure/stacking_cv.png}
             %\caption{Caption}
             % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
             \label{fig:stacking_cv}
@@ -120,7 +121,7 @@ Now: Also train multiple models at level 1, use predictions to train final level
         \vspace{-1em}
         \begin{figure}
             \centering
-            \includegraphics[width=0.9\textwidth]{slides/03-ensembles-stacking/figure/stacking.png}
+            \includegraphics[width=0.9\textwidth]{slides/07_ensembles-stacking/figure/stacking.png}
             %\caption{Caption}
             % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
             \label{fig:stacking_multi}
@@ -154,10 +155,43 @@ Popular choices of level 1 or level 2 models in stacking include:
 
 % ------------------------------------------------------------------------------
 
+\begin{vbframe}{AutoGluon -- \url{https://auto.gluon.ai/}}
+\begin{columns}
+    \begin{column}{0.4\textwidth}
+        \vspace{-1em}
+        \begin{figure}
+            \centering
+            \includegraphics[width=\textwidth]{slides/07_ensembles-stacking/figure/AG.png}
+            %\caption{Caption}
+            \label{fig:auto_gluon}
+        \end{figure}
+        \begin{figure}
+            \centering
+            \includegraphics[width=\textwidth]{slides/07_ensembles-stacking/figure/ALMB.png}
+            \caption{AutoGluon Performance on AMLB 1h binary classification.}
+            \label{fig:auto_gluon_almb}
+        \end{figure}
+    \end{column}
+    \begin{column}{0.6\textwidth}
+        \begin{itemize}
+            \item The de-facto currently most popular and successful AutoML system
+            \item Developed and maintained by Amazon
+            \item Cannot only do tabular but also multimodal and time-series data
+            \item Does not use HPO to find well performing models
+            \begin{itemize}
+                \item Instead, uses a set of default configurations for different learners
+            \end{itemize}
+            \item Employs multi layer stacking using the same set of default models in higher layers as for the base layer
+            \item Uses greedy ensemble selection to combine the predictions of the last layers
+        \end{itemize}
+    \end{column}
+\end{columns}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
 \begin{vbframe}{Further Reading}
-\begin{itemize}
-    \item One of the most popular and most successful AutoML systems \textit{AutoGluon} uses multilevel stacking together with repeated k-fold bagging https://auto.gluon.ai/stable/index.html
-\end{itemize}
+
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
