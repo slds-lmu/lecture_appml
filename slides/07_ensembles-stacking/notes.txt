@@ -7,7 +7,7 @@ Todos:
 fix math bold, math and notation
 re-generate figures in google pres
 averaging: x
-stacking: finish
+stacking: finish, example for single and multi layer
 
 
 use cases:

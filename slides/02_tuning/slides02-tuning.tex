@@ -20,7 +20,6 @@
 \lecturechapter{Applied Hyperparameter Tuning}
 \lecture{Applied Machine Learning}
 
-
 \section{Hyperparameter Tuning}
 
 \begin{frame}{}
@@ -89,46 +88,92 @@
     \end{table}
 \end{frame}
 
+\begin{frame}{}
+    \includepdf[pages={2},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-advanced.pdf}
+\end{frame}
+
+\begin{frame}{}
+    \includepdf[pages={4},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-advanced.pdf}
+\end{frame}
+
+\begin{frame}{}
+    \includepdf[pages={5},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-advanced.pdf}
+\end{frame}
+
+\begin{frame}{}
+    \includepdf[pages={10},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-advanced.pdf}
+\end{frame}
+
+\begin{frame}{}
+    \includepdf[pages={6},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-practical.pdf}
+\end{frame}
+
 \section{The Untouched Test Set Principle}
-\begin{frame}{The Untouched Test Set Principle}
 
-\begin{itemize}
-\setlength\itemsep{2em}
-    \item 
-\end{itemize}
+\begin{frame}{}
+    \includepdf[pages={3},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-nested-nestedintro.pdf}
 \end{frame}
 
-\begin{frame}{Train-Valid-Test Protocol}
-
-\begin{itemize}
-\setlength\itemsep{2em}
-    \item 
-\end{itemize}
+\begin{frame}{}
+    \includepdf[pages={4},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-nested-nestedintro.pdf}
 \end{frame}
 
-\begin{frame}{Nested Cross-Validation}
-
-\begin{itemize}
-\setlength\itemsep{2em}
-    \item 
-\end{itemize}
+\begin{frame}{}
+    \includepdf[pages={5},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-nested-nestedintro.pdf}
 \end{frame}
 
-\begin{frame}{Most important factor in ML: correct CV}
+\begin{frame}{}
+    \includepdf[pages={2},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-nested-nestedresampling.pdf}
+\end{frame}
 
-\begin{itemize}
-\setlength\itemsep{2em}
-    \item 
-\end{itemize}
+\begin{frame}{}
+    \includepdf[pages={3},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-nested-nestedresampling.pdf}
+\end{frame}
+
+\begin{frame}{}
+    \includepdf[pages={4},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-nested-nestedresampling.pdf}
+\end{frame}
+
+\begin{frame}{}
+    \includepdf[pages={5},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-nested-nestedresampling.pdf}
+\end{frame}
+
+\begin{frame}{}
+    \includepdf[pages={6},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-nested-nestedresampling.pdf}
+\end{frame}
+
+\begin{frame}{}
+    \includepdf[pages={7},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-nested-nestedresampling.pdf}
 \end{frame}
 
 \section{Pipelines}
-\begin{frame}{Learn operations only on the training set}
+\begin{frame}{}
+    \includepdf[pages={3},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-pipelines.pdf}
+\end{frame}
+
+\section{Recap}
+
+\begin{frame}{Importance of CV on Kaggle}
 
 \begin{itemize}
-\setlength\itemsep{2em}
-    \item 
+\setlength\itemsep{1em}
+    \item Understand the data - After you download the data, start exploring features. Look at data types. Check variable classes. Create some univariate - bivariate plots to understand the nature of variables.
+    \item Understand the metric to optimise - Every problem comes with a unique evaluation metric. It's imperative for you to understand it, specially how does it change with target variable.
+    \item Decide cross validation strategy - To avoid overfitting, make sure you've set up a cross validation strategy in early stages. \textbf{A nice CV strategy will help you get reliable score on leaderboard}.
+    \item Start hyper parameter tuning 
 \end{itemize}
+
+Source: KazAnova, former Kaggle Champion at \url{https://www.hackerearth.com/practice/machine-learning/advanced-techniques/winning-tips-machine-learning-competitions-kazanova-current-kaggle-3/tutorial/}
+\end{frame}
+
+\begin{frame}{Take-Home Messages}
+\setlength\itemsep{1em}
+    \begin{itemize}
+        \item Conduct correct cross-validation
+        \item Nested-Resampling for performance estimation
+        \item Use advanced and robust HPO
+        \item Include your preprocessing in the splitting
+    \end{itemize}
 \end{frame}
 
 \endlecture
