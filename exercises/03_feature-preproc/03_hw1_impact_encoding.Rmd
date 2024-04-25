@@ -196,7 +196,7 @@ rsmp_cv2 = rsmp("cv", folds = 2)
 rsmp_cv2$instantiate(task)
 
 # Conduct benchmark:
-future::plan("multicore")
+future::plan("multisession")
 bmr = benchmark(benchmark_grid(task, c(auto_xgb_oh, auto_xgb_impact), rsmp_cv2))
 
 # Aggregate results:
