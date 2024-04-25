@@ -144,7 +144,7 @@ auto_xgb_impact = auto_tuner(
   learner = xgb_ts_impact,
   resampling = rsmp("cv", folds = 2),
   measure = msr("regr.mse"),
-  term_time = 20
+  term_evals = 20
 )
 ```
 
@@ -188,7 +188,7 @@ auto_xgb_oh = auto_tuner(
   learner = as_learner(po("encode") %>>% lts(lrn("regr.xgboost"))),
   resampling = rsmp("cv", folds = 2),
   measure = msr("regr.mse"),
-  term_time = 20
+  term_evals = 20
 )
 
 # Resampling design for benchmark:
@@ -196,6 +196,7 @@ rsmp_cv2 = rsmp("cv", folds = 2)
 rsmp_cv2$instantiate(task)
 
 # Conduct benchmark:
+future::plan("multicore")
 bmr = benchmark(benchmark_grid(task, c(auto_xgb_oh, auto_xgb_impact), rsmp_cv2))
 
 # Aggregate results:
