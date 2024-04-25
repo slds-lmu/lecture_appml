@@ -123,30 +123,29 @@ cat("<!--")
 <summary>Click me:</summary>
 
 ```{r, eval = show.solution}
-# Pre-processing pipeline components:
-factor_pipeline = po("encodeimpact",
-        affect_columns = selector_cardinality_greater_than(10),
-        id = "high_card_enc") %>>%
-        po("encode", method = "treatment",
-        affect_columns = selector_cardinality_greater_than(1),
-        id = "low_card_enc")
-
 #Autotuner pipeline component:
 tuner = tnr("random_search", batch_size = 3)
-search_space = lts("regr.xgboost.default")
 
-at = auto_tuner(
+# Create xgboost learner 
+xgb = lrn("regr.xgboost")
+as.data.table(xgb$param_set$values)
+
+# Set search space from mlr3tuningspaces
+xgb_ts = lts(xgb)
+as.data.table(xgb_ts$param_set$values)
+
+# Combine xgb_ts with impact encoding
+xgb_ts_impact = as_learner(po("encodeimpact") %>>% xgb_ts)
+as.data.table(xgb_ts_impact$param_set$values)
+
+# Create auto-tuned xgboost
+auto_xgb_impact = auto_tuner(
   tuner = tuner,
-  learner = lrn("regr.xgboost"),
-  search_space = search_space,
+  learner = xgb_ts_impact,
   resampling = rsmp("cv", folds = 2),
   measure = msr("regr.mse"),
   term_time = 20
 )
-
-# Combine pipeline:
-glrn_xgb_impact = as_learner(factor_pipeline %>>% at)
-glrn_xgb_impact$id = "XGB_enc_impact"
 ```
 
 
@@ -184,16 +183,20 @@ cat("<!--")
 
 ```{r, eval = show.solution}
 # Pipeline for One-Hot Encoding only:
-glrn_xgb_one_hot = as_learner(po("encode") %>>% at)
-glrn_xgb_one_hot$id = "XGB_enc_onehot"
+auto_xgb_oh = auto_tuner(
+  tuner = tuner,
+  learner = as_learner(po("encode") %>>% lts(lrn("regr.xgboost"))),
+  resampling = rsmp("cv", folds = 2),
+  measure = msr("regr.mse"),
+  term_time = 20
+)
 
 # Resampling design for benchmark:
 rsmp_cv2 = rsmp("cv", folds = 2)
 rsmp_cv2$instantiate(task)
 
 # Conduct benchmark:
-bmr = benchmark(benchmark_grid(task,
-  c(glrn_xgb_impact, glrn_xgb_one_hot), rsmp_cv2))
+bmr = benchmark(benchmark_grid(task, c(auto_xgb_oh, auto_xgb_impact), rsmp_cv2))
 
 # Aggregate results:
 bmr$aggregate(measure = msr("regr.mse"))[, .(learner_id, regr.mse)]
