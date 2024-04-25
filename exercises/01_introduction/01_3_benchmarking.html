@@ -165,6 +165,8 @@ the learners</a></li>
 <li><a href="#create-the-resampling" id="toc-create-the-resampling">Create the resampling</a></li>
 <li><a href="#create-a-benchmarking-design" id="toc-create-a-benchmarking-design">Create a benchmarking
 design</a></li>
+<li><a href="#run-the-benchmark" id="toc-run-the-benchmark">Run the
+benchmark</a></li>
 <li><a href="#evaluate-the-benchmark" id="toc-evaluate-the-benchmark">Evaluate the benchmark</a></li>
 <li><a href="#interpret-the-results" id="toc-interpret-the-results">Interpret the results</a></li>
 </ul></li>
@@ -223,20 +225,16 @@ be able to distinguish the learners).
 To create a list of KNN learners, you can use this template:
 <code>lapply(..., function(i) lrn(&quot;classif.kknn&quot;, k = i, id = paste0(&quot;classif.knn&quot;, i))</code>
 </details>
-<!--
-
-### Solution
+<div id="solution" class="section level3">
+<h3>Solution</h3>
 <details>
-  <summary>Click me:</summary>
-
-
-```r
-log_reg = lrn("classif.log_reg")
-knn = lapply(3:30, function(i) lrn("classif.kknn", k = i, id = paste0("classif.knn", i)))
-lrns = append(log_reg, knn)
-```
-
--->
+<summary>
+Click me:
+</summary>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>log_reg <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;classif.log_reg&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>knn <span class="ot">=</span> <span class="fu">lapply</span>(<span class="dv">3</span><span class="sc">:</span><span class="dv">30</span>, <span class="cf">function</span>(i) <span class="fu">lrn</span>(<span class="st">&quot;classif.kknn&quot;</span>, <span class="at">k =</span> i, <span class="at">id =</span> <span class="fu">paste0</span>(<span class="st">&quot;classif.knn&quot;</span>, i)))</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>lrns <span class="ot">=</span> <span class="fu">append</span>(log_reg, knn)</span></code></pre></div>
+</div>
 </div>
 <div id="create-the-resampling" class="section level2">
 <h2>Create the resampling</h2>
@@ -249,18 +247,14 @@ contains this resampling (this is needed later for the
 </summary>
 See the previous resampling use case.
 </details>
-<!--
-
-### Solution
+<div id="solution-1" class="section level3">
+<h3>Solution</h3>
 <details>
-  <summary>Click me:</summary>
-
-
-```r
-cv4 = list(rsmp("cv", folds = 4))
-```
-
--->
+<summary>
+Click me:
+</summary>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>cv4 <span class="ot">=</span> <span class="fu">list</span>(<span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> <span class="dv">4</span>))</span></code></pre></div>
+</div>
 </div>
 <div id="create-a-benchmarking-design" class="section level2">
 <h2>Create a benchmarking design</h2>
@@ -284,40 +278,35 @@ the <code>benchmark_grid</code> function requires lists as input.
 </summary>
 <code>benchmark_grid(...</code>
 </details>
-<!--
-
-### Solution
+<div id="solution-2" class="section level3">
+<h3>Solution</h3>
 <details>
-  <summary>Click me:</summary>
-  
-
-```r
-design = benchmark_grid(list(task), lrns, cv4)
-```
-
-## Run the benchmark
-
-Now you still need to run all experiments specified in the design.
-Do so by using the `benchmark` function.
-This may take some time.
-(Still less than a minute.)
-Make sure to store the benchmark in a new object called `bmr` as you will reuse and inspect the benchmark result in the subsequent exercises.
-
+<summary>
+Click me:
+</summary>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>design <span class="ot">=</span> <span class="fu">benchmark_grid</span>(<span class="fu">list</span>(task), lrns, cv4)</span></code></pre></div>
+</div>
+</div>
+<div id="run-the-benchmark" class="section level2">
+<h2>Run the benchmark</h2>
+<p>Now you still need to run all experiments specified in the design. Do
+so by using the <code>benchmark</code> function. This may take some
+time. (Still less than a minute.) Make sure to store the benchmark in a
+new object called <code>bmr</code> as you will reuse and inspect the
+benchmark result in the subsequent exercises.</p>
 <details>
-  <summary>**Show Hint 1:**</summary>
-  </details>
-
-<!--
-
-### Solution
+<summary>
+<strong>Show Hint 1:</strong>
+</summary>
+</details>
+<div id="solution-3" class="section level3">
+<h3>Solution</h3>
 <details>
-  <summary>Click me:</summary>
-  
-
-```r
-bmr = benchmark(design)
-```
--->
+<summary>
+Click me:
+</summary>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>bmr <span class="ot">=</span> <span class="fu">benchmark</span>(design)</span></code></pre></div>
+</div>
 </div>
 <div id="evaluate-the-benchmark" class="section level2">
 <h2>Evaluate the benchmark</h2>
@@ -338,51 +327,48 @@ The previously stored benchmark object has a method
 </summary>
 <code>autoplot(..., measure = msr(...))</code>
 </details>
-<!--
-
-### Solution
+<div id="solution-4" class="section level3">
+<h3>Solution</h3>
 <details>
-  <summary>Click me:</summary>
-  
-In case of a credit use case the false negative rate may be innteresting to study next to the accuracy.
-
-
-```r
-res = bmr$aggregate(measures = c(msr("classif.fn"), msr("classif.acc")))
-head(res)
-##    nr       task_id      learner_id resampling_id iters classif.fn classif.acc
-## 1:  1 german_credit classif.log_reg            cv     4      24.50       0.747
-## 2:  2 german_credit    classif.knn3            cv     4      35.00       0.683
-## 3:  3 german_credit    classif.knn4            cv     4      35.00       0.683
-## 4:  4 german_credit    classif.knn5            cv     4      25.00       0.724
-## 5:  5 german_credit    classif.knn6            cv     4      23.25       0.728
-## 6:  6 german_credit    classif.knn7            cv     4      23.25       0.728
-## Hidden columns: resample_result
-autoplot(bmr, measure = msr("classif.acc"))
-```
-
-![](01_3_benchmarking_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
-<p>–&gt;</p>
+<summary>
+Click me:
+</summary>
+<p>In case of a credit use case the false negative rate may be
+innteresting to study next to the accuracy.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>res <span class="ot">=</span> bmr<span class="sc">$</span><span class="fu">aggregate</span>(<span class="at">measures =</span> <span class="fu">c</span>(<span class="fu">msr</span>(<span class="st">&quot;classif.fn&quot;</span>), <span class="fu">msr</span>(<span class="st">&quot;classif.acc&quot;</span>)))</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">head</span>(res)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="do">##    nr       task_id      learner_id resampling_id iters classif.fn classif.acc</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="do">## 1:  1 german_credit classif.log_reg            cv     4      24.50       0.747</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="do">## 2:  2 german_credit    classif.knn3            cv     4      35.00       0.683</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="do">## 3:  3 german_credit    classif.knn4            cv     4      35.00       0.683</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="do">## 4:  4 german_credit    classif.knn5            cv     4      25.00       0.724</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="do">## 5:  5 german_credit    classif.knn6            cv     4      23.25       0.728</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="do">## 6:  6 german_credit    classif.knn7            cv     4      23.25       0.728</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="do">## Hidden columns: resample_result</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="fu">autoplot</span>(bmr, <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">&quot;classif.acc&quot;</span>))</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
 </div>
 <div id="interpret-the-results" class="section level2">
 <h2>Interpret the results</h2>
 <p>Interpret the plot. Which <span class="math inline">\(k\)</span>
 seems to work well given the task? Would you prefer a logistic
 regression over a KNN learner?</p>
-<!--
-
-### Solution
+<div id="solution-5" class="section level3">
+<h3>Solution</h3>
 <details>
-  <summary>Click me:</summary>
-
-A $k$ of approx. 12 seems to perform best (in terms of accuracy). 
-A too small $k$ underfits, a large one overfits.
-Not knowing the true $k$, a logistic regression seems preferable.
-If $k$ is too small, the average performance of the logistic regression is much better.
-If $k$ is too large, the variance of the performance is much higher compared to the logistic regression.
-However, a KNN an optimal $k$ has a consistently high accuracy.
-
--->
+<summary>
+Click me:
+</summary>
+<p>A <span class="math inline">\(k\)</span> of approx. 12 seems to
+perform best (in terms of accuracy). A too small <span class="math inline">\(k\)</span> underfits, a large one overfits. Not
+knowing the true <span class="math inline">\(k\)</span>, a logistic
+regression seems preferable. If <span class="math inline">\(k\)</span>
+is too small, the average performance of the logistic regression is much
+better. If <span class="math inline">\(k\)</span> is too large, the
+variance of the performance is much higher compared to the logistic
+regression. However, a KNN an optimal <span class="math inline">\(k\)</span> has a consistently high accuracy.</p>
+</div>
 </div>
 </div>
 <div id="extra-parallelize-your-efforts" class="section level1">
@@ -404,33 +390,28 @@ You need to use the <code>plan</code> function twice. Once to set up a
 <summary>
 <strong>Show Hint 2:</strong>
 </summary>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(future)</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">plan</span>(multisession)</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co"># your code                     </span></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">plan</span>(sequential)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">library</span>(future)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">plan</span>(multisession)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co"># your code                     </span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="fu">plan</span>(sequential)</span></code></pre></div>
 </details>
-<!--
-
-### Solution
+<div id="solution-6" class="section level3">
+<h3>Solution</h3>
 <details>
-  <summary>Click me:</summary>
-
-
-
-```r
-# load the packages
-library(mlr3)
-library(future)
-library(future.apply)
-
-# parallel plan
-plan(multisession)
-set.seed(100) # it is good practice to set a seed before 
-bmr_par = benchmark(design)                     
-plan(sequential)
-```
-
--->
+<summary>
+Click me:
+</summary>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># load the packages</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">library</span>(mlr3)</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="fu">library</span>(future)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="fu">library</span>(future.apply)</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co"># parallel plan</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="fu">plan</span>(multisession)</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">100</span>) <span class="co"># it is good practice to set a seed before </span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>bmr_par <span class="ot">=</span> <span class="fu">benchmark</span>(design)                     </span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="fu">plan</span>(sequential)</span></code></pre></div>
+</div>
 </div>
 <div id="summary" class="section level1">
 <h1>Summary</h1>

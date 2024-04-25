@@ -146,7 +146,7 @@ pointer-events: auto;
 <header class="header-title">
 <div class="header-title-wrap">
 <h1 class="title toc-ignore entry-title">Applied Machine Learning</h1>
-<h2 class="subtitle">In-class exercise 02-3</h2>
+<h2 class="subtitle">In-class exercise 02-1</h2>
 </div><!-- /.header-title-wrap -->
 </header>
 
@@ -253,6 +253,12 @@ stratification. In this exercise, we will illustrate this using the
 <h2>1.1 Set stratification variable</h2>
 <p>Modify the <code>task_gc</code> object such that the target variable
 <code>credit_risk</code> is used to for stratification.</p>
+<details>
+<summary>
+<strong>Hint 1</strong>
+</summary>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>task_gc<span class="sc">$</span>col_roles<span class="sc">$</span>... <span class="ot">=</span> <span class="st">&quot;credit_risk&quot;</span></span></code></pre></div>
+</details>
 <!--
 
 ### Solution:
@@ -295,13 +301,36 @@ cv3$instance
 <div id="sanity-check" class="section level2">
 <h2>1.3 Sanity check</h2>
 <p>As a sanity check, the target class distribution should be similar
-within each CV fold. Compute and check the target class distribution
-within each fold.</p>
+within each CV fold. Compute and check the target class distribution in
+form of a ratio within each fold.</p>
+<details>
+<summary>
+<strong>Hint 1</strong>
+</summary>
+First, merge the data with the corresponding cv fold. Second, aggregate
+for each fold.
+</details>
+<details>
+<summary>
+<strong>Hint 2</strong>
+</summary>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>dt <span class="ot">&lt;-</span> <span class="fu">merge</span>(cv3<span class="sc">$</span>..., <span class="fu">transform</span>(..., <span class="at">row_id =</span> <span class="fu">seq_len</span>(...)), <span class="at">by =</span> ...)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">aggregate</span>(..., <span class="at">data =</span> ..., <span class="at">FUN =</span> <span class="cf">function</span>(x) ...)</span></code></pre></div>
+</details>
 <!--
 
 ### Solution:
 <details>
 <summary>**Click me:**</summary>
+
+With `base R`:
+
+
+```r
+dt <- merge(cv3$instance, transform(task_gc$data(), row_id = seq_len(nrow(task_gc$data()))), by = "row_id")
+aggregate(credit_risk ~ fold, data = dt, FUN = function(x) sum(x == "bad") / sum(x == "good"))
+with(dt, sum(credit_risk == "bad") / sum(credit_risk == "good"))
+```
 
 With `data.table`:
 
@@ -319,15 +348,6 @@ Indeed, we can see that the target class is distributed similarly within each CV
 dt[, .(class_ratio = sum(credit_risk == "bad") / sum(credit_risk == "good"))]
 ```
 
-With base R:
-
-
-```r
-dt <- merge(cv3$instance, transform(task_gc$data(), row_id = seq_len(nrow(task_gc$data()))), by = "row_id")
-aggregate(credit_risk ~ fold, data = dt, FUN = function(x) sum(x == "bad") / sum(x == "good"))
-with(dt, sum(credit_risk == "bad") / sum(credit_risk == "good"))
-```
-
 -->
 </div>
 </div>
@@ -341,8 +361,8 @@ either in the training set or in the test set.</p>
 <p>In the following example, wel will consider the
 <code>BreastCancer</code> data set from the <code>mlbench</code>
 package:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">data</span>(BreastCancer, <span class="at">package =</span> <span class="st">&quot;mlbench&quot;</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>task_bc <span class="ot">=</span> <span class="fu">as_task_classif</span>(BreastCancer, <span class="at">target =</span> <span class="st">&quot;Class&quot;</span>, <span class="at">positive =</span> <span class="st">&quot;malignant&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">data</span>(BreastCancer, <span class="at">package =</span> <span class="st">&quot;mlbench&quot;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>task_bc <span class="ot">=</span> <span class="fu">as_task_classif</span>(BreastCancer, <span class="at">target =</span> <span class="st">&quot;Class&quot;</span>, <span class="at">positive =</span> <span class="st">&quot;malignant&quot;</span>)</span></code></pre></div>
 <p>In this data set, several observations have the same <code>Id</code>
 (sample code number), which implies these are samples taken from the
 same patient at different times.</p>
@@ -422,15 +442,7 @@ than one fold.</p>
 <details>
 <summary>**Click me:**</summary>
 
-With `data.table`:
-
-```r
-dt = merge(task_bc$data(), cv5$instance, by.x = "Id", by.y = "row_id")
-dt = dt[, .(unique_folds = length(unique(fold))), by = Id]
-dt[unique_folds > 1, ]
-```
-
-With base R:
+With `base R`:
 
 ```r
 dt <- aggregate(fold ~ Id,
@@ -440,6 +452,14 @@ dt <- aggregate(fold ~ Id,
                               by.y = "row_id"),
                  FUN = function(x) length(unique(x)))
 dt[dt$fold > 1,]
+```
+
+With `data.table`:
+
+```r
+dt = merge(task_bc$data(), cv5$instance, by.x = "Id", by.y = "row_id")
+dt = dt[, .(unique_folds = length(unique(fold))), by = Id]
+dt[unique_folds > 1, ]
 ```
 
 -->
@@ -465,33 +485,33 @@ scores the prediction as 0 otherwise. In maths this would be defined as
 truth and <span class="math inline">\(\mathbb{I}\)</span> is the
 indicator function. In this case, we need the following code to
 construct a corresponding measure class:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>MeasureRegrThresholdAcc <span class="ot">=</span> R6<span class="sc">::</span><span class="fu">R6Class</span>(<span class="st">&quot;MeasureRegrThresholdAcc&quot;</span>,</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="at">inherit =</span> mlr3<span class="sc">::</span>MeasureRegr, <span class="co"># regression measure</span></span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="at">public =</span> <span class="fu">list</span>(</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>    <span class="at">initialize =</span> <span class="cf">function</span>() { <span class="co"># initialize class</span></span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>      super<span class="sc">$</span><span class="fu">initialize</span>(</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>        <span class="at">id =</span> <span class="st">&quot;thresh_acc&quot;</span>, <span class="co"># unique ID</span></span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>        <span class="at">packages =</span> <span class="fu">character</span>(), <span class="co"># no package dependencies</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>        <span class="at">properties =</span> <span class="fu">character</span>(), <span class="co"># no special properties</span></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>        <span class="at">predict_type =</span> <span class="st">&quot;response&quot;</span>, <span class="co"># measures response prediction</span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>        <span class="at">range =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="co"># results in values between (0, 1)</span></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>        <span class="at">minimize =</span> <span class="cn">FALSE</span> <span class="co"># larger values are better</span></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>      )</span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>    }</span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>  ),</span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a></span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>  <span class="at">private =</span> <span class="fu">list</span>(</span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>    <span class="co"># define score as private method</span></span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>    <span class="at">.score =</span> <span class="cf">function</span>(prediction, ...) {</span>
-<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>      <span class="co"># define loss</span></span>
-<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>      threshold_acc <span class="ot">=</span> <span class="cf">function</span>(truth, response) {</span>
-<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>        <span class="fu">mean</span>(<span class="fu">ifelse</span>(<span class="fu">abs</span>(truth <span class="sc">-</span> response) <span class="sc">&lt;</span> <span class="fu">sd</span>(truth), <span class="dv">1</span>, <span class="dv">0</span>))</span>
-<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>      }</span>
-<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>      <span class="co"># call loss function</span></span>
-<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>      <span class="fu">threshold_acc</span>(prediction<span class="sc">$</span>truth, prediction<span class="sc">$</span>response)</span>
-<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a>    }</span>
-<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>  )</span>
-<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>MeasureRegrThresholdAcc <span class="ot">=</span> R6<span class="sc">::</span><span class="fu">R6Class</span>(<span class="st">&quot;MeasureRegrThresholdAcc&quot;</span>,</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="at">inherit =</span> mlr3<span class="sc">::</span>MeasureRegr, <span class="co"># regression measure</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="at">public =</span> <span class="fu">list</span>(</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>    <span class="at">initialize =</span> <span class="cf">function</span>() { <span class="co"># initialize class</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>      super<span class="sc">$</span><span class="fu">initialize</span>(</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>        <span class="at">id =</span> <span class="st">&quot;thresh_acc&quot;</span>, <span class="co"># unique ID</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>        <span class="at">packages =</span> <span class="fu">character</span>(), <span class="co"># no package dependencies</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>        <span class="at">properties =</span> <span class="fu">character</span>(), <span class="co"># no special properties</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>        <span class="at">predict_type =</span> <span class="st">&quot;response&quot;</span>, <span class="co"># measures response prediction</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>        <span class="at">range =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="co"># results in values between (0, 1)</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>        <span class="at">minimize =</span> <span class="cn">FALSE</span> <span class="co"># larger values are better</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>      )</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>    }</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>  ),</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>  <span class="at">private =</span> <span class="fu">list</span>(</span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>    <span class="co"># define score as private method</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>    <span class="at">.score =</span> <span class="cf">function</span>(prediction, ...) {</span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a>      <span class="co"># define loss</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>      threshold_acc <span class="ot">=</span> <span class="cf">function</span>(truth, response) {</span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a>        <span class="fu">mean</span>(<span class="fu">ifelse</span>(<span class="fu">abs</span>(truth <span class="sc">-</span> response) <span class="sc">&lt;</span> <span class="fu">sd</span>(truth), <span class="dv">1</span>, <span class="dv">0</span>))</span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a>      }</span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a>      <span class="co"># call loss function</span></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a>      <span class="fu">threshold_acc</span>(prediction<span class="sc">$</span>truth, prediction<span class="sc">$</span>response)</span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a>    }</span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a>  )</span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a>)</span></code></pre></div>
 <ol style="list-style-type: decimal">
 <li>In the first two lines we name the class, here
 <code>MeasureRegrThresholdAcc</code>, and then state this is a
@@ -514,7 +534,7 @@ object of class <code>MeasureRegrThresholdAcc</code>. The method is
 </ol>
 <p>Once you have defined your custom measure, you can add it to the
 <code>mlr3measures</code> dictionary like this:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>mlr3<span class="sc">::</span>mlr_measures<span class="sc">$</span><span class="fu">add</span>(<span class="st">&quot;regr.thresh_acc&quot;</span>, MeasureRegrThresholdAcc)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>mlr3<span class="sc">::</span>mlr_measures<span class="sc">$</span><span class="fu">add</span>(<span class="st">&quot;regr.thresh_acc&quot;</span>, MeasureRegrThresholdAcc)</span></code></pre></div>
 <div id="mse-mae" class="section level2">
 <h2>3.1 MSE-MAE</h2>
 <p>Define you own risk measure for regression, the maximum of MSE and
@@ -572,10 +592,10 @@ MeasureRegrMaxMseMae = R6::R6Class("MeasureRegrMaxMseMae",
 <h2>3.2 Evaluate a custom measure</h2>
 <p>Add your custom measure to the <code>mlr3measures</code> dictionary
 and use it to evaluate the following model prediction:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>tsk_mtcars <span class="ot">=</span> <span class="fu">tsk</span>(<span class="st">&quot;mtcars&quot;</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>split <span class="ot">=</span> <span class="fu">partition</span>(tsk_mtcars)</span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>lrn_ranger <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;regr.ranger&quot;</span>)<span class="sc">$</span><span class="fu">train</span>(tsk_mtcars, split<span class="sc">$</span>train)</span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>prediction <span class="ot">=</span> lrn_ranger<span class="sc">$</span><span class="fu">predict</span>(tsk_mtcars, split<span class="sc">$</span>test)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>tsk_mtcars <span class="ot">=</span> <span class="fu">tsk</span>(<span class="st">&quot;mtcars&quot;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>split <span class="ot">=</span> <span class="fu">partition</span>(tsk_mtcars)</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>lrn_ranger <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;regr.ranger&quot;</span>)<span class="sc">$</span><span class="fu">train</span>(tsk_mtcars, split<span class="sc">$</span>train)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>prediction <span class="ot">=</span> lrn_ranger<span class="sc">$</span><span class="fu">predict</span>(tsk_mtcars, split<span class="sc">$</span>test)</span></code></pre></div>
 <!--
 
 ### Solution:

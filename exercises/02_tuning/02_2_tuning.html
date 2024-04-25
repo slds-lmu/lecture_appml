@@ -146,7 +146,7 @@ pointer-events: auto;
 <header class="header-title">
 <div class="header-title-wrap">
 <h1 class="title toc-ignore entry-title">Applied Machine Learning</h1>
-<h2 class="subtitle">In-class exercise 02-1</h2>
+<h2 class="subtitle">In-class exercise 02-2</h2>
 </div><!-- /.header-title-wrap -->
 </header>
 
@@ -196,7 +196,7 @@ a good HPC.</p>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>task <span class="ot">=</span> <span class="fu">tsk</span>(<span class="st">&quot;german_credit&quot;</span>)</span></code></pre></div>
 <details>
 <summary>
-<strong>Recap</strong>
+<strong>Recap: k-NN</strong>
 </summary>
 k-NN is a machine learning method that predicts new data by averaging
 over the responses of the k nearest neighbors.
@@ -365,29 +365,8 @@ task = tsk("german_credit")
 lrn_knn = lrn("classif.kknn", k = to_tune(1, 100), scale = to_tune())
 ```
 
-This adjust the parameter set (`lrn_knn$param_set`) attached to the learner and flags it as "tunable". The tuning then makes use of that search space if no `search_space` is given in the `ti()` construction:
-
-
-```r
-resampling = rsmp("cv", folds = 3L)
-
-terminator = trm("evals", n_evals = 40L)
-
-instance = ti(
-  task = task,
-  learner = lrn_knn,
-  resampling = resampling,
-  terminator = terminator
-)
-
-optimizer = tnr("random_search", batch_size = 4L)
-
-optimizer$optimize(instance)
-instance$result_y
-instance$result
-```
+This adjust the parameter set (`lrn_knn$param_set`) attached to the learner and flags it as "tunable". 
 </details>
-
 
 -->
 </div>
@@ -527,8 +506,8 @@ configurations.</p>
 <p>A simple way to do this is to pass <code>logscale = TRUE</code> when
 using <code>to_tune()</code> to define the parameter search space while
 constructing the learner:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">lrn</span>(<span class="st">&quot;classif.svm&quot;</span>, <span class="at">cost =</span> <span class="fu">to_tune</span>(<span class="fl">1e-5</span>, <span class="fl">1e5</span>, <span class="at">logscale =</span> <span class="cn">TRUE</span>))<span class="sc">$</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  param_set<span class="sc">$</span><span class="fu">search_space</span>()</span>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>lrn <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;classif.svm&quot;</span>, <span class="at">cost =</span> <span class="fu">to_tune</span>(<span class="fl">1e-5</span>, <span class="fl">1e5</span>, <span class="at">logscale =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>lrn<span class="sc">$</span>param_set<span class="sc">$</span><span class="fu">search_space</span>()</span>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="do">## &lt;ParamSet&gt;</span></span>
 <span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="do">##      id    class     lower    upper nlevels        default value</span></span>
 <span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="do">## 1: cost ParamDbl -11.51293 11.51293     Inf &lt;NoDefault[3]&gt;      </span></span>

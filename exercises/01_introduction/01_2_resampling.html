@@ -225,19 +225,15 @@ learner.
 </summary>
 Make sure to have the <code>kknn</code> package installed.
 </details>
-<!--
-
-### Solution
+<div id="solution" class="section level3">
+<h3>Solution</h3>
 <details>
-  <summary>Click me:</summary>
-
-
-```r
-log_reg = lrn("classif.log_reg")
-knn = lrn("classif.kknn", k = 5)
-```
-
--->
+<summary>
+Click me:
+</summary>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>log_reg <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;classif.log_reg&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>knn <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;classif.kknn&quot;</span>, <span class="at">k =</span> <span class="dv">5</span>)</span></code></pre></div>
+</div>
 </div>
 <div id="set-up-a-resampling-instance" class="section level2">
 <h2>Set up a resampling instance</h2>
@@ -265,24 +261,22 @@ instance. The number of folds can be set using an additional argument
 (see the <code>params</code> column from
 <code>as.data.table(mlr_resamplings)</code>).
 </details>
-<!--
-
-### Solution
+<div id="solution-1" class="section level3">
+<h3>Solution</h3>
 <details>
-  <summary>Click me:</summary>
-  
-
-```r
-cv5 = rsmp("cv", folds = 5)
-cv5
-## <ResamplingCV>: Cross-Validation
-## * Iterations: 5
-## * Instantiated: FALSE
-## * Parameters: folds=5
-```
-Note: `Instantiated: FALSE` means that we only created the resampling instance and did not apply the resampling technique to a task yet.
-
--->
+<summary>
+Click me:
+</summary>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>cv5 <span class="ot">=</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> <span class="dv">5</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>cv5</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="do">## &lt;ResamplingCV&gt;: Cross-Validation</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="do">## * Iterations: 5</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="do">## * Instantiated: FALSE</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="do">## * Parameters: folds=5</span></span></code></pre></div>
+<p>Note: <code>Instantiated: FALSE</code> means that we only created the
+resampling instance and did not apply the resampling technique to a task
+yet.</p>
+</div>
 </div>
 <div id="run-the-resampling" class="section level2">
 <h2>Run the resampling</h2>
@@ -305,36 +299,31 @@ by <code>tsk()</code>), a learner (created by <code>lrn()</code>) and a
 resampling strategy (created by <code>rsmp()</code>), e.g.,</p>
 <p><code>resample(task = task, learner = log_reg, resampling = cv5)</code></p>
 </details>
-<!--
-
-### Solution
-
+<div id="solution-2" class="section level3">
+<h3>Solution</h3>
 <details>
-  <summary>Click me:</summary>
-
-
-```r
-res_log_reg = resample(task, log_reg, cv5)
-res_knn = resample(task, knn, cv5)
-res_log_reg
-## <ResampleResult> with 5 resampling iterations
-##        task_id      learner_id resampling_id iteration warnings errors
-##  german_credit classif.log_reg            cv         1        0      0
-##  german_credit classif.log_reg            cv         2        0      0
-##  german_credit classif.log_reg            cv         3        0      0
-##  german_credit classif.log_reg            cv         4        0      0
-##  german_credit classif.log_reg            cv         5        0      0
-res_knn
-## <ResampleResult> with 5 resampling iterations
-##        task_id   learner_id resampling_id iteration warnings errors
-##  german_credit classif.kknn            cv         1        0      0
-##  german_credit classif.kknn            cv         2        0      0
-##  german_credit classif.kknn            cv         3        0      0
-##  german_credit classif.kknn            cv         4        0      0
-##  german_credit classif.kknn            cv         5        0      0
-```
-
--->
+<summary>
+Click me:
+</summary>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>res_log_reg <span class="ot">=</span> <span class="fu">resample</span>(task, log_reg, cv5)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>res_knn <span class="ot">=</span> <span class="fu">resample</span>(task, knn, cv5)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>res_log_reg</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="do">## &lt;ResampleResult&gt; with 5 resampling iterations</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="do">##        task_id      learner_id resampling_id iteration warnings errors</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="do">##  german_credit classif.log_reg            cv         1        0      0</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="do">##  german_credit classif.log_reg            cv         2        0      0</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="do">##  german_credit classif.log_reg            cv         3        0      0</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="do">##  german_credit classif.log_reg            cv         4        0      0</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="do">##  german_credit classif.log_reg            cv         5        0      0</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>res_knn</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="do">## &lt;ResampleResult&gt; with 5 resampling iterations</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="do">##        task_id   learner_id resampling_id iteration warnings errors</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="do">##  german_credit classif.kknn            cv         1        0      0</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="do">##  german_credit classif.kknn            cv         2        0      0</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="do">##  german_credit classif.kknn            cv         3        0      0</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="do">##  german_credit classif.kknn            cv         4        0      0</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="do">##  german_credit classif.kknn            cv         5        0      0</span></span></code></pre></div>
+</div>
 </div>
 <div id="evaluation" class="section level2">
 <h2>Evaluation</h2>
@@ -354,25 +343,21 @@ method of the resampling object.
 <code>res_knn$aggregate(msr(...))</code> to obtain the classification
 accuracy averaged across all folds.
 </details>
-<!--
-
-### Solution
+<div id="solution-3" class="section level3">
+<h3>Solution</h3>
 <details>
-  <summary>Click me:</summary>
-  
-
-```r
-res_knn$aggregate(msr("classif.acc"))
-## classif.acc 
-##        0.72
-res_log_reg$aggregate(msr("classif.acc"))
-## classif.acc 
-##       0.747
-```
-
-Note: Use e.g. `res_knn$score(msr(...))` to look at the results of each individual fold.
-
--->
+<summary>
+Click me:
+</summary>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>res_knn<span class="sc">$</span><span class="fu">aggregate</span>(<span class="fu">msr</span>(<span class="st">&quot;classif.acc&quot;</span>))</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="do">## classif.acc </span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="do">##        0.72</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>res_log_reg<span class="sc">$</span><span class="fu">aggregate</span>(<span class="fu">msr</span>(<span class="st">&quot;classif.acc&quot;</span>))</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="do">## classif.acc </span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="do">##       0.747</span></span></code></pre></div>
+<p>Note: Use e.g. <code>res_knn$score(msr(...))</code> to look at the
+results of each individual fold.</p>
+</div>
 </div>
 </div>
 <div id="summary" class="section level1">

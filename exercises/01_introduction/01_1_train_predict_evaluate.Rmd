@@ -37,13 +37,13 @@ First, because they create an unintended gap in the bank's planning,
 and second, because the collection of the repayment amount additionally
 causes additional time and cost for the bank.
 
-On the other hand, (interest rates for) loans is an important revenue stream for banks.
+On the other hand, (interest rates for) loans are an important revenue stream for banks.
 If a person's loan is rejected, even though they would have met the repayment deadlines,
 revenue is lost, as well as potential upselling opportunities.
 
 Banks are therefore highly interested in a risk prediction model that accurately
 predicts the risk of future customers.
-This is were supervised learning models come into play.
+This is where supervised learning models come into play.
 
 ## Data Overview
 
@@ -101,7 +101,7 @@ More systematically in `mlr3` they can be expressed via five components:
 
 Your task is to split the `german` dataset into 70 \% training data and 30 \% 
 test data by randomly sampling rows.
-Later, we will use the training data to learn a ML model and use the test data 
+Later, we will use the training data to learn an ML model and use the test data 
 to assess its performance.
 
 <details>
@@ -179,9 +179,9 @@ cat("-->")
 
 ## Create a Classification Task
 
-Install and loaded the `mlr3verse` package which is a collection of multiple add-on packages in the `mlr3` universe (if you fail installing `mlr3verse`, try to install and load only the `mlr3` and `mlr3learners` packages). 
+Install and load the `mlr3verse` package which is a collection of multiple add-on packages in the `mlr3` universe (if you fail installing `mlr3verse`, try to install and load only the `mlr3` and `mlr3learners` packages). 
 Then, create a classification task using the training data as an input and `credit_risk` as the target variable (with the class label `good` as the positive class). 
-By defining an `mlr3` Task, we conceptualize the ML problem we want to solve (here we face a classification task).
+By defining an `mlr3` task, we conceptualize the ML problem we want to solve (here we face a classification task).
 As we have a classification task here, make sure you properly specify the class that should be used as the positive class (i.e., the class label for which we would like to predict probabilities - here `good` if you are interested in predicting a probability for the creditworthiness of customers).
 
 <details>
@@ -225,7 +225,7 @@ cat("-->")
 ## Train a Model on the Training Dataset
 The created `Task` contains the data we want to work with.
 Now that we conceptualized the ML task (i.e., classification) in a `Task` object,
-it is time to train your first supervised learning method.
+it is time to train our first supervised learning method.
 We start with a simple classifier: a logistic regression model.
 During this course, you will, of course, also gain experience with more complex
 models.
@@ -276,8 +276,8 @@ cat("-->")
 
 ## Inspect the Model
 
-Have a look on the coefficients by using `summary()`.
-Name at least two features which have a significant effect on the outcome.
+Have a look at the coefficients by using `summary()`.
+Name at least two features that have a significant effect on the outcome.
 
 <details>
 <summary>**Hint 1:**</summary>
@@ -312,9 +312,8 @@ of the coefficients (including p-values) using `summary()`.
 summary(logreg$model)
 ```
 
-According to the summary, e.g., `credit_history` and `status` significantly influence the
-creditworthiness and the bank's risk assessment.
-By looking on `task$positive`, we could see that the class `good` (creditworthy client) is the positive class.
+According to the summary, e.g., `credit_history` and `status` significantly influence the creditworthiness and the bank's risk assessment.
+By looking on `task$positive`, we see that the class `good` (creditworthy client) is the positive class.
 This means that a positive sign of the estimated coefficient of a feature means that the feature has a positive influence on being a creditworthy client (while a negative sign will have a negative influence).
 
 ```{r}
@@ -397,7 +396,7 @@ cat("<!--")
 <details>
 <summary>Click me:</summary>
 
-By using the `$score()` method, we obtain a estimate for the classification error
+By using the `$score()` method, we obtain an estimate for the classification error
 of our model.
 
 ```{r}

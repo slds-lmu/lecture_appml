@@ -206,19 +206,20 @@ problem.</p>
 <p>There is many ways of doing black box optimization, grid and random
 search being examples for simple strategies. Bayesian optimization are a
 class of black box optimization algorithms that rely on a ‘surrogate
-model’ trained on observed data to model the black box function. This
-surrogate model tries to capture the unknown function between
-hyperparameter configuations and generalization performance using
-limited observed data. During each iteration, BO algorithms employ an
-‘acquisition function’ to determine the next candidate point for
-evaluation. This function measures the expected ‘utility’ of each point
-within the search space based on the prediction of the surrogate model.
-The algorithm then selects the candidate point with the best acquisition
-function value and evaluates the black box function at that point to
-then update the surrogate model. This iterative process continues until
-a termination criterion is met, such as reaching a pre-specified maximum
-number of evaluations or achieving a desired level of performance. BO is
-a powerful method that often results in good optimization performance,
+model’ trained on observed hyperparameter evaluations to model the black
+box function. This surrogate model tries to capture the unknown function
+between hyperparameter configuations and estimated generalization
+performance using (the very low number of) observed function
+evaluations. During each iteration, BO algorithms employ an ‘acquisition
+function’ to determine the next candidate point for evaluation. This
+function measures the expected ‘utility’ of each point within the search
+space based on the prediction of the surrogate model. The algorithm then
+selects the candidate point with the best acquisition function value and
+evaluates the black box function at that point to then update the
+surrogate model. This iterative process continues until a termination
+criterion is met, such as reaching a pre-specified maximum number of
+evaluations or achieving a desired level of performance. BO is a
+powerful method that often results in good optimization performance,
 especially if the cost of the black box evaluation becomes expensive and
 the optimization budget is tight.</p>
 <p>In the rest of this section, we will first provide an introduction to
@@ -306,26 +307,22 @@ evaluate first, before any of the real BO magic starts.</p>
 has better coverage properties than grid or random search. If you are
 interested in why the Sobol design has favorable properties, you can
 take a look at the original paper by Niederreiter (<a href="https://doi.org/10.1016/0022-314X(88)90025-X">1988</a>).</strong></p>
-<!--
-
-### Solution:
+<div id="solution" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-sobol_design = generate_design_sobol(domain, n = 30)$data
-head(sobol_design)
-##           x1        x2
-## 1: 0.6209494 0.3531295
-## 2: 0.1209494 0.8531295
-## 3: 0.8709494 0.6031295
-## 4: 0.3709494 0.1031295
-## 5: 0.2459494 0.4781295
-## 6: 0.7459494 0.9781295
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>sobol_design <span class="ot">=</span> <span class="fu">generate_design_sobol</span>(domain, <span class="at">n =</span> <span class="dv">30</span>)<span class="sc">$</span>data</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">head</span>(sobol_design)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="do">##           x1        x2</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="do">## 1: 0.6209494 0.3531295</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="do">## 2: 0.1209494 0.8531295</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="do">## 3: 0.8709494 0.6031295</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="do">## 4: 0.3709494 0.1031295</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="do">## 5: 0.2459494 0.4781295</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="do">## 6: 0.7459494 0.9781295</span></span></code></pre></div>
+</div>
 </div>
 <div id="generate-data-from-initial-design" class="section level2">
 <h2>1.2 Generate data from initial design</h2>
@@ -338,12 +335,12 @@ function outputs). Objective functions can be created using different
 classes, all of which inherit from <code>Objective</code>. Here, we will
 use <code>ObjectiveRFun</code>.</li>
 </ul>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># We have already defined our domain, but will do here again:</span></span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>domain <span class="ot">=</span> <span class="fu">ps</span>(<span class="at">x1 =</span> <span class="fu">p_dbl</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">x2 =</span> <span class="fu">p_dbl</span>(<span class="dv">0</span>, <span class="dv">1</span>))</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co"># Our codomain:</span></span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>codomain <span class="ot">=</span> <span class="fu">ps</span>(<span class="at">y =</span> <span class="fu">p_dbl</span>(<span class="at">tags =</span> <span class="st">&quot;minimize&quot;</span>))</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co"># Our objective: </span></span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>objective <span class="ot">=</span> ObjectiveRFun<span class="sc">$</span><span class="fu">new</span>(sinus_1D, <span class="at">domain =</span> domain, <span class="at">codomain =</span> codomain)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># We have already defined our domain, but will do here again:</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>domain <span class="ot">=</span> <span class="fu">ps</span>(<span class="at">x1 =</span> <span class="fu">p_dbl</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">x2 =</span> <span class="fu">p_dbl</span>(<span class="dv">0</span>, <span class="dv">1</span>))</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co"># Our codomain:</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>codomain <span class="ot">=</span> <span class="fu">ps</span>(<span class="at">y =</span> <span class="fu">p_dbl</span>(<span class="at">tags =</span> <span class="st">&quot;minimize&quot;</span>))</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co"># Our objective: </span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>objective <span class="ot">=</span> ObjectiveRFun<span class="sc">$</span><span class="fu">new</span>(sinus_1D, <span class="at">domain =</span> domain, <span class="at">codomain =</span> codomain)</span></code></pre></div>
 <p>Further:</p>
 <ul>
 <li><code>OptimInstanceSingleCrit</code> to construct an optimization
@@ -354,24 +351,52 @@ optimization algorithms. Optimization Instance</li>
 </ul>
 <p>Let’s define our optimization instance and evaluate it on our initial
 Sobol design:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>instance <span class="ot">=</span> OptimInstanceSingleCrit<span class="sc">$</span><span class="fu">new</span>(objective,</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="at">terminator =</span> <span class="fu">trm</span>(<span class="st">&quot;evals&quot;</span>, <span class="at">n_evals =</span> <span class="dv">20</span>))</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>instance<span class="sc">$</span><span class="fu">eval_batch</span>(sobol_design)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>instance <span class="ot">=</span> OptimInstanceSingleCrit<span class="sc">$</span><span class="fu">new</span>(objective,</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="at">terminator =</span> <span class="fu">trm</span>(<span class="st">&quot;evals&quot;</span>, <span class="at">n_evals =</span> <span class="dv">20</span>))</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>instance<span class="sc">$</span><span class="fu">eval_batch</span>(sobol_design)</span></code></pre></div>
 <p><strong>Task: Extract the training archive data from the tuning
 instance to find the data that we will now use to train our surrogate
 model with in the first iteration.</strong></p>
-<!--
-
-### Solution:
+<div id="solution-1" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-instance$archive$data
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>instance<span class="sc">$</span>archive<span class="sc">$</span>data</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="do">##             x1         x2              y  x_domain           timestamp batch_nr</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="do">##  1: 0.62094945 0.35312951  0.10130973475 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="do">##  2: 0.12094945 0.85312951  0.15430307423 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="do">##  3: 0.87094945 0.60312951 -0.21720269569 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="do">##  4: 0.37094945 0.10312951 -0.00698324321 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="do">##  5: 0.24594945 0.47812951 -0.03215570187 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="do">##  6: 0.74594945 0.97812951 -1.03044722698 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="do">##  7: 0.49594945 0.72812951  0.29472069478 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="do">##  8: 0.99594945 0.22812951  0.10084236052 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="do">##  9: 0.43344945 0.29062951 -0.01539541454 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="do">## 10: 0.93344945 0.79062951  0.50475921283 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="do">## 11: 0.18344945 0.54062951  0.05537398368 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="do">## 12: 0.68344945 0.04062951 -0.00032262900 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="do">## 13: 0.05844944 0.16562951  0.00233028511 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="do">## 14: 0.55844945 0.66562951  0.45882279485 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="do">## 15: 0.80844945 0.41562951 -0.25733560369 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="do">## 16: 0.30844945 0.91562951 -0.41356232957 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="do">## 17: 0.27719945 0.38437951 -0.05383437592 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="do">## 18: 0.77719945 0.88437951 -1.05634688119 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="do">## 19: 0.52719945 0.13437951  0.01689706980 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="do">## 20: 0.02719944 0.63437951  0.00760149590 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="do">## 21: 0.40219945 0.75937951 -0.25531082605 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="do">## 22: 0.90219945 0.25937951  0.00772777653 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="do">## 23: 0.65219945 0.50937951  0.09388572387 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="do">## 24: 0.15219945 0.00937951  0.00002268884 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="do">## 25: 0.33969945 0.57187951 -0.21008195590 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="do">## 26: 0.83969945 0.07187951 -0.00628260506 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="do">## 27: 0.08969945 0.32187951  0.01736872763 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a><span class="do">## 28: 0.58969945 0.82187951  0.65341360154 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a><span class="do">## 29: 0.46469945 0.19687951  0.00790205122 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a><span class="do">## 30: 0.96469945 0.69687951  0.69660808856 &lt;list[2]&gt; 2024-04-24 09:38:08        1</span></span>
+<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a><span class="do">##             x1         x2              y  x_domain           timestamp batch_nr</span></span></code></pre></div>
+</div>
 </div>
 <div id="train-surrogate-model" class="section level2">
 <h2>1.3 Train surrogate model</h2>
@@ -390,8 +415,8 @@ not all learners are suitable for all scenarios. Typical choices are
 random forests or Gaussian processes <code>(lrn(&quot;regr.km&quot;))</code>,
 which we will use here. You can learn more about Gaussian processes in
 Williams and Rasmussen (<a href="https://gaussianprocess.org/gpml/chapters/RW.pdf">2006</a>).</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>lrn_gp <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;regr.km&quot;</span>, <span class="at">covtype =</span> <span class="st">&quot;matern5_2&quot;</span>, <span class="at">optim.method =</span> <span class="st">&quot;BFGS&quot;</span>,</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="at">control =</span> <span class="fu">list</span>(<span class="at">trace =</span> <span class="cn">FALSE</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>lrn_gp <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;regr.km&quot;</span>, <span class="at">covtype =</span> <span class="st">&quot;matern5_2&quot;</span>, <span class="at">optim.method =</span> <span class="st">&quot;BFGS&quot;</span>,</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  <span class="at">control =</span> <span class="fu">list</span>(<span class="at">trace =</span> <span class="cn">FALSE</span>))</span></code></pre></div>
 <p>The Matérn covariance function is a kernel used in Gaussian processes
 to model the smoothness of the random function, offering a flexible
 class of smoothness parameters. The BFGS algorithm is a type of
@@ -401,7 +426,7 @@ finding parameter estimates.</p>
 <p>A <code>SurrogateLearner</code> can be constructed by passing a
 <code>LearnerRegr</code> object to the sugar function
 <code>srlrn()</code>, alongside the archive of the instance:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>surrogate <span class="ot">=</span> <span class="fu">srlrn</span>(lrn_gp, <span class="at">archive =</span> instance<span class="sc">$</span>archive)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>surrogate <span class="ot">=</span> <span class="fu">srlrn</span>(lrn_gp, <span class="at">archive =</span> instance<span class="sc">$</span>archive)</span></code></pre></div>
 <p>Internally, the regression learner is fit on a <code>TaskRegr</code>
 where features are the variables of the domain and the target is the
 codomain, the data is from the archive of the <code>OptimInstance</code>
@@ -416,25 +441,23 @@ contained within the surrogate:</strong></p>
 <p>Fitting the surrogate model will require calling one of the methods
 of <code>surrogate</code>. See <code>?surrogate</code> for help.</p>
 </details>
-<!--
-
-### Solution:
+<div id="solution-2" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-surrogate$update()
-surrogate$learner$model
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>surrogate<span class="sc">$</span><span class="fu">update</span>()</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>surrogate<span class="sc">$</span>learner<span class="sc">$</span>model</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="do">## NULL</span></span></code></pre></div>
+</div>
 </div>
 <div id="define-an-acquisition-function" class="section level2">
 <h2>1.4 Define an acquisition function</h2>
-<p>An acquisition function relies on the prediction of a surrogate model
-and quantifies the expected ‘utility’ of each point of the search space
-if it were to be evaluated in the next iteration.</p>
+<p>Roughly speaking, an acquisition function relies on the prediction of
+a surrogate model and quantifies the perceived ‘utility’ of each point
+of the search space if it were to be evaluated in the next
+iteration.</p>
 <p>A popular example is the <strong>expected improvement</strong>, which
 tells us how much we can expect a candidate point to improve over the
 best function value observed so far (the ‘incumbent’), given the
@@ -448,26 +471,18 @@ our surrogate learner. In our running example, we will use the expected
 improvement to choose the next candidate for evaluation.</p>
 <p><strong>Task: Construct an aquisition function object using expected
 improvement. Then, update the aquisition function object.</strong></p>
-<!--
-
-### Solution:
+<div id="solution-3" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-acq_function = acqf("ei", surrogate = surrogate)
-acq_function$update()
-```
-
-The best y-value the acquisition function has seen so far:
-
-
-```r
-acq_function$y_best
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>acq_function <span class="ot">=</span> <span class="fu">acqf</span>(<span class="st">&quot;ei&quot;</span>, <span class="at">surrogate =</span> surrogate)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>acq_function<span class="sc">$</span><span class="fu">update</span>()</span></code></pre></div>
+<p>The best y-value the acquisition function has seen so far:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>acq_function<span class="sc">$</span>y_best</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="do">## [1] -1.056347</span></span></code></pre></div>
+</div>
 </div>
 <div id="optimize-acquisition-function" class="section level2">
 <h2>1.5 Optimize acquisition function</h2>
@@ -491,33 +506,34 @@ a much cheaper one than the original.</p>
 Terminator, and the acquisition function. Optimizers are stored in the
 <code>mlr_optimizers</code> dictionary and can be constructed with the
 sugar function <code>opt()</code>. Let’s select an optimizer first:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>optimizer <span class="ot">=</span> <span class="fu">opt</span>(<span class="st">&quot;nloptr&quot;</span>, <span class="at">algorithm =</span> <span class="st">&quot;NLOPT_GN_ORIG_DIRECT&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>optimizer <span class="ot">=</span> <span class="fu">opt</span>(<span class="st">&quot;nloptr&quot;</span>, <span class="at">algorithm =</span> <span class="st">&quot;NLOPT_GN_ORIG_DIRECT&quot;</span>)</span></code></pre></div>
 <p><strong>Task: Construct an acquisition function optimizer using the
 optimizer above, a termination criterion of your choice and the
 acquisition function from the previous exercise. Then, call $optimize()
 on the optimizer to suggest the next candidate hyperparameter
 configuration.</strong></p>
-<!--
-
-### Solution:
+<div id="solution-4" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-acq_optimizer = acqo(
-  optimizer = optimizer,
-  terminator = trm("evals", n_evals = 200),
-  acq_function = acq_function
-)
-
-candidate = acq_optimizer$optimize()
-candidate
-```
-
-This is the next hyperparameter configuration we would want to evaluate. This restarts the loop: add it to the archive, train surrogate model, optimize the acquisition function with the new surrogate model, get the next candidate, etc. We would do this until some termination criterion is met.
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>acq_optimizer <span class="ot">=</span> <span class="fu">acqo</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>  <span class="at">optimizer =</span> optimizer,</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>  <span class="at">terminator =</span> <span class="fu">trm</span>(<span class="st">&quot;evals&quot;</span>, <span class="at">n_evals =</span> <span class="dv">200</span>),</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>  <span class="at">acq_function =</span> acq_function</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>)</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>candidate <span class="ot">=</span> acq_optimizer<span class="sc">$</span><span class="fu">optimize</span>()</span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>candidate</span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="do">##          x1        x2  x_domain     acq_ei .already_evaluated</span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="do">## 1: 0.777854 0.9999238 &lt;list[2]&gt; 0.07737823              FALSE</span></span></code></pre></div>
+<p>This is the next hyperparameter configuration we would want to
+evaluate. This restarts the loop: add it to the archive, train surrogate
+model, optimize the acquisition function with the new surrogate model,
+get the next candidate, etc. We would do this until some termination
+criterion is met.</p>
+</div>
 </div>
 </div>
 <div id="automating-bo-with-optimizermbo" class="section level1">
@@ -531,45 +547,43 @@ algorithm, aka <code>bayesopt_ego</code> provided by
 <code>mlr_loop_functions</code>. You do not need to pass any of these
 building blocks to each other manually as the <code>opt()</code>
 constructor will do this for you:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>loop_function <span class="ot">=</span> mlr_loop_functions<span class="sc">$</span><span class="fu">get</span>(<span class="st">&quot;bayesopt_ego&quot;</span>)</span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>surrogate <span class="ot">=</span> <span class="fu">srlrn</span>(<span class="fu">lrn</span>(<span class="st">&quot;regr.km&quot;</span>,</span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>                      <span class="at">covtype =</span> <span class="st">&quot;matern5_2&quot;</span>,</span>
-<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>                      <span class="at">optim.method =</span> <span class="st">&quot;BFGS&quot;</span>,</span>
-<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>                      <span class="at">control =</span> <span class="fu">list</span>(<span class="at">trace =</span> <span class="cn">FALSE</span>)))</span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a></span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>acq_function <span class="ot">=</span> <span class="fu">acqf</span>(<span class="st">&quot;ei&quot;</span>)</span>
-<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a></span>
-<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>acq_optimizer <span class="ot">=</span> <span class="fu">acqo</span>(<span class="fu">opt</span>(<span class="st">&quot;nloptr&quot;</span>,</span>
-<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>                         <span class="at">algorithm =</span> <span class="st">&quot;NLOPT_GN_ORIG_DIRECT&quot;</span>),</span>
-<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>                         <span class="at">terminator =</span> <span class="fu">trm</span>(<span class="st">&quot;evals&quot;</span>, <span class="at">n_evals =</span> <span class="dv">100</span>))</span>
-<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a></span>
-<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>optimizer <span class="ot">=</span> <span class="fu">opt</span>(<span class="st">&quot;mbo&quot;</span>,</span>
-<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>  <span class="at">loop_function =</span> loop_function,</span>
-<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>  <span class="at">surrogate =</span> surrogate,</span>
-<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a>  <span class="at">acq_function =</span> acq_function,</span>
-<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a>  <span class="at">acq_optimizer =</span> acq_optimizer)</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>loop_function <span class="ot">=</span> mlr_loop_functions<span class="sc">$</span><span class="fu">get</span>(<span class="st">&quot;bayesopt_ego&quot;</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>surrogate <span class="ot">=</span> <span class="fu">srlrn</span>(<span class="fu">lrn</span>(<span class="st">&quot;regr.km&quot;</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>                      <span class="at">covtype =</span> <span class="st">&quot;matern5_2&quot;</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>                      <span class="at">optim.method =</span> <span class="st">&quot;BFGS&quot;</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>                      <span class="at">control =</span> <span class="fu">list</span>(<span class="at">trace =</span> <span class="cn">FALSE</span>)))</span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>acq_function <span class="ot">=</span> <span class="fu">acqf</span>(<span class="st">&quot;ei&quot;</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a>acq_optimizer <span class="ot">=</span> <span class="fu">acqo</span>(<span class="fu">opt</span>(<span class="st">&quot;nloptr&quot;</span>,</span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a>                         <span class="at">algorithm =</span> <span class="st">&quot;NLOPT_GN_ORIG_DIRECT&quot;</span>),</span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a>                         <span class="at">terminator =</span> <span class="fu">trm</span>(<span class="st">&quot;evals&quot;</span>, <span class="at">n_evals =</span> <span class="dv">100</span>))</span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a>optimizer <span class="ot">=</span> <span class="fu">opt</span>(<span class="st">&quot;mbo&quot;</span>,</span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a>  <span class="at">loop_function =</span> loop_function,</span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a>  <span class="at">surrogate =</span> surrogate,</span>
+<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a>  <span class="at">acq_function =</span> acq_function,</span>
+<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a>  <span class="at">acq_optimizer =</span> acq_optimizer)</span></code></pre></div>
 <p><strong>Task: Use the MBO optimizer constructed above to solve the
 optimization problem. To do so, define an optimization instance (as in
 1.2) and an initial design (as in 1.1). Then, evaluate the optimization
 instance on the initial design (as in 1.2). Then, call
 <code>optimizer$optimize()</code> on the instance.</strong></p>
-<!--
-
-### Solution:
+<div id="solution-5" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-instance = OptimInstanceSingleCrit$new(objective,
-  terminator = trm("evals", n_evals = 100))
-sobol_design = generate_design_sobol(domain, n = 100)$data
-instance$eval_batch(sobol_design)
-optimizer$optimize(instance)
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>instance <span class="ot">=</span> OptimInstanceSingleCrit<span class="sc">$</span><span class="fu">new</span>(objective,</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>  <span class="at">terminator =</span> <span class="fu">trm</span>(<span class="st">&quot;evals&quot;</span>, <span class="at">n_evals =</span> <span class="dv">100</span>))</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>sobol_design <span class="ot">=</span> <span class="fu">generate_design_sobol</span>(domain, <span class="at">n =</span> <span class="dv">100</span>)<span class="sc">$</span>data</span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>instance<span class="sc">$</span><span class="fu">eval_batch</span>(sobol_design)</span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>optimizer<span class="sc">$</span><span class="fu">optimize</span>(instance)</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="do">##           x1        x2  x_domain          y</span></span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="do">## 1: 0.8061805 0.8231794 &lt;list[2]&gt; -0.9323896</span></span></code></pre></div>
+</div>
 </div>
 <div id="bo-for-hpo-with-tunermbo" class="section level1">
 <h1>3 BO for HPO with <code>TunerMbo</code></h1>
@@ -579,17 +593,17 @@ optimizer$optimize(instance)
 example, we want to tune the cost and gamma parameters of
 <code>lrn(&quot;classif.svm&quot;)</code> with a radial kernel on
 <code>tsk(&quot;sonar&quot;)</code> with three-fold CV.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>lrn_svm <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;classif.svm&quot;</span>, <span class="at">kernel =</span> <span class="st">&quot;radial&quot;</span>,</span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">&quot;C-classification&quot;</span>,</span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="at">cost  =</span> <span class="fu">to_tune</span>(<span class="fl">1e-5</span>, <span class="fl">1e5</span>, <span class="at">logscale =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="at">gamma =</span> <span class="fu">to_tune</span>(<span class="fl">1e-5</span>, <span class="fl">1e5</span>, <span class="at">logscale =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>)</span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a></span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>tuner <span class="ot">=</span> <span class="fu">tnr</span>(<span class="st">&quot;mbo&quot;</span>,</span>
-<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>  <span class="at">loop_function =</span> bayesopt_ego,</span>
-<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>  <span class="at">surrogate =</span> surrogate,</span>
-<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>  <span class="at">acq_function =</span> acq_function,</span>
-<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>  <span class="at">acq_optimizer =</span> acq_optimizer)</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>lrn_svm <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;classif.svm&quot;</span>, <span class="at">kernel =</span> <span class="st">&quot;radial&quot;</span>,</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">&quot;C-classification&quot;</span>,</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>  <span class="at">cost  =</span> <span class="fu">to_tune</span>(<span class="fl">1e-5</span>, <span class="fl">1e5</span>, <span class="at">logscale =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>  <span class="at">gamma =</span> <span class="fu">to_tune</span>(<span class="fl">1e-5</span>, <span class="fl">1e5</span>, <span class="at">logscale =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>)</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a>tuner <span class="ot">=</span> <span class="fu">tnr</span>(<span class="st">&quot;mbo&quot;</span>,</span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a>  <span class="at">loop_function =</span> bayesopt_ego,</span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a>  <span class="at">surrogate =</span> surrogate,</span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a>  <span class="at">acq_function =</span> acq_function,</span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a>  <span class="at">acq_optimizer =</span> acq_optimizer)</span></code></pre></div>
 <p><strong>Task: Run the tuner on the lrn_svm for the sonar task and
 3-fold CV. Use misclassification error as performance measure. What is
 the best HP configuration?</strong></p>
@@ -599,24 +613,22 @@ the best HP configuration?</strong></p>
 </summary>
 <p>See <code>?mlr3tuning::tune</code> for help.</p>
 </details>
-<!--
-
-### Solution:
+<div id="solution-6" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-instance = tune(tuner,
-                tsk("sonar"),
-                lrn_svm,
-                rsmp("cv", folds = 3),
-                msr("classif.ce"), 25)
-
-instance$result
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>instance <span class="ot">=</span> <span class="fu">tune</span>(tuner,</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>                <span class="fu">tsk</span>(<span class="st">&quot;sonar&quot;</span>),</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>                lrn_svm,</span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>                <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> <span class="dv">3</span>),</span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>                <span class="fu">msr</span>(<span class="st">&quot;classif.ce&quot;</span>), <span class="dv">25</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a>instance<span class="sc">$</span>result</span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a><span class="do">##        cost     gamma learner_param_vals  x_domain classif.ce</span></span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a><span class="do">## 1: 11.46555 -3.695507          &lt;list[4]&gt; &lt;list[2]&gt;   0.115528</span></span></code></pre></div>
+</div>
 </div>
 <div id="summary" class="section level1">
 <h1>Summary</h1>

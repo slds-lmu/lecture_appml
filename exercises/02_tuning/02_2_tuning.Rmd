@@ -1,6 +1,6 @@
 ---
 title: "Applied Machine Learning"
-subtitle: "In-class exercise 02-1"
+subtitle: "In-class exercise 02-2"
 output:
   prettydoc::html_pretty:
     theme: hpstr
@@ -29,7 +29,7 @@ task = tsk("german_credit")
 ```
 
 <details>
-<summary>**Recap**</summary>
+<summary>**Recap: k-NN**</summary>
 k-NN is a machine learning method that predicts new data by averaging over the responses of the k nearest neighbors.
 </details>
 
@@ -190,28 +190,8 @@ task = tsk("german_credit")
 lrn_knn = lrn("classif.kknn", k = to_tune(1, 100), scale = to_tune())
 ```
 
-This adjust the parameter set (`lrn_knn$param_set`) attached to the learner and flags it as "tunable". The tuning then makes use of that search space if no `search_space` is given in the `ti()` construction:
-
-```{r, eval=FALSE}
-resampling = rsmp("cv", folds = 3L)
-
-terminator = trm("evals", n_evals = 40L)
-
-instance = ti(
-  task = task,
-  learner = lrn_knn,
-  resampling = resampling,
-  terminator = terminator
-)
-
-optimizer = tnr("random_search", batch_size = 4L)
-
-optimizer$optimize(instance)
-instance$result_y
-instance$result
-```
+This adjust the parameter set (`lrn_knn$param_set`) attached to the learner and flags it as "tunable". 
 </details>
-
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("-->")

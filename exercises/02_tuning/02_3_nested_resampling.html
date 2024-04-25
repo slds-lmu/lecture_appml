@@ -146,7 +146,7 @@ pointer-events: auto;
 <header class="header-title">
 <div class="header-title-wrap">
 <h1 class="title toc-ignore entry-title">Applied Machine Learning</h1>
-<h2 class="subtitle">In-class exercise 02-2</h2>
+<h2 class="subtitle">In-class exercise 02-3</h2>
 </div><!-- /.header-title-wrap -->
 </header>
 
@@ -177,20 +177,20 @@ HPs and how to apply nested resampling.</p>
 <p>As a follow-up on the tuning use case, we continue with the German
 credit task (<code>tsk(&quot;german_credit&quot;)</code>) and perform nested
 resampling. The purpose is to get a valid estimation of the
-generalisation error without an optimistic bias introduced by tuning
-without nested resampling. For this task, we estimate the generalisation
+generalization error without an optimistic bias introduced by tuning
+without nested resampling. For this task, we estimate the generalization
 error of a k-NN model implemented in <code>kknn</code>.</p>
 <details>
 <summary>
-<strong>Recap</strong>
+<strong>Recap: Nested Resampling</strong>
 </summary>
 Nested resampling evaluates a learner combined with a tuning strategy to
-correctly estimate the generalisation error. Linking a tuning strategy
+correctly estimate the generalization error. Linking a tuning strategy
 with a learner uses the training data to find a good hyperparameter
 configuration (HPC). Using the same data for performance estimation and
-hence taking the best-estimated generalisation error of the
+hence taking the best-estimated generalization error of the
 best-performing model leads to an over-optimistic estimation. This is
-because information on the resampling splits may favour specific HPCs
+because information on the resampling splits may favor specific HPCs
 (overtuning) by chance.
 </details>
 <div id="the-autotuner" class="section level2">
@@ -204,7 +204,7 @@ the <code>german_credit</code> task:</p>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>task <span class="ot">=</span> <span class="fu">tsk</span>(<span class="st">&quot;german_credit&quot;</span>)</span></code></pre></div>
 <details>
 <summary>
-<strong>Recap</strong>
+<strong>Recap: <code>AutoTuner</code></strong>
 </summary>
 The <a href="https://mlr3tuning.mlr-org.com/reference/AutoTuner.html"><code>AutoTuner</code></a>
 class of <a href="https://mlr3tuning.mlr-org.com/index.html"><code>mlr3tuning</code></a>
@@ -308,10 +308,10 @@ arx = at$tuning_instance$archive
 arx = at$archive
 ```
 
-The fitted learner on the best parameter configuration is stored in `at$model$learner$model`:
+The trained learner on the best parameter configuration is stored in `at$learner`:
 
 ```r
-at$model$learner$model
+at$learner
 ```
 
 The configuration aligns with the result of the tuning (on the scale of the param set):
@@ -334,7 +334,7 @@ at$tuning_instance$result_x_domain
 <h2>Perform nested resampling</h2>
 <p>Setting the resampling strategy in the <code>AutoTuner</code> defines
 how the HPC are internally evaluated and is hence called <em>inner
-resampling</em>. To get the final estimate of the generalisation error,
+resampling</em>. To get the final estimate of the generalization error,
 we have to resample the <code>AutoTuner</code>. This resampling is also
 called <em>outer resampling</em>. Use <code>resample</code> to conduct a
 3-fold CV as outer resampling strategy:</p>
@@ -369,7 +369,7 @@ outer$instantiate(task)
 res = resample(task = task, learner = at, resampling = outer)
 ```
 
-The estimated generalisation error then can be obtained by calling `$aggregate()` with the specific measure. The results from the individual folds can be obtained with `$score()`:
+The estimated generalization error then can be obtained by calling `$aggregate()` with the specific measure. The results from the individual folds can be obtained with `$score()`:
 
 ```r
 res$aggregate(msr("classif.ce"))
@@ -399,7 +399,7 @@ defined KNN-AutoTuner behaves like a normal learner that automatically
 finds the best hyperparameters (internally, it performs an <em>inner
 resampling</em> to evaluate the hyperparameter configurations of the
 random search). As we want to get the final estimate of the
-generalisation error, we have to define another so-called <em>outer
+generalization error, we have to define another so-called <em>outer
 resampling</em> to compare the different learners within the
 <code>benchmark()</code> function (you can use e.g. a 4-fold CV as outer
 resampling strategy). This will perform nested resampling for the
@@ -443,7 +443,7 @@ bmr = benchmark(benchmark_grid(
   learners = list(at, l1, l2, l3),
   resamplings = outer))
 ```
-Again, we can calculate the generalisation error with `$aggregate()` or visualize the result with `mlr3viz` and the `autoplot()` function:
+Again, we can calculate the generalization error with `$aggregate()` or visualize the result with `mlr3viz` and the `autoplot()` function:
 
 ```r
 bmr$aggregate(msr("classif.ce"))

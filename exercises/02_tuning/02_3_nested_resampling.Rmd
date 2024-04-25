@@ -1,6 +1,6 @@
 ---
 title: "Applied Machine Learning"
-subtitle: "In-class exercise 02-2"
+subtitle: "In-class exercise 02-3"
 output:
   prettydoc::html_pretty:
     theme: hpstr
@@ -21,11 +21,11 @@ After this exercise, you should be able to understand the importance of nested r
 
 # Exercises
 
-As a follow-up on the tuning use case, we continue with the German credit task (`tsk("german_credit")`) and perform nested resampling. The purpose is to get a valid estimation of the generalisation error without an optimistic bias introduced by tuning without nested resampling. For this task, we estimate the generalisation error of a k-NN model implemented in `kknn`.
+As a follow-up on the tuning use case, we continue with the German credit task (`tsk("german_credit")`) and perform nested resampling. The purpose is to get a valid estimation of the generalization error without an optimistic bias introduced by tuning without nested resampling. For this task, we estimate the generalization error of a k-NN model implemented in `kknn`.
 
 <details>
-<summary>**Recap**</summary>
-Nested resampling evaluates a learner combined with a tuning strategy to correctly estimate the generalisation error. Linking a tuning strategy with a learner uses the training data to find a good hyperparameter configuration (HPC). Using the same data for performance estimation and hence taking the best-estimated generalisation error of the best-performing model leads to an over-optimistic estimation. This is because information on the resampling splits may favour specific HPCs (overtuning) by chance.
+<summary>**Recap: Nested Resampling**</summary>
+Nested resampling evaluates a learner combined with a tuning strategy to correctly estimate the generalization error. Linking a tuning strategy with a learner uses the training data to find a good hyperparameter configuration (HPC). Using the same data for performance estimation and hence taking the best-estimated generalization error of the best-performing model leads to an over-optimistic estimation. This is because information on the resampling splits may favor specific HPCs (overtuning) by chance.
 </details>
 
 ## The AutoTuner
@@ -38,7 +38,7 @@ task = tsk("german_credit")
 ```
 
 <details>
-<summary>**Recap**</summary>
+<summary>**Recap: `AutoTuner`**</summary>
 The [`AutoTuner`](https://mlr3tuning.mlr-org.com/reference/AutoTuner.html) class of [`mlr3tuning`](https://mlr3tuning.mlr-org.com/index.html) combines the learner and the HPO to encapsulate the learner from its HPs. When training an `AutoTuner`, two steps are executed. (1) Conduct tuning based on the defined tuning strategy and (2) take the best HPC and fit a model with that HPs to the full data set.
 </details>
 
@@ -154,7 +154,7 @@ cat("-->")
 
 ## Perform nested resampling
 
-Setting the resampling strategy in the `AutoTuner` defines how the HPC are internally evaluated and is hence called _inner resampling_. To get the final estimate of the generalisation error, we have to resample the `AutoTuner`. This resampling is also called _outer resampling_. Use `resample` to conduct a 3-fold CV as outer resampling strategy:
+Setting the resampling strategy in the `AutoTuner` defines how the HPC are internally evaluated and is hence called _inner resampling_. To get the final estimate of the generalization error, we have to resample the `AutoTuner`. This resampling is also called _outer resampling_. Use `resample` to conduct a 3-fold CV as outer resampling strategy:
 
 
 <details>
@@ -187,7 +187,7 @@ outer$instantiate(task)
 res = resample(task = task, learner = at, resampling = outer)
 ```
 
-The estimated generalisation error then can be obtained by calling `$aggregate()` with the specific measure. The results from the individual folds can be obtained with `$score()`:
+The estimated generalization error then can be obtained by calling `$aggregate()` with the specific measure. The results from the individual folds can be obtained with `$score()`:
 ```{r, eval = show.solution}
 res$aggregate(msr("classif.ce"))
 res$score(msr("classif.ce"))
@@ -205,7 +205,7 @@ Think about suitable learners (which you already know) and run a benchmark with 
 
 <details>
 <summary>**Hint 1**</summary>
-A list of all possible learners can be achieved via `as.data.table(mlr_learners)`. Note that the previously defined KNN-AutoTuner behaves like a normal learner that automatically finds the best hyperparameters (internally, it performs an _inner resampling_ to evaluate the hyperparameter configurations of the random search). As we want to get the final estimate of the generalisation error, we have to define another so-called _outer resampling_ to compare the different learners within the `benchmark()` function (you can use e.g. a 4-fold CV as outer resampling strategy). This will perform nested resampling for the KNN-AutoTuner.
+A list of all possible learners can be achieved via `as.data.table(mlr_learners)`. Note that the previously defined KNN-AutoTuner behaves like a normal learner that automatically finds the best hyperparameters (internally, it performs an _inner resampling_ to evaluate the hyperparameter configurations of the random search). As we want to get the final estimate of the generalization error, we have to define another so-called _outer resampling_ to compare the different learners within the `benchmark()` function (you can use e.g. a 4-fold CV as outer resampling strategy). This will perform nested resampling for the KNN-AutoTuner.
 </details>
 
 <details>
@@ -246,7 +246,7 @@ bmr = benchmark(benchmark_grid(
   learners = list(at, l1, l2, l3),
   resamplings = outer))
 ```
-Again, we can calculate the generalisation error with `$aggregate()` or visualize the result with `mlr3viz` and the `autoplot()` function:
+Again, we can calculate the generalization error with `$aggregate()` or visualize the result with `mlr3viz` and the `autoplot()` function:
 ```{r, eval = show.solution}
 bmr$aggregate(msr("classif.ce"))
 

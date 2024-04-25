@@ -1,6 +1,6 @@
 ---
 title: "Applied Machine Learning"
-subtitle: "In-class exercise 02-3"
+subtitle: "In-class exercise 02-1"
 output:
   prettydoc::html_pretty:
     theme: hpstr
@@ -51,6 +51,13 @@ task_gc$col_roles
 
 Modify the `task_gc` object such that the target variable `credit_risk` is used to for stratification.
 
+<details>
+<summary>**Hint 1**</summary>
+```{r, eval = FALSE}
+task_gc$col_roles$... = "credit_risk"
+```
+</details>
+
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("<!--")
 ```
@@ -97,7 +104,20 @@ cat("-->")
 
 ## 1.3 Sanity check
 
-As a sanity check, the target class distribution should be similar within each CV fold. Compute and check the target class distribution within each fold.
+As a sanity check, the target class distribution should be similar within each CV fold. Compute and check the target class distribution in form of a ratio within each fold.
+
+<details>
+<summary>**Hint 1**</summary>
+First, merge the data with the corresponding cv fold. Second, aggregate for each fold.
+</details>
+
+<details>
+<summary>**Hint 2**</summary>
+```{r, eval = FALSE}
+dt <- merge(cv3$..., transform(..., row_id = seq_len(...)), by = ...)
+aggregate(..., data = ..., FUN = function(x) ...)
+```
+</details>
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("<!--")
@@ -106,6 +126,14 @@ cat("<!--")
 ### Solution:
 <details>
 <summary>**Click me:**</summary>
+
+With `base R`:
+
+```{r, eval = show.solution}
+dt <- merge(cv3$instance, transform(task_gc$data(), row_id = seq_len(nrow(task_gc$data()))), by = "row_id")
+aggregate(credit_risk ~ fold, data = dt, FUN = function(x) sum(x == "bad") / sum(x == "good"))
+with(dt, sum(credit_risk == "bad") / sum(credit_risk == "good"))
+```
 
 With `data.table`:
 
@@ -119,14 +147,6 @@ Indeed, we can see that the target class is distributed similarly within each CV
 
 ```{r, eval = show.solution}
 dt[, .(class_ratio = sum(credit_risk == "bad") / sum(credit_risk == "good"))]
-```
-
-With base R:
-
-```{r, eval = show.solution}
-dt <- merge(cv3$instance, transform(task_gc$data(), row_id = seq_len(nrow(task_gc$data()))), by = "row_id")
-aggregate(credit_risk ~ fold, data = dt, FUN = function(x) sum(x == "bad") / sum(x == "good"))
-with(dt, sum(credit_risk == "bad") / sum(credit_risk == "good"))
 ```
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
@@ -224,14 +244,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-With `data.table`:
-```{r, eval = show.solution}
-dt = merge(task_bc$data(), cv5$instance, by.x = "Id", by.y = "row_id")
-dt = dt[, .(unique_folds = length(unique(fold))), by = Id]
-dt[unique_folds > 1, ]
-```
-
-With base R:
+With `base R`:
 ```{r, eval = show.solution}
 dt <- aggregate(fold ~ Id,
                  data = merge(task_bc$data(),
@@ -240,6 +253,13 @@ dt <- aggregate(fold ~ Id,
                               by.y = "row_id"),
                  FUN = function(x) length(unique(x)))
 dt[dt$fold > 1,]
+```
+
+With `data.table`:
+```{r, eval = show.solution}
+dt = merge(task_bc$data(), cv5$instance, by.x = "Id", by.y = "row_id")
+dt = dt[, .(unique_folds = length(unique(fold))), by = Id]
+dt[unique_folds > 1, ]
 ```
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
