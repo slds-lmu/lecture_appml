@@ -171,6 +171,13 @@ Training</a></li>
 </ul></li>
 <li><a href="#multiple-performance-measures" id="toc-multiple-performance-measures">2 Multiple Performance
 Measures</a></li>
+<li><a href="#nested-resampling" id="toc-nested-resampling">3 Nested
+Resampling</a>
+<ul>
+<li><a href="#create-an-autofselector-instance" id="toc-create-an-autofselector-instance">3.1 Create an
+<code>AutoFSelector</code> Instance</a></li>
+<li><a href="#benchmark" id="toc-benchmark">3.2 Benchmark</a></li>
+</ul></li>
 <li><a href="#summary" id="toc-summary">Summary</a></li>
 </ul>
 </div>
@@ -280,33 +287,33 @@ the <code>FSelectInstanceSingleCrit</code> object to the
 </summary>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>fselector <span class="ot">=</span> <span class="fu">fs</span>(<span class="st">&quot;sequential&quot;</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>fselector<span class="sc">$</span><span class="fu">optimize</span>(instance)</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="do">## INFO  [15:36:04.616] [bbotk] Starting to optimize 4 parameter(s) with &#39;&lt;FSelectorSequential&gt;&#39; and &#39;&lt;TerminatorEvals&gt; [n_evals=20, k=0]&#39;</span></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="do">## INFO  [15:36:04.647] [bbotk] Evaluating 4 configuration(s)</span></span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="do">## INFO  [15:36:05.299] [bbotk] Result of batch 1:</span></span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="do">## INFO  [15:36:05.302] [bbotk]    age amount credit_history duration classif.acc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="do">## INFO  [15:36:05.302] [bbotk]   TRUE  FALSE          FALSE    FALSE   0.6999874        0      0             0.04 ad51cff8-fd69-45d7-9a3a-141066293494</span></span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="do">## INFO  [15:36:05.302] [bbotk]  FALSE   TRUE          FALSE    FALSE   0.6879724        0      0             0.05 70cae355-b5f2-4c48-8a92-ed3d8335f49b</span></span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="do">## INFO  [15:36:05.302] [bbotk]  FALSE  FALSE           TRUE    FALSE   0.7170044        0      0             0.03 db54efc2-d312-4e5c-8c19-1db4708c5e72</span></span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="do">## INFO  [15:36:05.302] [bbotk]  FALSE  FALSE          FALSE     TRUE   0.6909784        0      0             0.05 260895c0-c3cd-4de8-ba65-4d9be887f475</span></span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="do">## INFO  [15:36:05.306] [bbotk] Evaluating 3 configuration(s)</span></span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="do">## INFO  [15:36:05.616] [bbotk] Result of batch 2:</span></span>
-<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="do">## INFO  [15:36:05.618] [bbotk]    age amount credit_history duration classif.acc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="do">## INFO  [15:36:05.618] [bbotk]   TRUE  FALSE           TRUE    FALSE   0.7170044        0      0             0.03 ef9be27e-523b-452c-94ce-9e8d01393184</span></span>
-<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="do">## INFO  [15:36:05.618] [bbotk]  FALSE   TRUE           TRUE    FALSE   0.6769554        0      0             0.03 ff96ff16-600a-4424-a007-ea7315a09e8e</span></span>
-<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="do">## INFO  [15:36:05.618] [bbotk]  FALSE  FALSE           TRUE     TRUE   0.7019894        0      0             0.04 fa7d5a92-ea2f-42fb-bdb6-77d71a538703</span></span>
-<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="do">## INFO  [15:36:05.620] [bbotk] Evaluating 2 configuration(s)</span></span>
-<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="do">## INFO  [15:36:05.818] [bbotk] Result of batch 3:</span></span>
-<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="do">## INFO  [15:36:05.820] [bbotk]   age amount credit_history duration classif.acc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="do">## INFO  [15:36:05.820] [bbotk]  TRUE   TRUE           TRUE    FALSE   0.6809834        0      0             0.02 2e580a4f-20bd-4dcf-9150-af4a6f9518f6</span></span>
-<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="do">## INFO  [15:36:05.820] [bbotk]  TRUE  FALSE           TRUE     TRUE   0.7069704        0      0             0.00 a39d5de5-fec2-490d-9a9d-ab7a5ef2b61e</span></span>
-<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="do">## INFO  [15:36:05.822] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="do">## INFO  [15:36:05.936] [bbotk] Result of batch 4:</span></span>
-<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="do">## INFO  [15:36:05.938] [bbotk]   age amount credit_history duration classif.acc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="do">## INFO  [15:36:05.938] [bbotk]  TRUE   TRUE           TRUE     TRUE   0.6799974        0      0             0.04 86aeb211-9cb3-4e43-bb7d-a1fe766f29da</span></span>
-<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="do">## INFO  [15:36:05.942] [bbotk] Finished optimizing after 10 evaluation(s)</span></span>
-<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="do">## INFO  [15:36:05.942] [bbotk] Result:</span></span>
-<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="do">## INFO  [15:36:05.944] [bbotk]    age amount credit_history duration       features classif.acc</span></span>
-<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="do">## INFO  [15:36:05.944] [bbotk]  FALSE  FALSE           TRUE    FALSE credit_history   0.7170044</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="do">## INFO  [10:58:35.800] [bbotk] Starting to optimize 4 parameter(s) with &#39;&lt;FSelectorSequential&gt;&#39; and &#39;&lt;TerminatorEvals&gt; [n_evals=20, k=0]&#39;</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="do">## INFO  [10:58:35.829] [bbotk] Evaluating 4 configuration(s)</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="do">## INFO  [10:58:36.480] [bbotk] Result of batch 1:</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="do">## INFO  [10:58:36.483] [bbotk]    age amount credit_history duration classif.acc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="do">## INFO  [10:58:36.483] [bbotk]   TRUE  FALSE          FALSE    FALSE   0.6999874        0      0             0.07 330d19bf-4ed4-4a7a-91c2-92be4fe74b4f</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="do">## INFO  [10:58:36.483] [bbotk]  FALSE   TRUE          FALSE    FALSE   0.6879724        0      0             0.05 dd93be32-dce4-4d81-ae26-658ab65ddf8e</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="do">## INFO  [10:58:36.483] [bbotk]  FALSE  FALSE           TRUE    FALSE   0.7170044        0      0             0.01 3cd23aa0-be25-49aa-91ba-47cd5f9b1275</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="do">## INFO  [10:58:36.483] [bbotk]  FALSE  FALSE          FALSE     TRUE   0.6909784        0      0             0.00 e9ec6f33-16c4-48c8-a4be-2bb5058bb738</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="do">## INFO  [10:58:36.486] [bbotk] Evaluating 3 configuration(s)</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="do">## INFO  [10:58:36.812] [bbotk] Result of batch 2:</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="do">## INFO  [10:58:36.813] [bbotk]    age amount credit_history duration classif.acc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="do">## INFO  [10:58:36.813] [bbotk]   TRUE  FALSE           TRUE    FALSE   0.7170044        0      0             0.01 b95dbe75-15d1-467d-8b9d-5c89521b5a30</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="do">## INFO  [10:58:36.813] [bbotk]  FALSE   TRUE           TRUE    FALSE   0.6769554        0      0             0.04 9031ee42-b994-4a87-acd9-75130e20e2ab</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="do">## INFO  [10:58:36.813] [bbotk]  FALSE  FALSE           TRUE     TRUE   0.7019894        0      0             0.04 bb835da7-1677-4c81-b8d7-f58f468bdad2</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="do">## INFO  [10:58:36.815] [bbotk] Evaluating 2 configuration(s)</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="do">## INFO  [10:58:37.018] [bbotk] Result of batch 3:</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="do">## INFO  [10:58:37.020] [bbotk]   age amount credit_history duration classif.acc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="do">## INFO  [10:58:37.020] [bbotk]  TRUE   TRUE           TRUE    FALSE   0.6809834        0      0             0.04 5b1e5890-51fe-46f2-b4de-43f28656e86d</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="do">## INFO  [10:58:37.020] [bbotk]  TRUE  FALSE           TRUE     TRUE   0.7069704        0      0             0.02 b2aaffbe-b01d-46d1-bbfa-75f3746b881d</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="do">## INFO  [10:58:37.022] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="do">## INFO  [10:58:37.151] [bbotk] Result of batch 4:</span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="do">## INFO  [10:58:37.152] [bbotk]   age amount credit_history duration classif.acc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="do">## INFO  [10:58:37.152] [bbotk]  TRUE   TRUE           TRUE     TRUE   0.6799974        0      0             0.04 9fed9c47-d96c-4ee5-8785-bf334e37bbad</span></span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="do">## INFO  [10:58:37.156] [bbotk] Finished optimizing after 10 evaluation(s)</span></span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="do">## INFO  [10:58:37.156] [bbotk] Result:</span></span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="do">## INFO  [10:58:37.157] [bbotk]    age amount credit_history duration       features classif.acc</span></span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="do">## INFO  [10:58:37.157] [bbotk]  FALSE  FALSE           TRUE    FALSE credit_history   0.7170044</span></span>
 <span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a><span class="do">##      age amount credit_history duration       features classif.acc</span></span>
 <span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a><span class="do">## 1: FALSE  FALSE           TRUE    FALSE credit_history   0.7170044</span></span></code></pre></div>
 <p>The two calls (<code>fsi()</code>and <code>fs()</code>) can also be
@@ -477,6 +484,86 @@ to choose according to their preferences. Here, we see different
 tradeoffs of sensitivity and specificity but no feature subset is
 dominated by another, i.e. has worse sensitivity and specificity than
 any other subset.</p>
+</div>
+</div>
+<div id="nested-resampling" class="section level1">
+<h1>3 Nested Resampling</h1>
+<p>Nested resampling enables finding unbiased performance estimators for
+the selection of features. In <code>mlr3</code> this is possible with
+the class <code>AutoFSelector</code>, whose instance can be created by
+the function <code>auto_fselector()</code>.</p>
+<div id="create-an-autofselector-instance" class="section level2">
+<h2>3.1 Create an <code>AutoFSelector</code> Instance</h2>
+<p>Implement an <code>AutoFSelector</code> object that uses random
+search to find a feature selection that gives the highest accuracy for a
+logistic regression with holdout resampling. It should terminate after
+10 evaluations.</p>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a>afs <span class="ot">=</span> <span class="fu">auto_fselector</span>(</span>
+<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>  <span class="at">fselector =</span> ...,</span>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>  <span class="at">learner =</span> ...,</span>
+<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a>  <span class="at">resampling =</span> ...,</span>
+<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a>  <span class="at">measure =</span> ...,</span>
+<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a>  <span class="at">terminator =</span> ...</span>
+<span id="cb25-7"><a href="#cb25-7" tabindex="-1"></a>)</span></code></pre></div>
+</details>
+<div id="solution-5" class="section level3">
+<h3>Solution:</h3>
+<details>
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>afs <span class="ot">=</span> <span class="fu">auto_fselector</span>(</span>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a>  <span class="at">fselector =</span> <span class="fu">fs</span>(<span class="st">&quot;random_search&quot;</span>),</span>
+<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a>  <span class="at">learner =</span> <span class="fu">lrn</span>(<span class="st">&quot;classif.log_reg&quot;</span>),</span>
+<span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a>  <span class="at">resampling =</span> <span class="fu">rsmp</span>(<span class="st">&quot;holdout&quot;</span>),</span>
+<span id="cb26-5"><a href="#cb26-5" tabindex="-1"></a>  <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">&quot;classif.acc&quot;</span>),</span>
+<span id="cb26-6"><a href="#cb26-6" tabindex="-1"></a>  <span class="at">terminator =</span> <span class="fu">trm</span>(<span class="st">&quot;evals&quot;</span>, <span class="at">n_evals =</span> <span class="dv">10</span>)</span>
+<span id="cb26-7"><a href="#cb26-7" tabindex="-1"></a>)</span>
+<span id="cb26-8"><a href="#cb26-8" tabindex="-1"></a>afs</span>
+<span id="cb26-9"><a href="#cb26-9" tabindex="-1"></a><span class="do">## &lt;AutoFSelector:classif.log_reg.fselector&gt;</span></span>
+<span id="cb26-10"><a href="#cb26-10" tabindex="-1"></a><span class="do">## * Model: list</span></span>
+<span id="cb26-11"><a href="#cb26-11" tabindex="-1"></a><span class="do">## * Packages: mlr3, mlr3fselect, mlr3learners, stats</span></span>
+<span id="cb26-12"><a href="#cb26-12" tabindex="-1"></a><span class="do">## * Predict Type: response</span></span>
+<span id="cb26-13"><a href="#cb26-13" tabindex="-1"></a><span class="do">## * Feature Types: logical, integer, numeric, character, factor, ordered</span></span>
+<span id="cb26-14"><a href="#cb26-14" tabindex="-1"></a><span class="do">## * Properties: loglik, twoclass</span></span></code></pre></div>
+</div>
+</div>
+<div id="benchmark" class="section level2">
+<h2>3.2 Benchmark</h2>
+<p>Compare the <code>AutoFSelector</code> with a normal logistic
+regression using 3 fold cross-validation.</p>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<p>The <code>AutoFSelector</code> inherits from the <code>Learner</code>
+base class, which is why it can be used like any other learner.</p>
+</details>
+<details>
+<summary>
+<strong>Hint 2:</strong>
+</summary>
+<p>Implement a benchmark grid and aggregate the result.</p>
+</details>
+<div id="solution-6" class="section level3">
+<h3>Solution:</h3>
+<details>
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>grid <span class="ot">=</span> <span class="fu">benchmark_grid</span>(<span class="fu">tsk</span>(<span class="st">&quot;sonar&quot;</span>), <span class="fu">list</span>(afs, <span class="fu">lrn</span>(<span class="st">&quot;classif.log_reg&quot;</span>)),</span>
+<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a>  <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> <span class="dv">3</span>))</span>
+<span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" tabindex="-1"></a>bmr <span class="ot">=</span> <span class="fu">benchmark</span>(grid)<span class="sc">$</span><span class="fu">aggregate</span>(<span class="fu">msr</span>(<span class="st">&quot;classif.acc&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="fu">as.data.table</span>(bmr)[, .(learner_id, classif.acc)]</span>
+<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a><span class="do">##                   learner_id classif.acc</span></span>
+<span id="cb28-3"><a href="#cb28-3" tabindex="-1"></a><span class="do">## 1: classif.log_reg.fselector   0.7115942</span></span>
+<span id="cb28-4"><a href="#cb28-4" tabindex="-1"></a><span class="do">## 2:           classif.log_reg   0.6877157</span></span></code></pre></div>
+</div>
 </div>
 </div>
 <div id="summary" class="section level1">

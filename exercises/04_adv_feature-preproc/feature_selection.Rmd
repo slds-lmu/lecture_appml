@@ -315,6 +315,93 @@ Note that the measures can not be optimal at the same time so one has to choose 
 cat("-->")
 ```
 
+# 3 Nested Resampling
+
+Nested resampling enables finding unbiased performance estimators for the selection of features. In `mlr3` this is possible with the class `AutoFSelector`, whose instance can be created by the function `auto_fselector()`.
+
+## 3.1 Create an `AutoFSelector` Instance
+
+Implement an `AutoFSelector` object that uses random search to find a feature selection that gives the highest accuracy for a logistic regression with holdout resampling. It should terminate after 10 evaluations.
+
+<details>
+<summary>**Hint 1:**</summary>
+
+```{r, eval = FALSE}
+afs = auto_fselector(
+  fselector = ...,
+  learner = ...,
+  resampling = ...,
+  measure = ...,
+  terminator = ...
+)
+```
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+```{r, eval = show.solution}
+afs = auto_fselector(
+  fselector = fs("random_search"),
+  learner = lrn("classif.log_reg"),
+  resampling = rsmp("holdout"),
+  measure = msr("classif.acc"),
+  terminator = trm("evals", n_evals = 10)
+)
+afs
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## 3.2 Benchmark
+
+Compare the `AutoFSelector` with a normal logistic regression using 3 fold cross-validation.
+
+<details>
+<summary>**Hint 1:**</summary>
+
+The `AutoFSelector` inherits from the `Learner` base class, which is why it can be used like any other learner.
+
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+
+Implement a benchmark grid and aggregate the result.
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+```{r, eval = show.solution, results='hide'}
+grid = benchmark_grid(tsk("sonar"), list(afs, lrn("classif.log_reg")),
+  rsmp("cv", folds = 3))
+
+bmr = benchmark(grid)$aggregate(msr("classif.acc"))
+```
+
+```{r, eval = show.solution}
+as.data.table(bmr)[, .(learner_id, classif.acc)]
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
 # Summary
 
 - Stratified resampling helps with balancing classes and features within CV folds, to ensure each fold represents the data well enough.
