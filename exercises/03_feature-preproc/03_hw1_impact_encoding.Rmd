@@ -52,6 +52,16 @@ XGBoost ([Chen and Guestrin, 2016](https://dl.acm.org/doi/10.1145/2939672.293978
 
 ```{r}
 task = as_task_regr(kc_housing, target = "price")
+split = partition(task, ratio = 0.6)
+
+tasktrain = task$clone()
+tasktrain$filter(split$train)
+tasktrain
+
+tasktest = task$clone()
+tasktest$filter(split$test)
+tasktest
+
 ft = task$feature_types
 ft[ft[[2]] == "factor"]
 ```
@@ -124,7 +134,7 @@ cat("<!--")
 
 ```{r, eval = show.solution}
 #Autotuner pipeline component:
-tuner = tnr("random_search", batch_size = 3)
+tuner = tnr("random_search")
 
 # Create xgboost learner 
 xgb = lrn("regr.xgboost")
@@ -133,6 +143,9 @@ as.data.table(xgb$param_set$values)
 # Set search space from mlr3tuningspaces
 xgb_ts = lts(xgb)
 as.data.table(xgb_ts$param_set$values)
+# set nrounds to fixed values for speed reasons
+xgb_ts$param_set$values$nrounds = 100
+xgb_ts$param_set$values$nthread = parallel::detectCores()
 
 # Combine xgb_ts with impact encoding
 xgb_ts_impact = as_learner(po("encodeimpact") %>>% xgb_ts)
@@ -185,7 +198,7 @@ cat("<!--")
 # Pipeline for One-Hot Encoding only:
 auto_xgb_oh = auto_tuner(
   tuner = tuner,
-  learner = as_learner(po("encode") %>>% lts(lrn("regr.xgboost"))),
+  learner = as_learner(po("encode") %>>% xgb_ts),
   resampling = rsmp("cv", folds = 2),
   measure = msr("regr.mse"),
   term_evals = 20
@@ -193,14 +206,20 @@ auto_xgb_oh = auto_tuner(
 
 # Resampling design for benchmark:
 rsmp_cv2 = rsmp("cv", folds = 2)
-rsmp_cv2$instantiate(task)
+rsmp_cv2$instantiate(tasktrain)
 
 # Conduct benchmark:
-future::plan("multisession")
-bmr = benchmark(benchmark_grid(task, c(auto_xgb_oh, auto_xgb_impact), rsmp_cv2))
+bmr = benchmark(benchmark_grid(tasktrain, c(auto_xgb_oh, auto_xgb_impact), rsmp_cv2))
 
 # Aggregate results:
 bmr$aggregate(measure = msr("regr.mse"))[, .(learner_id, regr.mse)]
+
+
+auto_xgb_oh$train(tasktrain)
+auto_xgb_impact$train(tasktrain)
+
+auto_xgb_oh$predict(tasktest)$score()
+auto_xgb_impact$predict(tasktest)$score()
 ```
 
 
