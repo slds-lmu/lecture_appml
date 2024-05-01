@@ -46,9 +46,9 @@ kc_housing[,c(8, 14)] = lapply(c(8, 14), function(x) {as.factor(kc_housing[,x])}
 str(kc_housing)
 ```
 
-# XGBoost
+# Train-test Split
 
-XGBoost ([Chen and Guestrin, 2016](https://dl.acm.org/doi/10.1145/2939672.2939785) is a highly performant library for gradient-boosted trees. As some other ML learners, it cannot handle categorical data, so categorical features must be encoded as numerical variables. In the King county data, there are two categorial features encoded as `factor`:
+Before we train a model, let's reserve some data for evaluating our model later on:
 
 ```{r}
 task = as_task_regr(kc_housing, target = "price")
@@ -61,7 +61,13 @@ tasktrain
 tasktest = task$clone()
 tasktest$filter(split$test)
 tasktest
+```
 
+# XGBoost
+
+XGBoost ([Chen and Guestrin, 2016](https://dl.acm.org/doi/10.1145/2939672.2939785) is a highly performant library for gradient-boosted trees. As some other ML learners, it cannot handle categorical data, so categorical features must be encoded as numerical variables. In the King county data, there are two categorial features encoded as `factor`:
+
+```{r}
 ft = task$feature_types
 ft[ft[[2]] == "factor"]
 ```
@@ -90,13 +96,13 @@ Impact encoding preserves the information of the categorical feature while also 
 
 ## Exercise 1: Create a pipeline
 
-Create a pipeline that first pre-processes each factor variable with either impact or treatment encoding, depending on the feature cardinality. Then, the pipeline runs an `autotuner` that automatically conducts hyperparameter optimization (HPO) with an XGBoost learner using random search and MSE as performance measure. You can use CV with a suitable number of folds for the resampling stragegy. For the search space, you can use `lts("regr.xgboost.default")` from the `mlr3tuningspaces` package. This constructs a search space customized for Xgboost based on theoretically and empirically validated considerations on which variables to tune or not.
+Create a pipeline that pre-processes each factor variable with impact encoding. The pipeline should run an `autotuner` that automatically conducts hyperparameter optimization (HPO) with an XGBoost learner that learns on the pre-processed features using random search and MSE as performance measure. You can use CV with a suitable number of folds for the resampling stragegy. For the search space, you can use `lts("regr.xgboost.default")` from the `mlr3tuningspaces` package. This constructs a search space customized for Xgboost based on theoretically and empirically validated considerations on which variables to tune or not. However, you should set the parameter `nrounds = 100` for speed reasons. Further, set `nthread = parallel::detectCores()` to prepare multi-core computing later on.
 
 
 <details>
   <summary>**Hint 1:**</summary>
   
-The pipeline must have three elements: one for conditional treatment encoding, one for conditional impact encoding, and one for the autotuner. Within the `po()` function, you will have to set `affect_columns = selector_cardinality_greater_than(...)` to determine the cardinality threshold of a feature to be encoded with the respective encoding method. Further, you can set `id = "high_card_enc"` or `id = "low_card_enc"` as additional argument within `po()` as an identifier for each encoding method.
+The pipeline must be embedded in the `autotuner`: the learner supplied to the `autotuner` must include the feature preprocessing and the XGboost learner.
 
 </details>
 
@@ -104,8 +110,21 @@ The pipeline must have three elements: one for conditional treatment encoding, o
   <summary>**Hint 2:**</summary>
   
 ```{r, eval = FALSE}
-# Pre-processing pipeline components:
-factor_pipeline = po(...) %>>% po(...)
+# Create xgboost learner:
+xgb = lrn(...)
+
+# Set search space from mlr3tuningspaces:
+xgb_ts = ...
+
+# Set nrounds and nthread:
+xgb_ts$... = ....
+xgb_ts$... = ....
+
+# Combine xgb_ts with impact encoding:
+xgb_ts_impact = as_learner(...)
+
+# Use random search:
+tuner = tnr(...)
 
 #Autotuner pipeline component:
 at = auto_tuner(
@@ -133,9 +152,6 @@ cat("<!--")
 <summary>Click me:</summary>
 
 ```{r, eval = show.solution}
-#Autotuner pipeline component:
-tuner = tnr("random_search")
-
 # Create xgboost learner 
 xgb = lrn("regr.xgboost")
 as.data.table(xgb$param_set$values)
@@ -143,13 +159,17 @@ as.data.table(xgb$param_set$values)
 # Set search space from mlr3tuningspaces
 xgb_ts = lts(xgb)
 as.data.table(xgb_ts$param_set$values)
-# set nrounds to fixed values for speed reasons
+
+# Set nrounds and nthread:
 xgb_ts$param_set$values$nrounds = 100
 xgb_ts$param_set$values$nthread = parallel::detectCores()
 
 # Combine xgb_ts with impact encoding
 xgb_ts_impact = as_learner(po("encodeimpact") %>>% xgb_ts)
 as.data.table(xgb_ts_impact$param_set$values)
+
+# Use random search:
+tuner = tnr("random_search")
 
 # Create auto-tuned xgboost
 auto_xgb_impact = auto_tuner(
@@ -168,7 +188,7 @@ cat("-->")
 
 ## Exercise 2: Benchmark a pipeline
 
-Benchmark your factor encoding pipeline from the previous task against a simple one-hot encoding pipeline that uses one-hot encoding for all factor variables. Use the same `autotuner` as element for both pipelines. Use two-fold CV as resampling strategy for the benchmark. Afterwards, evaluate the benchmark with MSE.
+Benchmark your impact encoding pipeline from the previous task against a simple one-hot encoding pipeline that uses one-hot encoding for all factor variables. Use the same `autotuner` setup as element for both. Use two-fold CV as resampling strategy for the benchmark. Afterwards, evaluate the benchmark with MSE. Finally, assess the performance via the "untouched test set principle" by training both autotuners on `tasktrain` and evaluate their performance on `tasktest`.
 
 
 <details>
@@ -209,6 +229,7 @@ rsmp_cv2 = rsmp("cv", folds = 2)
 rsmp_cv2$instantiate(tasktrain)
 
 # Conduct benchmark:
+lgr::get_logger("mlr3")$set_threshold("warn")
 bmr = benchmark(benchmark_grid(tasktrain, c(auto_xgb_oh, auto_xgb_impact), rsmp_cv2))
 
 # Aggregate results:
