@@ -214,7 +214,7 @@ cat("<!--")
 <details>
 <summary>Click me:</summary>
 
-```{r, eval = show.solution}
+```{r, eval = show.solution, results = 'hide'}
 # Pipeline for One-Hot Encoding only:
 auto_xgb_oh = auto_tuner(
   tuner = tuner,
@@ -231,14 +231,19 @@ rsmp_cv2$instantiate(tasktrain)
 # Conduct benchmark:
 lgr::get_logger("mlr3")$set_threshold("warn")
 bmr = benchmark(benchmark_grid(tasktrain, c(auto_xgb_oh, auto_xgb_impact), rsmp_cv2))
+```
 
+```{r, eval = show.solution}
 # Aggregate results:
 bmr$aggregate(measure = msr("regr.mse"))[, .(learner_id, regr.mse)]
+```
 
-
+```{r, eval = show.solution, results = 'hide'}
 auto_xgb_oh$train(tasktrain)
 auto_xgb_impact$train(tasktrain)
+```
 
+```{r, eval = show.solution}
 auto_xgb_oh$predict(tasktest)$score()
 auto_xgb_impact$predict(tasktest)$score()
 ```
