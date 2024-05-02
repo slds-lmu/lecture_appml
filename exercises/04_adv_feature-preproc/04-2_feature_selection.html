@@ -288,33 +288,33 @@ the <code>FSelectInstanceSingleCrit</code> object to the
 </summary>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>fselector <span class="ot">=</span> <span class="fu">fs</span>(<span class="st">&quot;sequential&quot;</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>fselector<span class="sc">$</span><span class="fu">optimize</span>(instance)</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="do">## INFO  [14:25:05.305] [bbotk] Starting to optimize 4 parameter(s) with &#39;&lt;FSelectorSequential&gt;&#39; and &#39;&lt;TerminatorEvals&gt; [n_evals=20, k=0]&#39;</span></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="do">## INFO  [14:25:05.386] [bbotk] Evaluating 4 configuration(s)</span></span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="do">## INFO  [14:25:07.887] [bbotk] Result of batch 1:</span></span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="do">## INFO  [14:25:07.890] [bbotk]    age amount credit_history duration classif.acc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="do">## INFO  [14:25:07.890] [bbotk]   TRUE  FALSE          FALSE    FALSE   0.6550203        0      0             0.29 67e083c1-726e-4d35-82e8-301ecfef421e</span></span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="do">## INFO  [14:25:07.890] [bbotk]  FALSE   TRUE          FALSE    FALSE   0.6040232        0      0             0.69 6d7d0ecd-453a-4197-a093-10de6a56249d</span></span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="do">## INFO  [14:25:07.890] [bbotk]  FALSE  FALSE           TRUE    FALSE   0.7170314        0      0             0.15 cdce4f98-2f8a-40fe-a371-c83692711f0f</span></span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="do">## INFO  [14:25:07.890] [bbotk]  FALSE  FALSE          FALSE     TRUE   0.7020224        0      0             0.27 0a0980cb-dea0-4561-b49c-4a883ebe4db6</span></span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="do">## INFO  [14:25:07.892] [bbotk] Evaluating 3 configuration(s)</span></span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="do">## INFO  [14:25:08.969] [bbotk] Result of batch 2:</span></span>
-<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="do">## INFO  [14:25:08.971] [bbotk]    age amount credit_history duration classif.acc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="do">## INFO  [14:25:08.971] [bbotk]   TRUE  FALSE           TRUE    FALSE   0.7120324        0      0             0.22 75a00879-c27f-4c94-bbe7-8b429d348611</span></span>
-<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="do">## INFO  [14:25:08.971] [bbotk]  FALSE   TRUE           TRUE    FALSE   0.7190304        0      0             0.31 b9427e5d-cf17-4541-9616-3bddc8f19c8f</span></span>
-<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="do">## INFO  [14:25:08.971] [bbotk]  FALSE  FALSE           TRUE     TRUE   0.7170314        0      0             0.21 2b428942-d951-4b6d-bc72-d7d2633fa629</span></span>
-<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="do">## INFO  [14:25:08.973] [bbotk] Evaluating 2 configuration(s)</span></span>
-<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="do">## INFO  [14:25:09.888] [bbotk] Result of batch 3:</span></span>
-<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="do">## INFO  [14:25:09.890] [bbotk]    age amount credit_history duration classif.acc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="do">## INFO  [14:25:09.890] [bbotk]   TRUE   TRUE           TRUE    FALSE   0.7040154        0      0             0.40 933f73e1-f3eb-423c-9527-ae1dcf04af08</span></span>
-<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="do">## INFO  [14:25:09.890] [bbotk]  FALSE   TRUE           TRUE     TRUE   0.7180324        0      0             0.36 29e9f724-be37-4394-8959-2cb17d788380</span></span>
-<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="do">## INFO  [14:25:09.892] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="do">## INFO  [14:25:10.637] [bbotk] Result of batch 4:</span></span>
-<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="do">## INFO  [14:25:10.639] [bbotk]   age amount credit_history duration classif.acc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="do">## INFO  [14:25:10.639] [bbotk]  TRUE   TRUE           TRUE     TRUE   0.7000264        0      0             0.67 7f037447-88fd-4a70-be9a-d89dede1dae5</span></span>
-<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="do">## INFO  [14:25:10.643] [bbotk] Finished optimizing after 10 evaluation(s)</span></span>
-<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="do">## INFO  [14:25:10.644] [bbotk] Result:</span></span>
-<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="do">## INFO  [14:25:10.645] [bbotk]    age amount credit_history duration              features classif.acc</span></span>
-<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="do">## INFO  [14:25:10.645] [bbotk]  FALSE   TRUE           TRUE    FALSE amount,credit_history   0.7190304</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="do">## INFO  [16:26:52.521] [bbotk] Starting to optimize 4 parameter(s) with &#39;&lt;FSelectorSequential&gt;&#39; and &#39;&lt;TerminatorEvals&gt; [n_evals=20, k=0]&#39;</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="do">## INFO  [16:26:52.597] [bbotk] Evaluating 4 configuration(s)</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="do">## INFO  [16:26:55.245] [bbotk] Result of batch 1:</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="do">## INFO  [16:26:55.248] [bbotk]    age amount credit_history duration classif.acc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="do">## INFO  [16:26:55.248] [bbotk]   TRUE  FALSE          FALSE    FALSE   0.6550203        0      0             0.38 bf8ab14d-0565-43b6-9fee-511cc8219e70</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="do">## INFO  [16:26:55.248] [bbotk]  FALSE   TRUE          FALSE    FALSE   0.6040232        0      0             0.74 86952a5f-33d6-482c-84de-b81908dd5566</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="do">## INFO  [16:26:55.248] [bbotk]  FALSE  FALSE           TRUE    FALSE   0.7170314        0      0             0.16 5407afe3-8b90-462d-ba54-a9d15befc369</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="do">## INFO  [16:26:55.248] [bbotk]  FALSE  FALSE          FALSE     TRUE   0.7020224        0      0             0.24 1abaf7ea-351c-466d-8684-0dfed9efff72</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="do">## INFO  [16:26:55.250] [bbotk] Evaluating 3 configuration(s)</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="do">## INFO  [16:26:56.564] [bbotk] Result of batch 2:</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="do">## INFO  [16:26:56.566] [bbotk]    age amount credit_history duration classif.acc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="do">## INFO  [16:26:56.566] [bbotk]   TRUE  FALSE           TRUE    FALSE   0.7120324        0      0             0.31 c6cec793-d9da-4248-957d-33fe52f415e7</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="do">## INFO  [16:26:56.566] [bbotk]  FALSE   TRUE           TRUE    FALSE   0.7190304        0      0             0.32 8b31427e-53e2-4ecd-a265-8e4839d4d10f</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="do">## INFO  [16:26:56.566] [bbotk]  FALSE  FALSE           TRUE     TRUE   0.7170314        0      0             0.31 878bb0b9-dc7d-41b9-883f-5ef7bc9a47d1</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="do">## INFO  [16:26:56.569] [bbotk] Evaluating 2 configuration(s)</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="do">## INFO  [16:26:57.773] [bbotk] Result of batch 3:</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="do">## INFO  [16:26:57.775] [bbotk]    age amount credit_history duration classif.acc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="do">## INFO  [16:26:57.775] [bbotk]   TRUE   TRUE           TRUE    FALSE   0.7040154        0      0             0.51 811ddfa1-244e-49fb-a8ab-dc9d18b567cc</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="do">## INFO  [16:26:57.775] [bbotk]  FALSE   TRUE           TRUE     TRUE   0.7180324        0      0             0.48 b4e5b186-de1b-4d55-a3aa-df19abf89f85</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="do">## INFO  [16:26:57.778] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="do">## INFO  [16:26:58.541] [bbotk] Result of batch 4:</span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="do">## INFO  [16:26:58.543] [bbotk]   age amount credit_history duration classif.acc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="do">## INFO  [16:26:58.543] [bbotk]  TRUE   TRUE           TRUE     TRUE   0.7000264        0      0             0.67 0da903cd-ac47-4edf-bf6b-5b5374fa7db8</span></span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="do">## INFO  [16:26:58.547] [bbotk] Finished optimizing after 10 evaluation(s)</span></span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="do">## INFO  [16:26:58.548] [bbotk] Result:</span></span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="do">## INFO  [16:26:58.549] [bbotk]    age amount credit_history duration              features classif.acc</span></span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="do">## INFO  [16:26:58.549] [bbotk]  FALSE   TRUE           TRUE    FALSE amount,credit_history   0.7190304</span></span>
 <span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a><span class="do">##      age amount credit_history duration              features classif.acc</span></span>
 <span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a><span class="do">## 1: FALSE   TRUE           TRUE    FALSE amount,credit_history   0.7190304</span></span></code></pre></div>
 <p>The two calls (<code>fsi()</code>and <code>fs()</code>) can also be
