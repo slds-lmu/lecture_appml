@@ -395,17 +395,7 @@ we could train our final model.
 To avoid overfitting we conduct early stopping - 
 meaning that the algorithm stops as soon as a the performance 
 does not improve for a given number of rounds to avoid overfitting.
-The performance for stopping should be assessed via a validation data set.
-
-```{r}
-library("xgboost")
-set.seed(2001L)
-
-ylab = task$data()$credit_risk
-
-split = partition(task, ratio = 0.9)
-task$set_row_roles(split$test, "test")
-```
+The performance for stopping should be assessed via a validation dataset.
 
 Set up an XGBoost learner with the following hyperparameters:
 
@@ -416,10 +406,15 @@ tuning task.
 - A `watchlist` consisting of a list with elements `train` and `eval` with the following input:
 
 ```{r}
-train = xgb.DMatrix(as.matrix(task$data(cols = task$feature_names)[split$train, ]),
-                    label = ylab[split$train])
-eval = xgb.DMatrix(as.matrix(task$data(cols = task$feature_names)[split$test, ]),
-                   label = ylab[split$test])
+library("xgboost")
+set.seed(2001L)
+evalid = sample(1:task$nrow, 100L)
+trainid = setdiff(1:task$nrow, evalid)
+
+ylab = task$data()$credit_risk
+
+train = xgb.DMatrix(as.matrix(task$data(cols = task$feature_names)[trainid, ]), label = ylab[trainid])
+eval = xgb.DMatrix(as.matrix(task$data(cols = task$feature_names)[evalid, ]), label = ylab[evalid])
 ```
 
 <details>
@@ -437,8 +432,7 @@ The number of rounds could be specified with `early_stopping_rounds`.
 lrn("...", nrounds = ..., 
   max_depth = instance_random$result$..., 
   eta = instance_random$result$..., 
-  early_stopping_rounds = ..., 
-  watchlist = list(
+  early_stopping_rounds = ..., watchlist = list(
     train = train, 
     eval = eval
   )
@@ -456,12 +450,10 @@ cat("<!--")
 <summary>Click me:</summary>
 
 ```{r}
-xgboost_lrn2 = lrn("classif.xgboost", 
-  nrounds = 100L, 
+xgboost_lrn2 = lrn("classif.xgboost", nrounds = 100L, 
   max_depth = instance_random$result$max_depth, 
   eta = instance_random$result$eta, 
-  early_stopping_rounds = 5L, 
-  watchlist = list(
+  early_stopping_rounds = 5L, watchlist = list(
     train = train, 
     eval = eval
   )
@@ -475,7 +467,7 @@ cat("-->")
 
 ## Training on Credit Data
 
-Train the XGBoost learner from the previous exercise on the credit data set 
+Train the XGBoost learner from the previous exercise on the credit dataset. 
 How many iterations were conducted before the boosting algorithm stopped?
 
 <details>
@@ -510,7 +502,8 @@ xgboost_lrn2$model$niter
 ```
 
 On average, the classification error over the 3 cross-validation folds 
-is `r rr$aggregate()`. Therefore, it is slightly lower than the one of the default hyperparameter learner.
+is `r rr$aggregate()`. Therefore, it is sighlty lower than the one of the default hyperparameter 
+learner.
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("-->")
@@ -620,7 +613,7 @@ cat("-->")
 
 # Summary
 In this exercise sheet, we learned how to apply a XGBoost learner to the credit 
-data set By using resampling, we estimated the performance. 
+dataset. By using resampling, we estimated the performance. 
 XGBoost has a lot of hyperparameters and we only had a closer look on two of them. 
 We also saw how early stopping could be facilitated which should help to 
 avoid overfitting of the XGBoost model.
