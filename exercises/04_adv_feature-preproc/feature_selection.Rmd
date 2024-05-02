@@ -16,7 +16,7 @@ sys.source("setup.R", envir = knitr::knit_global())
 
 # Goal
 
-After this exercise, you should be able to perform feature selection using wrapper functions with `mlr3fselect`. 
+After this exercise, you should understand and be able to perform feature selection using wrapper functions with `mlr3fselect`. You should also be able to integrate various performance measures and calculate the generalization error.
 
 # Wrapper Methods
 
@@ -33,17 +33,16 @@ We load the most important packages and use a fixed seed for reproducibility.
 
 ```{r}
 library(mlr3verse)
-# library(mlbench)
 library(data.table)
 library(mlr3fselect)
-set.seed(7832)
+set.seed(7891)
 ```
 
-In this exercise, we will use the `german_credit` data and the learner `classif.rpart`:
+In this exercise, we will use the `german_credit` data and the learner `classif.ranger`:
 
 ```{r}
 task_gc = tsk("german_credit")
-lrn_rpart = lrn("classif.rpart")
+lrn_ranger = lrn("classif.ranger")
 ```
 
 # 1 Basic Application
@@ -82,7 +81,7 @@ task_gc$select(c("age", "amount", "credit_history", "duration"))
 
 instance = fsi(
   task = task_gc,
-  learner = lrn_rpart,
+  learner = lrn_ranger,
   resampling = rsmp("cv", folds = 3),
   measure = msr("classif.acc"),
   terminator = trm("evals", n_evals = 20)
@@ -135,8 +134,8 @@ The two calls (`fsi()`and `fs()`) can also be executed by one sugar function (`f
 ```{r, eval = FALSE}
 instance = fselect(
   fselector = fs("sequential"),
-  task =  tsk_gc,
-  learner = lrn_rpart,
+  task =  task_gc,
+  learner = lrn_ranger,
   resampling = rsmp("cv", folds = 3),
   measure = msr("classif.acc")
 )
@@ -186,7 +185,7 @@ The highest accuracy results when the model relies on `credit_history`. So for t
 instance$archive$data[batch_nr == 2, 1:5]
 ```
 
-We see that the accuracy did not increase, so the prediction did not improve when using two features compared to `credit_history`. 
+We see that the accuracy increases when using the two features `amount` and `credit_history` compared to using only `credit_history`.
 
 Alternatively with `data.table`:
 
@@ -195,7 +194,7 @@ as.data.table(instance$archive)[batch_nr == 1, 1:5]
 as.data.table(instance$archive)[batch_nr == 2, 1:5]
 ```
 
-A visualization of this can be created by `autoplot`:
+A visualization of all batches can be created via `autoplot`:
 
 ```{r, eval = show.solution}
 autoplot(instance, type = "performance")
@@ -222,7 +221,7 @@ Compare the accuracy values for the different feature combinations and select th
 ```{r, eval = FALSE}
 task_gc = ...
 task_gc$select(...)
-lrn_rpart$train(...)
+lrn_ranger$train(...)
 ```
 
 </details>
@@ -235,13 +234,13 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-The feature(s) resulting in the highest accuracy should be selected. Here, considering more features than `credit_history` does not improve the accuracy, so we only select this single feature:
+The feature(s) resulting in the highest accuracy should be selected, so, here `amount` and `credit_history`:
 
 ```{r, eval = show.solution}
 task_gc = tsk("german_credit")
 task_gc$select(instance$result_feature_set)
-lrn_rpart$train(task_gc)
-lrn_rpart$selected_features()
+task_gc$feature_names
+lrn_ranger$train(task_gc)
 ```
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
@@ -288,7 +287,7 @@ cat("<!--")
 ```{r, eval = show.solution, results='hide'}
 instance = fsi(
   task = task_gc,
-  learner = lrn_rpart,
+  learner = lrn_ranger,
   resampling = rsmp("cv", folds = 3),
   measure = msrs(c("classif.tpr", "classif.tnr")),
   terminator = trm("evals", n_evals = 20)
@@ -404,6 +403,6 @@ cat("-->")
 
 # Summary
 
-- Stratified resampling helps with balancing classes and features within CV folds, to ensure each fold represents the data well enough.
-- Block resampling reduces bias in generalization error estimates by ensuring that observations from the same group end up in the same fold.
-- Custom domain applications require custom performance measures. In `mlr3`, you can define custom measures by creating a new `R6` class.
+- Wrapper methods calculate performance measures for various combinations of features in order to perform feature selection.
+- They are computationally expensive since several models need to be fitted.
+- The `AutoFSelector` inherits from the `Learner` base class, which is why it can be used like any other learner.

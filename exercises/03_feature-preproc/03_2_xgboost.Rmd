@@ -397,29 +397,19 @@ meaning that the algorithm stops as soon as a the performance
 does not improve for a given number of rounds to avoid overfitting.
 The performance for stopping should be assessed via a validation data set.
 
-```{r}
-library("xgboost")
-set.seed(2001L)
-
-ylab = task$data()$credit_risk
-
-split = partition(task, ratio = 0.9)
-task$set_row_roles(split$test, "test")
-```
-
 Set up an XGBoost learner with the following hyperparameters:
 
 - `max_depth` and `eta` set to the best configurations according to the previous 
 tuning task.
 - `nrounds` set to 100L.
 - The number of early stopping rounds set to 5 (this could be tuned, as well, but we simplify things) in order to stop earlier if there was no improvement in the previous 5 iterations.
-- A `watchlist` consisting of a list with elements `train` and `eval` with the following input:
 
 ```{r}
-train = xgb.DMatrix(as.matrix(task$data(cols = task$feature_names)[split$train, ]),
-                    label = ylab[split$train])
-eval = xgb.DMatrix(as.matrix(task$data(cols = task$feature_names)[split$test, ]),
-                   label = ylab[split$test])
+library("xgboost")
+set.seed(2001L)
+
+split = partition(task, ratio = 0.9)
+task$set_row_roles(split$test, "test")
 ```
 
 <details>
@@ -437,11 +427,8 @@ The number of rounds could be specified with `early_stopping_rounds`.
 lrn("...", nrounds = ..., 
   max_depth = instance_random$result$..., 
   eta = instance_random$result$..., 
-  early_stopping_rounds = ..., 
-  watchlist = list(
-    train = train, 
-    eval = eval
-  )
+  early_stopping_rounds = ....
+  early_stopping_set = ...
 ) 
 ```
 
@@ -460,11 +447,8 @@ xgboost_lrn2 = lrn("classif.xgboost",
   nrounds = 100L, 
   max_depth = instance_random$result$max_depth, 
   eta = instance_random$result$eta, 
-  early_stopping_rounds = 5L, 
-  watchlist = list(
-    train = train, 
-    eval = eval
-  )
+  early_stopping_rounds = 5L,
+  early_stopping_set = "test"
 ) 
 ```
 
