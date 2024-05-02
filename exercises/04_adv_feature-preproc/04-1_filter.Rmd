@@ -1,45 +1,26 @@
 ---
-title: "Supervised Learning III"
-subtitle: "Ranking Features by Feature Filters"
+title: "Applied Machine Learning"
+subtitle: "In-class exercise 04-1"
 output:
-  html_document:
+  prettydoc::html_pretty:
+    theme: hpstr
     toc: yes
     toc_depth: 2
-    css: ../../../../_setup/css/style-usecase.css
+    css: ../_template/prettydoc-hpstr.css
     self_contained: yes
 ---
 
-<!-- #FIXME: mlr3 codestyle -->
-
-```{r, echo = FALSE}
-if (!exists("show.solution")) {
-  show.solution = T
-}
+```{r, include=FALSE}
+sys.source("setup.R", envir = knitr::knit_global())
 ```
 
-```{r, include = FALSE}
-# Just some preparation
-knitr::opts_chunk$set(
-  cache = FALSE,
-  warning = FALSE,
-  message = FALSE,
-  echo = TRUE,
-  R.options = list(width = 120)
-)
-lgr::get_logger("mlr3")$set_threshold("warn")
-# SET BBOTK TO 'info' IF YOU PLAY AROUND WITH THIS!
-lgr::get_logger("bbotk")$set_threshold("info")
-```
-
-# Goals
+# Goal
 
 Learn how to rank features of a supervised task by their importance / strength of relationship with the target variable using a feature filter method.
 
 # German Credit Dataset 
 
-We create the task as for the resampling exercise:
-Again, we make us of our work horse:
-The German Credit Data set.
+We create the task as for the resampling exercise: The German Credit Data set.
 
 ```{r}
 library("mlr3verse")
@@ -50,7 +31,7 @@ task = tsk("german_credit")
 # Exercises
 
 Within the `mlr3` ecosystem, feature filters are implemented in the `mlr3filters` package and are typically used in combination with `mlr3pipelines` to be able to include the whole preprocessing step in a pipeline.
-In exercise 1 and 3, we apply feature filtering to preprocess the data of a task without using a pipeline. 
+In exercises 1 to 3, we apply feature filtering to preprocess the data of a task without using a pipeline. 
 In exercise 4, we will set up a pipeline that combines a learner with the feature filtering as preprocessing step.
 
 ## Exercise 1: Find a suitable Feature Filter
