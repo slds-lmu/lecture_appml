@@ -509,9 +509,6 @@ xgboost_lrn2$train(task)
 xgboost_lrn2$model$niter
 ```
 
-On average, the classification error over the 3 cross-validation folds 
-is `r rr$aggregate()`. Therefore, it is slightly lower than the one of the default hyperparameter learner.
-
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("-->")
 ```
