@@ -12,7 +12,8 @@
 *.snm
 *.toc
 *.pdf
-!mlr3-*.pdf
+!**/pdf_chapters/*.pdf
+!mlr3*.pdf
 !**/figure_man/*.pdf
 !**/figure/*.pdf
 !slides-pdf/*.pdf
