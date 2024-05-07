@@ -97,7 +97,7 @@ Hypothesis tests can (a) quantify evidence that a difference in model performanc
 \centering
 \large{Two algorithms on 1 data set}
     \begin{figure}
-        \includegraphics[width = 0.6\textwidth]{slides/04-perf-eval/figure/2algos_1dataset.png}
+        \includegraphics[width = 0.6\textwidth]{figure/2algos_1dataset.png}
     \end{figure}
 \vfill
 \end{frame}
@@ -143,7 +143,7 @@ Hypothesis tests can (a) quantify evidence that a difference in model performanc
 %     \item McNemar's test compares the errors of two models in a 2x2 contingency matrix:
 %     \begin{figure}
 %         \centering
-%         \includegraphics[width = 0.6\textwidth]{slides/04-perf-eval/mcnemar_contingency_table_ex1.png}
+%         \includegraphics[width = 0.6\textwidth]{mcnemar_contingency_table_ex1.png}
 %         \label{fig:enter-label}
 %     \end{figure}
 %     \item Both models seem to perform equally well (model 1 accuracy: 9,960 / 10,000 = 99.6\%; model 2 accuracy: 9,970 / 10,000 = 99.7\%).
@@ -224,7 +224,7 @@ Hypothesis tests can (a) quantify evidence that a difference in model performanc
 % \end{itemize}
 
 % Overview of different hypothesis tests for matched samples:
-% \begin{center}\includegraphics[width=\textwidth]{slides/04-perf-eval/figure/tests_overview.png} \end{center}
+% \begin{center}\includegraphics[width=\textwidth]{figure/tests_overview.png} \end{center}
 
 % \footnotesize
 % {\tiny{Source: \code{\url{https://marthawhite.github.io/mlcourse/lectures/2017/Lec20-MeasuringPerformance.pdf}}, p. 142.}\par}
@@ -323,7 +323,7 @@ Hypothesis tests can (a) quantify evidence that a difference in model performanc
     \item We use the Brier score as loss function:
     {
         \scriptsize
-        \include{slides/04-perf-eval/rsrc/rpart_ranger_kin8nm_task}
+        \include{rsrc/rpart_ranger_kin8nm_task}
     }
     \item The test statistic corresponds to:
     $$
@@ -350,7 +350,7 @@ $$
 \end{itemize}
 
 \begin{minipage}{0.45\textwidth}
-\includegraphics[width=\textwidth]{slides/04-perf-eval/figure/mcnemar_1.png} \end{minipage}
+\includegraphics[width=\textwidth]{figure/mcnemar_1.png} \end{minipage}
 \begin{minipage}{0.54\textwidth}
 \begin{itemize}
 \item A: $\#$ obs. correctly classified by both.
@@ -465,7 +465,7 @@ $$
 \centering
 \large{Two algorithms on multiple data sets}
     \begin{figure}
-        \includegraphics[width = 0.6\textwidth]{slides/04-perf-eval/figure/2algos_multipledatasets.png}
+        \includegraphics[width = 0.6\textwidth]{figure/2algos_multipledatasets.png}
     \end{figure}
 \vfill
 \end{frame}
@@ -497,7 +497,7 @@ $$
         \item A benchmark of rpart and ranger (with default hyperparameters) on 6 classification tasks, using the classification error as performance measure:
     {   
         \scriptsize
-        \include{slides/04-perf-eval/rsrc/friedman_benchmark_results_rpart_ranger}
+        \include{rsrc/friedman_benchmark_results_rpart_ranger}
     }
 % https://edisciplinas.usp.br/pluginfile.php/4129451/mod_resource/content/1/model_selection_evaluation.pdf
 % \textbf{Example:} AUC of two algorithms on multiple data sets
@@ -569,7 +569,7 @@ $$
 \centering
 \large{Multiple algorithms on multiple data sets}
     \begin{figure}
-        \includegraphics[width = 0.6\textwidth]{slides/04-perf-eval/figure/multiplalgos_multipledatasets.png}
+        \includegraphics[width = 0.6\textwidth]{figure/multiplalgos_multipledatasets.png}
     \end{figure}
 \vfill
 \end{frame}
@@ -593,7 +593,7 @@ $$
 
 \begin{figure}
     \centering
-    \includegraphics{slides/04-perf-eval/figure/omnibustesting.png}
+    \includegraphics{figure/omnibustesting.png}
     % \caption{Caption}
     % \label{fig:enter-label}
 \end{figure}
@@ -650,19 +650,19 @@ $$
 
 {
     \tiny
-    \include{slides/04-perf-eval/rsrc/friedman_benchmark_results_short}
+    \include{rsrc/friedman_benchmark_results_short}
 }
     \centering
-    \includegraphics[width = 0.65\textwidth]{slides/04-perf-eval/figure/benchmarkrankplot.png}
+    \includegraphics[width = 0.65\textwidth]{figure/benchmarkrankplot.png}
 
 \end{frame}
 
 % \begin{frame}{Friedman test}
-%     \includegraphics[width = \textwidth]{slides/04-perf-eval/figure/benchmarkcolplot.png}
+%     \includegraphics[width = \textwidth]{figure/benchmarkcolplot.png}
 % \end{frame}
 
 % \begin{frame}{Friedman test}
-%     \includegraphics[width = 0.5\textwidth]{slides/04-perf-eval/figure/benchmarkrankplot.png}
+%     \includegraphics[width = 0.5\textwidth]{figure/benchmarkrankplot.png}
 % \end{frame}
 
 
@@ -673,6 +673,8 @@ $$
 %   \item If there is a $d$-way tie after rank $r$, assign a rank of $ \left[(r+1) + (r+2) + ... + (r+d)\right] /d $ to all tied classifiers.
 %   \item Let $R_{mk}$ denote the rank of algorithm $k$ on data set $m$.
 % \end{itemize}
+
+\begin{frame}{Friedman Test}
 
 After ranking algorithms, we calculate the following quantities (where $M$ denotes the number of data sets and $K$ the number of algorithms):
 
@@ -833,7 +835,7 @@ where $q_{\alpha, \infty, K}$ is the studentized range statistic for significanc
     \item We can see the ordered mean ranks of all algorithms on a single line. If the distance between two algorithms exceeds the CD, the left algorithm significantly outperforms the right one.
     \item \textbf{Continuing example:} The difference in mean ranks between ranger and the SVM does not exceed the CD; the difference between ranger and rpart does. 
 \end{itemize}
-\includegraphics[width = 1.3\textwidth]{slides/04-perf-eval/figure/crit_diff_plot.png}
+\includegraphics[width = 1.3\textwidth]{figure/crit_diff_plot.png}
 \end{frame}
 
 \begin{frame}{Post-hoc Bonferroni-Dunn test}
@@ -867,7 +869,7 @@ where $q_{\alpha, \infty, K}$ is the studentized range statistic for significanc
 
 \begin{frame}{Overview of different hypothesis tests}
 % https://docs.google.com/presentation/d/1iiaVfeVwJJEFTTal_2dYQYOPm_WiykKBNAcryAWuLHk/edit#slide=id.p
-\begin{center}\includegraphics[width = 1\textwidth]{slides/04-perf-eval/figure/tests.pdf} \end{center}
+\begin{center}\includegraphics[width = 1\textwidth]{figure/tests.pdf} \end{center}
 
 % \footnotesize
 % {\tiny{Source: Evaluating Learning Algorithms:
