@@ -228,24 +228,20 @@ space are <code>ps</code> and <code>p_int</code>, <code>p_dbl</code>,
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="at">scale =</span> ...</span>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>)</span></code></pre></div>
 </details>
-<!--
-
-### Solution
-
+<div id="solution" class="section level3">
+<h3>Solution</h3>
 <details>
-<summary>**Click me**</summary>
-
-```r
-library(mlr3tuning)
-
-search_space = ps(
-  k = p_int(1, 100),
-  scale = p_lgl()
-)
-```
+<summary>
+<strong>Click me</strong>
+</summary>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(mlr3tuning)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>search_space <span class="ot">=</span> <span class="fu">ps</span>(</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="at">k =</span> <span class="fu">p_int</span>(<span class="dv">1</span>, <span class="dv">100</span>),</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  <span class="at">scale =</span> <span class="fu">p_lgl</span>()</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>)</span></code></pre></div>
 </details>
-
--->
+</div>
 </div>
 <div id="hyperparameter-optimization" class="section level2">
 <h2>Hyperparameter optimization</h2>
@@ -281,94 +277,169 @@ four.
 <p>The optimization algorithm is obtained from <code>tnr()</code> with
 the corresponding key as argument. Furthermore we allow parallel
 computations using four cores:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(mlr3)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">library</span>(mlr3learners)</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="fu">library</span>(mlr3tuning)</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>future<span class="sc">::</span><span class="fu">plan</span>(<span class="st">&quot;multicore&quot;</span>, <span class="at">workers =</span> 4L)</span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>task <span class="ot">=</span> <span class="fu">tsk</span>(...)</span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>lrn_knn <span class="ot">=</span> <span class="fu">lrn</span>(...)</span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>search_space <span class="ot">=</span> <span class="fu">ps</span>(</span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>  <span class="at">k =</span> <span class="fu">p_int</span>(<span class="dv">1</span>, <span class="dv">100</span>),</span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  <span class="at">scale =</span> <span class="fu">p_lgl</span>()</span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>)</span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>resampling <span class="ot">=</span> <span class="fu">rsmp</span>(...)</span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a></span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>terminator <span class="ot">=</span> <span class="fu">trm</span>(..., <span class="at">... =</span> 40L)</span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a></span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>instance <span class="ot">=</span> <span class="fu">ti</span>(</span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>  <span class="at">task =</span> ...,</span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>  <span class="at">learner =</span> ...,</span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>  <span class="at">resampling =</span> ...,</span>
-<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>  <span class="at">terminator =</span> ...,</span>
-<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a>  <span class="at">search_space =</span> ...</span>
-<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a>)</span>
-<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a></span>
-<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a>optimizer <span class="ot">=</span> <span class="fu">tnr</span>(...)</span>
-<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a>optimizer<span class="sc">$</span><span class="fu">...</span>(...)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">library</span>(mlr3)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">library</span>(mlr3learners)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="fu">library</span>(mlr3tuning)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>future<span class="sc">::</span><span class="fu">plan</span>(<span class="st">&quot;multicore&quot;</span>, <span class="at">workers =</span> 4L)</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>task <span class="ot">=</span> <span class="fu">tsk</span>(...)</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>lrn_knn <span class="ot">=</span> <span class="fu">lrn</span>(...)</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>search_space <span class="ot">=</span> <span class="fu">ps</span>(</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>  <span class="at">k =</span> <span class="fu">p_int</span>(<span class="dv">1</span>, <span class="dv">100</span>),</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>  <span class="at">scale =</span> <span class="fu">p_lgl</span>()</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>)</span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>resampling <span class="ot">=</span> <span class="fu">rsmp</span>(...)</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>terminator <span class="ot">=</span> <span class="fu">trm</span>(..., <span class="at">... =</span> 40L)</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>instance <span class="ot">=</span> <span class="fu">ti</span>(</span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>  <span class="at">task =</span> ...,</span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>  <span class="at">learner =</span> ...,</span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>  <span class="at">resampling =</span> ...,</span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>  <span class="at">terminator =</span> ...,</span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>  <span class="at">search_space =</span> ...</span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>)</span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>optimizer <span class="ot">=</span> <span class="fu">tnr</span>(...)</span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a>optimizer<span class="sc">$</span><span class="fu">...</span>(...)</span></code></pre></div>
 Finally, the optimization is started by passing the tuning instance to
 the <code>$optimize()</code> method of the tuner.
 </details>
-<!--
-
-### Solution
-
+<div id="solution-1" class="section level3">
+<h3>Solution</h3>
 <details>
-<summary>**Click me**</summary>
-
-```r
-library(mlr3)
-library(mlr3learners)
-library(mlr3tuning)
-
-future::plan("multicore", workers = 4L)
-
-task = tsk("german_credit")
-lrn_knn = lrn("classif.kknn")
-
-search_space = ps(
-  k = p_int(1, 100),
-  scale = p_lgl()
-)
-resampling = rsmp("cv", folds = 3L)
-
-terminator = trm("evals", n_evals = 40L)
-
-instance = ti(
-  task = task,
-  learner = lrn_knn,
-  resampling = resampling,
-  terminator = terminator,
-  search_space = search_space
-)
-
-optimizer = tnr("random_search", batch_size = 4L)
-
-optimizer$optimize(instance)
-instance$result_y
-instance$result
-```
+<summary>
+<strong>Click me</strong>
+</summary>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">library</span>(mlr3)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">library</span>(mlr3learners)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="fu">library</span>(mlr3tuning)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>future<span class="sc">::</span><span class="fu">plan</span>(<span class="st">&quot;multicore&quot;</span>, <span class="at">workers =</span> 4L)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>task <span class="ot">=</span> <span class="fu">tsk</span>(<span class="st">&quot;german_credit&quot;</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>lrn_knn <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;classif.kknn&quot;</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>search_space <span class="ot">=</span> <span class="fu">ps</span>(</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>  <span class="at">k =</span> <span class="fu">p_int</span>(<span class="dv">1</span>, <span class="dv">100</span>),</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>  <span class="at">scale =</span> <span class="fu">p_lgl</span>()</span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>)</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>resampling <span class="ot">=</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> 3L)</span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>terminator <span class="ot">=</span> <span class="fu">trm</span>(<span class="st">&quot;evals&quot;</span>, <span class="at">n_evals =</span> 40L)</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>instance <span class="ot">=</span> <span class="fu">ti</span>(</span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>  <span class="at">task =</span> task,</span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>  <span class="at">learner =</span> lrn_knn,</span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>  <span class="at">resampling =</span> resampling,</span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>  <span class="at">terminator =</span> terminator,</span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>  <span class="at">search_space =</span> search_space</span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>)</span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a></span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a>optimizer <span class="ot">=</span> <span class="fu">tnr</span>(<span class="st">&quot;random_search&quot;</span>, <span class="at">batch_size =</span> 4L)</span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a></span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a>optimizer<span class="sc">$</span><span class="fu">optimize</span>(instance)</span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a><span class="do">## INFO  [16:58:31.517] [bbotk] Starting to optimize 2 parameter(s) with &#39;&lt;OptimizerRandomSearch&gt;&#39; and &#39;&lt;TerminatorEvals&gt; [n_evals=40, k=0]&#39;</span></span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a><span class="do">## INFO  [16:58:31.604] [bbotk] Evaluating 4 configuration(s)</span></span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a><span class="do">## INFO  [16:58:33.266] [bbotk] Result of batch 1:</span></span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a><span class="do">## INFO  [16:58:33.270] [bbotk]   k scale classif.ce warnings errors runtime_learners                                uhash</span></span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a><span class="do">## INFO  [16:58:33.270] [bbotk]  15  TRUE  0.2690145        0      0             0.15 f1ece315-0167-4542-9b8c-3dc2f0179d19</span></span>
+<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a><span class="do">## INFO  [16:58:33.270] [bbotk]  18 FALSE  0.3279927        0      0             0.11 238c046d-ee82-420c-9762-d563e3e93e28</span></span>
+<span id="cb5-35"><a href="#cb5-35" tabindex="-1"></a><span class="do">## INFO  [16:58:33.270] [bbotk]  34 FALSE  0.3220106        0      0             0.15 9f92c607-875a-482b-bd6e-318c00879f74</span></span>
+<span id="cb5-36"><a href="#cb5-36" tabindex="-1"></a><span class="do">## INFO  [16:58:33.270] [bbotk]  19 FALSE  0.3279957        0      0             0.10 fe792c31-65d7-44fe-a2bb-fec8d234738e</span></span>
+<span id="cb5-37"><a href="#cb5-37" tabindex="-1"></a><span class="do">## INFO  [16:58:33.274] [bbotk] Evaluating 4 configuration(s)</span></span>
+<span id="cb5-38"><a href="#cb5-38" tabindex="-1"></a><span class="do">## INFO  [16:58:34.260] [bbotk] Result of batch 2:</span></span>
+<span id="cb5-39"><a href="#cb5-39" tabindex="-1"></a><span class="do">## INFO  [16:58:34.262] [bbotk]   k scale classif.ce warnings errors runtime_learners                                uhash</span></span>
+<span id="cb5-40"><a href="#cb5-40" tabindex="-1"></a><span class="do">## INFO  [16:58:34.262] [bbotk]   2 FALSE  0.3789898        0      0             0.15 7835fd82-26ac-4f76-80c3-d2bbdf535de2</span></span>
+<span id="cb5-41"><a href="#cb5-41" tabindex="-1"></a><span class="do">## INFO  [16:58:34.262] [bbotk]  62  TRUE  0.2810355        0      0             0.15 065145a7-3002-4cb8-bd20-d38a2d1bce1b</span></span>
+<span id="cb5-42"><a href="#cb5-42" tabindex="-1"></a><span class="do">## INFO  [16:58:34.262] [bbotk]  47 FALSE  0.3150156        0      0             0.15 46d62bac-7701-45bf-80d2-8d40abcdbf88</span></span>
+<span id="cb5-43"><a href="#cb5-43" tabindex="-1"></a><span class="do">## INFO  [16:58:34.262] [bbotk]  36  TRUE  0.2680315        0      0             0.19 08cfd10a-3d9a-4b3c-9e1b-8e6f434001a4</span></span>
+<span id="cb5-44"><a href="#cb5-44" tabindex="-1"></a><span class="do">## INFO  [16:58:34.265] [bbotk] Evaluating 4 configuration(s)</span></span>
+<span id="cb5-45"><a href="#cb5-45" tabindex="-1"></a><span class="do">## INFO  [16:58:35.426] [bbotk] Result of batch 3:</span></span>
+<span id="cb5-46"><a href="#cb5-46" tabindex="-1"></a><span class="do">## INFO  [16:58:35.428] [bbotk]    k scale classif.ce warnings errors runtime_learners                                uhash</span></span>
+<span id="cb5-47"><a href="#cb5-47" tabindex="-1"></a><span class="do">## INFO  [16:58:35.428] [bbotk]    7  TRUE  0.2930086        0      0             0.15 6f825c5b-ae34-480d-9802-5824c93c271c</span></span>
+<span id="cb5-48"><a href="#cb5-48" tabindex="-1"></a><span class="do">## INFO  [16:58:35.428] [bbotk]   24  TRUE  0.2710285        0      0             0.16 2eed6e00-5d37-49da-92ba-64eda533e053</span></span>
+<span id="cb5-49"><a href="#cb5-49" tabindex="-1"></a><span class="do">## INFO  [16:58:35.428] [bbotk]  100  TRUE  0.2870325        0      0             0.38 fc2f2220-0730-4a79-90fa-0906cb68fbd5</span></span>
+<span id="cb5-50"><a href="#cb5-50" tabindex="-1"></a><span class="do">## INFO  [16:58:35.428] [bbotk]   68 FALSE  0.3030156        0      0             0.18 879fe115-6520-4f2d-947b-120a74b825ce</span></span>
+<span id="cb5-51"><a href="#cb5-51" tabindex="-1"></a><span class="do">## INFO  [16:58:35.431] [bbotk] Evaluating 4 configuration(s)</span></span>
+<span id="cb5-52"><a href="#cb5-52" tabindex="-1"></a><span class="do">## INFO  [16:58:36.320] [bbotk] Result of batch 4:</span></span>
+<span id="cb5-53"><a href="#cb5-53" tabindex="-1"></a><span class="do">## INFO  [16:58:36.322] [bbotk]   k scale classif.ce warnings errors runtime_learners                                uhash</span></span>
+<span id="cb5-54"><a href="#cb5-54" tabindex="-1"></a><span class="do">## INFO  [16:58:36.322] [bbotk]   6  TRUE  0.2930086        0      0             0.15 470c5eee-08ba-49ad-9e8b-45b977980f17</span></span>
+<span id="cb5-55"><a href="#cb5-55" tabindex="-1"></a><span class="do">## INFO  [16:58:36.322] [bbotk]  24  TRUE  0.2710285        0      0             0.14 4511a1a0-02a8-4852-937e-af6c1838b970</span></span>
+<span id="cb5-56"><a href="#cb5-56" tabindex="-1"></a><span class="do">## INFO  [16:58:36.322] [bbotk]  24  TRUE  0.2710285        0      0             0.19 da64e367-6d97-4068-8cac-5cd507948b51</span></span>
+<span id="cb5-57"><a href="#cb5-57" tabindex="-1"></a><span class="do">## INFO  [16:58:36.322] [bbotk]  24 FALSE  0.3170176        0      0             0.11 6a9cb401-d9da-4fea-80f8-7c45937345d5</span></span>
+<span id="cb5-58"><a href="#cb5-58" tabindex="-1"></a><span class="do">## INFO  [16:58:36.326] [bbotk] Evaluating 4 configuration(s)</span></span>
+<span id="cb5-59"><a href="#cb5-59" tabindex="-1"></a><span class="do">## INFO  [16:58:37.305] [bbotk] Result of batch 5:</span></span>
+<span id="cb5-60"><a href="#cb5-60" tabindex="-1"></a><span class="do">## INFO  [16:58:37.307] [bbotk]   k scale classif.ce warnings errors runtime_learners                                uhash</span></span>
+<span id="cb5-61"><a href="#cb5-61" tabindex="-1"></a><span class="do">## INFO  [16:58:37.307] [bbotk]   9 FALSE  0.3429927        0      0             0.09 b1e82b5c-db1e-4b13-9e24-13d2a67da983</span></span>
+<span id="cb5-62"><a href="#cb5-62" tabindex="-1"></a><span class="do">## INFO  [16:58:37.307] [bbotk]  95  TRUE  0.2860315        0      0             0.19 629e9bc9-bd24-4682-b608-cffb1efd1625</span></span>
+<span id="cb5-63"><a href="#cb5-63" tabindex="-1"></a><span class="do">## INFO  [16:58:37.307] [bbotk]  73  TRUE  0.2800345        0      0             0.18 a8a8ff8f-dfd3-4c0b-84b3-c6f8c47e383d</span></span>
+<span id="cb5-64"><a href="#cb5-64" tabindex="-1"></a><span class="do">## INFO  [16:58:37.307] [bbotk]  93 FALSE  0.3030156        0      0             0.15 19fc3ad7-75fe-4896-99bb-76018f1c6962</span></span>
+<span id="cb5-65"><a href="#cb5-65" tabindex="-1"></a><span class="do">## INFO  [16:58:37.311] [bbotk] Evaluating 4 configuration(s)</span></span>
+<span id="cb5-66"><a href="#cb5-66" tabindex="-1"></a><span class="do">## INFO  [16:58:38.330] [bbotk] Result of batch 6:</span></span>
+<span id="cb5-67"><a href="#cb5-67" tabindex="-1"></a><span class="do">## INFO  [16:58:38.332] [bbotk]   k scale classif.ce warnings errors runtime_learners                                uhash</span></span>
+<span id="cb5-68"><a href="#cb5-68" tabindex="-1"></a><span class="do">## INFO  [16:58:38.332] [bbotk]  78  TRUE  0.2830375        0      0             0.20 cda0c4d3-ec6f-4f64-ba4c-a6901ff46deb</span></span>
+<span id="cb5-69"><a href="#cb5-69" tabindex="-1"></a><span class="do">## INFO  [16:58:38.332] [bbotk]  34 FALSE  0.3220106        0      0             0.11 1d61debe-8e31-4092-ab94-1266cd988265</span></span>
+<span id="cb5-70"><a href="#cb5-70" tabindex="-1"></a><span class="do">## INFO  [16:58:38.332] [bbotk]  86  TRUE  0.2840325        0      0             0.18 d166116e-123b-482e-8590-0eddd5c302bc</span></span>
+<span id="cb5-71"><a href="#cb5-71" tabindex="-1"></a><span class="do">## INFO  [16:58:38.332] [bbotk]  59  TRUE  0.2820335        0      0             0.18 cc5fd247-1f12-4e0c-b054-a5dfa294d74a</span></span>
+<span id="cb5-72"><a href="#cb5-72" tabindex="-1"></a><span class="do">## INFO  [16:58:38.336] [bbotk] Evaluating 4 configuration(s)</span></span>
+<span id="cb5-73"><a href="#cb5-73" tabindex="-1"></a><span class="do">## INFO  [16:58:39.331] [bbotk] Result of batch 7:</span></span>
+<span id="cb5-74"><a href="#cb5-74" tabindex="-1"></a><span class="do">## INFO  [16:58:39.333] [bbotk]   k scale classif.ce warnings errors runtime_learners                                uhash</span></span>
+<span id="cb5-75"><a href="#cb5-75" tabindex="-1"></a><span class="do">## INFO  [16:58:39.333] [bbotk]  93 FALSE  0.3030156        0      0             0.19 9a13bc3a-cd00-4a38-8bbf-9d72eff56b82</span></span>
+<span id="cb5-76"><a href="#cb5-76" tabindex="-1"></a><span class="do">## INFO  [16:58:39.333] [bbotk]  44 FALSE  0.3130136        0      0             0.17 14c646b1-0a61-4d61-b4dc-bb64cf3ce7db</span></span>
+<span id="cb5-77"><a href="#cb5-77" tabindex="-1"></a><span class="do">## INFO  [16:58:39.333] [bbotk]  87  TRUE  0.2840325        0      0             0.20 336a3780-965d-4dec-a99e-ec83ad97fa35</span></span>
+<span id="cb5-78"><a href="#cb5-78" tabindex="-1"></a><span class="do">## INFO  [16:58:39.333] [bbotk]  31  TRUE  0.2600295        0      0             0.16 638406e4-2cc0-487e-8b79-7defe126d2a8</span></span>
+<span id="cb5-79"><a href="#cb5-79" tabindex="-1"></a><span class="do">## INFO  [16:58:39.336] [bbotk] Evaluating 4 configuration(s)</span></span>
+<span id="cb5-80"><a href="#cb5-80" tabindex="-1"></a><span class="do">## INFO  [16:58:40.282] [bbotk] Result of batch 8:</span></span>
+<span id="cb5-81"><a href="#cb5-81" tabindex="-1"></a><span class="do">## INFO  [16:58:40.284] [bbotk]   k scale classif.ce warnings errors runtime_learners                                uhash</span></span>
+<span id="cb5-82"><a href="#cb5-82" tabindex="-1"></a><span class="do">## INFO  [16:58:40.284] [bbotk]  66  TRUE  0.2780325        0      0             0.17 21a9122e-1250-4907-b5d8-709e65c413d7</span></span>
+<span id="cb5-83"><a href="#cb5-83" tabindex="-1"></a><span class="do">## INFO  [16:58:40.284] [bbotk]  52  TRUE  0.2840295        0      0             0.20 940fcfde-e050-4b16-ab94-0dfe12adc433</span></span>
+<span id="cb5-84"><a href="#cb5-84" tabindex="-1"></a><span class="do">## INFO  [16:58:40.284] [bbotk]  15 FALSE  0.3279867        0      0             0.11 069ba6d2-20fe-4599-92ce-30bf8e738a9b</span></span>
+<span id="cb5-85"><a href="#cb5-85" tabindex="-1"></a><span class="do">## INFO  [16:58:40.284] [bbotk]  62 FALSE  0.3010196        0      0             0.17 ed568034-c7f4-4c03-be1b-675774e80dec</span></span>
+<span id="cb5-86"><a href="#cb5-86" tabindex="-1"></a><span class="do">## INFO  [16:58:40.287] [bbotk] Evaluating 4 configuration(s)</span></span>
+<span id="cb5-87"><a href="#cb5-87" tabindex="-1"></a><span class="do">## INFO  [16:58:41.244] [bbotk] Result of batch 9:</span></span>
+<span id="cb5-88"><a href="#cb5-88" tabindex="-1"></a><span class="do">## INFO  [16:58:41.246] [bbotk]   k scale classif.ce warnings errors runtime_learners                                uhash</span></span>
+<span id="cb5-89"><a href="#cb5-89" tabindex="-1"></a><span class="do">## INFO  [16:58:41.246] [bbotk]  51 FALSE  0.3100166        0      0             0.14 c9ec0cca-f6c5-4718-b5a6-6b7a99e15104</span></span>
+<span id="cb5-90"><a href="#cb5-90" tabindex="-1"></a><span class="do">## INFO  [16:58:41.246] [bbotk]  28  TRUE  0.2590285        0      0             0.17 c5e38899-2d44-40cf-ad13-b6b23c21d9d6</span></span>
+<span id="cb5-91"><a href="#cb5-91" tabindex="-1"></a><span class="do">## INFO  [16:58:41.246] [bbotk]  60 FALSE  0.3010196        0      0             0.17 9e1e7f1e-5655-48ed-bbfe-d6c091c6ed26</span></span>
+<span id="cb5-92"><a href="#cb5-92" tabindex="-1"></a><span class="do">## INFO  [16:58:41.246] [bbotk]  74 FALSE  0.3030156        0      0             0.18 48df44f0-9c42-405d-8e0e-650dacca4af5</span></span>
+<span id="cb5-93"><a href="#cb5-93" tabindex="-1"></a><span class="do">## INFO  [16:58:41.249] [bbotk] Evaluating 4 configuration(s)</span></span>
+<span id="cb5-94"><a href="#cb5-94" tabindex="-1"></a><span class="do">## INFO  [16:58:42.272] [bbotk] Result of batch 10:</span></span>
+<span id="cb5-95"><a href="#cb5-95" tabindex="-1"></a><span class="do">## INFO  [16:58:42.274] [bbotk]   k scale classif.ce warnings errors runtime_learners                                uhash</span></span>
+<span id="cb5-96"><a href="#cb5-96" tabindex="-1"></a><span class="do">## INFO  [16:58:42.274] [bbotk]  84 FALSE  0.3030156        0      0             0.17 6e0c2351-c963-4be2-a0be-4a2fb1e72071</span></span>
+<span id="cb5-97"><a href="#cb5-97" tabindex="-1"></a><span class="do">## INFO  [16:58:42.274] [bbotk]  12  TRUE  0.2780145        0      0             0.17 879e4296-c4af-479d-9f04-0bc58007fb4f</span></span>
+<span id="cb5-98"><a href="#cb5-98" tabindex="-1"></a><span class="do">## INFO  [16:58:42.274] [bbotk]  96  TRUE  0.2860315        0      0             0.22 3b5c8d8c-dfb5-459e-969d-2e6bea77b794</span></span>
+<span id="cb5-99"><a href="#cb5-99" tabindex="-1"></a><span class="do">## INFO  [16:58:42.274] [bbotk]  75 FALSE  0.3030156        0      0             0.17 c0b07d59-38ab-4682-9b77-5e40a2b0acb4</span></span>
+<span id="cb5-100"><a href="#cb5-100" tabindex="-1"></a><span class="do">## INFO  [16:58:42.282] [bbotk] Finished optimizing after 40 evaluation(s)</span></span>
+<span id="cb5-101"><a href="#cb5-101" tabindex="-1"></a><span class="do">## INFO  [16:58:42.282] [bbotk] Result:</span></span>
+<span id="cb5-102"><a href="#cb5-102" tabindex="-1"></a><span class="do">## INFO  [16:58:42.284] [bbotk]   k scale learner_param_vals  x_domain classif.ce</span></span>
+<span id="cb5-103"><a href="#cb5-103" tabindex="-1"></a><span class="do">## INFO  [16:58:42.284] [bbotk]  28  TRUE          &lt;list[2]&gt; &lt;list[2]&gt;  0.2590285</span></span>
+<span id="cb5-104"><a href="#cb5-104" tabindex="-1"></a><span class="do">##     k scale learner_param_vals  x_domain classif.ce</span></span>
+<span id="cb5-105"><a href="#cb5-105" tabindex="-1"></a><span class="do">## 1: 28  TRUE          &lt;list[2]&gt; &lt;list[2]&gt;  0.2590285</span></span>
+<span id="cb5-106"><a href="#cb5-106" tabindex="-1"></a>instance<span class="sc">$</span>result_y</span>
+<span id="cb5-107"><a href="#cb5-107" tabindex="-1"></a><span class="do">## classif.ce </span></span>
+<span id="cb5-108"><a href="#cb5-108" tabindex="-1"></a><span class="do">##  0.2590285</span></span>
+<span id="cb5-109"><a href="#cb5-109" tabindex="-1"></a>instance<span class="sc">$</span>result</span>
+<span id="cb5-110"><a href="#cb5-110" tabindex="-1"></a><span class="do">##     k scale learner_param_vals  x_domain classif.ce</span></span>
+<span id="cb5-111"><a href="#cb5-111" tabindex="-1"></a><span class="do">## 1: 28  TRUE          &lt;list[2]&gt; &lt;list[2]&gt;  0.2590285</span></span></code></pre></div>
 </details>
-
-__Syntactic sugar to define the HP space__
-
-`mlr3` provides syntactic sugar to shorten the process of search space definition. To do so, it is possible to directly specify the HP range in the learner construction:
-
+<p><strong>Syntactic sugar to define the HP space</strong></p>
+<p><code>mlr3</code> provides syntactic sugar to shorten the process of
+search space definition. To do so, it is possible to directly specify
+the HP range in the learner construction:</p>
 <details>
-<summary>**Click me**</summary>
-
-```r
-task = tsk("german_credit")
-
-lrn_knn = lrn("classif.kknn", k = to_tune(1, 100), scale = to_tune())
-```
-
-This adjust the parameter set (`lrn_knn$param_set`) attached to the learner and flags it as "tunable". 
+<summary>
+<strong>Click me</strong>
+</summary>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>task <span class="ot">=</span> <span class="fu">tsk</span>(<span class="st">&quot;german_credit&quot;</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>lrn_knn <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;classif.kknn&quot;</span>, <span class="at">k =</span> <span class="fu">to_tune</span>(<span class="dv">1</span>, <span class="dv">100</span>), <span class="at">scale =</span> <span class="fu">to_tune</span>())</span></code></pre></div>
+This adjust the parameter set (<code>lrn_knn$param_set</code>) attached
+to the learner and flags it as “tunable”.
 </details>
-
--->
+</div>
 </div>
 <div id="analyzing-the-tuning-archive" class="section level2">
 <h2>Analyzing the tuning archive</h2>
@@ -376,18 +447,15 @@ This adjust the parameter set (`lrn_knn$param_set`) attached to the learner and 
 process with <code>instance$archive</code>. Create a simple plot with
 the goal of illustrating the association between the hyperparametere
 <code>k</code> and the estimated classification error.</p>
-<!--
-
-### Solution:
+<div id="solution-2" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-plot(x = instance$archive$data$k, y = instance$archive$data$classif.ce)
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">plot</span>(<span class="at">x =</span> instance<span class="sc">$</span>archive<span class="sc">$</span>data<span class="sc">$</span>k, <span class="at">y =</span> instance<span class="sc">$</span>archive<span class="sc">$</span>data<span class="sc">$</span>classif.ce)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
 </div>
 <div id="visualizing-hyperparameters" class="section level2">
 <h2>Visualizing hyperparameters</h2>
@@ -407,48 +475,46 @@ after transforming it to a <code>data.table</code>.
 <summary>
 <strong>Hint 2</strong>
 </summary>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>arx <span class="ot">=</span> <span class="fu">as...</span>(instance<span class="sc">$</span>...)</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a></span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>gg_k <span class="ot">=</span> <span class="fu">ggplot</span>(..., <span class="fu">aes</span>(...)) <span class="sc">+</span> <span class="fu">...</span>()</span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>gg_scale <span class="ot">=</span> <span class="fu">ggplot</span>(..., <span class="fu">aes</span>(...)) <span class="sc">+</span> <span class="fu">...</span>()</span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>gg_k <span class="sc">+</span> gg_scale <span class="sc">&amp;</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>arx <span class="ot">=</span> <span class="fu">as...</span>(instance<span class="sc">$</span>...)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>gg_k <span class="ot">=</span> <span class="fu">ggplot</span>(..., <span class="fu">aes</span>(...)) <span class="sc">+</span> <span class="fu">...</span>()</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>gg_scale <span class="ot">=</span> <span class="fu">ggplot</span>(..., <span class="fu">aes</span>(...)) <span class="sc">+</span> <span class="fu">...</span>()</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>gg_k <span class="sc">+</span> gg_scale <span class="sc">&amp;</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>)</span></code></pre></div>
 </details>
-<!--
-
-### Solution
-
+<div id="solution-3" class="section level3">
+<h3>Solution</h3>
 <details>
-<summary>**Click me**</summary>
-
-```r
-arx = as.data.table(instance$archive)
-
-library(ggplot2)
-library(patchwork)
-
-gg_k = ggplot(arx, aes(x = k, y = classif.ce)) + geom_point()
-gg_scale = ggplot(arx, aes(x = scale, y = classif.ce, fill = scale)) + geom_boxplot()
-
-gg_k + gg_scale & theme(legend.position = "bottom")
-
-## ALTERNATIVE:
-
-# The `mlr3viz` automatically creates plots for getting an idea of the
-# effect of the HPs:
-
-library(mlr3viz)
-
-autoplot(instance)
-```
-
-The number of neighbours `k` and `scale` seem to have a big impact on the performance of the model. 
+<summary>
+<strong>Click me</strong>
+</summary>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>arx <span class="ot">=</span> <span class="fu">as.data.table</span>(instance<span class="sc">$</span>archive)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>gg_k <span class="ot">=</span> <span class="fu">ggplot</span>(arx, <span class="fu">aes</span>(<span class="at">x =</span> k, <span class="at">y =</span> classif.ce)) <span class="sc">+</span> <span class="fu">geom_point</span>()</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>gg_scale <span class="ot">=</span> <span class="fu">ggplot</span>(arx, <span class="fu">aes</span>(<span class="at">x =</span> scale, <span class="at">y =</span> classif.ce, <span class="at">fill =</span> scale)) <span class="sc">+</span> <span class="fu">geom_boxplot</span>()</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>gg_k <span class="sc">+</span> gg_scale <span class="sc">&amp;</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABaAAAAHgCAMAAABkaTqFAAAAz1BMVEUAAAAAADoAAGYAOpAAZrYAv8QzMzM6AAA6ADo6AGY6OpA6kNtNTU1NTW5NTY5NbqtNjshmAABmADpmOpBmZmZmtv9uTU1uTW5uTY5ubqtuq+SOTU2OTW6OTY6ObquOjo6OyP+QOgCQOjqQOmaQtpCQ27aQ2/+rbk2rbm6rbo6ryKur5Mir5P+2ZgC2///Ijk3I///bkDrb25Db/7bb///kq27k5Kvk///r6+vy8vL4dm3/tmb/yI7/25D/29v/5Kv//7b//8j//9v//+T///8/jeeNAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAgAElEQVR4nO2dDXvc5nFF17ZCJxEdW2nlJLLTWm1iJalkSa1cJaFUfe3//01dLJYfGIC7wM4sZi54zpPYJGVeDF/c9xAEIXK1BgCAkqyyBwAAgGEQNABAURA0AEBREDQAQFEQNABAURA0AEBREDQAQFEQNABAURA0AEBREDQAQFEQNABAURA0AEBREDQAQFG8gv57j4E3HUvNqKJjLT5qf5Z3IwTOOQ96E6cgt0ymlwg6NYuoqCxnj+X2sZ55cpBbJtNLBJ2aRVRUlrPHcvtYzzw5yC2T6SWCTs0iKirL2WO5faxnnhzklsn0EkGnZhEVleXssdw+1jNPDnLLZHqJoFOziIrKcvZYbh/rmScHuWUyvUTQqVlERWU5eyy3j/XMk4PcMpleIujULKKispw9ltvHeubJQW6ZTC8RdGoWUVFZzh7L7WM98+Qgt0ymlwg6NYuoqCxnj+X2sZ55cpBbJtNLBJ2aRVRUlrPHcvtYzzw5yC2T6SWCTs0iKirL2WO5faxnnhzklsn0EkGnZhEVleXssdw+1jNPDnLLZHqJoFOziIrKcvZYbh/rmScHuWUyvUTQqVlERWU5eyy3j/XMk4PcMplenlTQq9XKN6vrvU8VVXSsxUch6JucnZ1ljyCB3Ik1vTyloFcrp6EVRUHUqaIQ9A3OzjD0KNROLIIulUVUVJazx2r7GEGPRO3EIuhSWURFZTl7rLaPEfRI1E4s96BLZREVleXssdw+xs/jkDuxppc8xZGaRVRUlrPHcvtYzzw5yC2T6SWCTs0iKirL2WO5faxnnhzklsn0EkGnZhEVleXssdw+1jNPDnLLZHqJoFOziIrKcvZYbh/rmScHuWUyvUTQqVlERWU5eyy3j/XMk4PcMpleIujULKKispw9ltvHeubJQW6ZTC8RdGoWUVFZzh7L7WM98+Qgt0yml15BAwDAieAKOjWLqKgs70YInHMe9CZOQW6ZTC8RdGoWUVFZzh7L7WM98+Qgt0ymlwg6NYuoqCxnj+X2sZ55cpBbJtNLBJ2aRVRUlrPHcvtYzzw5yC2T6SWCTs0iKirL2WO5faxnnhzklsn0EkGnZhEVleXssdw+1jNPDnLLZHqJoFOziIrKcvZYbh/rmScHuWUyvUTQqVlERWU5eyy3j/XMk4PcMpleIujULKKispw9ltvHeubJQW6ZTC8RdGoWUVFZzh7L7WM98+Qgt0ymlwg6NYuoqCxnj+X2sZ55cpBbJtNLBJ2aRVRUlrPHcvtYzzw5yC2T6SWCTs0iKirL2WO5faxnnhzklsn0EkGnZhEVleXssdw+1jNPDnLLZHqJoFOziIrKcvZYbh/rmScHuWUyvUTQqVlERWU5eyy3j/XMk4PcMpleIujULKKispw9ltvHeubJQW6ZTC8RdGoWUVFZzh7L7WM98+Qgt0ymlwg6NYuoqCxnj+X2sZ55cpBbJtNLBJ2aRVRUlrPHcvtYzzw5yC2T6SWCTs0iKirL2WO5faxnnhzklsn0EkGnZhEVleXssdw+1jNPDnLLZHqJoFOziIrKcvZYbh/rmScHuWUyvUTQqVlERWU5eyy3j/XMk4PcMpleIujULKKispw9ltvHeubJQW6ZTC8RdGoWUVFZzh7L7WM98+Qgt0ymlwg6NYuoqCxnj+X2sZ55cpBbJtNLBJ2aRVRUlrPHcvtYzzw5yC2T6SWCTs0iKirL2WO5faxnnhzklsn0EkGnZhEVleXssdw+1jNPDnLLZHqJoFOziIrKcvZYbh/rmScHuWUyvUTQqVlERWU5eyy3j/XMk4PcMpleIujULKKispw9ltvHeubJQW6ZTC8RdGoWUVFZzh7L7WM98+Qgt0ymlwg6NYuoqCxnj+X2sZ55cpBbJtNLBJ2aRVRUlrPHcvtYzzw5yC2T6SWCTs0iKirL2WO5faxnnhzklsn0EkGnZhEVleXssdw+1jNPDnLLZHqJoFOziIrKcvZYbh/rmScHuWUyvUTQqVlERWU5eyy3j/XMk4PcMpleIujULKKispw9ltvHeubJQW6ZTC8RdGoWUVFZzh7L7WM98+Qgt0ymlwg6NYuoqCxnj+X2sZ55cpBbJtNLBJ2aRVRUlrPHcvtYzzw5yC2T6SWCTs0iKirL2WO5faxnnhzklsn0EkGnZhEVleXssdw+1jNPDnLLZHqJoFOziIrKcvZYbh/rmScHuWUyvUTQqVlERWU5eyy3j/XMk4PcMpleIujULKKispw9ltvHeubJQW6ZTC8RdGoWUVFZzh7L7WM98+Qgt0ymlwg6NYuoqCxnj+X2sZ55cpBbJtNLBJ2aRVRUlrPHcvtYzzw5yC2T6SWCTs0iKirL2WO5faxnnhzklsn0EkGnZhEVleXssdw+1jNPDnLLZHqJoFOziIrKcvZYbh/rmScHuWUyvUTQqVlERWU5eyy3j/XMk4PcMpleIujULKKispw9ltvHeubJQW6ZTC8RdGoWUVFZzh7L7WM98+Qgt0ymlwg6NYuoqCxnj+X2sZ55cpBbJtNLBJ2aRVRUlrPHcvtYzzw5yC2T6SWCTs0iKirL2WO5faxnnhzklsn0EkGnZhEVleXssdw+1jNPDnLLZHqJoFOziIrKcvZYbh/rmScHuWUyvUTQqVlERWU5eyy3j/XMk4PcMpleIujULKKispw9ltvHeubJQW6ZTC9HCPrDd+dfv96+9Ob8/Dcv1uufz9t/I2iiZozyCnpvj+X2sZ55cpBbpsmC/vTkh/XP3zQvvfv9i+1Lz3+4/tOBAwTOWjKq6FiLj3IKen+P5faxnnlykFumyYL+8McX20q3bF769JenCJqo2aOcgt7fY7l9rGeeHOSWabKg3/3h9frD95dd3lx5bL5UPD/fXnycnZ0dfHeAEuzvMUWGkhwW9Juvr4v97tuvnq7f/e7p+urqY+AzQOAnk5JRRcdafJTzCnp/j+UutPQuDXOQW6bJgu5eeVy+dHn/buAAgbOWjCo61uKjnILe32O5faxnnhzklmmyoLv37i4bjaCJmjkq9B607bHcPtYzTw5yyzRZ0J+ePNp993v3RWLzr09/5TE7ouaNcj/Fsa/HcvtYzzw5yC3TZEHvnh/dPpt0fv7V0/XlvxA0UXNGxTwHfUuP5faxnnlykFum6YLey8ABAmctGVV0rMVH8TcJO+hNnILcMpleIujULKKispw9ltvHeubJQW6ZTC8RdGoWUVFZzh7L7WM98+Qgt0ymlwg6NYuoqCxnj+X2sZ55cpBbJtNLBJ2aRVRUlrPHcvtYzzw5yC2T6SWCTs0iKirL2WO5faxnnhzklsn0EkGnZhEVleXssdw+1jNPDnLLZHqJoFOziIrKcvZYbh/rmScHuWUyvUTQqVlERWU5eyy3j/XMk4PcMpleIujULKKispw9ltvHeubJQW6ZTC8RdGoWUVFZzh7L7WM98+Qgt0yml0UEvVqthmY9JmoYBC0fhaA76E2cgtwymV7WEPRqNWhoRVEQdaooBN1Bb+IU5JbJ9BJBp2YRFZXl7LHcPv77WfYAGsidWNNLBJ2aRVRUlrPHcvsYQY9D7sSaXtYQNPegiXJmOXsst48R9DjkTqzpZRFB3zJryaiiYy0+CkF3QNCjkDuxppcIOjWLqKgsZ4/l9jGCHofciTW9RNCpWURFZTl7LLePEfQ45E6s6SWCTs0iKirL2WO5fYygxyF3Yk0vEXRqFlFRWc4ey+1jBD0OuRNreomgU7OIispy9lhuHyPoccidWNNLBJ2aRVRUlrPHcvsYQY9D7sSaXiLo1CyiorKcPZbbxwh6HHIn1vQSQadmERWV5eyx3D5G0OOQO7Gmlwg6NYuoqCxnj+X2MYIeh9yJNb1E0KlZREVlOXsst48R9DjkTqzpJYJOzSIqKsvZY7l9jKDHIXdiTS8RdGoWUVFZzh7L7WMEPQ65E2t6iaBTs4iKynL2WG4fI+hxyJ1Y00sEnZpFVFSWs8dy+xhBj0PuxJpeIujULKKispw9ltvHCHoccifW9BJBp2YRFZXl7LHcPkbQ45A7saaXCDo1i6ioLGeP5fYxgh6H3Ik1vUTQqVlERWU5eyy3jxH0OOROrOklgk7NIioqy9ljuX2MoMchd2JNLxF0ahZRUVnOHsvtYwQ9DrkTa3qJoFOziIrKcvZYbh8j6HHInVjTSwSdmkVUVJazx3L7GEGPQ+7Eml4i6NQsoqKynD2W28cIehxyJ9b0EkGnZhEVleXssdw+RtDjkDuxppcIOjWLqKgsZ4/l9jGCHofciTW9RNCpWURFZTl7LLePEfQ45E6s6SWCTs0iKirL2WO5fYygxyF3Yk0vEXRqFlFRWc4ey+1jBD0OuRNreomgU7OIispy9lhuHyPoccidWNNLBJ2aRVRUlrPHcvsYQY9D7sSaXiLo1CyiorKcPZbbxwh6HHIn1vQSQadmERWV5eyx3D5G0OOQO7Gml4OCfrlaPXz5xSsEffIsoqKyBtvpKnJxEPQo5E7sCEE/++J/Hjz8+Pgegj55FlFRWUPl9BW5OAh6FHIn9rCg3z94uPnf+uLznxD0qbOIisoa6KazyMVB0KOQO7G6gl6tVubP27f0334wykdNfy0+CkF3QNCjkDuxhwW9ftl8Zfj+wf0RtZ5R0KuVNXH7lv7bD0ZFjkXUXFHTb3H4ilwcBD0KuRM7QtDri8Z5o2qNoImaK+qIbxK6ilwcBD0KuRM7RtATGDhA4Kw3X0HQdzyKx+w6IOhRyJ1Y00sdQXMP+o5HIegOCHoUcifW9HJI0B8f31+PfDiJpziImitquqB9RS4Ogh6F3IkdIehn97blHlXsgQMEzloyquhYi4864jloV5GLg6BHIXdiDwu6eTRpQ7nH7KpEFR1r8VHHPGbnKXJxEPQo5E4sgq6URVRUFoKGIeRO7GFBr182jS73HHSZqKJjLT7qiOegXUUuDoIehdyJHSHoKY+PAtRl1iKfLZuZVhG6CD1mVyWq6FiLj6r+mN3ZP5eM6gX7Iq+gXb2uubsRtHwUgs4EQc+E6eXtguabhDNkERWVdXtF5/omIYKuyHIFPY6BAwTOWjKq6FiLj+IKOhMEPROmlwg6NYuoqCxnjxH0ARD0TJheWkHvfoYugp4ni6ioLFtMf5GngqArgqB7BwicNTnqlh/DlD3WHY1C0Jkg6Jk4IOjm92zuuPPfJLztB5ku5yOUipp4i8Nd5Kkg6IosTtBXf0N2HAMHCJw1NwpBl4o69q96H1vkqSDoiixQ0JMYOEDgrLlRCLpUFN8kzARBz4Tp5eA9aG5xtHAPulLUEfegucURBoKeiQOCnsrAAQJnLRlVdKzFR3EFnQmCngnTSwSdmkVUVJazxwj6AAh6JkwvhwTdfnU46gtDBE3UXFHTBe0r8lQQdEWWKOhn95qfpPvyHoI+eRZRUVlD5fQVeSoIuiILFPTmuqP5PW78sKQZsoiKyhroprPIU0HQFVmmoJvfQoGgZ8giKiprWNCeIk8FQVdkgYL++Pj+xWc/tr8SGUGfNouoqKyBbjqLPBUEXZEFCnr99svVvfWzL14h6JNnERWVNVROX5GngqArskRBT2HgAIGzBmTs/rIJgpaP4jG7TBD0TJheLl3Ql39dG0HLRyHoTBD0TJheLv05aAS9mCieg84EQc/ECEEv6TloBL2YKJ6DzgRBz8RhQS/rOWjuQS8liuegM0HQMzFK0DwHPVMWUVFZw4LmOegoEPRMHBY0z0GfKGvgp5fW/AhrRvEcdCYIeiYOC5rnoE+TNfTz/2t+hDWjeA46EwQ9EyMEPYWBAwTOWjIKQedE8ZhdJgh6JkwvEfRsWQj6lFnOHiPoAyDomTC9vOUWB7/y6gRZ3IM+YdZQOX1FngqCrsgCBf3x8f2Pjx+O/JXIAwcInLVk1MisW36h4TFRo1h81DHfJPQUeSoIuiILFHTT6Gf31xejvrkycIDAWUtGjcu67VeCHxE1jsVHHfOYnafIUzlbNv4FSmGhgn65mL+oEh+FoHOijhK0o8hTyTboifEvUAoLFHTz4Oim1C+5gvZkIejoqKP+qrejyFPhFkdFlijoj4/vr5+tPvtxRK0R9K1wDzo4arqgfUWeCoKuyBIFPYWBAwTOWjKq6FiLj+Ixu0wQ9EyYXiLo1CyiorKcPUbQB0DQM2F6aQX9/sHqEr5JePosoqKybDH9RZ4Kgq7I0gQ9lYEDBM5aMip8rFF3q8dFxVAziivoTBD0TJheIujUrCZq3PMeo6KCqBmFoDNB0DNhennbUxzNTzpH0CfPQtBRWUPl9BV5Kgi6IksU9PYH6I4s9sABAmctGYWgc6KOeg7aUeSpIOiKLFDQux9ewN8knCGLe9BRWQPddBZ5Kgi6Igi6d4DAWUtGFR1r8VEIOhMEPROHBd38JuSm3fdH1BpBEzVX1PRbHL4iTwVBV2SJgl5fNHdFR9UaQRM1V9QRT3G4ijwVBF2RRQp6AgMHCJy1ZFTRsRYfxWN2mSDomTC9RNCpWURFZTl7jKAPgKBnwvQSQadmERWV5ewxgj4Agp4J00sEnZpFVFSWs8cI+gAIeiZMLxF0ahZRUVnOHiPoAyDomTC9RNCpWURFZTl7jKAPgKBnwvQSQadmERWV5ewxgj4Agp4J00sEnZpFVFSWs8cI+gAIeiZMLxF0ahZRUVnOHiPoAyDomTC9RNCpWURFZTl7jKAPgKBnwvQSQadmERWV5ewxgj4Agp4J00sEnZpFVFSWs8cI+gAIeiZMLxF0ataMUWN+6nT73xz386mH3+vgBzjhYAg6EQQ9E6aXCDo1a76oMb+3pf1vjvsNL7e814hPG6MPhqATQdAzYXqJoFOzEPSCBL1s/AuUAoLuHSBw1pJRRcdC0MFFLo6qMWdG7sSaXiLo1CzuQS/nHvTMIOhRyJ1Y00sEnZrliLpptublGlOdMApBd0DQo5A7saaXCDo16/iom/cGti+XmOqUUQi6A4IehdyJNb0cIegP351//Xr70pvz89+8uPkGBJ0WhaDNH/p6LLeP9cyTg9wyTRb0pyc/rH/+pnnp3e9fNC9dvwFB50UhaPOHvh7L7WM98+Qgt0yTBf3hjy+2lW7ZvNR5w8ABAmctGVVkLO5Bd//Q12O5faxnnhzklmmyoN/94fX6w/dPd69tLjmu33B2dnbw3QFKsL/HFBlKcljQb76+Lva7b7962nkDV9BEzRXlvILe32O5Cy29S8Mc5JZpsqC7Vx6blzpvGDhA4Kwlo4qOtfgop6D391huH+uZJwe5ZZos6O6tuvXzH7gHTVRGVOg9aNtjuX2sZ54c5JZpsqA/PXm0+2b37mvC6zcgaKLmi3I/xbGvx3L7WM88Ocgt02RB7x4X3T6bdH7+1VOeg6451uKjYp6DvqXHcvtYzzw5yC3TdEHvZeAAgbOWjCo61uKj+JuEHfQmTkFumUwvEXRqFlFRWc4ey+1jPfPkILdMppcIOjWLqKgsZ4/l9rGeeXKQWybTSwSdmkVUVJazx3L7WM88Ocgtk+klgk7NIioqy9ljuX2sZ54c5JbJ9BJBp2YRFZXl7LHcPtYzTw5yy2R6iaBTs4iKynL2WG4f65knB7llMr1E0KlZREVlOXsst4/1zJOD3DKZXiLo1CyiorKcPZbbx3rmyUFumUwvEXRqFlFRWc4ey+1jPfPkILdMppcIOjWLqKgsZ4/l9rGeeXKQWybTyxRBt78M5OavBLll1mM+wJNHFR1r8VEIuoPexCnILZPpZYag21+nd/OX6t0265Ef42mjio61+CgE3UFv4hTklsn0EkGnZhEVleXssdw+1jNPDmfZA0zF9BJBp2YRFZXl7LGe7vQmTgFB9w5weAbuQRMVneXssZ7u9CZOAUH3DhA4a8moomMtPgpBd9CbOAUE3TtA4Kwlo4qOtfgoBN1Bb+IUEHTvAIGzlowqOtbioxB0B72JU0DQvQMEzloyquhYi49C0B30Jk4BQfcOEDhryaiiYy0+CkF30Js4BQTdO0DgrCWjio61+CgE3UFv4hQQdO8AgbOWjCo61uKjEHQHvYlTQNC9AwTOWjKq6FiLj0LQHfQmTgFB9w4QOGvJqKJjLT4KQXfQmzgFBN07QOCsJaOKjrX4KATdQW/iFBB07wCBs5aMKjrW4qMQdAe9iVNA0L0DBM5aMqroWIuP2v+zW5w91tOd3sQpIOjeAQJnLRlVdKylRx346YfOHuvpTm/iFBB07wCBs5aMKjrW0qMQdBe9iVNA0L0DBM5aMqroWAuI2vtjaBF0F72JU0DQvQMEzloyquhY+lEHfpED96A76E2cAoLuHSBw1pJRRcfSjzr0m3Z4iuMmehOngKB7BwictWRU0bH0oxD0FPQmTgFB9w4QOGvJqKJjLSDqwK9CQ9A30Zs4BQTdO0DgrCWjio61+CgE3UFv4hQQdO8AgbOWjDrRWId/h+7oKC/uqOtLYQR9KvQmTgFB9w4QOGvJqNOMdeApsilRbrxRN24mI+hToTdxCgi6d4DAWUtG3UFBTxwNQc+A3sQtZ8vGvT6mlwg6NUtD0FNnQ9AzoDdxy9kvlgyCzo+6e/egJ3/y4B706dGbuAVB78f0EkGnZh0VNWzLSoK+PcoDgr6J3sQtCHo/ppcIOjXrmKhbdFnoHvS+KAcI+iZ6E7cg6P2YXiLo1CwRQZeIQtAd9CZuQdD7Mb1E0KlZQYIOvttbMwpBd9CbuAVB78f0EkGnZsXcg45+XqJmFILuoDdxS/ZzcCfGvT6mlwg6NSsmKkDQHemX+wBHZDl7rKc7vYlbsg16YtzrY3qJoFOzqgi6e9uk3Ac4IsvZYz3d6U3cwi2O/ZheIujUrKAo9z1oBB045zzoTdyCoPdjeomgU7OqRCHowDnnQW/iFgS9H9NLBJ2aVSaKe9Bq6E3cgqD3Y3qJoFOziIrKcvZYT3d6E7cg6P2YXpYVdN1He4uONRR15N8ArPkBIugOehO3IOj9mF5WFXThR3uL+msg6tifoVHzA0TQHfQmbkHQ+zG9RNCpWQg6KsvZYz3d6U3cgqD3Y3qJoFOzEHRUlrPHerrTm7gFQe/H9LKqoLkHHRHFPWhHkYujN3ELgt6P6WVZQdeNKjrW4qMQdAe9iVsQ9H5MLxF0ahZRUVnOHuvpTm/iFgS9H9NLBJ2aRVRUlrPHerrTm7gFQe/H9BJBp2YRFZXl7LGe7vQmbkHQ+zG9RNCpWURFZTl7rKc7vYlbEPR+TC+9ggYAGM/CBR29XFxBp2YRFZXl3QiBc86D3sQtCxe0e31MLxF0ahZRUVnOHuvpTm/iFgS9H9NLBJ2aRVRUlrPHerrTm7gFQe/H9BJBp2YRFZXl7LGe7vQmbkHQ+zG9RNCpWURFZTl7rKc7vYlbEPR+TC8RdGoWUVFZzh7r6U5v4hYEvR/TSwSdmkVUVJazx3q605u4BUHvx/QSQadmERWV5eyxnu70Jm5B0PsxvVy8oHc/cRNBy0ch6A56E7cg6P2YXi5d0Jc/sx5By0ch6A56E7cg6P2YXiLo6dT6CO9MFILuoDdxy9myca+P6SWCnk6tj/DORCHoDnoTp+A35syYXi5d0NyDXkwUgu6gN3EKCLp3gMBZS0YVHWvxUQi6g97EKSDo3gECZ+28duRvQB2K8lHTX4uPQtAd9CZOAUH3DhA4681XLu8mB0Q5qemvxUch6A56E6eAoHsHCJz15ivJgr5x8Jr+WnwUgu6gN3EKCLp3gMBZb76SK+ibR6/pr8VHIegOehOngKB7BwictfNa6j1oBJ0ehaA76E2cAoLuHSBw1jpRCDo9CkF30Js4BQTdO0DgrIWiuAedHYWgO+hNnAKC7h0gcNaSUUXHWnwUgu6gN3EKCLp3gMBZS0YVHWvxUQi6g97EKSDo3gECZy0ZVXSsxUch6A56E6eAoHsHCJy1ZFTRsRYfhaA76E2cAoLuHSBw1pJRRcdafBSC7qA3cQoIuneAwFlLRhUda/FRCLqD3sQpIOjeAQJnLRlVdKzFRyHoDnoTp4CgewcInLVkVNGxFh+FoDvoTZwCgu4dIHDWklFFx1p8FILuoDdxCgi6d4DAWUtGFR1r8VEIuoPexCkg6N4BAmctGVV0rMVHIegOehOngKB7BwictWRU0bEWH4WgO+hNnAKC7h0gcNaSUUXHWnwUgu6gN3EKCLp3gMBZS0YVHWvxUQi6g97EKSDo3gECZy0ZVXSsxUch6A56E6eAoHsHCJy1ZFTRsRYfhaA76E2cAoLuHSBw1pJRRcdafBSC7qA3cQoIuneAwFlnjRr9Ow9lP0LtKATdQW/iFBB07wCBs84ZNf63hqt+hOJRCLqD3sQpIOjeAQJnnTMKQRePQtAd9CZOAUH3DhA46wmjejZG0MWjEHQHvYlTQNC9AwTOerqoAR1zD7p2FILuoDdxCgi6d4DAWU8XNf56+XCWA6Kispw91tOd3sQpyC2T6SWC9mc5ICoqy9ljuX2sZ54c5JbJ9PKuCnr8DY0RWcdDVFSWs8dy+1jPPDnILZPp5Z0VdI0soqKynD2W28d65slBbplMLxF0ahZRUVnOHsvtYz3z5CC3TKaXCDo1i6ioLGeP5faxnnlykFsm00sEnZpFVFSWs8dy+1jPPDnILZPpJYJOzSIqKsvZY7l9rGeeHOSWyfQSQadmERWV5eyx3D7WM08OcstkeomgU7OIispy9lhuH+uZJwe5ZTK9RNCpWURFZTl7LLeP9cyTg9wymV4i6NQsoqKynD2W28d65slBbplMLxF0ahZRUVnOHsvtYz3z5CC3TKaXCDo1i6ioLGeP5faxnnlykFsm00sEnZpFVFSWs8dy+1jPPDnILZPpJYJOzSIqKsvZY7l9rGeeHOSWyfTSK+g+Z+GJEdScquhYNaeqOlYSrMYo1JcJQadSc6yaU1UdKwlWYxTqy4SgU6k5Vs2pqo6VBKsxCvVlQtCp1Byr5lRVx0qC1RiF+jLFCxoAAEJA0AAARUHQAABFQTdX3sUAAAdLSURBVNAAAEVB0AAARQkW9Ifvzr9+HRvp5d235+c/rNc/n5+f/+ZF9jDX7OaptWDNUM1q1Vqsd79/cdWsWus1G02Jz88fbT7+75/uFmS9XYzmNLV/+NXT5Bkr8OnJtsFf/+92SZq12S7V5p+qixQr6E9PNpv7m9BIL02j3/3u6fr5D9mTdGnnKbhgbzYCLLVYb5qNtluogus1C5dKXr/590dXr334rrnw+Pr11R/Cerc47ZJcrU0jaNFFihX0hz++WBdbiTfNdn7+w6e/1PrcuZun3oI1n9BKLdbzr/62WaDdQtVbr3m4/Jg//eW//u315WvtVxbfP72LC3I7NwR95WUEvePdH163X4TVYjNS89XgeaHrwt089RasuT4ttljN3totVL31modLvWw+/s1XN7vXPj1p7/aouuc0cAW9h+bL43r759OTR9u7HJUuDHfzlFuw9h5nrcVq9tZuocqt10xs76BuPnX+/Kj5kvD6hsf2rmp7e/Uu3pofohX05ZKYe9B6i3QHrqA/fPdo91KpW6vrZp5yC/bmqsJ1Fosr6Otr5u23vm5eDW4+mapeHJ6GqyvoN1897d3r0GPx96A3n0yvTFPHOS3Pfyi3YM8fXb1UZrHecQ/68q7z5vNT82m9fW377ZXrV2HL9S2On5unpLafzTfrprpI0U9xPKr2Tfadn5srw09/rXOOdvNUW7D2xkaxxWr21m6hqq3XXOz08nPT5Tff3HyKg28SGq4F/enJpinPv9nd4xRdpMU/B33j0d5SD0Hu5im2YLvbB7UWi+egd3ppP2l++P5v2/up32y/mXt1D7rQd3VTufkUx7ebrweftw+Qqy4Sf5MQAKAoCBoAoCgIGgCgKAgaAKAoCBoAoCgIGgCgKAgaAKAoCDqZt7/8MXsEgEBodCQIOhnqDMuCRkeCoJOhzrAsaHQkCDqZps4Xq3vZYwBM5e2Xq9Xq4Xr98fFqW+Dt6/e3jW7e9PlP2QMuAQSdzKbOb798mD0FwFS2V8qb7n58fG/9/sHD7f/XLz//afP25k3rl1+8yh5xASDoZN7+8k9f3s8eAmAyb3/VXiJf3tL4v1ftK5v/XTRXz1thgxMEnUzzdSFFBkGetXc2Lq7uZVysVqvPGkG/XG3hwsMPgk5m8zXiM74WBEneP1h9/tOloN8/+OzH3RU0dzfCQNDJbOr8/gGXGqDJ+wcPL29xXDRWvtheQW/+mTzXYkDQyTT1fkmfQY7tlfPuO4LN/xsrv/1yK+iPjzeyxtIRIOhk2oeS+JIQ5GhvOV8/Zvds8+qf2yvq5k34OQIEDQBQFAQNAFAUBA0AUBQEDQBQFAQNAFAUBA0AUBQEDQBQFAQNAFAUBA0AUBQEDQBQFAQNAFAUBA0AUBQEDQBQFAQNAFAUBA0AUBQEDQBQFAQNAFAUBA0AUBQEDQBQFAQNAFAUBA0AUBQEDQBQFAQNAFAUBA0AUBQEDQDD/GOY1KQ7BoIGgGEQdDoIGgCGuaHSszhBn7mS7hgIGgCGQdDpIGgAGAZBp4OgAWCYjUz7HCvooKQ7BoIGgGE2Vv2n5XhB/8KAoEeAoAFgw9tf/mjfhKDTQdAAsD5C0G+/XG24v16//+3mPd/+6qftW98/WK0+/2n3h5/9eJW0T9AfHzf/8eqL/96+U/Pe27DNP03M3QNBA8D6GEHvlLy++Nf7V6+9f/BwvX75xaurP7xMOnAFvf3v23e6eu9G0N2YuweCBrhbbK9KH7bXrfcuX7+/FXTzps+vlThO0B//48//8uryte2/NpfUDkFfeRlBI2iAO8b2Svntlw8/Pr63vd5tr3k//2nz9uZNzQXs5X+6/ymOS3m+/fWrZw8vX/v4uH33AUHvfYqDK+hhEDTAneLKq7tbGv/3qn1l87+L5up5K+yWEfeg722Een99ce/GDY/tPeP25vGV60deQV++k7kHff0p486BoAHuFs/aOxsXV/cyLrbfh9sI+uX2e3XN9/1aRt3i2H6H7/POtW6j+2NvcVx89mPvXscdBkED3DXeP9gY9VLQ7x80F7zbK+iX5lJ1lKDf/nrzTs8e7l7bXEuvb7x6nTT6HvTLzVzb50KaZASdPQAAzM77Bw8vb3FcNFa+2F5BX5jn2UYJ+mVzR+Ti3s2nOFzfJNzeCH92r3nhvr2VffdA0AB3iu2V8+47gs3/L7Z3jLeC3n6H74alxwj64382/3z/2z9t7xbf2z4HfXUPevXwKmnCUxxf3t/eh2lutZiYuweCBrhbXOz+6sflY3YbF3725/aKunnTjatofhZHOggaAIbhp9mlg6ABYBgEnQ6CBoBh/jFMatIdA0EDwDAIOh0EDQDDIOh0EDQAQFEQNABAURA0AEBREDQAQFEQNABAURA0AEBREDQAQFEQNABAURA0AEBREDQAQFEQNABAURA0AEBREDQAQFEQNABAURA0AEBREDQAQFEQNABAURA0AEBREDQAQFEQNABAURA0AEBREDQAQFH+H25TCskVvKmiAAAAAElFTkSuQmCC" width="100%" /></p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="do">## ALTERNATIVE:</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co"># The `mlr3viz` automatically creates plots for getting an idea of the</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co"># effect of the HPs:</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="fu">library</span>(mlr3viz)</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="fu">autoplot</span>(instance)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" width="100%" /></p>
+The number of neighbours <code>k</code> and <code>scale</code> seem to
+have a big impact on the performance of the model.
 </details>
-
--->
+</div>
 </div>
 <div id="hyperparameter-dependencies" class="section level2">
 <h2>Hyperparameter dependencies</h2>
@@ -473,25 +539,21 @@ this using the <code>depends</code> argument, which takes a named
 argument of the form <code>&lt;param&gt; == value</code> or
 <code>&lt;param&gt; %in% &lt;vector&gt;</code>.
 </details>
-<!--
-
-### Solution:
+<div id="solution-4" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-ps(
-  kernel = p_fct(c("polynomial", "radial")),
-  degree = p_int(1, 3, depends = (kernel == "polynomial"))
-)
-## <ParamSet>
-##        id    class lower upper nlevels        default parents value
-## 1: degree ParamInt     1     3       3 <NoDefault[3]>  kernel      
-## 2: kernel ParamFct    NA    NA       2 <NoDefault[3]>
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">ps</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>  <span class="at">kernel =</span> <span class="fu">p_fct</span>(<span class="fu">c</span>(<span class="st">&quot;polynomial&quot;</span>, <span class="st">&quot;radial&quot;</span>)),</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="at">degree =</span> <span class="fu">p_int</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="at">depends =</span> (kernel <span class="sc">==</span> <span class="st">&quot;polynomial&quot;</span>))</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>)</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="do">## &lt;ParamSet&gt;</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="do">##        id    class lower upper nlevels        default parents value</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="do">## 1: degree ParamInt     1     3       3 &lt;NoDefault[3]&gt;  kernel      </span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="do">## 2: kernel ParamFct    NA    NA       2 &lt;NoDefault[3]&gt;</span></span></code></pre></div>
+</div>
 </div>
 <div id="hyperparameter-transformations" class="section level2">
 <h2>Hyperparameter transformations</h2>
@@ -506,38 +568,34 @@ configurations.</p>
 <p>A simple way to do this is to pass <code>logscale = TRUE</code> when
 using <code>to_tune()</code> to define the parameter search space while
 constructing the learner:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>lrn <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;classif.svm&quot;</span>, <span class="at">cost =</span> <span class="fu">to_tune</span>(<span class="fl">1e-5</span>, <span class="fl">1e5</span>, <span class="at">logscale =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>lrn<span class="sc">$</span>param_set<span class="sc">$</span><span class="fu">search_space</span>()</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="do">## &lt;ParamSet&gt;</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="do">##      id    class     lower    upper nlevels        default value</span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="do">## 1: cost ParamDbl -11.51293 11.51293     Inf &lt;NoDefault[3]&gt;      </span></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="do">## Trafo is set.</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>lrn <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;classif.svm&quot;</span>, <span class="at">cost =</span> <span class="fu">to_tune</span>(<span class="fl">1e-5</span>, <span class="fl">1e5</span>, <span class="at">logscale =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>lrn<span class="sc">$</span>param_set<span class="sc">$</span><span class="fu">search_space</span>()</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="do">## &lt;ParamSet&gt;</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="do">##      id    class     lower    upper nlevels        default value</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="do">## 1: cost ParamDbl -11.51293 11.51293     Inf &lt;NoDefault[3]&gt;      </span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="do">## Trafo is set.</span></span></code></pre></div>
 <p>To manually create the same transformation, we can pass the
 transformation to the more general <code>trafo</code> argument in
 <code>p_dbl()</code> and related functions and set the bounds using the
 <code>log()</code> function. For the following search space, implement a
 logarithmic transformation. the output should look exactly as the search
 space above.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># Change this to a log trafo:</span></span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">ps</span>(<span class="at">cost =</span> <span class="fu">p_dbl</span>(<span class="fl">1e-5</span>, <span class="fl">1e5</span>))</span></code></pre></div>
-<!--
-
-### Solution:
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Change this to a log trafo:</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="fu">ps</span>(<span class="at">cost =</span> <span class="fu">p_dbl</span>(<span class="fl">1e-5</span>, <span class="fl">1e5</span>))</span></code></pre></div>
+<div id="solution-5" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-search_space = ps(cost = p_dbl(log(1e-5), log(1e5),
-  trafo = function(x) exp(x))) # alternatively: 'trafo = exp'
-search_space
-## <ParamSet>
-##      id    class     lower    upper nlevels        default value
-## 1: cost ParamDbl -11.51293 11.51293     Inf <NoDefault[3]>      
-## Trafo is set.
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>search_space <span class="ot">=</span> <span class="fu">ps</span>(<span class="at">cost =</span> <span class="fu">p_dbl</span>(<span class="fu">log</span>(<span class="fl">1e-5</span>), <span class="fu">log</span>(<span class="fl">1e5</span>),</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>  <span class="at">trafo =</span> <span class="cf">function</span>(x) <span class="fu">exp</span>(x))) <span class="co"># alternatively: &#39;trafo = exp&#39;</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>search_space</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="do">## &lt;ParamSet&gt;</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="do">##      id    class     lower    upper nlevels        default value</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="do">## 1: cost ParamDbl -11.51293 11.51293     Inf &lt;NoDefault[3]&gt;      </span></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="do">## Trafo is set.</span></span></code></pre></div>
+</div>
 </div>
 </div>
 <div id="summary" class="section level1">

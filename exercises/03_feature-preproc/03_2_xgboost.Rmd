@@ -30,21 +30,15 @@ The dataset is available at the UCI repository as
 
 ## Preprocessing
 
-We first load the `.csv` file from the directory.
-
-```{r}
-credit = read.csv("../data/german_credit.csv", header = TRUE, stringsAsFactors = TRUE)
-```
-
 To apply the XGBoost algorithm to the `credit` dataset, categorical features 
 need to be converted into numeric features e.g. using one-hot-encoding. 
 We use a factor encoding `PipeOp` from `mlr3pipelines` to do so.
 
-First, we setup a classification task from the data:
+First, we setup a classification task:
 
 ```{r}
 library(mlr3verse)
-task = as_task_classif(credit, target = "credit_risk")
+task = tsk("german_credit")
 task$positive = "good"
 ```
 
@@ -55,11 +49,9 @@ poe = po("encode")
 task = poe$train(list(task))[[1]]
 ```
 
-# Exercises: 
+# 1 XGBoost Learner
 
-Now that we have a preprocessed, one-hot-encoded dataset and can now train a XGBoost model.
-
-## Initialize a XGBoost Learner
+## 1.1 Initialize an XGBoost Learner
 
 Initialize a XGBoost `mlr3` learner with 100 iterations.
 Make sure that that you have installed the `xgboost` R package.
@@ -116,7 +108,7 @@ xgboost_lrn = lrn("classif.xgboost", nrounds = 100L)
 cat("-->")
 ```
 
-## Performance Assessment using Cross-validation
+## 1.2 Performance Assessment using Cross-validation
 
 Use 5-fold cross-validation to estimate the generalization error of the
 XGBoost learner with 100 boosting iterations on the one-hot-encoded credit task. 
@@ -166,7 +158,9 @@ rr$aggregate()
 cat("-->")
 ```
 
-## Overview of Hyperparameters
+# 2 Hyperparameters
+
+## 2.1 Overview of Hyperparameters
 
 Apart from the number of iterations (`nrounds`), the XGBoost learner has a several other hyperparameters 
 which were kept to their default values in the previous exercise. 
@@ -243,7 +237,7 @@ model also starts to overfit faster which necessitates a lower value for `nround
 cat("-->")
 ```
 
-## Tune Hyperparameters
+## 2.2 Tune Hyperparameters
 
 Tune the the depth of tree of the `xgboost` learner on the German credit data using random search
 
@@ -348,7 +342,7 @@ tuner_random$optimize(instance_random)
 cat("-->")
 ```
 
-## Inspect the the Best Performing Setup
+## 2.3 Inspect the the Best Performing Setup
 
 Which tree depth was the best performing one?
 
@@ -388,7 +382,9 @@ and `max_depth` set to `r instance_random$result$max_depth`.
 cat("-->")
 ```
 
-## Set up an XGBoost Learner with Early Stopping
+# 3 Early Stopping
+
+## 3.1 Set up an XGBoost Learner with Early Stopping
 
 Now that we derived the best hyperparameter for the maximum depth and eta, 
 we could train our final model. 
@@ -457,7 +453,7 @@ cat("-->")
 ```
 
 
-## Training on Credit Data
+## 3.2 Training on Credit Data
 
 Train the XGBoost learner from the previous exercise on the credit data set 
 How many iterations were conducted before the boosting algorithm stopped?
@@ -497,7 +493,7 @@ xgboost_lrn2$model$niter
 cat("-->")
 ```
 
-## Extra: Nested Resampling
+# 4 Extra: Nested Resampling
 
 To receive an unbiased performance estimate when tuning hyperparameters and 
 using early stopping, conduct nested resampling with

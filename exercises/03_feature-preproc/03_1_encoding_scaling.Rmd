@@ -53,29 +53,21 @@ n = 1,000 observations of credits
 - `status`: Status of the debtor's checking account with the bank
 - `telephone`: Whether there is a telephone landline registered on the debtor's name
 
-# Recap mlr3 Tasks
-
-<!-- First, we load the German credit dataset: -->
-
-<!-- ```{r} -->
-<!-- credit = read.csv("data/german_credit.csv", header = TRUE, stringsAsFactors = TRUE) -->
-<!-- ``` -->
-
-<!-- Later, we will be interested in classifying the credit risk (binary **target** variable, `"bad"` vs. `"good"`) by using the other columns as so-called **features**. -->
-
-An `mlr3` `Task` encapsulates data with meta-information, such as the name of the target variable and the type of the learning problem (in our example this would be a **classification** task, where the target is a factor label with relatively few distinct values).
-
-<!-- To create a `TaskClassif` (the `mlr3` `Task` object for a supervised classification problem) based on the German credit data, we can use either `TaskClassif$new()` or `as_task_classif()`: -->
-
 ```{r}
 library(mlr3)
 task = tsk("german_credit")
+```
+
+<details>
+  <summary>**Recap: mlr3 Tasks**</summary> 
+
+An `mlr3` `Task` encapsulates data with meta-information, such as the name of the target variable and the type of the learning problem (in our example this would be a **classification** task, where the target is a factor label with relatively few distinct values).
+
+```{r}
 task
 ```
 
-<!-- By setting `target = "credit_risk"`, we specify the correct column in the data containing the target variable. `id = "german_credit"` simply assigns the task the ID `"german_credit"`. -->
-
-The `print()` method gives a short summary of the task: It has 1000 observations and 21 columns of which 20 are features. 17 features are categorical (i.e., factors) and 3 features are integer.
+We get a short summary of the task: It has 1000 observations and 21 columns of which 20 are features. 17 features are categorical (i.e., factors) and 3 features are integer.
 
 By using the `$data()` method, we get access to the data (in the form of a `data.table`):
 
@@ -95,9 +87,9 @@ To obtain information about the types of features of the task (similarly like in
 task$feature_types
 ```
 
-# Exercises
+</details>
 
-## Exercise 1: Preprocess a Task (with One-Hot Encoding)
+# 1 Preprocess a Task (with One-Hot Encoding)
 
 Use the one-hot encoding `PipeOp` to convert all categorical features from the `german_credit` task into a preprocessed task containing 0-1 indicator variables for each category level instead of categorical features.
 
@@ -146,7 +138,7 @@ cat("-->")
 ```
 
 
-## Exercise 2: Create a Simple ML Pipeline (with One-Hot Encoding)
+# 2 Create a Simple ML Pipeline (with One-Hot Encoding)
 
 Some learners cannot handle categorical features such as the the `xgboost` learner (which gives an error message when applied to a task containing categorical features):
 
@@ -208,26 +200,52 @@ cat("-->")
 ```
 
 
-## Exercise 3: Feature Transformation for Decision Trees
+# 3 Feature Transformation for Decision Trees
 
 The structure of a decision tree is insensitive to monotonic transformations of the features (and scaling is a monotonic transformation). 
 This means that although the scaled features are different to non-scaled features, the decision tree will have the same structure (the values of the split points for numeric feature might be different as the numeric features will have a different scale, but the structure of the decision tree will stay the same).
 
-Do the following tasks:
-
-1. Use the `PipeOp` to scale all numeric features from the `german_credit` task and create a preprocessed task the scaled numeric features. Do this for standard scaling (i.e. normalization by centering and scaling) and for box-cox transformation. You can look up the corresponding keys by inspecting the table `as.data.table(mlr_pipeops)[,1:2]`. Create the preprocessed tasks `task_scaled` and `task_boxcox` and check the values of the numeric features. You may have to first install the `bestNormalize` package for the boxcox transformation.
+## 3.1 Preprocessing
+Use the `PipeOp` to scale all numeric features from the `german_credit` task and create a preprocessed task the scaled numeric features. Do this for standard scaling (i.e. normalization by centering and scaling) and for box-cox transformation. You can look up the corresponding keys by inspecting the table `as.data.table(mlr_pipeops)[,1:2]`. Create the preprocessed tasks `task_scaled` and `task_boxcox` and check the values of the numeric features. You may have to first install the `bestNormalize` package for the boxcox transformation.
 
 <details>
-  <summary>**Hint for task 1:**</summary>
+  <summary>**Hint:**</summary>
   Proceed as in Exercise 1, but use `scale` and `boxcox` instead of `encode` as keys in the `po()` function. If installing the `bestNormalize` package does not work, you can also select a different scaling approach such as `scalemaxabs` or `scalerange`.
 </details>
 
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
 
-2. Create two ML pipelines, one that combines the `classif.rpart` learner with the standard scaling and another one that combines `classif.rpart` learner with the boxcox scaling. Then use the `classif.rpart` learner and the two ML pipelines on the `german_credit` task to fit 3 different decision trees (one trained on the raw task and the other two trained on the scaled and box-cox transformed task). Visualize the decision tree structure using the `rpart.plot` function from the `rpart.plot` package.
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = show.solution}
+library(mlr3pipelines)
+pos = po("scale")
+pobc = po("boxcox")
+
+task_scaled = pos$train(list(task))$output
+task_boxcox = pobc$train(list(task))$output
+
+numfeat = task$feature_types$id[task$feature_types$type == "integer"]
+task_scaled$data(cols = numfeat)
+task_boxcox$data(cols = numfeat)
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## 3.2 Visual Comparison
+Create two ML pipelines, one that combines the `classif.rpart` learner with the standard scaling and another one that combines `classif.rpart` learner with the boxcox scaling. Then use the `classif.rpart` learner and the two ML pipelines on the `german_credit` task to fit 3 different decision trees (one trained on the raw task and the other two trained on the scaled and box-cox transformed task). Visualize the decision tree structure using the `rpart.plot` function from the `rpart.plot` package.
 
 
 <details>
-  <summary>**Hint for task 2:**</summary>
+  <summary>**Hint:**</summary>
   Proceed as in Exercise 2 to create two `GraphLearner`s, one with `po("scale")` and the other one with `po("boxcox")`. Then, train the `classif.rpart` learner and the two `GraphLearner`s on the `german_credit` task. Apply the `rpart.plot` function to the trained model objects to compare the structure of the decision trees.
   Note: While for the `classif.rpart` learner, the model object is directly contained in the `$model` slot of the learner after training, the `$model` slot of the two `GraphLearners` is a list and you have to access the trained model via `$model$classif.rpart$model`.
 </details>
@@ -243,20 +261,7 @@ cat("<!--")
 <details>
 <summary>Click me:</summary>
 
-1. Solution of first task:
-```{r, eval = show.solution}
-library(mlr3pipelines)
-pos = po("scale")
-pobc = po("boxcox")
-
-numfeat = task$feature_types$id[task$feature_types$type == "integer"]
-task_scaled = pos$train(list(task))$output
-task_scaled$data(cols = numfeat)
-task_boxcox = pobc$train(list(task))$output
-task_boxcox$data(cols = numfeat)
-```
-
-2. Solution of second task showing that the decision tree strucuture is exactly the same (although the split points of the numeric features such as `amount` and `duration` are different due to the transformed features):
+The solution shows that the decision tree structure is exactly the same (although the split points of the numeric features such as `amount` and `duration` are different due to the transformed features):
 ```{r, eval = show.solution}
 library(mlr3pipelines)
 rp = lrn("classif.rpart")
@@ -292,7 +297,7 @@ rpart.plot(rp$model)
 cat("-->")
 ```
 
-## Exercise 4: Benchmark k-NN and Decison Tree with Scaling and Box-Cox Transformation
+# 4 Benchmark k-NN and Decison Tree with Scaling and Box-Cox Transformation
 
 In the previous exercise we saw that scaling does not affect a decision tree structure.
 That is scaling numeric features of a decision tree will not have any (strong) effect on the performance.
