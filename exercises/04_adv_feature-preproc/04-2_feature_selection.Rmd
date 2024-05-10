@@ -1,6 +1,6 @@
 ---
 title: "Applied Machine Learning"
-subtitle: "In-class exercise 04-X"
+subtitle: "In-class exercise 04-2"
 output:
   prettydoc::html_pretty:
     theme: hpstr
