@@ -1,5 +1,6 @@
 \documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
 
+
 \usepackage{../../style/lmu-lecture}
 % Defines macros and environments
 \input{../../style/common.tex}
@@ -17,6 +18,85 @@
 
 % scikitlearn calibration 
 % https://scikit-learn.org/stable/modules/calibration.html
+
+% \begin{frame}
+%     \frametitle{Calibration Methods}
+%     \framesubtitle{Introduction to Calibration}
+    
+%     \begin{itemize}
+%         \item \textbf{Calibration:} The process of refining predicted probabilities to align with observed frequencies.
+%         \item Necessary when model probabilities do not accurately reflect true probabilities.
+%         \item Commonly used in classification tasks such as binary or multiclass classification.
+%     \end{itemize}
+% \end{frame}
+
+% \begin{frame}
+%     \frametitle{Platt Scaling}
+    
+%     Platt scaling is a logistic regression approach to calibrate predicted probabilities.
+    
+%     \begin{align*}
+%         &\text{For binary classification:}\\
+%         &\text{Model Output: } f(x) \\
+%         &\text{Platt's Scaling: } P(y=1|x) = \frac{1}{1 + e^{a \cdot f(x) + b}}
+%     \end{align*}
+    
+%     \begin{itemize}
+%         \item Example: Logistic regression is trained on model predictions to estimate $a$ and $b$.
+%     \end{itemize}
+% \end{frame}
+
+% \begin{frame}
+%     \frametitle{Isotonic Regression}
+    
+%     Isotonic regression fits a non-decreasing function to calibrate predicted probabilities.
+    
+%     \begin{align*}
+%         &\text{For binary classification:}\\
+%         &\text{Model Output: } f(x) \\
+%         &\text{Isotonic Regression: } P(y=1|x) = g(f(x))
+%     \end{align*}
+    
+%     \begin{itemize}
+%         \item Example: Piecewise constant function is fitted to map model predictions to calibrated probabilities.
+%     \end{itemize}
+% \end{frame}
+
+% \begin{frame}
+%     \frametitle{Beta Calibration}
+    
+%     Beta calibration is a method based on a parametric family of transformations.
+    
+%     \begin{align*}
+%         &\text{For binary classification:}\\
+%         &\text{Model Output: } f(x) \\
+%         &\text{Beta Calibration: } P(y=1|x) = \frac{f(x)^{\alpha}}{f(x)^{\alpha} + (1 - f(x))^{\beta}}
+%     \end{align*}
+    
+%     \begin{itemize}
+%         \item Example: Parameters $\alpha$ and $\beta$ are learned through cross-validation or maximum likelihood estimation.
+%     \end{itemize}
+% \end{frame}
+\begin{frame}{Calibration and Discrimination}
+
+Consider a binary outcome with $Y=1$ as positive and $Y=0$ as negative label.
+
+\begin{itemize}
+  \item \textbf{Discrimination:} Ability to perfectly separate the population into positive and negative instances.
+    Measures of discrimination are, for example, FPR, TPR, AUC.
+  \item \textbf{Calibration:} When the predicted probabilities closely agree with the observed outcome (for any reasonable grouping).
+  \begin{itemize}
+    \item \textbf{Calibration in the large} is a property of the \textit{full sample}.
+    It compares the observed probability in the full sample (e.g. proportion of positive instances)
+   % <!-- (e.g., 10% if 10 of 100 individuals have the outcome being predicted, e.g. $y=1$) -->
+    with the average predicted probability in the full sample.
+    \item \textbf{Calibration in the small} is a property of \textit{subsets} of the sample.
+    It compares the observed proportion of positive instances in each subset with the average predicted probability in that subset.
+  \end{itemize}
+
+\end{itemize}
+    
+\end{frame}
 
 \begin{frame}{Calibration versus Discrimination}
 
