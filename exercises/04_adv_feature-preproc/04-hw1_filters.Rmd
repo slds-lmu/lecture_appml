@@ -1,6 +1,6 @@
 ---
 title: "Applied Machine Learning"
-subtitle: "Homework exercise 03-2"
+subtitle: "Homework exercise 04-1"
 output:
   prettydoc::html_pretty:
     theme: hpstr
@@ -117,7 +117,7 @@ cat("<!--")
 <details>
 <summary>Click me:</summary>
 
-```{r, eval = show.solution}
+```{r, include = show.solution}
 # Create rf learner 
 rf = lrn("regr.ranger")
 
@@ -169,7 +169,7 @@ cat("-->")
 
 ## Exercise 2: Information gain
 
-An alternative filter method is information gain (include source here). Recreate the pipeline from exercise 1, but use information gain as filter. Again, select the three features with the highest information gain. Train the `autotuner` on the training data, and evaluate the performance on the holdout test data.
+An alternative filter method is information gain (https://mlr3filters.mlr-org.com/reference/mlr_filters_information_gain.html). Recreate the pipeline from exercise 1, but use information gain as filter. Again, select the three features with the highest information gain. Train the `autotuner` on the training data, and evaluate the performance on the holdout test data.
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("<!--")
@@ -180,7 +180,7 @@ cat("<!--")
 <details>
 <summary>Click me:</summary>
 
-```{r, eval = show.solution}
+```{r, include = show.solution}
 # Create "information_gain" filter pipeline element
 info_filter = po("filter", filter = flt("information_gain"))
 # Use the 8 features with the highest filter value
@@ -210,7 +210,7 @@ cat("-->")
 
 ## Exercise 3: Pearson correlation vs. Information gain
 
-Compare the performance between both filter methods. 
+We receive the following performance scores for the two filter methods: 
 
 ```{r}
 score_rf_cor
@@ -274,6 +274,10 @@ tasktest$filter(split$test)
 ```
 
 As the two features with missing values are both numeric, we can compare two simple strategies for imputation: mean imputation and histogram imputation. While the former replaces `NAs` with the mean value of a feature, the latter samples from the empirical distribution of the non-`NA` values of the feature, ensuring that the marginal distribution is preserved. For each imputation method, construct a simple pipeline that trains a random forest without any HPO on the `tasktrain`, and evaluate the model on `tasktest` using MSE.
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
 
 ### Solution:
 

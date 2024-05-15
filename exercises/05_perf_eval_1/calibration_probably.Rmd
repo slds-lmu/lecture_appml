@@ -32,6 +32,8 @@ library(discrim)
 library(gridExtra)
 
 tidymodels_prefer()
+
+set.seed(12345)
 ```
 
 ## Data: predicting cell segmentation quality
@@ -74,15 +76,13 @@ cat("<!--")
 <summary>**Click me:**</summary>
 
 ```{r}
-set.seed(12345)
+trainval_test_split <- initial_split(cells, prop = 0.6, strata = class)
+cells_train_val <- training(trainval_test_split)
+train_val_split <- initial_split(cells_train_val, prop = 0.7, strata = class)
 
-train_val_split <- initial_split(cells, prop = 0.6, strata = class)
-cells_train_val <- training(train_val_split)
-val_split <- initial_split(cells_train_val, prop = 0.7, strata = class)
-
-cells_train <- training(val_split)
-cells_val <- testing(val_split)
-cells_test <- testing(train_val_split)
+cells_train <- training(train_val_split)
+cells_val <- testing(train_val_split)
+cells_test <- testing(trainval_test_split)
 ```
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
@@ -157,6 +157,8 @@ predictions_test <- nb_fit %>%
   predict(cells_test, type = "prob") %>%
   select(.pred_PS) %>%
   bind_cols(cells_test)
+
+head(predictions_test)[1:5]
 ```
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
@@ -224,13 +226,15 @@ grid.arrange(uncalibrated10, uncalibrated5, ncol = 2)
 cat("-->")
 ```
 
-## 6.1 Platt scaling with {base R}
+## 6 Platt scaling
 
 The good news is that we can do something about this. There are tools to "fix" the probability estimates so that they have better properties, such as falling along the diagonal lines in the diagnostic plots shown above. Different methods improve the predictions in different ways. 
 
 The most common approach is Platt scaling, also called logistic calibration. This works in the following way: The original model is used to predict on the validation data set, returning predicted probabilities. We already know these probabilities are off, i.e., not well-calibrated. Then, we fit a simple logistic regression model, using the predicted probabilities from the original model as "x/feature" and the true labels as "y/target". In this way, we stack a second model on top of the first one: Original Model -> Probabilities -> Logistic Regression Model -> Calibrated Probabilities.
 
 If effective, the logistic regression model estimates the probability regions where the original model is off (as shown in the diagnostic plot). For example, suppose that when the model predicts a 2% event rate, the logistic regression model estimates that it under-predicts the probability by 5% (relative to the observed data). Given this gap, new predictions are adjusted up so that the probability estimates are more in-line with the data.  
+
+## 6.1 Platt scaling with {base R}
 
 ## 6.1.1 Task
 
@@ -285,12 +289,22 @@ predictions_test_calibrated <- predictions_test
 predictions_test_calibrated$.pred_PS <- predict(calibrator_logreg, newdata = predictions_test_calibrated, type = "response")
 ```
 
-How well-calibrated is this model?
+How well-calibrated is this model? Assess the model performance by checking the ROC AUC and the Brier score of the calibrated model and the model calibration by looking at the histogram of predicted probabilities and by comparing calibration plots of the calibrated model to the uncalibrated model (as in exercises 4 and 5).
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
 
 ```{r, message = FALSE}
 roc_auc(predictions_test_calibrated, truth = class, .pred_PS)
 brier_class(predictions_test_calibrated, class, .pred_PS)
 ```
+
+We can see a slight improvement: The brier score as evaluated on the test data improved. Interestingly, the ROC AUC remains unaffected. This should be no surprise, however, as the ROC AUC assesses a model's ability to discriminate between classes. If we simply squash the probabilities using the logistic function, this will likely not change the predicted labels too much.
 
 Let's check the histogram of predicted probabilities and compare calibration plots of the calibrated model to the uncalibrated model.
 
@@ -302,9 +316,13 @@ grid.arrange(uncalibrated10, log_calibrated10, ncol = 2)
 grid.arrange(uncalibrated5, log_calibrated5, ncol = 2)
 ```
 
-We can see a slight improvement: The brier score as evaluated on the test data improved. Interestingly, the AUC remains unaffected. This should be no surprise, however, as the AUC assesses a model's ability to discriminate between classes. If we simply squash the probabilities using the logistic function, this will likely not change the predicted labels too much.
+An improvement can also be observed here, as the calibration diagrams of the calibrated model are closer to the diagonal than those of the uncalibrated model.
 
-## 6.1 Platt scaling with {probably}
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## 6.2 Platt scaling with {probably}
 
 ## 6.2.1 Task
 
@@ -338,7 +356,7 @@ predictions_test <- nb_fit %>%
 <details>
 <summary>**Hint 2:**</summary>
 
-Take a look at the [function reference](https://probably.tidymodels.org/reference/index.html#calibration). You will need one function to compute the calibration model, and another function to recompute the model probabilities. As a sanity check, we should get score the same metrics as by using base R.
+Take a look at the [function reference](https://probably.tidymodels.org/reference/index.html#calibration). You will need one function to compute the calibration model, and another function to recompute the model probabilities. As a sanity check, we should score the same metrics as when using base R.
 
 </details>
 
@@ -376,6 +394,14 @@ cat("-->")
 
 Let's check if the metrics for the approach using `probably` match with the results we got using base R.
 
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
 ```{r, message = FALSE}
 # Sanity check:
 roc_auc(predictions_test_calibrated_alt, truth = class, .pred_PS)
@@ -383,6 +409,10 @@ brier_class(predictions_test_calibrated_alt, class, .pred_PS)
 ```
 
 Indeed, both approaches yield the same results.
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
 
 ## 7 Isotonic regression
 
@@ -421,7 +451,7 @@ cat("-->")
 ## 8 Resamping for Calibration with probably
 
 The advantage of using `probably` for calibration is that one can easily access different calibration methods within a unified framework.
-In the examples above, we have used a simple train-validate-test split to perform calibration and evaluate the resulting models. In practice, we would prefer to use resampling, e.g. as in cross-validation (CV), to assess calibration methods. This can be done with `probably`. In fact, we can use the `cal_validate_*()` function family to calibrate models contained in `resample_results` objects created with tidymodels. Fit 10 Naive Bayes models using 10-fold CV and calibrate each of these models using beta calibration, another calibration method.
+In the examples above, we have used a simple train-validate-test split to perform calibration and evaluate the resulting models. In practice, we would prefer to use resampling, e.g. as in cross-validation (CV), to assess calibration methods. This can also be done with `probably`. In fact, we can use the `cal_validate_*()` function family to calibrate models contained in `resample_results` objects created with tidymodels. Fit 10 Naive Bayes models using 10-fold CV and calibrate each of these models using beta calibration, another calibration method.
 
 <details>
 <summary>**Hint 1:**</summary>
@@ -430,10 +460,10 @@ You can use the following code skeleton, detailing the required steps:
 
 ```{r, eval = FALSE}
 # Create CV specification
-## -> your code here <- ##
+cells_cv <- vfold_cv(...)
 
 # Specify metrics
-metr <- metric_set(roc_auc, brier_class)
+metr <- metric_set(...)
 
 # Save predictions
 ctrl <- control_resamples(save_pred = TRUE)
@@ -444,10 +474,10 @@ bayes_wflow <- workflow() %>%
   add_model(naive_Bayes())
 
 # Fit resamples
-## -> your code here <- ##
+bayes_res <- fit_resamples(...)
 
 # Calibrate each of the models
-## -> your code here <- ##
+beta_val <- cal_validate_beta(...)
 
 # Evaluate calibrated models
 collect_metrics(beta_val)
@@ -465,7 +495,7 @@ cat("<!--")
 
 ```{r, message = FALSE}
 # Create CV specification
-cells_cv <- vfold_cv(cells, strata = class)
+cells_cv <- vfold_cv(cells, strata = class) # 10 folds per default
 
 # Specify metrics
 metr <- metric_set(roc_auc, brier_class)
@@ -480,7 +510,7 @@ bayes_wflow <- workflow() %>%
 
 # Fit resamples
 bayes_res <- fit_resamples(
-  object <- bayes_wflow,
+  object = bayes_wflow,
   metrics = metr,
   resamples = cells_cv,
   control = ctrl
