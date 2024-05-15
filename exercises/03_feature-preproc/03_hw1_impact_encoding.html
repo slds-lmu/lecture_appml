@@ -257,7 +257,7 @@ model later on:</p>
 2016</a> is a highly performant library for gradient-boosted trees. As
 some other ML learners, it cannot handle categorical data, so
 categorical features must be encoded as numerical variables. In the King
-county data, there are two categorial features encoded as
+county data, there are two categorical features encoded as
 <code>factor</code>:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>ft <span class="ot">=</span> task<span class="sc">$</span>feature_types</span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>ft[ft[[<span class="dv">2</span>]] <span class="sc">==</span> <span class="st">&quot;factor&quot;</span>]</span>
@@ -368,52 +368,69 @@ preprocessing and the XGboost learner.</p>
 <span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a>  <span class="at">search_space =</span> ...,</span>
 <span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a>  <span class="at">resampling =</span> ...,</span>
 <span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a>  <span class="at">measure =</span> ...,</span>
-<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a>  <span class="at">term_time =</span> ...)</span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a>  <span class="at">term_time =</span> ...) <span class="co"># Maximum allowed time in seconds.</span></span>
 <span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a></span>
 <span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co"># Combine pipeline:</span></span>
 <span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a>glrn_xgb_impact <span class="ot">=</span> <span class="fu">as_learner</span>(...)</span>
 <span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a>glrn_xgb_impact<span class="sc">$</span>id <span class="ot">=</span> <span class="st">&quot;XGB_enc_impact&quot;</span></span></code></pre></div>
 </details>
-<!--
-
-### Solution:
-
+<div id="solution" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>Click me:</summary>
-
-
-```r
-# Create xgboost learner 
-xgb = lrn("regr.xgboost")
-as.data.table(xgb$param_set$values)
-
-# Set search space from mlr3tuningspaces
-xgb_ts = lts(xgb)
-as.data.table(xgb_ts$param_set$values)
-
-# Set nrounds and nthread:
-xgb_ts$param_set$values$nrounds = 100
-xgb_ts$param_set$values$nthread = parallel::detectCores()
-
-# Combine xgb_ts with impact encoding
-xgb_ts_impact = as_learner(po("encodeimpact") %>>% xgb_ts)
-as.data.table(xgb_ts_impact$param_set$values)
-
-# Use random search:
-tuner = tnr("random_search")
-
-# Create auto-tuned xgboost
-auto_xgb_impact = auto_tuner(
-  tuner = tuner,
-  learner = xgb_ts_impact,
-  resampling = rsmp("cv", folds = 2),
-  measure = msr("regr.mse"),
-  term_evals = 20
-)
-```
-
-
--->
+<summary>
+Click me:
+</summary>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Create xgboost learner </span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>xgb <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;regr.xgboost&quot;</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="fu">as.data.table</span>(xgb<span class="sc">$</span>param_set<span class="sc">$</span>values)</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="do">##    nrounds nthread verbose early_stopping_set</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="do">## 1:       1       1       0               none</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co"># Set search space from mlr3tuningspaces</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>xgb_ts <span class="ot">=</span> <span class="fu">lts</span>(xgb)</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="fu">as.data.table</span>(xgb_ts<span class="sc">$</span>param_set<span class="sc">$</span>values)</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="do">##             nrounds nthread verbose early_stopping_set                                eta      max_depth</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="do">## 1:        &lt;list[3]&gt;       1       0               none                          &lt;list[3]&gt;      &lt;list[3]&gt;</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="do">## 2: to_tune(1, 5000)       1       0               none to_tune(1e-04, 1, logscale = TRUE) to_tune(1, 20)</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="do">##    colsample_bytree colsample_bylevel                                lambda                                 alpha</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="do">## 1:        &lt;list[3]&gt;         &lt;list[3]&gt;                             &lt;list[3]&gt;                             &lt;list[3]&gt;</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="do">## 2:  to_tune(0.1, 1)   to_tune(0.1, 1) to_tune(0.001, 1000, logscale = TRUE) to_tune(0.001, 1000, logscale = TRUE)</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="do">##          subsample</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="do">## 1:       &lt;list[3]&gt;</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="do">## 2: to_tune(0.1, 1)</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="co"># Set nrounds and nthread:</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a>xgb_ts<span class="sc">$</span>param_set<span class="sc">$</span>values<span class="sc">$</span>nrounds <span class="ot">=</span> <span class="dv">100</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a>xgb_ts<span class="sc">$</span>param_set<span class="sc">$</span>values<span class="sc">$</span>nthread <span class="ot">=</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>()</span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="co"># Combine xgb_ts with impact encoding</span></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a>xgb_ts_impact <span class="ot">=</span> <span class="fu">as_learner</span>(<span class="fu">po</span>(<span class="st">&quot;encodeimpact&quot;</span>) <span class="sc">%&gt;&gt;%</span> xgb_ts)</span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="fu">as.data.table</span>(xgb_ts_impact<span class="sc">$</span>param_set<span class="sc">$</span>values)</span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="do">##    encodeimpact.smoothing encodeimpact.impute_zero regr.xgboost.nrounds regr.xgboost.nthread regr.xgboost.verbose</span></span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="do">## 1:                 0.0001                    FALSE                  100                    8                    0</span></span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="do">## 2:                 0.0001                    FALSE                  100                    8                    0</span></span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a><span class="do">##    regr.xgboost.early_stopping_set                   regr.xgboost.eta regr.xgboost.max_depth</span></span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a><span class="do">## 1:                            none                          &lt;list[3]&gt;              &lt;list[3]&gt;</span></span>
+<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a><span class="do">## 2:                            none to_tune(1e-04, 1, logscale = TRUE)         to_tune(1, 20)</span></span>
+<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a><span class="do">##    regr.xgboost.colsample_bytree regr.xgboost.colsample_bylevel                   regr.xgboost.lambda</span></span>
+<span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a><span class="do">## 1:                     &lt;list[3]&gt;                      &lt;list[3]&gt;                             &lt;list[3]&gt;</span></span>
+<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a><span class="do">## 2:               to_tune(0.1, 1)                to_tune(0.1, 1) to_tune(0.001, 1000, logscale = TRUE)</span></span>
+<span id="cb7-36"><a href="#cb7-36" tabindex="-1"></a><span class="do">##                       regr.xgboost.alpha regr.xgboost.subsample</span></span>
+<span id="cb7-37"><a href="#cb7-37" tabindex="-1"></a><span class="do">## 1:                             &lt;list[3]&gt;              &lt;list[3]&gt;</span></span>
+<span id="cb7-38"><a href="#cb7-38" tabindex="-1"></a><span class="do">## 2: to_tune(0.001, 1000, logscale = TRUE)        to_tune(0.1, 1)</span></span>
+<span id="cb7-39"><a href="#cb7-39" tabindex="-1"></a></span>
+<span id="cb7-40"><a href="#cb7-40" tabindex="-1"></a><span class="co"># Use random search:</span></span>
+<span id="cb7-41"><a href="#cb7-41" tabindex="-1"></a>tuner <span class="ot">=</span> <span class="fu">tnr</span>(<span class="st">&quot;random_search&quot;</span>)</span>
+<span id="cb7-42"><a href="#cb7-42" tabindex="-1"></a></span>
+<span id="cb7-43"><a href="#cb7-43" tabindex="-1"></a><span class="co"># Create auto-tuned xgboost</span></span>
+<span id="cb7-44"><a href="#cb7-44" tabindex="-1"></a>auto_xgb_impact <span class="ot">=</span> <span class="fu">auto_tuner</span>(</span>
+<span id="cb7-45"><a href="#cb7-45" tabindex="-1"></a>  <span class="at">tuner =</span> tuner,</span>
+<span id="cb7-46"><a href="#cb7-46" tabindex="-1"></a>  <span class="at">learner =</span> xgb_ts_impact,</span>
+<span id="cb7-47"><a href="#cb7-47" tabindex="-1"></a>  <span class="at">resampling =</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> <span class="dv">2</span>),</span>
+<span id="cb7-48"><a href="#cb7-48" tabindex="-1"></a>  <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">&quot;regr.mse&quot;</span>),</span>
+<span id="cb7-49"><a href="#cb7-49" tabindex="-1"></a>  <span class="at">term_time =</span> <span class="dv">20</span></span>
+<span id="cb7-50"><a href="#cb7-50" tabindex="-1"></a>)</span></code></pre></div>
+</div>
 </div>
 <div id="exercise-2-benchmark-a-pipeline" class="section level2">
 <h2>Exercise 2: Benchmark a pipeline</h2>
@@ -439,53 +456,42 @@ autotuners on <code>tasktrain</code> and evaluate their performance on
 <p>To conduct performance evaluation, use <code>$aggregate()</code> on
 the benchmark object.</p>
 </details>
-<!--
-
-### Solution:
-
+<div id="solution-1" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>Click me:</summary>
-
-
-```r
-# Pipeline for One-Hot Encoding only:
-auto_xgb_oh = auto_tuner(
-  tuner = tuner,
-  learner = as_learner(po("encode") %>>% xgb_ts),
-  resampling = rsmp("cv", folds = 2),
-  measure = msr("regr.mse"),
-  term_evals = 20
-)
-
-# Resampling design for benchmark:
-rsmp_cv2 = rsmp("cv", folds = 2)
-rsmp_cv2$instantiate(tasktrain)
-
-# Conduct benchmark:
-lgr::get_logger("mlr3")$set_threshold("warn")
-bmr = benchmark(benchmark_grid(tasktrain, c(auto_xgb_oh, auto_xgb_impact), rsmp_cv2))
-```
-
-
-```r
-# Aggregate results:
-bmr$aggregate(measure = msr("regr.mse"))[, .(learner_id, regr.mse)]
-```
-
-
-```r
-auto_xgb_oh$train(tasktrain)
-auto_xgb_impact$train(tasktrain)
-```
-
-
-```r
-auto_xgb_oh$predict(tasktest)$score()
-auto_xgb_impact$predict(tasktest)$score()
-```
-
-
--->
+<summary>
+Click me:
+</summary>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Pipeline for One-Hot Encoding only:</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>auto_xgb_oh <span class="ot">=</span> <span class="fu">auto_tuner</span>(</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="at">tuner =</span> tuner,</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">learner =</span> <span class="fu">as_learner</span>(<span class="fu">po</span>(<span class="st">&quot;encode&quot;</span>) <span class="sc">%&gt;&gt;%</span> xgb_ts),</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="at">resampling =</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> <span class="dv">2</span>),</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">&quot;regr.mse&quot;</span>),</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>  <span class="at">term_time =</span> <span class="dv">20</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>)</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co"># Resampling design for benchmark:</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>rsmp_cv2 <span class="ot">=</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> <span class="dv">2</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>rsmp_cv2<span class="sc">$</span><span class="fu">instantiate</span>(tasktrain)</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co"># Conduct benchmark:</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>lgr<span class="sc">::</span><span class="fu">get_logger</span>(<span class="st">&quot;mlr3&quot;</span>)<span class="sc">$</span><span class="fu">set_threshold</span>(<span class="st">&quot;warn&quot;</span>)</span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>bmr <span class="ot">=</span> <span class="fu">benchmark</span>(<span class="fu">benchmark_grid</span>(tasktrain, <span class="fu">c</span>(auto_xgb_oh, auto_xgb_impact), rsmp_cv2))</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Aggregate results:</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>bmr<span class="sc">$</span><span class="fu">aggregate</span>(<span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">&quot;regr.mse&quot;</span>))[, .(learner_id, regr.mse)]</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="do">##                         learner_id regr.mse</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="do">## 1:       encode.regr.xgboost.tuned 25135.04</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="do">## 2: encodeimpact.regr.xgboost.tuned 17342.68</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>auto_xgb_oh<span class="sc">$</span><span class="fu">train</span>(tasktrain)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>auto_xgb_impact<span class="sc">$</span><span class="fu">train</span>(tasktrain)</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>auto_xgb_oh<span class="sc">$</span><span class="fu">predict</span>(tasktest)<span class="sc">$</span><span class="fu">score</span>()</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="do">## regr.mse </span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="do">## 18049.98</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>auto_xgb_impact<span class="sc">$</span><span class="fu">predict</span>(tasktest)<span class="sc">$</span><span class="fu">score</span>()</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="do">## regr.mse </span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="do">## 15771.81</span></span></code></pre></div>
+</div>
 </div>
 </div>
 <div id="summary" class="section level1">

@@ -65,7 +65,7 @@ tasktest
 
 # XGBoost
 
-XGBoost ([Chen and Guestrin, 2016](https://dl.acm.org/doi/10.1145/2939672.2939785) is a highly performant library for gradient-boosted trees. As some other ML learners, it cannot handle categorical data, so categorical features must be encoded as numerical variables. In the King county data, there are two categorial features encoded as `factor`:
+XGBoost ([Chen and Guestrin, 2016](https://dl.acm.org/doi/10.1145/2939672.2939785) is a highly performant library for gradient-boosted trees. As some other ML learners, it cannot handle categorical data, so categorical features must be encoded as numerical variables. In the King county data, there are two categorical features encoded as `factor`:
 
 ```{r}
 ft = task$feature_types
@@ -133,7 +133,7 @@ at = auto_tuner(
   search_space = ...,
   resampling = ...,
   measure = ...,
-  term_time = ...)
+  term_time = ...) # Maximum allowed time in seconds.
 
 # Combine pipeline:
 glrn_xgb_impact = as_learner(...)
@@ -177,7 +177,7 @@ auto_xgb_impact = auto_tuner(
   learner = xgb_ts_impact,
   resampling = rsmp("cv", folds = 2),
   measure = msr("regr.mse"),
-  term_evals = 20
+  term_time = 20
 )
 ```
 
@@ -221,7 +221,7 @@ auto_xgb_oh = auto_tuner(
   learner = as_learner(po("encode") %>>% xgb_ts),
   resampling = rsmp("cv", folds = 2),
   measure = msr("regr.mse"),
-  term_evals = 20
+  term_time = 20
 )
 
 # Resampling design for benchmark:

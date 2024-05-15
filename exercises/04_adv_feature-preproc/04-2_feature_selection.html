@@ -243,22 +243,26 @@ classification accuracy as the <code>measure</code> and terminate after
 <span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  <span class="at">terminator =</span> ...</span>
 <span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>)</span></code></pre></div>
 </details>
-<div id="solution" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>task_gc<span class="sc">$</span><span class="fu">select</span>(<span class="fu">c</span>(<span class="st">&quot;age&quot;</span>, <span class="st">&quot;amount&quot;</span>, <span class="st">&quot;credit_history&quot;</span>, <span class="st">&quot;duration&quot;</span>))</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>instance <span class="ot">=</span> <span class="fu">fsi</span>(</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="at">task =</span> task_gc,</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="at">learner =</span> lrn_ranger,</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="at">resampling =</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> <span class="dv">3</span>),</span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">&quot;classif.acc&quot;</span>),</span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  <span class="at">terminator =</span> <span class="fu">trm</span>(<span class="st">&quot;evals&quot;</span>, <span class="at">n_evals =</span> <span class="dv">20</span>)</span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>)</span></code></pre></div>
-</div>
+<summary>**Click me:**</summary>
+
+
+```r
+task_gc$select(c("age", "amount", "credit_history", "duration"))
+
+instance = fsi(
+  task = task_gc,
+  learner = lrn_ranger,
+  resampling = rsmp("cv", folds = 3),
+  measure = msr("classif.acc"),
+  terminator = trm("evals", n_evals = 20)
+)
+```
+
+-->
 </div>
 <div id="start-the-feature-selection" class="section level2">
 <h2>1.2 Start the Feature Selection</h2>
@@ -271,62 +275,41 @@ the <code>FSelectInstanceSingleCrit</code> object to the
 <summary>
 <strong>Hint 1:</strong>
 </summary>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>fselector <span class="ot">=</span> <span class="fu">fs</span>(...)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>fselector <span class="ot">=</span> <span class="fu">fs</span>(...)</span></code></pre></div>
 </details>
 <details>
 <summary>
 <strong>Hint 2:</strong>
 </summary>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>fselector <span class="ot">=</span> <span class="fu">fs</span>(...)</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>fselector<span class="sc">$</span><span class="fu">optimize</span>(...)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>fselector <span class="ot">=</span> <span class="fu">fs</span>(...)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>fselector<span class="sc">$</span><span class="fu">optimize</span>(...)</span></code></pre></div>
 </details>
-<div id="solution-1" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>fselector <span class="ot">=</span> <span class="fu">fs</span>(<span class="st">&quot;sequential&quot;</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>fselector<span class="sc">$</span><span class="fu">optimize</span>(instance)</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="do">## INFO  [13:46:55.889] [bbotk] Starting to optimize 4 parameter(s) with &#39;&lt;FSelectorSequential&gt;&#39; and &#39;&lt;TerminatorEvals&gt; [n_evals=20, k=0]&#39;</span></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="do">## INFO  [13:46:55.994] [bbotk] Evaluating 4 configuration(s)</span></span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="do">## INFO  [13:46:59.079] [bbotk] Result of batch 1:</span></span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="do">## INFO  [13:46:59.084] [bbotk]    age amount credit_history duration classif.acc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="do">## INFO  [13:46:59.084] [bbotk]   TRUE  FALSE          FALSE    FALSE   0.6550203        0      0             0.36 66430c62-6af6-4766-bfd4-3a5801397a24</span></span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="do">## INFO  [13:46:59.084] [bbotk]  FALSE   TRUE          FALSE    FALSE   0.6040232        0      0             0.84 d46e5ba1-8c26-4a3c-a4fc-150031833637</span></span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="do">## INFO  [13:46:59.084] [bbotk]  FALSE  FALSE           TRUE    FALSE   0.7170314        0      0             0.16 1ebb64cf-3907-4cd6-a847-5a38979a319b</span></span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="do">## INFO  [13:46:59.084] [bbotk]  FALSE  FALSE          FALSE     TRUE   0.7020224        0      0             0.30 cf52945d-d34e-4201-98bb-20ab7b5dd17e</span></span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="do">## INFO  [13:46:59.087] [bbotk] Evaluating 3 configuration(s)</span></span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="do">## INFO  [13:47:00.359] [bbotk] Result of batch 2:</span></span>
-<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="do">## INFO  [13:47:00.361] [bbotk]    age amount credit_history duration classif.acc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="do">## INFO  [13:47:00.361] [bbotk]   TRUE  FALSE           TRUE    FALSE   0.7120324        0      0             0.25 f9e35b71-9336-4b83-b008-5e73070a9d30</span></span>
-<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="do">## INFO  [13:47:00.361] [bbotk]  FALSE   TRUE           TRUE    FALSE   0.7190304        0      0             0.36 6546473c-9b56-405a-939b-ce650db2f938</span></span>
-<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="do">## INFO  [13:47:00.361] [bbotk]  FALSE  FALSE           TRUE     TRUE   0.7170314        0      0             0.30 10137171-342f-4f0a-a64d-e7bf365a855c</span></span>
-<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="do">## INFO  [13:47:00.365] [bbotk] Evaluating 2 configuration(s)</span></span>
-<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="do">## INFO  [13:47:01.466] [bbotk] Result of batch 3:</span></span>
-<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="do">## INFO  [13:47:01.469] [bbotk]    age amount credit_history duration classif.acc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="do">## INFO  [13:47:01.469] [bbotk]   TRUE   TRUE           TRUE    FALSE   0.7040154        0      0             0.44 2dbbe472-2260-4de0-9e47-1f53c0a2f9a9</span></span>
-<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="do">## INFO  [13:47:01.469] [bbotk]  FALSE   TRUE           TRUE     TRUE   0.7180324        0      0             0.43 3f15f861-3ccf-4db4-8d7d-44271cdfa658</span></span>
-<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="do">## INFO  [13:47:01.472] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="do">## INFO  [13:47:02.322] [bbotk] Result of batch 4:</span></span>
-<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="do">## INFO  [13:47:02.324] [bbotk]   age amount credit_history duration classif.acc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="do">## INFO  [13:47:02.324] [bbotk]  TRUE   TRUE           TRUE     TRUE   0.7000264        0      0             0.77 9fc63cf4-4652-4475-88bd-60a27f974bff</span></span>
-<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="do">## INFO  [13:47:02.329] [bbotk] Finished optimizing after 10 evaluation(s)</span></span>
-<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="do">## INFO  [13:47:02.330] [bbotk] Result:</span></span>
-<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="do">## INFO  [13:47:02.332] [bbotk]    age amount credit_history duration              features classif.acc</span></span>
-<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="do">## INFO  [13:47:02.332] [bbotk]  FALSE   TRUE           TRUE    FALSE amount,credit_history   0.7190304</span></span>
-<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a><span class="do">##      age amount credit_history duration              features classif.acc</span></span>
-<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a><span class="do">## 1: FALSE   TRUE           TRUE    FALSE amount,credit_history   0.7190304</span></span></code></pre></div>
-<p>The two calls (<code>fsi()</code>and <code>fs()</code>) can also be
-executed by one sugar function (<code>fselect()</code>):</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>instance <span class="ot">=</span> <span class="fu">fselect</span>(</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  <span class="at">fselector =</span> <span class="fu">fs</span>(<span class="st">&quot;sequential&quot;</span>),</span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="at">task =</span>  task_gc,</span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">learner =</span> lrn_ranger,</span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="at">resampling =</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> <span class="dv">3</span>),</span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">&quot;classif.acc&quot;</span>)</span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>)</span></code></pre></div>
-</div>
+<summary>**Click me:**</summary>
+
+
+```r
+fselector = fs("sequential")
+fselector$optimize(instance)
+```
+
+The two calls (`fsi()`and `fs()`) can also be executed by one sugar function (`fselect()`): 
+
+
+```r
+instance = fselect(
+  fselector = fs("sequential"),
+  task =  task_gc,
+  learner = lrn_ranger,
+  resampling = rsmp("cv", folds = 3),
+  measure = msr("classif.acc")
+)
+```
+
+-->
 </div>
 <div id="evaluate" class="section level2">
 <h2>1.3 Evaluate</h2>
@@ -336,54 +319,50 @@ archive for each of the first two batches.</p>
 <summary>
 <strong>Hint 1:</strong>
 </summary>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>instance<span class="sc">$</span>archive<span class="sc">$</span>data[...]</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>instance<span class="sc">$</span>archive<span class="sc">$</span>data[...]</span></code></pre></div>
 </details>
 <details>
 <summary>
 <strong>Hint 2:</strong>
 </summary>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>instance<span class="sc">$</span>archive<span class="sc">$</span>data[batch_nr <span class="sc">==</span> ..., ...]</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>instance<span class="sc">$</span>archive<span class="sc">$</span>data[batch_nr <span class="sc">==</span> ..., ...]</span></code></pre></div>
 </details>
-<div id="solution-2" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>instance<span class="sc">$</span>archive<span class="sc">$</span>data[batch_nr <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="do">##      age amount credit_history duration classif.acc</span></span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="do">## 1:  TRUE  FALSE          FALSE    FALSE   0.6550203</span></span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="do">## 2: FALSE   TRUE          FALSE    FALSE   0.6040232</span></span>
-<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="do">## 3: FALSE  FALSE           TRUE    FALSE   0.7170314</span></span>
-<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="do">## 4: FALSE  FALSE          FALSE     TRUE   0.7020224</span></span></code></pre></div>
-<p>The highest accuracy results when the model relies on
-<code>credit_history</code>. So for the next batch, only combinations
-with <code>credit_history</code> are considered:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>instance<span class="sc">$</span>archive<span class="sc">$</span>data[batch_nr <span class="sc">==</span> <span class="dv">2</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="do">##      age amount credit_history duration classif.acc</span></span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="do">## 1:  TRUE  FALSE           TRUE    FALSE   0.7120324</span></span>
-<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="do">## 2: FALSE   TRUE           TRUE    FALSE   0.7190304</span></span>
-<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="do">## 3: FALSE  FALSE           TRUE     TRUE   0.7170314</span></span></code></pre></div>
-<p>We see that the accuracy increases when using the two features
-<code>amount</code> and <code>credit_history</code> compared to using
-only <code>credit_history</code>.</p>
-<p>Alternatively with <code>data.table</code>:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">as.data.table</span>(instance<span class="sc">$</span>archive)[batch_nr <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
-<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="do">##      age amount credit_history duration classif.acc</span></span>
-<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="do">## 1:  TRUE  FALSE          FALSE    FALSE   0.6550203</span></span>
-<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="do">## 2: FALSE   TRUE          FALSE    FALSE   0.6040232</span></span>
-<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="do">## 3: FALSE  FALSE           TRUE    FALSE   0.7170314</span></span>
-<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="do">## 4: FALSE  FALSE          FALSE     TRUE   0.7020224</span></span>
-<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="fu">as.data.table</span>(instance<span class="sc">$</span>archive)[batch_nr <span class="sc">==</span> <span class="dv">2</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
-<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="do">##      age amount credit_history duration classif.acc</span></span>
-<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="do">## 1:  TRUE  FALSE           TRUE    FALSE   0.7120324</span></span>
-<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="do">## 2: FALSE   TRUE           TRUE    FALSE   0.7190304</span></span>
-<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="do">## 3: FALSE  FALSE           TRUE     TRUE   0.7170314</span></span></code></pre></div>
-<p>A visualization of all batches can be created via
-<code>autoplot</code>:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">autoplot</span>(instance, <span class="at">type =</span> <span class="st">&quot;performance&quot;</span>)</span></code></pre></div>
-<p><img src="04-2_feature_selection_files/figure-html/unnamed-chunk-20-1.png" /><!-- --></p>
-</div>
+<summary>**Click me:**</summary>
+
+
+```r
+instance$archive$data[batch_nr == 1, 1:5]
+```
+
+The highest accuracy results when the model relies on `credit_history`. So for the next batch, only combinations with `credit_history` are considered:
+
+
+```r
+instance$archive$data[batch_nr == 2, 1:5]
+```
+
+We see that the accuracy increases when using the two features `amount` and `credit_history` compared to using only `credit_history`.
+
+Alternatively with `data.table`:
+
+
+```r
+as.data.table(instance$archive)[batch_nr == 1, 1:5]
+as.data.table(instance$archive)[batch_nr == 2, 1:5]
+```
+
+A visualization of all batches can be created via `autoplot`:
+
+
+```r
+autoplot(instance, type = "performance")
+```
+
+-->
 </div>
 <div id="model-training" class="section level2">
 <h2>1.4 Model Training</h2>
@@ -399,24 +378,27 @@ and select the feature(s) accordingly.</p>
 <summary>
 <strong>Hint 2:</strong>
 </summary>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>task_gc <span class="ot">=</span> ...</span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>task_gc<span class="sc">$</span><span class="fu">select</span>(...)</span>
-<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>lrn_ranger<span class="sc">$</span><span class="fu">train</span>(...)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>task_gc <span class="ot">=</span> ...</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>task_gc<span class="sc">$</span><span class="fu">select</span>(...)</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>lrn_ranger<span class="sc">$</span><span class="fu">train</span>(...)</span></code></pre></div>
 </details>
-<div id="solution-3" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<p>The feature(s) resulting in the highest accuracy should be selected,
-so, here <code>amount</code> and <code>credit_history</code>:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>task_gc <span class="ot">=</span> <span class="fu">tsk</span>(<span class="st">&quot;german_credit&quot;</span>)</span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>task_gc<span class="sc">$</span><span class="fu">select</span>(instance<span class="sc">$</span>result_feature_set)</span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>task_gc<span class="sc">$</span>feature_names</span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="do">## [1] &quot;amount&quot;         &quot;credit_history&quot;</span></span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>lrn_ranger<span class="sc">$</span><span class="fu">train</span>(task_gc)</span></code></pre></div>
-</div>
+<summary>**Click me:**</summary>
+
+The feature(s) resulting in the highest accuracy should be selected, so, here `amount` and `credit_history`:
+
+
+```r
+task_gc = tsk("german_credit")
+task_gc$select(instance$result_feature_set)
+task_gc$feature_names
+lrn_ranger$train(task_gc)
+```
+
+-->
 </div>
 </div>
 <div id="multiple-performance-measures" class="section level1">
@@ -428,56 +410,54 @@ followed as above except that multiple metrics are passed. Create an
 step use <code>random search</code> and take a look at the results in a
 third step.</p>
 <p>We again use the <code>german_credit</code> data:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>task_gc <span class="ot">=</span> <span class="fu">tsk</span>(<span class="st">&quot;german_credit&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>task_gc <span class="ot">=</span> <span class="fu">tsk</span>(<span class="st">&quot;german_credit&quot;</span>)</span></code></pre></div>
 <details>
 <summary>
 <strong>Hint 1:</strong>
 </summary>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>instance <span class="ot">=</span> <span class="fu">fsi</span>(...)</span></code></pre></div>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>fselector <span class="ot">=</span> <span class="fu">fs</span>(...)</span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>fselector<span class="sc">$</span><span class="fu">...</span>(...)</span></code></pre></div>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>features <span class="ot">=</span> <span class="fu">unlist</span>(<span class="fu">lapply</span>(...))</span>
-<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a><span class="fu">cbind</span>(features,...)</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>instance <span class="ot">=</span> <span class="fu">fsi</span>(...)</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>fselector <span class="ot">=</span> <span class="fu">fs</span>(...)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>fselector<span class="sc">$</span><span class="fu">...</span>(...)</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>features <span class="ot">=</span> <span class="fu">unlist</span>(<span class="fu">lapply</span>(...))</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">cbind</span>(features,...)</span></code></pre></div>
 </details>
-<div id="solution-4" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>instance <span class="ot">=</span> <span class="fu">fsi</span>(</span>
-<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>  <span class="at">task =</span> task_gc,</span>
-<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>  <span class="at">learner =</span> lrn_ranger,</span>
-<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>  <span class="at">resampling =</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> <span class="dv">3</span>),</span>
-<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>  <span class="at">measure =</span> <span class="fu">msrs</span>(<span class="fu">c</span>(<span class="st">&quot;classif.tpr&quot;</span>, <span class="st">&quot;classif.tnr&quot;</span>)),</span>
-<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a>  <span class="at">terminator =</span> <span class="fu">trm</span>(<span class="st">&quot;evals&quot;</span>, <span class="at">n_evals =</span> <span class="dv">20</span>)</span>
-<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a>)</span></code></pre></div>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a>fselector <span class="ot">=</span> <span class="fu">fs</span>(<span class="st">&quot;random_search&quot;</span>)</span>
-<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a>fselector<span class="sc">$</span><span class="fu">optimize</span>(instance)</span></code></pre></div>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a>features <span class="ot">=</span> <span class="fu">unlist</span>(<span class="fu">lapply</span>(instance<span class="sc">$</span>result<span class="sc">$</span>features, paste, <span class="at">collapse =</span> <span class="st">&quot;, &quot;</span>))</span>
-<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a><span class="fu">cbind</span>(features,instance<span class="sc">$</span>result[,<span class="fu">c</span>(<span class="st">&quot;classif.tpr&quot;</span>, <span class="st">&quot;classif.tnr&quot;</span>)])</span>
-<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a><span class="do">##                                                                                                                                                                                                                features</span></span>
-<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a><span class="do">## 1:                                                                                                                                                                                                  age, number_credits</span></span>
-<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a><span class="do">## 2:                                                                                                                                                                      amount, credit_history, other_installment_plans</span></span>
-<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a><span class="do">## 3:                                                     credit_history, duration, employment_duration, housing, installment_rate, job, number_credits, other_installment_plans, people_liable, property, savings, status</span></span>
-<span id="cb23-7"><a href="#cb23-7" tabindex="-1"></a><span class="do">## 4:                                                                                                                                                                                    credit_history, present_residence</span></span>
-<span id="cb23-8"><a href="#cb23-8" tabindex="-1"></a><span class="do">## 5: age, amount, credit_history, duration, housing, installment_rate, job, number_credits, other_debtors, other_installment_plans, personal_status_sex, present_residence, property, purpose, savings, status, telephone</span></span>
-<span id="cb23-9"><a href="#cb23-9" tabindex="-1"></a><span class="do">## 6:                            age, credit_history, duration, employment_duration, housing, installment_rate, job, number_credits, other_debtors, people_liable, personal_status_sex, property, purpose, savings, status</span></span>
-<span id="cb23-10"><a href="#cb23-10" tabindex="-1"></a><span class="do">##    classif.tpr classif.tnr</span></span>
-<span id="cb23-11"><a href="#cb23-11" tabindex="-1"></a><span class="do">## 1:   0.9913654 0.003333333</span></span>
-<span id="cb23-12"><a href="#cb23-12" tabindex="-1"></a><span class="do">## 2:   0.9490556 0.148856404</span></span>
-<span id="cb23-13"><a href="#cb23-13" tabindex="-1"></a><span class="do">## 3:   0.8895982 0.444243707</span></span>
-<span id="cb23-14"><a href="#cb23-14" tabindex="-1"></a><span class="do">## 4:   0.9677945 0.106902241</span></span>
-<span id="cb23-15"><a href="#cb23-15" tabindex="-1"></a><span class="do">## 5:   0.9001744 0.429612528</span></span>
-<span id="cb23-16"><a href="#cb23-16" tabindex="-1"></a><span class="do">## 6:   0.9111984 0.426224754</span></span></code></pre></div>
-<p>Or with <code>data.table</code>:</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="fu">as.data.table</span>(instance<span class="sc">$</span>result)[, .(features, classif.tpr, classif.tnr)]</span></code></pre></div>
-<p>Note that the measures can not be optimal at the same time so one has
-to choose according to their preferences. Here, we see different
-tradeoffs of sensitivity and specificity but no feature subset is
-dominated by another, i.e. has worse sensitivity and specificity than
-any other subset.</p>
-</div>
+<summary>**Click me:**</summary>
+
+
+```r
+instance = fsi(
+  task = task_gc,
+  learner = lrn_ranger,
+  resampling = rsmp("cv", folds = 3),
+  measure = msrs(c("classif.tpr", "classif.tnr")),
+  terminator = trm("evals", n_evals = 20)
+)
+```
+
+
+```r
+fselector = fs("random_search")
+fselector$optimize(instance)
+```
+
+
+```r
+features = unlist(lapply(instance$result$features, paste, collapse = ", "))
+cbind(features,instance$result[,c("classif.tpr", "classif.tnr")])
+```
+Or with `data.table`:
+
+```r
+as.data.table(instance$result)[, .(features, classif.tpr, classif.tnr)]
+```
+
+Note that the measures can not be optimal at the same time so one has to choose according to their preferences. Here, we see different tradeoffs of sensitivity and specificity but no feature subset is dominated by another, i.e. has worse sensitivity and specificity than any other subset.
+
+-->
 </div>
 <div id="nested-resampling" class="section level1">
 <h1>3 Nested Resampling</h1>
@@ -495,35 +475,33 @@ logistic regression with holdout resampling. It should terminate after
 <summary>
 <strong>Hint 1:</strong>
 </summary>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a>afs <span class="ot">=</span> <span class="fu">auto_fselector</span>(</span>
-<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>  <span class="at">fselector =</span> ...,</span>
-<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>  <span class="at">learner =</span> ...,</span>
-<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a>  <span class="at">resampling =</span> ...,</span>
-<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a>  <span class="at">measure =</span> ...,</span>
-<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a>  <span class="at">terminator =</span> ...</span>
-<span id="cb25-7"><a href="#cb25-7" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>afs <span class="ot">=</span> <span class="fu">auto_fselector</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>  <span class="at">fselector =</span> ...,</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  <span class="at">learner =</span> ...,</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  <span class="at">resampling =</span> ...,</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>  <span class="at">measure =</span> ...,</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>  <span class="at">terminator =</span> ...</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>)</span></code></pre></div>
 </details>
-<div id="solution-5" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>afs <span class="ot">=</span> <span class="fu">auto_fselector</span>(</span>
-<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a>  <span class="at">fselector =</span> <span class="fu">fs</span>(<span class="st">&quot;random_search&quot;</span>),</span>
-<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a>  <span class="at">learner =</span> <span class="fu">lrn</span>(<span class="st">&quot;classif.log_reg&quot;</span>),</span>
-<span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a>  <span class="at">resampling =</span> <span class="fu">rsmp</span>(<span class="st">&quot;holdout&quot;</span>),</span>
-<span id="cb26-5"><a href="#cb26-5" tabindex="-1"></a>  <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">&quot;classif.acc&quot;</span>),</span>
-<span id="cb26-6"><a href="#cb26-6" tabindex="-1"></a>  <span class="at">terminator =</span> <span class="fu">trm</span>(<span class="st">&quot;evals&quot;</span>, <span class="at">n_evals =</span> <span class="dv">10</span>)</span>
-<span id="cb26-7"><a href="#cb26-7" tabindex="-1"></a>)</span>
-<span id="cb26-8"><a href="#cb26-8" tabindex="-1"></a>afs</span>
-<span id="cb26-9"><a href="#cb26-9" tabindex="-1"></a><span class="do">## &lt;AutoFSelector:classif.log_reg.fselector&gt;</span></span>
-<span id="cb26-10"><a href="#cb26-10" tabindex="-1"></a><span class="do">## * Model: list</span></span>
-<span id="cb26-11"><a href="#cb26-11" tabindex="-1"></a><span class="do">## * Packages: mlr3, mlr3fselect, mlr3learners, stats</span></span>
-<span id="cb26-12"><a href="#cb26-12" tabindex="-1"></a><span class="do">## * Predict Type: response</span></span>
-<span id="cb26-13"><a href="#cb26-13" tabindex="-1"></a><span class="do">## * Feature Types: logical, integer, numeric, character, factor, ordered</span></span>
-<span id="cb26-14"><a href="#cb26-14" tabindex="-1"></a><span class="do">## * Properties: loglik, twoclass</span></span></code></pre></div>
-</div>
+<summary>**Click me:**</summary>
+
+
+```r
+afs = auto_fselector(
+  fselector = fs("random_search"),
+  learner = lrn("classif.log_reg"),
+  resampling = rsmp("holdout"),
+  measure = msr("classif.acc"),
+  terminator = trm("evals", n_evals = 10)
+)
+afs
+```
+
+-->
 </div>
 <div id="benchmark" class="section level2">
 <h2>3.2 Benchmark</h2>
@@ -542,21 +520,26 @@ base class, which is why it can be used like any other learner.</p>
 </summary>
 <p>Implement a benchmark grid and aggregate the result.</p>
 </details>
-<div id="solution-6" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>grid <span class="ot">=</span> <span class="fu">benchmark_grid</span>(<span class="fu">tsk</span>(<span class="st">&quot;sonar&quot;</span>), <span class="fu">list</span>(afs, <span class="fu">lrn</span>(<span class="st">&quot;classif.log_reg&quot;</span>)),</span>
-<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a>  <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> <span class="dv">3</span>))</span>
-<span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a></span>
-<span id="cb27-4"><a href="#cb27-4" tabindex="-1"></a>bmr <span class="ot">=</span> <span class="fu">benchmark</span>(grid)<span class="sc">$</span><span class="fu">aggregate</span>(<span class="fu">msr</span>(<span class="st">&quot;classif.acc&quot;</span>))</span></code></pre></div>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="fu">as.data.table</span>(bmr)[, .(learner_id, classif.acc)]</span>
-<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a><span class="do">##                   learner_id classif.acc</span></span>
-<span id="cb28-3"><a href="#cb28-3" tabindex="-1"></a><span class="do">## 1: classif.log_reg.fselector   0.7499655</span></span>
-<span id="cb28-4"><a href="#cb28-4" tabindex="-1"></a><span class="do">## 2:           classif.log_reg   0.7017253</span></span></code></pre></div>
-</div>
+<summary>**Click me:**</summary>
+
+
+```r
+grid = benchmark_grid(tsk("sonar"), list(afs, lrn("classif.log_reg")),
+  rsmp("cv", folds = 3))
+
+bmr = benchmark(grid)$aggregate(msr("classif.acc"))
+```
+
+
+```r
+as.data.table(bmr)[, .(learner_id, classif.acc)]
+```
+
+-->
 </div>
 </div>
 <div id="summary" class="section level1">

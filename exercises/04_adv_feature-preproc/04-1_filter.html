@@ -219,68 +219,39 @@ in task, see <code>task$feature_types</code>).</p>
 <p>The website linked above includes a table that provides detailed
 information for each <code>Filter</code>.</p>
 </details>
-<div id="solution" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
+
 <details>
-<summary>
-Click me:
-</summary>
-<p>Our task is a classification task and we have <code>integer</code>,
-and <code>factor</code> and features:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>task<span class="sc">$</span>task_type</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="do">## [1] &quot;classif&quot;</span></span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>ftypes <span class="ot">=</span> <span class="fu">unique</span>(task<span class="sc">$</span>feature_types<span class="sc">$</span>type)</span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>ftypes</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="do">## [1] &quot;integer&quot; &quot;factor&quot;  &quot;ordered&quot;</span></span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co"># subset all filters that support integer and factor features</span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">library</span>(mlr3filters)</span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>filters <span class="ot">=</span> <span class="fu">as.data.table</span>(mlr_filters)</span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>check_ftypes <span class="ot">=</span> <span class="fu">sapply</span>(filters<span class="sc">$</span>feature_types, <span class="cf">function</span>(x) <span class="fu">all</span>(ftypes <span class="sc">%in%</span> x))</span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>filters[check_ftypes, ]</span>
-<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="do">##                   key                                                    label   task_types task_properties</span></span>
-<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="do">##  1:              cmim      Minimal Conditional Mutual Information Maximization classif,regr                </span></span>
-<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="do">##  2:              disr                       Double Input Symmetrical Relevance classif,regr                </span></span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="do">##  3:        importance                                         Importance Score      classif                </span></span>
-<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="do">##  4:  information_gain                                         Information Gain classif,regr                </span></span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="do">##  5:               jmi                                 Joint Mutual Information classif,regr                </span></span>
-<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="do">##  6:              jmim            Minimal Joint Mutual Information Maximization classif,regr                </span></span>
-<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="do">##  7:               mim                          Mutual Information Maximization classif,regr                </span></span>
-<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="do">##  8:              mrmr                     Minimum Redundancy Maximal Relevancy classif,regr                </span></span>
-<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="do">##  9:             njmim Minimal Normalised Joint Mutual Information Maximization classif,regr                </span></span>
-<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="do">## 10:       performance                                   Predictive Performance      classif                </span></span>
-<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="do">## 11:       permutation                                        Permutation Score      classif                </span></span>
-<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="do">## 12:            relief                                                   RELIEF classif,regr                </span></span>
-<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="do">## 13: selected_features                               Embedded Feature Selection      classif                </span></span>
-<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a><span class="do">##                              params                                        feature_types          packages</span></span>
-<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a><span class="do">##  1:                         threads                       integer,numeric,factor,ordered           praznik</span></span>
-<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a><span class="do">##  2:                         threads                       integer,numeric,factor,ordered           praznik</span></span>
-<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a><span class="do">##  3:                          method logical,integer,numeric,character,factor,ordered,...              mlr3</span></span>
-<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a><span class="do">##  4: type,equal,discIntegers,threads                       integer,numeric,factor,ordered     FSelectorRcpp</span></span>
-<span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a><span class="do">##  5:                         threads                       integer,numeric,factor,ordered           praznik</span></span>
-<span id="cb2-32"><a href="#cb2-32" tabindex="-1"></a><span class="do">##  6:                         threads                       integer,numeric,factor,ordered           praznik</span></span>
-<span id="cb2-33"><a href="#cb2-33" tabindex="-1"></a><span class="do">##  7:                         threads                       integer,numeric,factor,ordered           praznik</span></span>
-<span id="cb2-34"><a href="#cb2-34" tabindex="-1"></a><span class="do">##  8:                         threads                       integer,numeric,factor,ordered           praznik</span></span>
-<span id="cb2-35"><a href="#cb2-35" tabindex="-1"></a><span class="do">##  9:                         threads                       integer,numeric,factor,ordered           praznik</span></span>
-<span id="cb2-36"><a href="#cb2-36" tabindex="-1"></a><span class="do">## 10:                          method logical,integer,numeric,character,factor,ordered,... mlr3,mlr3measures</span></span>
-<span id="cb2-37"><a href="#cb2-37" tabindex="-1"></a><span class="do">## 11:                 standardize,nmc logical,integer,numeric,character,factor,ordered,... mlr3,mlr3measures</span></span>
-<span id="cb2-38"><a href="#cb2-38" tabindex="-1"></a><span class="do">## 12:      neighboursCount,sampleSize                       integer,numeric,factor,ordered     FSelectorRcpp</span></span>
-<span id="cb2-39"><a href="#cb2-39" tabindex="-1"></a><span class="do">## 13:                          method logical,integer,numeric,character,factor,ordered,...              mlr3</span></span></code></pre></div>
-<p>Looking at the table <a href="https://mlr3filters.mlr-org.com/">here</a>, potential filters
-are:</p>
-<p><code>cmim</code>, <code>disr</code>, <code>importance</code>,
-<code>information_gain</code>, <code>jmi</code>, <code>jmim</code>,
-<code>mim</code>, <code>mrmr</code>, <code>njmim</code>,
-<code>performance</code>, <code>permutation</code>, <code>relief</code>,
-<code>selected_features</code>.</p>
-<p>You can read their documentation by looking at
-<code>?mlr_filters_&lt;id&gt;</code>, (<code>&lt;id&gt;</code> should be
-replaced with the filter id, e.g., <code>cmim</code>).</p>
-<p>Note that <code>importance</code>, <code>performance</code>,
-<code>permutation</code>, and <code>selected_features</code> are special
-in the sense that they require <code>Learner</code>s themselves.</p>
+<summary>Click me:</summary>
+
+Our task is a classification task and we have `integer`, and `factor` and features:
+
+
+```r
+task$task_type
+ftypes = unique(task$feature_types$type)
+ftypes
+
+# subset all filters that support integer and factor features
+library(mlr3filters)
+filters = as.data.table(mlr_filters)
+check_ftypes = sapply(filters$feature_types, function(x) all(ftypes %in% x))
+filters[check_ftypes, ]
+```
+
+Looking at the table [here](https://mlr3filters.mlr-org.com/), potential filters are:
+
+`cmim`, `disr`, `importance`, `information_gain`, `jmi`, `jmim`, `mim`, `mrmr`, `njmim`, `performance`, `permutation`, `relief`, `selected_features`.
+
+You can read their documentation by looking at `?mlr_filters_<id>`, (`<id>` should be replaced with the filter id, e.g., `cmim`).
+
+Note that `importance`, `performance`, `permutation`, and `selected_features` are special in the sense that they require `Learner`s themselves.
+
 </details>
-</div>
+
+-->
 </div>
 <div id="exercise-2-information-gain-filter" class="section level2">
 <h2>Exercise 2: Information Gain Filter</h2>
@@ -317,25 +288,29 @@ number of features to include.</p>
 <summary>
 <strong>Hint 2:</strong>
 </summary>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(mlr3filters)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">library</span>(mlr3viz)</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>filter <span class="ot">=</span> <span class="fu">flt</span>(...)</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>filter<span class="sc">$</span><span class="fu">calculate</span>()</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="fu">autoplot</span>(...)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(mlr3filters)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">library</span>(mlr3viz)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>filter <span class="ot">=</span> <span class="fu">flt</span>(...)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>filter<span class="sc">$</span><span class="fu">calculate</span>()</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="fu">autoplot</span>(...)</span></code></pre></div>
 </details>
-<div id="solution-1" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
+
 <details>
-<summary>
-Click me:
-</summary>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">library</span>(mlr3filters)</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">library</span>(mlr3viz)</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>filter <span class="ot">=</span> <span class="fu">flt</span>(<span class="st">&quot;information_gain&quot;</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>filter<span class="sc">$</span><span class="fu">calculate</span>(task)</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="fu">autoplot</span>(filter)  <span class="co"># status, credit_history and savings</span></span></code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
-</div>
+<summary>Click me:</summary>
+
+
+```r
+library(mlr3filters)
+library(mlr3viz)
+filter = flt("information_gain")
+filter$calculate(task)
+autoplot(filter)  # status, credit_history and savings
+```
+
+-->
 </div>
 <div id="exercise-3-create-and-apply-a-pipeopfilter-to-a-task" class="section level2">
 <h2>Exercise 3: Create and Apply a PipeOpFilter to a Task</h2>
@@ -391,56 +366,45 @@ containing the task we want to filter.</li>
 <summary>
 <strong>Hint 2:</strong>
 </summary>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">library</span>(mlr3pipelines)</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co"># Set the filter.nfeat parameter directly when constructing the PipeOp:</span></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>pofilter <span class="ot">=</span> <span class="fu">po</span>(<span class="st">&quot;...&quot;</span>,</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="at">filter =</span> <span class="fu">flt</span>(...),</span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>   <span class="at">... =</span> <span class="fu">list</span>(<span class="at">filter.nfeat =</span> ...))</span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co"># Alternative (first create the filter PipeOp and then set the parameter):</span></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>pofilter <span class="ot">=</span> <span class="fu">po</span>(<span class="st">&quot;...&quot;</span>, <span class="at">filter =</span> <span class="fu">flt</span>(...))</span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>pofilter<span class="sc">$</span>...<span class="sc">$</span>filter.nfeat <span class="ot">=</span> ...</span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a></span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co"># Train the PipeOpFilter on the task</span></span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>filtered_task <span class="ot">=</span> pofilter<span class="sc">$</span><span class="fu">train</span>(<span class="at">input =</span> <span class="fu">list</span>(...))</span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>filtered_task</span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>task</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(mlr3pipelines)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co"># Set the filter.nfeat parameter directly when constructing the PipeOp:</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>pofilter <span class="ot">=</span> <span class="fu">po</span>(<span class="st">&quot;...&quot;</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="at">filter =</span> <span class="fu">flt</span>(...),</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>   <span class="at">... =</span> <span class="fu">list</span>(<span class="at">filter.nfeat =</span> ...))</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co"># Alternative (first create the filter PipeOp and then set the parameter):</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>pofilter <span class="ot">=</span> <span class="fu">po</span>(<span class="st">&quot;...&quot;</span>, <span class="at">filter =</span> <span class="fu">flt</span>(...))</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>pofilter<span class="sc">$</span>...<span class="sc">$</span>filter.nfeat <span class="ot">=</span> ...</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co"># Train the PipeOpFilter on the task</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>filtered_task <span class="ot">=</span> pofilter<span class="sc">$</span><span class="fu">train</span>(<span class="at">input =</span> <span class="fu">list</span>(...))</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>filtered_task</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>task</span></code></pre></div>
 </details>
-<div id="solution-2" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
 <details>
-<summary>
-Click me:
-</summary>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">library</span>(mlr3pipelines)</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co"># Set the filter.nfeat parameter directly when constructing the PipeOp:</span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>pofilter <span class="ot">=</span> <span class="fu">po</span>(<span class="st">&quot;filter&quot;</span>,</span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="at">filter =</span> <span class="fu">flt</span>(<span class="st">&quot;information_gain&quot;</span>),</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>   <span class="at">param_vals =</span> <span class="fu">list</span>(<span class="at">filter.nfeat =</span> 5L))</span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co"># Alternative (first create the filter PipeOp and then set the parameter):</span></span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>pofilter <span class="ot">=</span> <span class="fu">po</span>(<span class="st">&quot;filter&quot;</span>, <span class="at">filter =</span> <span class="fu">flt</span>(<span class="st">&quot;information_gain&quot;</span>))</span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>pofilter<span class="sc">$</span>param_set<span class="sc">$</span>values<span class="sc">$</span>filter.nfeat <span class="ot">=</span> 5L</span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a></span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>filtered_task <span class="ot">=</span> pofilter<span class="sc">$</span><span class="fu">train</span>(<span class="fu">list</span>(task))[[<span class="dv">1</span>]]</span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>filtered_task</span>
-<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="do">## &lt;TaskClassif:german_credit&gt; (1000 x 6): German Credit</span></span>
-<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="do">## * Target: credit_risk</span></span>
-<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="do">## * Properties: twoclass</span></span>
-<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="do">## * Features (5):</span></span>
-<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="do">##   - fct (4): credit_history, purpose, savings, status</span></span>
-<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="do">##   - int (1): duration</span></span>
-<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a>task</span>
-<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="do">## &lt;TaskClassif:german_credit&gt; (1000 x 21): German Credit</span></span>
-<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="do">## * Target: credit_risk</span></span>
-<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="do">## * Properties: twoclass</span></span>
-<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="do">## * Features (20):</span></span>
-<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="do">##   - fct (14): credit_history, employment_duration, foreign_worker, housing, job, other_debtors,</span></span>
-<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="do">##     other_installment_plans, people_liable, personal_status_sex, property, purpose, savings, status,</span></span>
-<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="do">##     telephone</span></span>
-<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="do">##   - int (3): age, amount, duration</span></span>
-<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="do">##   - ord (3): installment_rate, number_credits, present_residence</span></span></code></pre></div>
-</div>
+<summary>Click me:</summary>
+
+
+```r
+library(mlr3pipelines)
+# Set the filter.nfeat parameter directly when constructing the PipeOp:
+pofilter = po("filter",
+  filter = flt("information_gain"),
+   param_vals = list(filter.nfeat = 5L))
+
+# Alternative (first create the filter PipeOp and then set the parameter):
+pofilter = po("filter", filter = flt("information_gain"))
+pofilter$param_set$values$filter.nfeat = 5L
+
+filtered_task = pofilter$train(list(task))[[1]]
+filtered_task
+task
+```
+
+-->
 </div>
 <div id="exercise-4-combine-pipeopfilter-with-a-learner" class="section level2">
 <h2>Exercise 4: Combine PipeOpFilter with a Learner</h2>
@@ -477,39 +441,39 @@ using the <code>%&gt;&gt;%</code> operator.</li>
 <summary>
 <strong>Hint 2:</strong>
 </summary>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">library</span>(mlr3learners)</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>graph <span class="ot">=</span> ... <span class="sc">%&gt;&gt;%</span> <span class="fu">lrn</span>(<span class="st">&quot;...&quot;</span>)</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>glrn <span class="ot">=</span> <span class="fu">as_learner</span>(...)</span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>rr <span class="ot">=</span> <span class="fu">resample</span>(<span class="at">task =</span> ..., <span class="at">learner =</span> ..., <span class="at">resampling =</span> ...)</span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>rr<span class="sc">$</span><span class="fu">aggregate</span>()</span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co"># Change `nfeat.filter` and run resampling again using same train-test splits</span></span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>...</span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>rr2 <span class="ot">=</span> <span class="fu">resample</span>(<span class="at">task =</span> ..., <span class="at">learner =</span> ..., <span class="at">resampling =</span> rr<span class="sc">$</span>resampling)</span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>rr2<span class="sc">$</span><span class="fu">aggregate</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">library</span>(mlr3learners)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>graph <span class="ot">=</span> ... <span class="sc">%&gt;&gt;%</span> <span class="fu">lrn</span>(<span class="st">&quot;...&quot;</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>glrn <span class="ot">=</span> <span class="fu">as_learner</span>(...)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>rr <span class="ot">=</span> <span class="fu">resample</span>(<span class="at">task =</span> ..., <span class="at">learner =</span> ..., <span class="at">resampling =</span> ...)</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>rr<span class="sc">$</span><span class="fu">aggregate</span>()</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co"># Change `nfeat.filter` and run resampling again using same train-test splits</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>...</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>rr2 <span class="ot">=</span> <span class="fu">resample</span>(<span class="at">task =</span> ..., <span class="at">learner =</span> ..., <span class="at">resampling =</span> rr<span class="sc">$</span>resampling)</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>rr2<span class="sc">$</span><span class="fu">aggregate</span>()</span></code></pre></div>
 </details>
-<div id="solution-3" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
 <details>
-<summary>
-Click me:
-</summary>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">library</span>(mlr3learners)</span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>graph <span class="ot">=</span> pofilter <span class="sc">%&gt;&gt;%</span> <span class="fu">lrn</span>(<span class="st">&quot;classif.kknn&quot;</span>)</span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>glrn <span class="ot">=</span> <span class="fu">as_learner</span>(graph)</span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>rr <span class="ot">=</span> <span class="fu">resample</span>(<span class="at">task =</span> task, <span class="at">learner =</span> glrn, <span class="at">resampling =</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> <span class="dv">5</span>))</span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>rr<span class="sc">$</span><span class="fu">aggregate</span>()</span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="do">## classif.ce </span></span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="do">##      0.271</span></span>
-<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co"># Change `nfeat.filter` and run resampling again using same train-test splits</span></span>
-<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>glrn<span class="sc">$</span>param_set<span class="sc">$</span>values<span class="sc">$</span>information_gain.filter.nfeat <span class="ot">=</span> <span class="dv">2</span></span>
-<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>rr2 <span class="ot">=</span> <span class="fu">resample</span>(<span class="at">task =</span> task, <span class="at">learner =</span> glrn, <span class="at">resampling =</span> rr<span class="sc">$</span>resampling)</span>
-<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>rr2<span class="sc">$</span><span class="fu">aggregate</span>()</span>
-<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="do">## classif.ce </span></span>
-<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="do">##      0.286</span></span></code></pre></div>
-</div>
+<summary>Click me:</summary>
+
+
+```r
+set.seed(1)
+library(mlr3learners)
+graph = pofilter %>>% lrn("classif.kknn")
+glrn = as_learner(graph)
+rr = resample(task = task, learner = glrn, resampling = rsmp("cv", folds = 5))
+rr$aggregate()
+
+# Change `nfeat.filter` and run resampling again using same train-test splits
+glrn$param_set$values$information_gain.filter.nfeat = 2
+rr2 = resample(task = task, learner = glrn, resampling = rr$resampling)
+rr2$aggregate()
+```
+
+-->
 </div>
 </div>
 <div id="summary" class="section level1">
