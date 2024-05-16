@@ -595,7 +595,7 @@ Calibration plots (reliability diagrams) visualize on
 % and do not visualize how well-calibrated the probabilities are.
 %To assess the performance of classifiers, we should consider:
 \begin{itemize}
-\item \textbf{ROC curve:}
+\item \textbf{ROC:}
 Measures only discrimination as it is based on TPR and FPR and assesses only the ranking of predicted probabilities (not their magnitude).
 %Measures the ability to separate the classes well. % (e.g., confusion matrix). %accurately rank individuals from low to high risk.
 \item \textbf{Calibration plot:} Measures (for reasonable groupings) how well the predicted probabilities match the proportion of positives. %(i.e., $Y = 1$).
@@ -603,18 +603,7 @@ Measures only discrimination as it is based on TPR and FPR and assesses only the
 
 \end{frame}
 
-\begin{frame}{Calibration and Discrimination}
 
-{\centering \includegraphics[width=\textwidth]{figure_man/calibdiscr2}}
-
-
-\begin{itemize}
-\item Permuting the predictions within each decile does not change the calibration plot.
-\item However, the ROC curve and AUC can get worse as the ranking is changed.
-\end{itemize}
-
-
-\end{frame}
 
 \begin{frame}{Calibration and Discrimination}
 
@@ -622,12 +611,24 @@ Measures only discrimination as it is based on TPR and FPR and assesses only the
 
 
 \begin{itemize}
-\item Monotonic transformations of the predicted probabilities do not change the ROC curve as the ranking will not change.
-\item However, the calibration plot looks worse as the probabilities are shifted.
+\item Monotonic transformations of the predicted probabilities (e.g., $\tfrac{\hat p + 0.2}{1.2}$) do not change the ROC curve as the ranking will not change.
+\item The calibration plot looks worse as the probabilities are changed.
 \end{itemize}
 \end{frame}
 
 
+\begin{frame}{Calibration and Discrimination}
+
+{\centering \includegraphics[width=\textwidth]{figure_man/calibdiscr2}}
+
+
+\begin{itemize}
+\item Permuting the predictions (e.g., randomly assigning different predictions to observations) within each decile does not change the calibration plot.
+\item However, the ROC curve and AUC can get worse as the ranking within each decile is changed.
+\end{itemize}
+
+
+\end{frame}
 
 \begin{frame}{Calibrating Probabilities}
 
@@ -641,6 +642,9 @@ Measures only discrimination as it is based on TPR and FPR and assesses only the
 
 %In order to extract exact probabilities, like logarithmic loss does, a classifier can be calibrated, i.\,e. the output score of the calssifier can be transformed into a more accurate probability. The link function of logisitc regression is basically a calibration for the linear regression. In order to evaluate the calibration an additional validation data set is used. \lz
 \end{frame}
+
+
+
 
 \begin{frame}{Calibrating Probabilities}
 
