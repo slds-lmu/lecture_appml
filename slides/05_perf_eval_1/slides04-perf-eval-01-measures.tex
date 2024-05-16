@@ -21,17 +21,70 @@
 \lecturechapter{Performance Metrics}
 \lecture{Applied Machine Learning}
 
-\begin{frame}{Loss Function versus Performance Measure}
+
+\begin{frame}{Considerations for Practice}
+
+\begin{itemize}
+    \item Stakeholders must grasp metrics relevant to the use case.
+    \item What a model optimizes does not necessarily overlap with what we are trying to achieve in a specific use case.
+    \item Choose performance metrics to needs of the use case:
+    \begin{itemize}
+        \item Consider outlier sensitivity (e.g., MAE instead of MSE)
+        \item Address class imbalance (e.g., F1 score instead of accuracy)
+        %, PR-AUC vs. ROC-AUC)
+        \item Cost-sensitive classification (e.g., use weights for FP/FN)
+        \item Discrimination vs. calibration (predicting the correct class vs. interpreting predicted probabilities as actual risk) \newline
+        $\Rightarrow$ Confusion matrix-based metrics vs. proper scoring rules
+    \end{itemize}
+
+\end{itemize}
+\end{frame}
+
+% \begin{frame}{Answering the Wrong Question}
+% % A. W. Kimball (1957) Errors of the Third Kind in Statistical Consulting, Journal of the American Statistical Association, 52:278, 133-142
+% \begin{itemize}
+% \setlength\itemsep{1em}
+%     \item An approximate answer to the right question is worth much more than the right answer to the wrong question.
+%     \item Pay attention to but do not get lost in technical details. You might end up developing a model that answers the wrong question or optimizes the wrong metric.
+%     \item \textbf{Example:} An online retail company aims to increase revenue by displaying advertisements with different products, hoping that the customer is going to purchase additional products. The company measures how often the user clicks / taps on those advertisements. A model is trained to predict click rates based on features such as the product category, price, age of the customer, etc. However, this model does not actually measure additional revenue from advertisements, as many customers will click on them by accident or not go through with the purchase.
+% \end{itemize}
+    
+% \end{frame}
+
+% \begin{frame}{What Affects Performance?}
+% % https://vuquangnguyen2016.files.wordpress.com/2018/03/applied-predictive-modeling-max-kuhn-kjell-johnson_1518.pdf
+
+% There is a multitude of technical aspects we need to consider:
+
+% \begin{itemize}
+%     \item \textbf{Model type:} Some models are or are not suited for certain tasks, e.g., tree-based models are bad at predicting linearly shaped data.
+%     \item \textbf{Non-informative features:} Including features that are not correlated with the target increases the risk of modeling noise.
+%     \item \textbf{Pre-processing of features:} Optimizing feature processing can improve performance, depending on the model.
+%     %\item \textbf{Measurement errors / noise in the outcome or features:} Garbage in = garbage out. Our performance depends on the quality of model inputs.
+%     \item \textbf{Data quality:} The presence of measurement errors or noise in both outcomes and features directly influences model efficacy (garbage in = garbage out).
+%     \item \textbf{Sample size:} The more data we have at our disposal, the better our algorithm is able to learn from it.
+%     %\item \textbf{Data diversity:} Beyond large sample size, diverse data also matters
+% \end{itemize}
+% \end{frame}
+
+
+
+
+\begin{frame}{Loss Function vs. Performance Measure}
 
 Both loss functions (LFs) and performance measures (PMs) serve to evaluate the performance of a model but for different purposes:
-\vspace{0.5cm}
+
 \begin{itemize}
-    \itemsep1em
-    \item LFs are used to optimize model parameters \textbf{during training}. PMs are used to evaluate the model performance \textbf{after training} on unseen test data.
-    \item LFs shoud have desirable numerical properties, e.g., differentiability for gradient-based optimization, convexity, robustness against outliers, etc.
-    \item We can use the same LF and PM. However, one typically selects the PM based on the prediction task and opts to approximate this metric with an LF that is numerically easier to handle.
-    \item LFs are often difficult to interpret. In contrast, a PM should be interpretable, as it is used to select an appropriate model from a number of candidates.
-    \item A PM should be tailored to the task at hand: what objective shall the model achieve and does the PM measure its ability to do so?
+    \item LFs are used to optimize model parameters \textbf{during training}. \\
+    $\Rightarrow$ desirable numerical properties, e.g., differentiability
+    \item PMs are used to evaluate the model performance \textbf{after training} on unseen test data. 
+    \item PMs should be tailored to the task at hand, i.e., measure the model's ability to achieve the desired objective.
+    %\item LFs shoud have desirable numerical properties, e.g., differentiability for gradient-based optimization, convexity, robustness against outliers, etc.
+    \item Ideally, we set LF = PM but this is not always possible.\\
+    $\Rightarrow$ LF is often specified by the ML algorithm, but we can tune its hyperparameters regarding our desired PM.
+    % However, one typically selects the PM based on the prediction task and opts to approximate this metric with an LF that is numerically easier to handle.
+    %\item LFs are often difficult to interpret. In contrast, a PM should be interpretable, as it is used to select an appropriate model from a number of candidates.
+    %\item A PM should be tailored to the task at hand: what objective shall the model achieve and does the PM measure its ability to do so?
 \end{itemize}
 \end{frame}
 
@@ -39,16 +92,13 @@ Both loss functions (LFs) and performance measures (PMs) serve to evaluate the p
 \begin{frame}{Examples: LF versus PM}
 
 \begin{itemize}
-    \itemsep2em
     \item \textbf{Regression:}
         \begin{itemize} 
-            \itemsep1em
-            \item We often optimize the mean squared error (MSE) during training (LF), which can also be used to evaluate various final model candidates (PM).
+            \item Models often optimize the mean squared error (MSE) during training (LF), which can also be used to evaluate various final model candidates (PM).
             \item Alternative PM: Different model candidates are also often compared using Pearson's coefficient of determination $R^2$ (or its adjusted variant) (PM).
         \end{itemize}
     \item \textbf{Classification:}
         \begin{itemize}
-            \itemsep1em
             \item The logarithmic loss is a popular LF to optimize classification models and can also be used as a PM.
             \item Alternative PM: The AUC (area under the ROC curve) compares the true positive rate against the false positive rate at each threshold setting.
         \end{itemize}
@@ -92,7 +142,6 @@ Both loss functions (LFs) and performance measures (PMs) serve to evaluate the p
 
 \begin{frame}{GQ: Software Output?}
     \begin{itemize}
-        \setlength\itemsep{2em}
         \item Most software packages support both probability / score and hard label outputs.
         \item Probabilities / scores can always be converted to hard labels. However, in certain settings we may be stuck with hard label predictions.
         \item For hard labels, we are restricted to measures based on the confusion matrix: accuracy, error rate, precision, recall, null error rate, F score, Cohen's Kappa
@@ -103,9 +152,7 @@ Both loss functions (LFs) and performance measures (PMs) serve to evaluate the p
 
 \begin{frame}{GQ: Cost Sensitivity - True Positives?}
     \begin{itemize}
-        \item
-        \setlength\itemsep{2em}
-        For certain applications, identifying true positives and avoiding false negatives is more important than avoiding false positives (\enquote{a false alarm}). 
+        \item For certain applications, identifying true positives and avoiding false negatives is more important than avoiding false positives (\enquote{a false alarm}). 
         \item For instance, when screening for cancer, missing to diagnose it will likely result in a fatal outcome for the patient, whereas a false positive may warrant additional investigations by doctors but no fatal outcome.
         \item Here, the true positive rate is important, which is also known as recall or sensitivity:
             $$
@@ -129,7 +176,6 @@ Both loss functions (LFs) and performance measures (PMs) serve to evaluate the p
 
 \begin{frame}{GQ: Cost Sensitivity - True Negatives?}
     \begin{itemize}
-        \setlength\itemsep{2em}
         \item The reverse corresponds to focusing on the identification of true negatives and assigning a lesser cost to false positives.
         \item \textbf{Example:} In an automated underwriting, identifying all applicants who will not pay back the loan is more important than not lending to an applicant who would pay back the loan.
         \item Here, the true negative rate is an appropriate PM, which is also known as  specifity:
@@ -142,7 +188,6 @@ Both loss functions (LFs) and performance measures (PMs) serve to evaluate the p
 
 \begin{frame}{GQ: Cost Sensitivity - Avoid False Positives?}
     \begin{itemize}
-        \setlength\itemsep{2em}
         \item In other applications, avoiding false positives may be most important.
         \item \textbf{Example:} For spam detection, we may not care about a few spam emails in our inbox folder (false negative), but we really want to avoid classifying an important email as spam (false positive).
         \item Here, maximizing precision, also known as the positive predictive value, is appropriate:
@@ -155,15 +200,12 @@ Both loss functions (LFs) and performance measures (PMs) serve to evaluate the p
 
 \begin{frame}{GQ: Balanced Data}
     \begin{itemize}
-        \setlength\itemsep{1em}
         \item Accuracy is a good measure if roughly the same number of observations belong to each class (balanced data):
             $$
                 \text{Accuracy} = \frac{\text{\# correct predictions}}{\text{\# total predictions}}
             $$
         \item \textbf{Example:} 
-            \vspace{0.5cm}
         \begin{itemize}
-            \itemsep1em
             \item Consider two classes A and B with 98\% of observations belonging to class A and 2\% to class B.
             \item A naive (and useless) model that always predicts class A will have 98\% accuracy and be falsely evaluated as a good model.
         \end{itemize}
@@ -174,7 +216,6 @@ Both loss functions (LFs) and performance measures (PMs) serve to evaluate the p
 
 \begin{frame}{GQ: Imbalanced Data and Possible Options}
     \begin{itemize}
-        \setlength\itemsep{1em}
         \item One option is to modify the data to cure imbalances. Over- or undersampling copy instances from the minority and majority class to receive a balanced class distribution.
         \item A popular variant that does over- and undersampling simultaneously is called synthetic minority oversampling technique (SMOTE).
         \item SMOTE is highly controversial!
@@ -266,7 +307,6 @@ Both loss functions (LFs) and performance measures (PMs) serve to evaluate the p
 \begin{frame}{Advanced Performance Metrics}
 
 \begin{itemize}
-\setlength\itemsep{2em}
     \item Dive into esoteric stuff here: Youden, Cohens-Kappa, Matthews correlation
     \item Motivate each advanced metric, do not just list formula
     \item Example: "MCC produces a high score only if the prediction obtained good results in all of the confusion matrix categories (TP, FP, TN, FN), proportionally both to the size of positive elements and the size of negative elements in the dataset"
