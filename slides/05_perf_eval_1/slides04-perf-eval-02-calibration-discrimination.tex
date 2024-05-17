@@ -4,7 +4,14 @@
 \usepackage[nospeakermargin]{../../style/lmu-lecture-2}
 % Defines macros and environments
 \input{../../style/common.tex}
-
+\usepackage{etoolbox}
+\makeatletter
+\newlength{\parboxtodim}
+\patchcmd{\@iiiparbox}
+  {\hsize}
+  {\ifx\relax#2\else\setlength{\parboxtodim}{#2}\fi\hsize}
+  {}{}
+\makeatother
 \begin{document}
 
 \newcommand{\titlefigure}{figure/calibrationplot}
@@ -77,6 +84,259 @@
 %         \item Example: Parameters $\alpha$ and $\beta$ are learned through cross-validation or maximum likelihood estimation.
 %     \end{itemize}
 % \end{frame}
+
+\begin{frame}{History of Calibration}
+\begin{itemize}
+    \item Weather forecasters began considering calibration in the 1950s. % (Brier, 1950).
+    \item For all instances where a model predicts a '70\% chance of rain', it should actually have rained 70\% of the time (retrospectively).
+    \item Applicable to both binary and multi-class classification.
+    \item In general, predicted probabilities for any event happening should (on average) match their empirical probabilities.\\
+    $\Rightarrow$ Ensures predictions can be interpreted as actual risk/probabilities.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Over- and Under-estimates}
+
+Consider the following predictions of a (good performing) classifier:
+
+\begin{columns}[c, onlytextwidth]
+    \begin{column}{0.3\textwidth}
+        \begin{center}
+\begin{tabular}{rrr}
+\hline
+ & $\hat{p}$ & $y$ \\
+\hline
+0 & 0.1 & 0 \\
+1 & 0.1 & 0 \\
+\hline
+2 & 0.4 & 0 \\
+3 & 0.4 & 1 \\
+\hline
+4 & 0.7 & 0 \\
+5 & 0.7 & 1 \\
+6 & 0.7 & 1 \\
+\hline
+7 & 0.9 & 1 \\
+\hline
+\end{tabular}
+\end{center}
+    \end{column}
+        \begin{column}{0.7\textwidth}
+\begin{itemize}
+    \item '10\% chance of rain' was a slight over-estimate ($\bar{y}=0/2=0\%$).
+    \item '40\% chance of rain' was a slight under-estimate ($\bar{y}=1/2=50\%$).
+    \item '70\% chance of rain' was a slight over-estimate ($\bar{y}=2/3=67\%$).
+    \item '90\% chance of rain' was a slight under-estimate ($\bar{y}=1/1=100\%$).
+\end{itemize}
+    \end{column}
+\end{columns}
+\vspace{1em}
+\textbf{Calibration}: Is a post-processing step on predicted probabilities trying to reduce over- and under-estimates.
+\end{frame}
+
+
+
+
+
+\begin{frame}{Calibration Plot / Reliability Diagram}
+
+%\fbox{
+\parbox[][45pt][t]{\linewidth}{%
+ To detect calibration, we can visualize on the
+\begin{itemize}
+    \item $x$-axis: average predicted probability (e.g., grouped by quantiles) 
+    \item $y$-axis: observed proportion of positive instances in each group
+\end{itemize}
+}
+%}
+
+\begin{columns}[c, onlytextwidth]
+    \begin{column}{0.3\textwidth}
+\begin{center}
+\begin{tabular}{rrr}
+\hline
+ & $\hat{p}$ & $y$ \\
+\hline
+0 & 0.1 & 0 \\
+1 & 0.1 & 0 \\
+\hline
+2 & 0.4 & 0 \\
+3 & 0.4 & 1 \\
+\hline
+4 & 0.7 & 0 \\
+5 & 0.7 & 1 \\
+6 & 0.7 & 1 \\
+\hline
+7 & 0.9 & 1 \\
+\hline
+\end{tabular}
+\end{center}
+ \end{column}
+        \begin{column}{0.7\textwidth}
+\includegraphics[width=\textwidth]{figure_man/calibplot}
+
+    \end{column}
+\end{columns}
+
+
+\end{frame}
+
+
+
+\begin{frame}{Calibration Plot / Reliability Diagram}
+
+\parbox[][45pt][t]{\linewidth}{%
+Changing predictions will change the position of the red points on the x-axis
+\begin{itemize}
+    \item[$\Rightarrow$] The closer the points to the diagonal line, the better calibration
+    \item[$\Rightarrow$] \textit{Gap pred. mean} shows deviation between points and diagonal line
+\end{itemize}
+}
+
+\begin{columns}[c, onlytextwidth]
+    \begin{column}{0.3\textwidth}
+
+
+\begin{center}
+\begin{tabular}{rrr}
+\hline
+ & $\hat{p}$ & $y$ \\
+\hline
+0 & 0.1 & 0 \\
+1 & \textbf{0.2} & 0 \\
+\hline
+2 & \textbf{0.3} & 0 \\
+3 & 0.4 & 1 \\
+\hline
+4 & \textbf{0.6} & 0 \\
+5 & 0.7 & 1 \\
+6 & \textbf{0.8} & 1 \\
+\hline
+7 & 0.9 & 1 \\
+\hline
+\end{tabular}
+\end{center}
+
+ \end{column}
+        \begin{column}{0.7\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figure_man/calibplot-2}
+\end{center}
+
+    \end{column}
+\end{columns}
+
+\textbf{Question:} Did we improve or worsen calibration?
+\end{frame}
+
+
+
+
+% Frame: Or should we group forecasts differently?
+\begin{frame}{Calibration Plot / Reliability Diagram}
+
+
+Different groupings lead to a completely different picture
+
+\begin{center}
+    
+\begin{columns}[c, onlytextwidth]
+    \begin{column}{0.35\textwidth}
+
+\footnotesize
+\raggedleft
+\begin{tabular}{rrr}
+\hline
+ & $\hat{p}$ & $y$ \\
+\hline
+0 & 0.1 & 0 \\
+1 & 0.2 & 0 \\
+2 & 0.3 & 0 \\
+3 & 0.4 & 1 \\
+\hline
+4 & 0.6 & 0 \\
+5 & 0.7 & 1 \\
+6 & 0.8 & 1 \\
+7 & 0.9 & 1 \\
+\hline
+\end{tabular}
+
+ \end{column}
+        \begin{column}{0.5\textwidth}
+        \raggedright
+\includegraphics[width=0.9\textwidth]{figure_man/calibplot-3}
+
+    \end{column}
+    \begin{column}{0.15\textwidth}
+    \end{column}
+\end{columns}
+
+\begin{columns}[c, onlytextwidth]
+    \begin{column}{0.35\textwidth}
+\footnotesize
+\raggedleft
+\begin{tabular}{rrr}
+\hline
+ & $\hat{p}$ & $y$ \\
+\hline
+0 & 0.1 & 0 \\
+\hline
+1 & 0.2 & 0 \\
+\hline
+2 & 0.3 & 0 \\
+\hline
+3 & 0.4 & 1 \\
+\hline
+4 & 0.6 & 0 \\
+\hline
+5 & 0.7 & 1 \\
+\hline
+6 & 0.8 & 1 \\
+\hline
+7 & 0.9 & 1 \\
+\hline
+\end{tabular}
+
+ \end{column}
+        \begin{column}{0.5\textwidth}
+        \raggedright
+\includegraphics[width=0.9\textwidth]{figure_man/calibplot-4}
+
+    \end{column}    
+    \begin{column}{0.15\textwidth}
+    \end{column}
+\end{columns}
+
+\end{center}
+\end{frame}
+
+% Frame: Binning or pooling predictions is a fundamental notion
+\begin{frame}{Importance of grouping predictions}
+\textbf{Evaluating calibration with bins/groups:}
+\begin{itemize}
+    \item We need a sufficient number of predictions within each group to obtain reliable empirical estimates.
+    \item Trade-off: large groups give better empirical estimates, small groups allow a more fine-grained assessment of calibration.
+\end{itemize}
+% But adjusting forecasts in groups also gives rise to practical calibration methods:
+% \begin{itemize}
+%     \item empirical binning
+%     \item isotonic regression (aka ROC convex hull)
+% \end{itemize}
+
+\textbf{How groups/bins can be created:}
+\begin{itemize}
+\item Equal-Width: Splits predicted probabilities into equally sized intervals.\\
+$\Rightarrow$ Can lead to bins with few or no observations.
+\item Equal-Frequency: Each bin holds a similar number of observations.\\
+$\Rightarrow$ Bin width can vary notably; Issues with duplicated values.
+% \item Empirical Binning: Uses unique values to create bins containing at least a desired number of observations.\\
+% $\Rightarrow$ Bin width and bin size may vary; Useful with duplicated values.% similar to equal-frequency in case of no duplicates.
+\end{itemize}
+\end{frame}
+
+
+
 \begin{frame}{Calibration and Discrimination}
 
 Consider the true positive $Y=1$, true negative $Y=0$, and predicted label $\hat Y$.
@@ -458,101 +718,30 @@ Avg Prob & 50\%  & 50\%        & 80\%        \\
 
 
 
-\begin{frame}{Why Is Calibration Important?}
-
-    \begin{itemize}
-        \item \textbf{Interpreting Predicted Probabilities:}
-            \begin{itemize}
-                \item They should accurately reflect actual risks or frequencies of events.
-                \item Good calibration ensures that predicted probabilities match observed frequencies.
-            \end{itemize}
-            
-        \item \textbf{Example: Medical Diagnosis}
-            \begin{itemize}
-                \item Well-calibrated models are crucial for informed decision-making.
-                \item Poor calibration: Only half of patients with 90\% predicted probability of a disease actually have it.
-                \item Good calibration: 90\% of patients with 90\% predicted probability of a disease actually have it.
-                \item Poor calibration can lead to misdiagnosis, delayed or unnecessary treatment, affecting human lives.
-            \end{itemize}
-    \end{itemize}
-\end{frame}
-
-
-
-\begin{frame}{Calibration and Discrimination}
-%<!-- http://www.uphs.upenn.edu/dgimhsr/documents/predictionrules.sp12.pdf -->
-A well calibrated classifier can be poorly discriminating, e.g.
-
-\begin{table}[]
-\centering
-\begin{tabular}{r|rrr}
-\hline
-Obs. Nr. & true $Y$ & $\fh_1$ & $\fh_2$ \\
-\hline
-1        & 1     & 1           & 0           \\
-2        & 1     & 1           & 0           \\
-3        & 0     & 0           & 1           \\
-4        & 0     & 0           & 1           \\ \hline
-Avg Prob & 50\%  & 50\%        & 50\%        \\
-\hline
-\end{tabular}
-\end{table}
-
-\begin{itemize}
-  \item Both models ($\fh_1$ and $\fh_2$) result in the same calibration in the large (50\%).
-  \item However, $\fh_1$ is better than $\fh_2$ as it correctly classifies the real outcome $Y$.
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}{Calibration and Discrimination}
-A well discriminating classifier can have a bad calibration, e.g.
-
-\begin{table}[]
-\centering
-\begin{tabular}{rrrr}
-\hline
-Obs. Nr. & truth $Y$ & $\fh_1$ & $\fh_2$ \\
-\hline
-1        & 1     & 0.9           & 0.9         \\
-2        & 1     & 0.9           & 0.9           \\
-3        & 0     & 0.1          & 0.7           \\
-4        & 0     & 0.1         & 0.7           \\ \hline
-Avg Prob & 50\%  & 50\%        & 80\%        \\
-\hline
-\end{tabular}
-\end{table}
-
-\begin{itemize}
-  \item Both models are well discriminating, i.e., setting thresholds $c_1 = 0.5$ for $\fh_1$ and $c_2 = 0.8$ for $\fh_2$ perfectly separates positive and negative observations.
-  \item Prediction rule 2 is rather poorly calibrated as the proportion of positive observations is estimated by $80\%$.
-\end{itemize}
-
-\end{frame}
 
 
 
 
 
 
-\begin{frame}{Calibration Plots}
+% \begin{frame}{Calibration Plots}
 
-\begin{columns}[c, onlytextwidth]
-    \begin{column}{0.61\linewidth}
-\includegraphics[width=\textwidth, page=1]{figure_man/calibration.pdf}
-    \end{column}
-      \begin{column}{0.39\linewidth}
+% \begin{columns}[c, onlytextwidth]
+%     \begin{column}{0.61\linewidth}
+% \includegraphics[width=\textwidth, page=1]{figure_man/calibration.pdf}
+%     \end{column}
+%       \begin{column}{0.39\linewidth}
         
-Calibration plots (reliability diagrams) visualize on
-\begin{itemize}
-    \item $x$-axis: average predicted probability (e.g., grouped by quantiles) 
-    \item $y$-axis: observed proportion of positive instances in each group
-\end{itemize}
+% Calibration plots (reliability diagrams) visualize on
+% \begin{itemize}
+%     \item $x$-axis: average predicted probability (e.g., grouped by quantiles) 
+%     \item $y$-axis: observed proportion of positive instances in each group
+% \end{itemize}
 
-    \end{column}
-\end{columns}
+%     \end{column}
+% \end{columns}
 
-\end{frame}
+%\end{frame}
 
 \begin{frame}{Calibration Plots}
 
@@ -609,10 +798,12 @@ Measures only discrimination as it is based on TPR and FPR and assesses only the
 
 {\centering \includegraphics[width=\textwidth]{figure_man/calibdiscr3}}
 
+\vspace{0.5em}
 
+Monotonic transformations of the predicted probabilities (e.g., $\tfrac{\hat p + 0.2}{1.2}$)
 \begin{itemize}
-\item Monotonic transformations of the predicted probabilities (e.g., $\tfrac{\hat p + 0.2}{1.2}$) do not change the ROC curve as the ranking will not change.
-\item The calibration plot looks worse as the probabilities are changed.
+\item do not affect the ROC curve as the ranking will not change.
+\item affect the calibration plot (here it looks worse). %as the probabilities are changed.
 \end{itemize}
 \end{frame}
 
@@ -621,10 +812,13 @@ Measures only discrimination as it is based on TPR and FPR and assesses only the
 
 {\centering \includegraphics[width=\textwidth]{figure_man/calibdiscr2}}
 
+\vspace{0.5em}
+
+Permuting the predictions (e.g., randomly assigning different predictions to observations) within each decile 
 
 \begin{itemize}
-\item Permuting the predictions (e.g., randomly assigning different predictions to observations) within each decile does not change the calibration plot.
-\item However, the ROC curve and AUC can get worse as the ranking within each decile is changed.
+\item worsens the ROC curve /  AUC (ranking within each decile changes).
+\item does not affect the calibration plot.
 \end{itemize}
 
 
@@ -910,6 +1104,28 @@ Calibrating a SVC with Platt's scaling and isotonic regression:
 	\end{itemize}
 \end{frame}
 
+
+
+
+
+\begin{frame}{Why Is Calibration Important?}
+
+    \begin{itemize}
+        \item \textbf{Interpreting Predicted Probabilities:}
+            \begin{itemize}
+                \item They should accurately reflect actual risks or frequencies of events.
+                \item Good calibration ensures that predicted probabilities match observed frequencies.
+            \end{itemize}
+            
+        \item \textbf{Example: Medical Diagnosis}
+            \begin{itemize}
+                \item Well-calibrated models are crucial for informed decision-making.
+                \item Poor calibration: Only half of patients with 90\% predicted probability of a disease actually have it.
+                \item Good calibration: 90\% of patients with 90\% predicted probability of a disease actually have it.
+                \item Poor calibration can lead to misdiagnosis, delayed or unnecessary treatment, affecting human lives.
+            \end{itemize}
+    \end{itemize}
+\end{frame}
 
 \endlecture
 \end{document}
