@@ -98,6 +98,6 @@ p = p1 + plot_spacer() + plot_spacer()
 pp = p1 + p2 + plot_spacer() 
 ppp = p1 + p2 + p3
 ggsave("calibration_methods1.pdf", plot = p, width = 9, height = 3)
-ggsave("calibration_methods2.pdf", plot = p, width = 9, height = 3)
-ggsave("calibration_methods3.pdf", plot = p, width = 9, height = 3)
+ggsave("calibration_methods2.pdf", plot = pp, width = 9, height = 3)
+ggsave("calibration_methods3.pdf", plot = ppp, width = 9, height = 3)
 
