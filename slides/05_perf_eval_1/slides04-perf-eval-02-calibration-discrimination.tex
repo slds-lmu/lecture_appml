@@ -995,6 +995,8 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[s(\xi) \in B_{J(s)}] \cdot
 
 \( \Rightarrow C \) maps \( s \) to \( \bar{p}_{J(s)} \) (average proportion of positive instances in \( B_{J(s)} \))  %\( \bar{p}_{J(s)} \) represents the average proportion of positive instances in the bin \( B_{J(s)} \), and \( C(s) \) is the calibration function that maps the score \( s \) to this average proportion.
 	\end{itemize}
+ 
+\includegraphics[width=\textwidth]{figure/calibration_methods1.pdf}
 \end{frame}
 
 
@@ -1014,6 +1016,7 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[s(\xi) \in B_{J(s)}] \cdot
     \item $\theta_1$ the slope estimated by the logistic regression model
 \end{itemize}
 	\end{itemize}
+\includegraphics[width=\textwidth]{figure/calibration_methods2.pdf}
 \end{frame}
 
 
@@ -1023,7 +1026,7 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[s(\xi) \in B_{J(s)}] \cdot
 	
 	\begin{itemize}
 		%\item The sigmoidal transformation fit by Platt scaling is appropriate for some methods (e.g., support vector machines) but not for others. 
-		\item \emph{Isotonic regression} combines the nonparametric character of empirical binning with the monotonicity guarantee of Platt scaling by minimizing
+		\item \emph{Isotonic regression} combines the non-parametric character of empirical binning with the monotonicity guarantee of Platt scaling by minimizing
 		$$
 		\sum_{i=1}^n w_i \, (C(s^{(i)}) - y^{(i)})^2 
 		$$
@@ -1032,6 +1035,7 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[s(\xi) \in B_{J(s)}] \cdot
 		Note that $C$ is evaluated only at a finite number of points; in-between, one may (linearly) interpolate or assume a piecewise constant function. 
 		
 	\end{itemize}
+\includegraphics[width=\textwidth]{figure/calibration_methods3.pdf}
 \end{frame}
 
 
