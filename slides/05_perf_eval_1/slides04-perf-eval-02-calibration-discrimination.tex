@@ -978,8 +978,7 @@ Calibrating a SVC with Platt's scaling and isotonic regression:
 \begin{frame}[t]
 	\frametitle{Empirical binning}
 	% https://link.springer.com/article/10.1007/s10994-023-06336-7
-	\begin{itemize}
-		\item \emph{Empirical binning} partitions the scores \( s \in \mathbb{S}\) into bins \( B_1, \ldots, B_M \) and defines a (piecewise constant) calibration function \( C \) by:
+\emph{Empirical binning} partitions the scores \( s \in \mathbb{S}\) into bins \( B_1, \ldots, B_M \) and defines a (piecewise constant) calibration function \( C \) by:
 
 \[ 
 C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[s(\xi) \in B_{J(s)}] \cdot y^{(i)}}{|B_{J(s)}|}, \, \text{ where }
@@ -994,9 +993,10 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[s(\xi) \in B_{J(s)}] \cdot
 \end{itemize}
 
 \( \Rightarrow C \) maps \( s \) to \( \bar{p}_{J(s)} \) (average proportion of positive instances in \( B_{J(s)} \))  %\( \bar{p}_{J(s)} \) represents the average proportion of positive instances in the bin \( B_{J(s)} \), and \( C(s) \) is the calibration function that maps the score \( s \) to this average proportion.
-	\end{itemize}
- 
-\includegraphics[width=\textwidth]{figure/calibration_methods1.pdf}
+
+  \vfill
+  \centering
+\includegraphics[width=0.8\textwidth]{figure/calibration_methods1.pdf}
 \end{frame}
 
 
@@ -1005,8 +1005,7 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[s(\xi) \in B_{J(s)}] \cdot
 \begin{frame}[t]
 	\frametitle{Platt scaling}
 	
-	\begin{itemize}
-		\item \emph{Platt scaling} applies logistic regression to predicted scores $s \in \mathbb{S}$, i.e., it fits a calibration function $C$ minimizing the log-loss on $\mathcal{D}_{cal}$ by:
+\emph{Platt scaling} applies logistic regression to predicted scores $s \in \mathbb{S}$, i.e., it fits a calibration function $C$ minimizing the log-loss on $\mathcal{D}_{cal}$ by:
 		$$
 		C(s) = \frac{1}{1 + \exp( \theta_0 + \theta_1 \cdot s) } , \, \text{ where }
 		$$
@@ -1015,8 +1014,8 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[s(\xi) \in B_{J(s)}] \cdot
     \item $\theta_0$ is the intercept, and 
     \item $\theta_1$ the slope estimated by the logistic regression model
 \end{itemize}
-	\end{itemize}
-\includegraphics[width=\textwidth]{figure/calibration_methods2.pdf}
+  \vfill\centering
+\includegraphics[width=0.8\textwidth]{figure/calibration_methods2.pdf}
 \end{frame}
 
 
@@ -1035,7 +1034,8 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[s(\xi) \in B_{J(s)}] \cdot
 		Note that $C$ is evaluated only at a finite number of points; in-between, one may (linearly) interpolate or assume a piecewise constant function. 
 		
 	\end{itemize}
-\includegraphics[width=\textwidth]{figure/calibration_methods3.pdf}
+ \vfill\centering
+\includegraphics[width=0.8\textwidth]{figure/calibration_methods3.pdf}
 \end{frame}
 
 
