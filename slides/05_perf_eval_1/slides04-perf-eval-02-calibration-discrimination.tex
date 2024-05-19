@@ -16,9 +16,9 @@
 
 \newcommand{\titlefigure}{figure/calibrationplot}
 \newcommand{\learninggoals}{
-\item What is calibration and discrimination?
-\item Why or when are they important?
-\item Standard approaches to diagnose whether a model is well-calibrated.}
+\item Understand difference between calibration and discrimination
+\item How to diagnose calibration
+\item How to calibrate probabilities}
 
 \lecturechapter{Calibration versus Discrimination}
 \lecture{Applied Machine Learning}
@@ -85,18 +85,34 @@
 %     \end{itemize}
 % \end{frame}
 
-\begin{frame}{History of Calibration}
+% \begin{frame}{History of Calibration}
+% \begin{itemize}
+%     \item Weather forecasters began considering calibration in the 1950s. % (Brier, 1950).
+%     \item For all instances where a model predicts a '70\% chance of rain', it should actually have rained 70\% of the time (retrospectively).
+%     %\item Applicable to both binary and multi-class classification.
+%     \item In general, predicted probabilities for any event happening should (on average) match their observed empirical probabilities.\\
+%     $\Rightarrow$ Ensures predictions can be interpreted as actual risk/probabilities.
+%     %\item 
+% \end{itemize}
+% \end{frame}
+
+\begin{frame}{Performance Metrics Basics}
+
 \begin{itemize}
-    \item Weather forecasters began considering calibration in the 1950s. % (Brier, 1950).
-    \item For all instances where a model predicts a '70\% chance of rain', it should actually have rained 70\% of the time (retrospectively).
-    %\item Applicable to both binary and multi-class classification.
-    \item In general, predicted probabilities for any event happening should (on average) match their observed empirical probabilities.\\
-    $\Rightarrow$ Ensures predictions can be interpreted as actual risk/probabilities.
-    %\item 
+    \item Stakeholders must understand metrics relevant to the use case.
+    \item What a model optimizes does not necessarily overlap with what we are trying to achieve in a specific use case.
+    \item Choose performance metrics according to needs of the use case:
+    \begin{itemize}
+        \item Consider outlier sensitivity (e.g., MAE instead of MSE)
+        \item Address class imbalance (e.g., F1 score instead of accuracy)
+        %, PR-AUC vs. ROC-AUC)
+        \item Cost-sensitive classification (e.g., use weights for FP/FN)
+        \item Discrimination vs. calibration (predicting the correct class vs. interpreting predicted probabilities as actual risk) %\newline
+        %$\Rightarrow$ Confusion matrix-based metrics vs. proper scoring rules
+    \end{itemize}
+
 \end{itemize}
 \end{frame}
-
-
 \begin{frame}{Calibration and Discrimination}
 
 Consider the true positive $Y=1$, true negative $Y=0$, and predicted label $\hat Y$.
@@ -487,11 +503,20 @@ Avg Prob & 50\%  & 50\%        & 80\%        \\
 
 \begin{frame}{Over- and Under-estimates}
 
-Consider the following predictions of a (good performing) classifier:
+\begin{itemize}
+    %\item Weather forecasters began considering calibration in the 1950s. % (Brier, 1950).
+    \item For all instances where a model predicts a '70\% chance of rain', it should actually have rained 70\% of the time (retrospectively).
+    %\item Applicable to both binary and multi-class classification.
+    % \item In general, predicted probabilities for any event happening should (on average) match their observed empirical probabilities.\\
+    % $\Rightarrow$ Ensures predictions can be interpreted as actual risk/probabilities.
+    \item Consider the following predictions of a (good performing) classifier:
+\end{itemize}
+
 
 \begin{columns}[c, onlytextwidth]
     \begin{column}{0.3\textwidth}
         \begin{center}
+        \small
 \begin{tabular}{rrr}
 \hline
  & $\hat{p}$ & $y$ \\
@@ -531,18 +556,19 @@ Consider the following predictions of a (good performing) classifier:
 \begin{frame}{Calibration Plot / Reliability Diagram}
 
 %\fbox{
-\parbox[][45pt][t]{\linewidth}{%
- To detect calibration, we can visualize on the
+%\parbox[][45pt][t]{\linewidth}{%
+ To assess calibration visually, we can plot on the
 \begin{itemize}
     \item $x$-axis: average predicted probability (e.g., grouped by quantiles) 
     \item $y$-axis: observed proportion of positive instances in each group
 \end{itemize}
-}
+%}
 %}
 
 \begin{columns}[c, onlytextwidth]
-    \begin{column}{0.3\textwidth}
-\begin{center}
+    \begin{column}{0.25\textwidth}
+%\begin{center}
+\centering
 \begin{tabular}{rrr}
 \hline
  & $\hat{p}$ & $y$ \\
@@ -560,14 +586,17 @@ Consider the following predictions of a (good performing) classifier:
 7 & 0.9 & 1 \\
 \hline
 \end{tabular}
-\end{center}
+%\end{center}
  \end{column}
-        \begin{column}{0.7\textwidth}
-\includegraphics[width=\textwidth]{figure_man/calibplot}
-
+        \begin{column}{0.75\textwidth}
+%\begin{center}
+\centering
+\includegraphics[width=0.85\textwidth]{figure_man/calibplot}
+%\end{center}
     \end{column}
 \end{columns}
 
+\textbf{Gap pred. mean:} Shows deviation between average predicted probability (red) and observed proportion of positives (blue) within each group.
 
 \end{frame}
 
@@ -575,19 +604,19 @@ Consider the following predictions of a (good performing) classifier:
 
 \begin{frame}{Calibration Plot / Reliability Diagram}
 
-\parbox[][45pt][t]{\linewidth}{%
+%\parbox[][45pt][t]{\linewidth}{%
 Changing predictions will change the position of the red points on the x-axis
 \begin{itemize}
-    \item[$\Rightarrow$] The closer the points to the diagonal line, the better calibration
-    \item[$\Rightarrow$] \textit{Gap pred. mean} shows deviation between points and diagonal line
+    \item The closer the points to the diagonal line, the better calibration
+    %\item[$\Rightarrow$] \textit{Gap pred. mean} shows deviation between points and diagonal line
+    \item \textbf{Question:} Did we improve or worsen calibration?
 \end{itemize}
-}
+%}
 
 \begin{columns}[c, onlytextwidth]
-    \begin{column}{0.3\textwidth}
-
-
-\begin{center}
+    \begin{column}{0.25\textwidth}
+%\begin{center}
+\centering
 \begin{tabular}{rrr}
 \hline
  & $\hat{p}$ & $y$ \\
@@ -605,18 +634,17 @@ Changing predictions will change the position of the red points on the x-axis
 7 & 0.9 & 1 \\
 \hline
 \end{tabular}
-\end{center}
-
+%\end{center}
  \end{column}
-        \begin{column}{0.7\textwidth}
-\begin{center}
-\includegraphics[width=\textwidth]{figure_man/calibplot-2}
-\end{center}
+        \begin{column}{0.75\textwidth}
+%\begin{center}
+\centering
+\includegraphics[width=0.85\textwidth]{figure_man/calibplot-2}
+%\end{center}
 
     \end{column}
 \end{columns}
 
-\textbf{Question:} Did we improve or worsen calibration?
 \end{frame}
 
 
@@ -737,11 +765,27 @@ $\Rightarrow$ Bin width can vary notably; Issues with duplicated values.
 \item \textbf{ROC:}
 Measures only discrimination as it is based on TPR and FPR and assesses only the ranking of predicted probabilities (not their magnitude).
 %Measures the ability to separate the classes well. % (e.g., confusion matrix). %accurately rank individuals from low to high risk.
-\item \textbf{Calibration plot:} Measures (for reasonable groupings) how well the predicted probabilities match the proportion of positives. %(i.e., $Y = 1$).
+\item \textbf{Calibration plot:} Measures (for reasonable groups, here by deciles) how well the predicted probabilities match the proportion of positives. %(i.e., $Y = 1$).
 \end{itemize}
 
 \end{frame}
 
+
+\begin{frame}{ROC Curve vs. Calibration Plot}
+
+{\centering \includegraphics[width=\textwidth]{figure_man/calibdiscr2}}
+
+\vspace{0.5em}
+
+Permuting predictions (e.g., randomly assigning different predictions to observations) within each group (here: decile)
+
+\begin{itemize}
+\item worsens the ROC curve /  AUC (ranking within each decile changes).
+\item does not affect the calibration plot.
+\end{itemize}
+
+
+\end{frame}
 
 
 \begin{frame}{ROC Curve vs. Calibration Plot}
@@ -752,27 +796,11 @@ Measures only discrimination as it is based on TPR and FPR and assesses only the
 
 Monotonic transformations of the predicted probabilities (e.g., $\tfrac{\hat p + 0.2}{1.2}$)
 \begin{itemize}
-\item do not affect the ROC curve as the ranking will not change.
+\item do not affect the ROC curve as the ranking of $\hat p$ will not change.
 \item affect the calibration plot (here it looks worse). %as the probabilities are changed.
 \end{itemize}
 \end{frame}
 
-
-\begin{frame}{ROC Curve vs. Calibration Plot}
-
-{\centering \includegraphics[width=\textwidth]{figure_man/calibdiscr2}}
-
-\vspace{0.5em}
-
-Permuting the predictions (e.g., randomly assigning different predictions to observations) within each decile 
-
-\begin{itemize}
-\item worsens the ROC curve /  AUC (ranking within each decile changes).
-\item does not affect the calibration plot.
-\end{itemize}
-
-
-\end{frame}
 
 
 
@@ -835,87 +863,81 @@ Permuting the predictions (e.g., randomly assigning different predictions to obs
 \begin{itemize}
   \item Calibrating probabilities means to post-process the predictions to improve the estimates and obtain more reliable probabilities.
   %\item Two popular calibration methods are the \textbf{Platt’s scaling} (parametric) and the \textbf{isotonic regression} (non-parametric).
-  \item A well calibrated classifier should classify samples such that among these samples with a predicted probability of 0.7, approximately 70\% actually belong to the positive class.
+  %\item A well calibrated classifier should classify samples such that among these samples with a predicted probability of 0.7, approximately 70\% actually belong to the positive class.
+  \item In general, predicted probabilities for any event happening should (on average) match their observed empirical probabilities.\\
+    $\Rightarrow$ Ensures predictions can be interpreted as actual risk/probabilities.
   \item The link function of logistic regression is basically a calibration for the scores predicted by linear regression.
-  \item Note that calibration should be performed on new data not used for model fitting.
+  \item Calibration should be performed on new data not used for model fitting.
 \end{itemize}
 
 %In order to extract exact probabilities, like logarithmic loss does, a classifier can be calibrated, i.\,e. the output score of the calssifier can be transformed into a more accurate probability. The link function of logisitc regression is basically a calibration for the linear regression. In order to evaluate the calibration an additional validation data set is used. \lz
 \end{frame}
 
 
-\begin{frame}{Calibrating Probabilities}
+% \begin{frame}{Calibrating Probabilities}
 
-The \textbf{Platt's scaling} (parametric sigmoid calibration) and the \textbf{isotonic regression} (non-parametric) are popular calibration methods:
-\begin{itemize}
-\item \textbf{Platt's scaling:} logistic regression on the output of the classifier with respect to the true class labels.
-\item \textbf{Isotonic regression:} fit a piecewise-constant non-decreasing function instead of logistic regression.
-\end{itemize}
+% The \textbf{Platt's scaling} (parametric sigmoid calibration) and the \textbf{isotonic regression} (non-parametric) are popular calibration methods:
+% \begin{itemize}
+% \item \textbf{Platt's scaling:} logistic regression on the output of the classifier with respect to the true class labels.
+% \item \textbf{Isotonic regression:} fit a piecewise-constant non-decreasing function instead of logistic regression.
+% \end{itemize}
 
-%\tiny{Source 1: https://scikit-learn.org/stable/modules/calibration.html}
-%\tiny{Source 2: http://fastml.com/classifier-calibration-with-platts-scaling-and-isotonic-regression/}
-%\tiny{Source 3: https://towardsdatascience.com/probability-calibration-for-boosted-trees-24cbd0f0ccae}
-%\tiny{Source 3: https://jmetzen.github.io/2015-04-14/calibration.html}
-%\tiny{Source 4: http://fa.bianp.net/blog/2013/isotonic-regression/}
-%\tiny{Source 5: https://www.analyticsvidhya.com/blog/2016/07/platt-scaling-isotonic-regression-minimize-logloss-error/}
+% %\tiny{Source 1: https://scikit-learn.org/stable/modules/calibration.html}
+% %\tiny{Source 2: http://fastml.com/classifier-calibration-with-platts-scaling-and-isotonic-regression/}
+% %\tiny{Source 3: https://towardsdatascience.com/probability-calibration-for-boosted-trees-24cbd0f0ccae}
+% %\tiny{Source 3: https://jmetzen.github.io/2015-04-14/calibration.html}
+% %\tiny{Source 4: http://fa.bianp.net/blog/2013/isotonic-regression/}
+% %\tiny{Source 5: https://www.analyticsvidhya.com/blog/2016/07/platt-scaling-isotonic-regression-minimize-logloss-error/}
 
 
-\textbf{Platt's scaling}:
+% \textbf{Platt's scaling}:
 
-\begin{itemize}
-  \item Train a logistic regression model using the (uncalibrated) classifier's predictions $\hat{Y}$ as input and the true labels as output.
-  \item Use the probabilities $\hat{\pi}$ of this logistic regression model as calibrated predictions.
-  %\item Essentially Platt's scaling performs a logistic regression on the output of a classifier.
-\end{itemize}
+% \begin{itemize}
+%   \item Train a logistic regression model using the (uncalibrated) classifier's predictions $\hat{Y}$ as input and the true labels as output.
+%   \item Use the probabilities $\hat{\pi}$ of this logistic regression model as calibrated predictions.
+%   %\item Essentially Platt's scaling performs a logistic regression on the output of a classifier.
+% \end{itemize}
+% % \begin{center}
+% % \includegraphics[width=0.55\textwidth]{figure_man/platt.png}
+% % \end{center}
+
+
+% \end{frame}
+
+
+% \begin{frame}{Platt's Scaling}
+
+% \begin{figure}
+% \includegraphics[width=0.8\textwidth]{figure_man/platts-scaling.png}
+% \end{figure}
+
+% \end{frame}
+
+
+% \begin{frame}{Isotonic regression}
+
+% \begin{itemize}
+% \item The idea is to fit a piecewise-constant non-decreasing function instead of
+% logistic regression with the pool adjacent violators algorithm
+% ($\mathcal{O}(n)$).
+% \item Basically, the algorithm goes through the data and looks for violations of
+% the monotonicity constraint. If it finds one, it gets adjusted with the best
+% possible fit under the constraint.
+% \end{itemize}
+
 % \begin{center}
-% \includegraphics[width=0.55\textwidth]{figure_man/platt.png}
+% \includegraphics[width=0.5\textwidth]{figure_man/iso-reg.png}
 % \end{center}
+% \end{frame}
+% \begin{frame}{Isotonic regression}
+
+% \begin{figure}
+% \includegraphics[width=0.8\textwidth]{figure_man/isotonic-reg.png}
+% \end{figure}
+
+% \end{frame}
 
 
-\end{frame}
-
-
-\begin{frame}{Platt's Scaling}
-
-\begin{figure}
-\includegraphics[width=0.8\textwidth]{figure_man/platts-scaling.png}
-\end{figure}
-
-\end{frame}
-
-
-\begin{frame}{Isotonic regression}
-
-\begin{itemize}
-\item The idea is to fit a piecewise-constant non-decreasing function instead of
-logistic regression with the pool adjacent violators algorithm
-($\mathcal{O}(n)$).
-\item Basically, the algorithm goes through the data and looks for violations of
-the monotonicity constraint. If it finds one, it gets adjusted with the best
-possible fit under the constraint.
-\end{itemize}
-
-\begin{center}
-\includegraphics[width=0.5\textwidth]{figure_man/iso-reg.png}
-\end{center}
-\end{frame}
-\begin{frame}{Isotonic regression}
-
-\begin{figure}
-\includegraphics[width=0.8\textwidth]{figure_man/isotonic-reg.png}
-\end{figure}
-
-\end{frame}
-
-
-\begin{frame}{Example: Calibration Plot}
-
-Calibrating a SVC with Platt's scaling and isotonic regression:
-\begin{center}
-\includegraphics[width=0.6\textwidth]{figure_man/calibration2.png}
-\end{center}
-
-\end{frame}
 
 
 
@@ -933,21 +955,21 @@ Calibrating a SVC with Platt's scaling and isotonic regression:
 
 % --------------------------------------
 
-\begin{frame}{Sources of Miscalibration}
-% https://classifier-calibration.github.io/assets/slides/clacal_tutorial_ecmlpkdd_2020_intro.pdf
-\begin{itemize}
-    \item Calibration is a characteristic of a learner, e.g., tree-based learners such as CART or random forests seldom produce probabilities close to 0 or 1 due to averaging class values. 
-    \item Miscalibration is related to accuracy: if the average class probability is higher or lower than accuracy, the model is said to be over- or underconfident.
-    \item \textbf{Underconfidence:} Probabilities are underestimating true incidences. This typically gives a sigmoidal reliability diagram.
-    $\Rightarrow$ We need to pull probabilities away from the center.
-    \item \textbf{Overconfidence:} Probabilities are overestimating true incidences.  This typically gives an inverse-sigmoidal reliability diagram. $\Rightarrow$ We need to push probabilities toward the center.
-    \item \textbf{Predicament:} Under- and overconfidence can coexist for different classes, requiring a simultaneous increase and decrease in different class probabilities.
+% \begin{frame}{Sources of Miscalibration}
+% % https://classifier-calibration.github.io/assets/slides/clacal_tutorial_ecmlpkdd_2020_intro.pdf
+% \begin{itemize}
+%     \item Calibration is a characteristic of a learner, e.g., tree-based learners such as CART or random forests seldom produce probabilities close to 0 or 1 due to averaging class values. 
+%     \item Miscalibration is related to accuracy: if the average class probability is higher or lower than accuracy, the model is said to be over- or underconfident.
+%     \item \textbf{Underconfidence:} Probabilities are underestimating true incidences. This typically gives a sigmoidal reliability diagram.
+%     $\Rightarrow$ We need to pull probabilities away from the center.
+%     \item \textbf{Overconfidence:} Probabilities are overestimating true incidences.  This typically gives an inverse-sigmoidal reliability diagram. $\Rightarrow$ We need to push probabilities toward the center.
+%     \item \textbf{Predicament:} Under- and overconfidence can coexist for different classes, requiring a simultaneous increase and decrease in different class probabilities.
 
-\end{itemize}
-\end{frame}
+% \end{itemize}
+% \end{frame}
 
 \begin{frame}[t]
-	\frametitle{How To Do Calibration}
+	\frametitle{Calibrating Probabilities}
 	\small
 	\begin{itemize}
 % %		
@@ -969,7 +991,6 @@ Calibrating a SVC with Platt's scaling and isotonic regression:
 		$$
 		\mathcal{D}_{cal} = \big\{ (s^{(1)}, y^{(1)}) , \ldots , (s^{(n)}, y^{(n)}) \big\} \subset \mathbb{S} \times \{ 0 , 1 \}
 		$$ 
-		
 		\item This data should be different from the training data used to learn the scoring classifier. Otherwise, there is a risk of introducing a bias. 
 		
 	\end{itemize}
@@ -981,12 +1002,12 @@ Calibrating a SVC with Platt's scaling and isotonic regression:
 \emph{Empirical binning} partitions the scores \( s \in \mathbb{S}\) into bins \( B_1, \ldots, B_M \) and defines a (piecewise constant) calibration function \( C \) by:
 
 \[ 
-C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[s(\xi) \in B_{J(s)}] \cdot y^{(i)}}{|B_{J(s)}|}, \, \text{ where }
+C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[ s^{(i)}  \in B_{J(s)}] \cdot y^{(i)}}{|B_{J(s)}|}, \, \text{ where }
 \]
 
 \begin{itemize}
     \item \( J(s) \in \{1, \dots, M\}\) is the bin index that \( s \) belongs to (i.e., \( s \in B_{J(s)} \))
-    \item \( s(\xi) \) is the score  and \( y^{(i)} \) the label for instance \( i \) % (with \( y^{(i)} = 1 \) indicating a positive instance)%,
+    \item \( s^{(i)} = s(\xi) \) is the score  and \( y^{(i)} \) the label of instance \( i \) % (with \( y^{(i)} = 1 \) indicating a positive instance)%,
 %- \( |B_{J(s)}| \) is the number of instances in the bin \( B_{J(s)} \).
     \item numerator counts the number of positive instances within \( B_{J(s)} \)
 %- \( |B_{J(s)}| \) counts the total number of instances within the bin \( B_{J(s)} \).
@@ -1031,7 +1052,7 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[s(\xi) \in B_{J(s)}] \cdot
 		$$
 		subject to the constraint that $C$ is isotonic: $C(s) \leq C(t)$ for $s <t$. 
 		\item 
-		Note that $C$ is evaluated only at a finite number of points; in-between, one may (linearly) interpolate or assume a piecewise constant function. 
+		Note: $C$ is evaluated only at a finite number of points; in-between, one may (linearly) interpolate or assume a piecewise constant function. 
 		
 	\end{itemize}
  \vfill\centering
@@ -1040,61 +1061,50 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[s(\xi) \in B_{J(s)}] \cdot
 
 
 
-% \begin{frame}[t]
-% 	\frametitle{Pair-adjacent violators algorithm (PAVA)}
+\begin{frame}[t]
+	\frametitle{Isotonic Regression - PAVA}
 	
-% 	\begin{itemize}
-% 		\item Let the scores observed for calibration be sorted (and without ties), such that
-% 		$$
-% 		s^{(1)} < s^{(2)} < \ldots < s^{(N)}\, .
-% 		$$
-% 		We then seek values $c_1 \leq c_2 \leq \ldots \leq c_N$ which minimize
-% 		$$
-% 		\sum_{n=1}^N w_n ( c_n - y^{(n)})^2 \, .
-% 		$$
-% 		\item Initialize one block $B_n$ for each observation $(s^{(n)} , y^{(n)})$; the value of the block is $c(B_n) = y^{(n)}$ and the width is $w(B_n) = 1$.
+	\begin{itemize}
+        \item Optimization can be solved by the pool-adjacent violators algorithm (PAVA) by sorting scores such that
+		$$
+		s^{(1)} < s^{(2)} < \ldots < s^{(n)}\, .
+		$$
+		% We then seek values $c_1 \leq c_2 \leq \ldots \leq c_n$ which minimize
+		% $$
+		% \sum_{i=1}^n w_i ( c_i - y^{(i)})^2 \, .
+		% $$
+		\item Initialize bins $B_i$ for each observation $(s^{(i)} , y^{(i)})$
+        \item Assign to all scores $s \in B_i$: $C(s) = y^{(i)}$ with initial width $w(B_i) = 1$.
 		
-% 		\item A merge operation combines two blocks $B'$ and $B''$ into a new block $B$ with width $w(B) = w(B') + w(B'')$ and value
-% 		$$
-% 		c = \frac{w(B') c(B') + w(B'') c(B'')}{w(B') + w(B'')} \, .
-% 		$$
+		\item A merge operation combines two adjacent bins $B_j$ and $B_k$ into a new bin $B = B_j \cup B_k$ with width $w(B) = w(B_j) + w(B_k)$ and 
+		$$
+		C(B) = \frac{w(B_j) C(B_j) + w(B_k) C(B_k)}{w(B_j) + w(B_k)} \, .
+		$$
 		
 		
-% 	\end{itemize}
-% \end{frame}
+\item The algorithm looks for violations of the monotonicity constraint and adjusts them with the best possible fit under the constraint ($\mathcal{O}(n)$).
+	\end{itemize}
+\end{frame}
 
-% \begin{frame}[t]
-% 	\frametitle{Pair-adjacent violators algorithm (PAVA)}
+\begin{frame}[t]
+	\frametitle{Isotonic Regression - PAVA}
+	 PAVA iterates the following steps (simplified to avoid notational overload):
+		
+		
+		\begin{itemize}
+			\item[(1)] Find first violating adjacent bins $B_i$ and $B_{i+1}$ such that $C(B_i) > C(B_{i+1})$.
+			\item[(2)] Merge $B_i$ and $B_{i+1}$ into a new bin $B$. Stop if no violation occured.
+			\item[(3)] If $C(B) < C(B_{i-1})$ for the left neighbor bin $B_{i-1}$, merge also these bins and continue until no more violations are found (monotonicity).
+			\item[(4)] Continue with (1).
+		\end{itemize}
 	
-% 	\begin{itemize}
-% 		\item PAVA iterates the following steps (the description is somewhat simplified to avoid notational overload):
-		
-% 		\medskip
-		
-% 		\begin{itemize}
-% 			\item[(1)] Find the first violating pair, namely, adjacent blocks $B_i$ and $B_{i+1}$ such that $c_i > c_{i+1}$; if there is no such pair, then stop.
-% 			\item[(2)] Merge $B_i$ and $B_{i+1}$ into a new block $B$.
-% 			\item[(3)] If $c(B) < c(B_{i-1})$ for the left neighbor block $B_{i-1}$, merge also these blocks and continue doing so until no more violations are encountered.
-% 			\item[(4)] Continue with (1).
-% 		\end{itemize}
-% 	\end{itemize}
-% \end{frame}
-
-
-
-% \begin{frame}[t]
-% 	\frametitle{Pair-adjacent violators algorithm (PAVA)}
-	
-% 	\medskip 
-	
-% 	\begin{center}
-% 		\includegraphics[width=0.9\textwidth]{figure/pic-pava}
-		
-% 	\end{center}
-% \end{frame}
+	\begin{center}
+		\includegraphics[width=0.65\textwidth]{figure/pic-pava}
+	\end{center}
+\end{frame}
 
 % \begin{frame}[t]
-% 	\frametitle{Pair-adjacent violators algorithm (PAVA)}
+% 	\frametitle{Isotonic Regression - PAVA}
 	
 % 	\begin{itemize}
 % 		\item Note that, in the case of binary classification, the target values $y^{(n)}$ are all in $\{ 0, 1 \}$:
@@ -1109,29 +1119,37 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[s(\xi) \in B_{J(s)}] \cdot
 % \end{frame}
 
 
-\begin{frame}[t]
-	\frametitle{Outlook: Multi-class calibration}
+% \begin{frame}[t]
+% 	\frametitle{Outlook: Multi-class calibration}
 	
-	\begin{itemize}
-        \itemsep1em
-		\item Calibration methods also exist for the multi-class case (i.e., classification problems with more than two classes).
-		\item Then, however, the problem becomes conceptually more difficult (and is still a topic of ongoing research).
-		\item 
-		While essentially coinciding for binary classification, the following definitions of calibration (leading to increasingly difficult problems) can be distinguished for more than two classes:
-		\begin{itemize}
-			\item Calibration of the highest predicted probability (confidence calibration) 
-			\item Calibration of the marginal probabilities (class-wise calibration)
-			\item Calibration of the entire vector of predicted probabilities (multi-class calibration)
-		\end{itemize}
-        \item Recently, native multi-class calibration methods extended Platt scaling by adding a calibration layer between the logits of the neural network and the softmax layer. 
-	\end{itemize}
+% 	\begin{itemize}
+%         \itemsep1em
+% 		\item Calibration methods also exist for the multi-class case (i.e., classification problems with more than two classes).
+% 		\item Then, however, the problem becomes conceptually more difficult (and is still a topic of ongoing research).
+% 		\item 
+% 		While essentially coinciding for binary classification, the following definitions of calibration (leading to increasingly difficult problems) can be distinguished for more than two classes:
+% 		\begin{itemize}
+% 			\item Calibration of the highest predicted probability (confidence calibration) 
+% 			\item Calibration of the marginal probabilities (class-wise calibration)
+% 			\item Calibration of the entire vector of predicted probabilities (multi-class calibration)
+% 		\end{itemize}
+%         \item Recently, native multi-class calibration methods extended Platt scaling by adding a calibration layer between the logits of the neural network and the softmax layer. 
+% 	\end{itemize}
+% \end{frame}
+
+
+
+
+\begin{frame}{Example: Calibration Plot}
+
+Calibrating a SVC with Platt's scaling and isotonic regression:
+\begin{center}
+\includegraphics[width=0.6\textwidth]{figure_man/calibration2.png}
+\end{center}
+
 \end{frame}
 
-
-
-
-
-\begin{frame}{Why Is Calibration Important?}
+\begin{frame}{Summary: Why Is Calibration Important?}
 
     \begin{itemize}
         \item \textbf{Interpreting Predicted Probabilities:}
