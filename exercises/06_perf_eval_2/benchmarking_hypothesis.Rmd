@@ -372,7 +372,7 @@ cat("-->")
 
 ## 2.5 Wilcoxon test
 
-Run the Wilcoxon signed rank test using the ranks you computed:
+Run the Wilcoxon signed rank test using the ranks you computed. You can use `qsignrank(p = 0.05 / 2, n = M)` to compute the critical value for the lower tail of the two-sided test for a 5% significance level.
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("<!--")
@@ -383,12 +383,16 @@ cat("<!--")
 <summary>**Click me:**</summary>
 
 ```{r}
+# Test Statistic
 r_plus = sum(as.numeric(ranktable_wide_rpart_ranger$rpart == 1))
 r_minus = sum(as.numeric(ranktable_wide_rpart_ranger$rpart == 2))
 M = nrow(ranktable_wide_rpart_ranger)
 wilcoxon = (min(r_plus, r_minus) - ((1 / 4) * M * (M + 1))) / sqrt((1 / 24) * M * (M + 1) * (2 * M + 1)) 
-wilcoxon
-### Add Critical Value here
+# Critical value for the lower tail
+lower_crit <- qsignrank(p = 0.05 / 2, n = M)
+# Perform test
+wilcoxon < lower_crit
+# We reject H0
 ```
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
