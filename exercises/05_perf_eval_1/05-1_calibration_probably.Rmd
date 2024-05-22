@@ -11,7 +11,7 @@ output:
 ---
 
 ```{r, include=FALSE}
-sys.source("../setup/setup.R", envir = knitr::knit_global())
+sys.source("setup.R", envir = knitr::knit_global())
 set.seed(123)
 ```
 
