@@ -291,7 +291,7 @@ and improve model performance (or make the data readable by the model in the fir
         \item Fit a random forest on the new dataset
         \item An attribute is deemed important, if its feature importance is higher than the maximal importance of all randomised attributes
         \item Repeat steps 1-3 for $N$ iterations
-        \item Execute SHT with the null hypothesis that the importance of a feature is equal to the maximal importance 
+        \item Execute SHT with the null hypothesis that the importance of a feature is equal to the maximal importance of all randomised attributes
         \item Repeat steps 1-5 until the feature set is stable
     \end{enumerate}
     \vfill

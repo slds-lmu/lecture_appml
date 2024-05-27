@@ -17,7 +17,7 @@
 \item What value do hypothesis tests add?
 \item Benchmarking scenarios and relevant tests}
 
-\lecturechapter{Hypothesis Testing}
+\lecturechapter{Model Selection \& Hypothesis Testing}
 \lecture{Applied Machine Learning}
 
 
@@ -85,22 +85,7 @@ Hypothesis tests can (a) quantify evidence that a difference in model performanc
 %     \item Multiple algorithms benchmarked on multiple data sets.
 % \end{enumerate}
 
-
-
-
-    
 % \end{frame}
-
-\begin{frame}{First Benchmarking Scenario}
-% https://docs.google.com/presentation/d/1hRPhxdXPvF2J2xXR_aDiG4Y3GxvMbNvujkPuJ-tsHRY/edit?usp=sharing
-\vfill
-\centering
-\large{Two algorithms on 1 data set}
-    \begin{figure}
-        \includegraphics[width = 0.6\textwidth]{figure/2algos_1dataset.png}
-    \end{figure}
-\vfill
-\end{frame}
 
 
 % \begin{frame}{Hypothesis Testing - General Procedure}
@@ -136,33 +121,7 @@ Hypothesis tests can (a) quantify evidence that a difference in model performanc
     
 % \end{frame}
 
-% \begin{frame}{McNemar's Test for Classifiers}
 
-% \begin{itemize}
-%     % \setlength\itemsep{1em}
-%     \item McNemar's test compares the errors of two models in a 2x2 contingency matrix:
-%     \begin{figure}
-%         \centering
-%         \includegraphics[width = 0.6\textwidth]{mcnemar_contingency_table_ex1.png}
-%         \label{fig:enter-label}
-%     \end{figure}
-%     \item Both models seem to perform equally well (model 1 accuracy: 9,960 / 10,000 = 99.6\%; model 2 accuracy: 9,970 / 10,000 = 99.7\%).
-%     \item In subfigure A, model 2 got 11 predictions right that model 1 got wrong; model 2 got 1 prediction right that model 2 got wrong (ratio 11:1).
-%     $\Rightarrow$ Model 2 seems to perform better than model 1.
-%     \item In subfigure B, the ratio is 25:15, which makes it less clear to choose a better-performing model.
-% \end{itemize}
-    
-% \end{frame}
-
-
-% \begin{frame}{McNemar's Test for Classifiers}
-
-% \begin{itemize}
-%     % \setlength\itemsep{1em}
-%     \item This relative error rate of two models can be used for a statistical test.
-% \end{itemize}
-    
-% \end{frame}
 
 % \begin{frame}{Benchmark Experiments}
 
@@ -232,8 +191,17 @@ Hypothesis tests can (a) quantify evidence that a difference in model performanc
     
 % \end{frame}
 
-% xx
-% xx
+\section{Scenario 1: Two Trained Models on 1 Data Set}
+\begin{frame}{First Benchmarking Scenario}
+\vfill
+\centering
+\large{Two trained models on 1 data set}
+    \begin{figure}
+        \includegraphics[width = 0.6\textwidth]{figure/2algos_1dataset.png}
+    \end{figure}
+\vfill 
+\end{frame}
+
 
 % \begin{frame}{Two-matched-samples t-test}
 
@@ -255,13 +223,14 @@ Hypothesis tests can (a) quantify evidence that a difference in model performanc
 % \end{frame}
 
 \begin{frame}{Two-matched-samples t-test}
+    % In contrast, Raschka (2018) starts his overview with an unpaired T-Test (testing the difference of proportions)
 
     
     % A paired t-test to compare two different models $\fh_1$ and $\fh_2$ w.r.t. a performance measure calculated on a test set of size $n_{\text{test}}$:
     
     \begin{itemize}
-        \item Given a holdout test set $\Dtest$, can we assume a difference in performance between $\widehat{f}_1$ and $\widehat{f}_2$ generalizes to other data?
-        $$H_0: \widehat{\text{GE}}(\widehat{f}_1, L, \Dtest) = \widehat{\text{GE}}(\widehat{f}_2, L, \Dtest) \text{ vs. } H_1: \widehat{\text{GE}}(\widehat{f}_1, L, \Dtest) \neq \widehat{\text{GE}}(\widehat{f}_2, L, \Dtest)$$
+        \item Given a holdout test set $\Dtest$, can we assume a difference in performance between $\fh_1$ and $\fh_2$ generalizes to other data?
+        $$H_0: \GEh(\fh_1, L, \Dtest) = \GEh(\fh_2, L, \Dtest) \text{ vs. } H_1: \GEh(\fh_1, L, \Dtest) \neq \GEh(\fh_2, L, \Dtest)$$
         \item Test statistic: 
             $$
             T_{\text{t-test}} = \sqrt{n_{test}} \frac{\bar{d}}{\sigma_{d}} \sim t(n_{test} - 1), \text{ with }
@@ -333,8 +302,9 @@ Hypothesis tests can (a) quantify evidence that a difference in model performanc
     \item For the given significance level, there is enough evidence to reject $H_0$. We assume the is a difference in performance on this population of data.
 \end{itemize}
 
-
 \end{frame}
+
+
 \begin{frame}{McNemar Test for Classification}
 % https://slideplayer.com/slide/9574350/
 \begin{itemize}
@@ -424,6 +394,34 @@ $$
 % \textbf{Note}: The McNemar test should only be used if $B + C > 20$.
 % \end{frame}
 
+% \begin{frame}{McNemar's Test for Classifiers}
+
+% \begin{itemize}
+%     % \setlength\itemsep{1em}
+%     \item McNemar's test compares the errors of two models in a 2x2 contingency matrix:
+%     \begin{figure}
+%         \centering
+%         \includegraphics[width = 0.6\textwidth]{mcnemar_contingency_table_ex1.png}
+%         \label{fig:enter-label}
+%     \end{figure}
+%     \item Both models seem to perform equally well (model 1 accuracy: 9,960 / 10,000 = 99.6\%; model 2 accuracy: 9,970 / 10,000 = 99.7\%).
+%     \item In subfigure A, model 2 got 11 predictions right that model 1 got wrong; model 2 got 1 prediction right that model 2 got wrong (ratio 11:1).
+%     $\Rightarrow$ Model 2 seems to perform better than model 1.
+%     \item In subfigure B, the ratio is 25:15, which makes it less clear to choose a better-performing model.
+% \end{itemize}
+    
+% \end{frame}
+
+
+% \begin{frame}{McNemar's Test for Classifiers}
+
+% \begin{itemize}
+%     % \setlength\itemsep{1em}
+%     \item This relative error rate of two models can be used for a statistical test.
+% \end{itemize}
+    
+% \end{frame}
+
 \begin{frame}{McNemar Test}
 
 % The test statistic is computed by
@@ -459,6 +457,42 @@ $$
 \end{frame}
 
 
+% \begin{frame}{McNemar Test}
+
+% \begin{itemize}
+% \item McNemar test is a non-parametric test that compares the errors of two classifiers.
+% \item classifiers have to be trained and tested on the same dataset.
+% % \item $H_0$: the two classifiers have the same error rates, \\ $H_1$: the error rates differ
+% \item Goodness-of-fit measure: Compares observed counts with expected distribution under $H_0$.
+% \item Relies on contingency matrix and is very similar to $\chi^2$-Test.
+% \item McNemar test considers if observations are classified correctly or not and does not provide any quantification of these measures.
+% \item According Dietterich(1998), the McNemar test should only be used if $B + C > 20$.
+% \end{itemize}
+% %
+    
+% \end{frame}
+
+%  \begin{frame}{T-test vs. McNemar Test}
+
+% Apart from t-test being parametric and the McNemar test being non-parametric, two tests have other significant differences. Because of its nature, it is possible to construct intervals for t-test however it is not possible to work with intervals for McNemar test which only works with nominal performance measures. McNemar test takes into account that whether observations are classified correctly or not and it does not provide any quantification of these measures.
+
+% \lz
+
+% According to the Dietterich(1998), one can proceed with McNemar test when the number of disagreement between two classifiers $c_{01}^{Mc} + c_{01}^{Mc} $ is greater than 20.
+
+% \end{frame}
+
+% The following compares the performance of multiple classifiers on one datasets
+% \begin{frame}{Cochran's Q Test? (not a slide)}
+
+%     \begin{itemize}
+%         \item Generalization of McNemar test to 3 or more models.
+%         \item Not as good as Friedman or Nemeniy?
+%     \end{itemize}
+% \end{frame}
+
+
+\section{Scenario 2: Two Algorithms on Multiple Data Sets}
 \begin{frame}{Second Benchmarking Scenario}
 % https://docs.google.com/presentation/d/1hRPhxdXPvF2J2xXR_aDiG4Y3GxvMbNvujkPuJ-tsHRY/edit?usp=sharing
 \vfill
@@ -535,34 +569,31 @@ $$
     \item There is evidence that the two algorithms do not perform equally well.
 \end{itemize}
 
-
 \end{frame}
 
-% \begin{frame}{McNemar Test}
+\begin{frame}{Further notes}
+    \vfill
+    \begin{itemize}
+        \item Wilcoxon Signed Rank Test assumes commensurability of scores $\rightarrow{}$ use sign test if violated
+        \item Researchers use the Wilcoxon Signed Rank Test to compare two algorithms on the same data, but violate independence assumption
+    \end{itemize}
+    \vfill
+\end{frame}
 
-% \begin{itemize}
-% \item McNemar test is a non-parametric test that compares the errors of two classifiers.
-% \item classifiers have to be trained and tested on the same dataset.
-% % \item $H_0$: the two classifiers have the same error rates, \\ $H_1$: the error rates differ
-% \item Goodness-of-fit measure: Compares observed counts with expected distribution under $H_0$.
-% \item Relies on contingency matrix and is very similar to $\chi^2$-Test.
-% \item McNemar test considers if observations are classified correctly or not and does not provide any quantification of these measures.
-% \item According Dietterich(1998), the McNemar test should only be used if $B + C > 20$.
-% \end{itemize}
-% %
-    
-% \end{frame}
+%\section{Scenario 2: Two Algorithms on One Data Set}
+%\begin{frame}{Second Benchmarking Scenario}
+%% https://docs.google.com/presentation/d/1hRPhxdXPvF2J2xXR_aDiG4Y3GxvMbNvujkPuJ-tsHRY/edit?usp=sharing
+%\vfill
+%\centering
+%\large{Two algorithms on 1 data set}
+%    \begin{figure}
+%        \includegraphics[width = 0.6\textwidth]{figure/2algos_1dataset.png}
+%    \end{figure}
+%\vfill
+%\end{frame}
 
-%  \begin{frame}{T-test vs. McNemar Test}
 
-% Apart from t-test being parametric and the McNemar test being non-parametric, two tests have other significant differences. Because of its nature, it is possible to construct intervals for t-test however it is not possible to work with intervals for McNemar test which only works with nominal performance measures. McNemar test takes into account that whether observations are classified correctly or not and it does not provide any quantification of these measures.
-
-% \lz
-
-% According to the Dietterich(1998), one can proceed with McNemar test when the number of disagreement between two classifiers $c_{01}^{Mc} + c_{01}^{Mc} $ is greater than 20.
-
-% \end{frame}
-
+\section{Scenario 3: Multiple Algorithms on Multiple Data Sets}
 \begin{frame}{Third Benchmarking Scenario}
 % https://docs.google.com/presentation/d/1hRPhxdXPvF2J2xXR_aDiG4Y3GxvMbNvujkPuJ-tsHRY/edit?usp=sharing
 \vfill
@@ -599,13 +630,6 @@ $$
 \end{figure}
     
 \end{frame}
-% \begin{frame}{Cochran's Q Test? (not a slide)}
-
-%     \begin{itemize}
-%         \item Generalization of McNemar test to 3 or more models.
-%         \item Not as good as Friedman or Nemeniy?
-%     \end{itemize}
-% \end{frame}
 
 %\section{Compare Multiple Models Multiple Domains}
 
@@ -867,6 +891,8 @@ where $q_{\alpha, \infty, K}$ is the studentized range statistic for significanc
      \end{itemize}
 \end{frame}
 
+\section{Conclusion}
+
 \begin{frame}{Overview of different hypothesis tests}
 % https://docs.google.com/presentation/d/1iiaVfeVwJJEFTTal_2dYQYOPm_WiykKBNAcryAWuLHk/edit#slide=id.p
 \begin{center}\includegraphics[width = 1\textwidth]{figure/tests.pdf} \end{center}
@@ -878,24 +904,28 @@ where $q_{\alpha, \infty, K}$ is the studentized range statistic for significanc
 \end{frame}
 
 
-% \begin{frame}{Guidelines on Hypothesis Tests}
+\begin{frame}{Guidelines on Hypothesis Tests}
 
-% \begin{itemize}
-%     \item There is no golden standard for using hypothesis testing in performance evaluation. Often, tests are based on questionable or unverifiable assumptions or conclusions.
-%     \item The Wilcoxon and Friedman tests have been demonstrated to be most useful CITE. They partially fulfil commensurability, do not assume normal distributions or homogeneity of variance, and can be applied to any evaluation metric (e.g., accuracy, error ratios).
-%     \item For comparisons of two models, use the Wilcoxon test. For comparisons of multiple models, use the Friedman test.
-%     \item  "Tests provide certain reassurance about the validity and non-randomness of the published
-% results. For that to be true, they should be performed correctly and the resulting conclusions should
-% be drawn cautiously. On the other hand, statistical tests should not be the deciding factor for or
-% against publishing the work. Other merits of the proposed algorithm that are beyond the grasp of
-% statistical testing should also be considered and possibly even favoured over pure improvements in
-% predictive power." (Japkowiecz)
-% \end{itemize}
-    
-% \end{frame}
+\vfill
+\begin{itemize}
+    \item There is no golden standard for using hypothesis testing in performance evaluation. Often, tests are based on questionable or unverifiable assumptions or conclusions.
+    \item The Wilcoxon and Friedman tests have been demonstrated to be most useful. They partially fulfil commensurability, do not assume normal distributions or homogeneity of variance, and can be applied to any evaluation metric (e.g., accuracy, error ratios).
+    \item  "Tests provide certain reassurance about the validity and non-randomness of the published  results. For that to be true, they should be performed correctly and the resulting conclusions should  be drawn cautiously. On the other hand, statistical tests should not be the deciding factor for or  against publishing the work. Other merits of the proposed algorithm that are beyond the grasp of  statistical testing should also be considered and possibly even favoured over pure improvements in  predictive power." (Japkowiecz)
+\end{itemize}
+\vfill
 
-% xx
+\end{frame}
 
+\begin{frame}{Guidelines on Model Selection}
+    \vfill
+    \begin{itemize}
+        \item Know what you are optimizing $\rightarrow$ be suspicious of huge improvements
+        \item Understand the difference between comparing trained models and machine learning algorithms
+        \item Your machine learning metric is only a proxy for your business metric $\rightarrow$ gains might not materialize in real-world improvement
+        \item Multi-objective model selection and tests are still an open area of research
+    \end{itemize}
+    \vfill
+\end{frame}
 
 
 \endlecture
