@@ -10,24 +10,34 @@ output:
 ---
 
 ```{r, eval = TRUE, echo = FALSE, include=FALSE}
-sys.source("../setup/setup.R", envir = knitr::knit_global())
+sys.source("setup.R", envir = knitr::knit_global())
 options(timeout = 10000)
+```
+
+# Goal
+
+Our goal for this exercise sheet is to use `mlr3` to benchmark models in multiple scenarios, using hypothesis tests as an additional diagnostic tool to make the benchmark more rigorous.
+
+# Required packages
+
+```{r, message = FALSE}
 library(mlr3oml)
 library(mlr3verse)
 library(mlr3learners)
+library(mlr3benchmark)
 library(tidyverse)
 library(ggplot2)
+library(PMCMRplus)
+set.seed(20220801)
 ```
-
-# Goals
-
-Our goal for this exercise sheet is to use `mlr3` to benchmark models in multiple scenarios, using hypothesis tests as an additional diagnostic.
 
 # 1 Two Algorithms on One Data Set
 
+Let's start with a simple example that compares two different learners on a single data set.
+
 ## 1.1 Train Models
 
-Train a random forest from the `ranger` package and a regression tree from the `rpart` package using `mlr3` with default hyperparameters on the German credit task ("german_credit").
+Train a random forest from the `ranger` package and a regression tree from the `rpart` package using `mlr3` with default hyperparameters on the German credit task `"german_credit"`. The models are used in the next step to predict class probabilities.
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("<!--")
@@ -37,15 +47,11 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
+credit.task = tsk("german_credit")
+
 rpart.model = mlr_learners$get("classif.rpart")
 rpart.model$predict_type = "prob"
-library(mlr3verse)
-library(tidyverse)
-library(ggplot2)
-credit.task = tsk("german_credit")
-set.seed(20220801)
-
 rpart.model$train(credit.task)
 
 ranger.model = mlr_learners$get("classif.ranger")
@@ -59,7 +65,14 @@ cat("-->")
 
 ## 1.2 Get Predictions
 
-Create a matrix with the ground truth label, the predicted probabilities by rpart and ranger, and the predicted labels.
+Create a `data.frame`. For each row in the credit data, it should contain the ground truth label as well as both the predicted probabilities and predicted labels by `rpart` and `ranger`, respectively.
+
+<details>
+  <summary>**Hint 1:**</summary>
+  
+You can call `$predict_newdata()` on the trained model object to make predictions.
+
+</details>
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("<!--")
@@ -69,7 +82,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 rpart.predictions = rpart.model$predict_newdata(newdata = credit.task$data())$print()
 ranger.predictions = ranger.model$predict_newdata(newdata = credit.task$data())$print()
 conf.mat = rpart.predictions[ , c("row_ids", "truth", "response", "prob.good")]
@@ -85,7 +98,7 @@ cat("-->")
 
 ## 1.3 Evaluate models
 
-Add two new columns with the observation-wise loss value and compare the performance of both models using the Brier score.
+Add two new columns with the observation-wise loss value for the Brier score. Compare the performance of both models using these columns.
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("<!--")
@@ -95,21 +108,17 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 conf.mat = conf.mat %>%
   mutate(
     rpart_loss = (rpart_prob - ifelse(truth == "good", 1, 0))^2
   ) %>%
   mutate(
     ranger_loss = (ranger_prob - ifelse(truth == "good", 1, 0))^2
-  ) %>%
-  mutate(
-    diff_loss = rpart_loss - ranger_loss
   )
 
-brier_score_ranger = mean(conf.mat$ranger_loss)
-brier_score_rpart = mean(conf.mat$rpart_loss)
-
+mean(conf.mat$rpart_loss)
+mean(conf.mat$ranger_loss)
 ```
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
@@ -118,12 +127,12 @@ cat("-->")
 
 ## 1.4 Two sample t-test
 
-Use a two sample t-test to evaluate whether both samples of performance scores come from different populations.
+Use a two sample t-test for an alpha of 5% to evaluate whether both samples of performance scores come from different populations.
 
 <details>
 <summary>**Hint 1:**</summary>
 
-Add another column with the difference between observation-wise loss values. Then run the t-test.
+Add another column with the difference between observation-wise loss values. Then run the t-test. The value of the quantile function of the t-distribution can be computed with `qt()`.
 
 </details>
 
@@ -135,7 +144,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 conf.mat = conf.mat %>%
   mutate(
     diff_loss = rpart_loss - ranger_loss
@@ -144,10 +153,8 @@ conf.mat = conf.mat %>%
 mean_diff_loss = conf.mat %>%
   ungroup() %>%
   summarize(diff_loss = mean(diff_loss))
-mean_diff_loss
 
 t_var = sqrt((1 / (nrow(conf.mat) - 1)) * sum((conf.mat$diff_loss - as.numeric(mean_diff_loss))^2))
-t_var
 
 t_statistic = sqrt(nrow(conf.mat)) * (mean_diff_loss / t_var)
 t_statistic
@@ -155,9 +162,9 @@ t_statistic
 qt(0.025, df = nrow(conf.mat) - 1)
 # OR
 # upper critical value, reject H0 if t-stat larger
-qt(0.025, df = nrow(conf.mat) - 1)
+qt(0.975, df = nrow(conf.mat) - 1)
 
-t_statistic > qt(0.025, df = nrow(conf.mat) - 1)
+t_statistic > qt(0.975, df = nrow(conf.mat) - 1)
 ```
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
@@ -168,12 +175,12 @@ cat("-->")
 
 ## 1.5 McNemar test
 
-Now run the McNemar test.
+Now run the McNemar test for an alpha of 5%. This is a non-parametric test that compares only the labels predicted by two models.
 
 <details>
 <summary>**Hint 1:**</summary>
 
-You will need the total number of observations that are classified correctly by rpart only and that are classified correctly by ranger only.
+You will need the total number of observations that are classified correctly by `rpart` only and those that are classified correctly by `ranger` only. The value of the quantile function of the chi-sqaured-distribution can be computed with `qchisq()`.
 
 </details>
 
@@ -185,7 +192,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 conf.mat = conf.mat %>%
   rowwise() %>%
   mutate(
@@ -231,11 +238,11 @@ cat("-->")
 
 # 2 Two Algorithms on Multiple Data Sets
 
-Let us now confirm whether this result holds for other data sets as well. We will first scout OpenML (package `mlr3oml`) for suitable classification tasks. 
+Let us now confirm whether this result holds for other data sets as well. We will first scout `OpenML` (package `mlr3oml`) for suitable classification tasks. 
 
 ## 2.1 Get Tasks from OpenML
 
-Use the function `list_oml_tasks` to look for tasks with the following characteristics: 
+Use the function `list_oml_tasks()` to look for tasks with the following characteristics: 
 
 - binary classification
 - number of features between 5 and 10
@@ -250,8 +257,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
-library(mlr3oml)
+```{r, eval = show.solution}
 otasks = list_oml_tasks(
   type = "classif",
   number_features = c(5, 10),
@@ -267,7 +273,7 @@ cat("-->")
 
 ## 2.2 Filter tasks 
 
-Filter out tasks with the same data_id. Use only tasks with balanced data sets where the ratio between the majority and minority class is smaller than 1.2. Also, remove tasks with a data_id of 720. You should receive a total number of 20 tasks.
+Filter out tasks with the same `data_id`. Use only tasks with balanced data sets where the ratio between the majority and minority class is smaller than 1.2. Also, remove tasks with a `data_id` of 720. You should receive a total number of 20 tasks.
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("<!--")
@@ -277,7 +283,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 otasks = otasks %>%
   filter(data_id != 720) %>%
   filter(MajorityClassSize / MinorityClassSize < 1.2) %>%
@@ -304,6 +310,13 @@ Use `po("encode", method = "one-hot")`.
 
 </details>
 
+<details>
+<summary>**Hint 2:**</summary>
+
+A benchmark design can be created with `design = benchmark_grid(tasklist, learners, resampling)` and evaluated with `benchmark(design)`.
+
+</details>
+
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("<!--")
 ```
@@ -312,17 +325,17 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
-tasklist = lapply(otasks$task_id, FUN = function(x) otsk(x))
+```{r, eval = show.solution}
+tasklist = lapply(otasks$task_id, FUN = otsk)
 unlist(lapply(tasklist, FUN = function(x) x[["data_name"]]))
 
-learners = lapply(c("classif.rpart", "classif.ranger"), lrn)
+learners = lrns(c("classif.rpart", "classif.ranger"))
 poe = po("encode", method = "one-hot")
 learners = lapply(learners, FUN = function(x) {po("encode") %>>% x})
 
-resamplings = rsmp("cv", folds = 3)
-design = benchmark_grid(tasklist, learners, resamplings)
-set.seed(123)
+resampling = rsmp("cv", folds = 3)
+design = benchmark_grid(tasklist, learners, resampling)
+
 bmr = benchmark(design)
 ```
 
@@ -342,7 +355,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 aggr = bmr$aggregate()
 aggr = aggr %>%
   mutate(learner_id = replace(learner_id, learner_id == "encode.classif.ranger", "ranger")) %>%
@@ -364,7 +377,7 @@ cat("-->")
 
 ## 2.5 Wilcoxon test
 
-Run the Wilcoxon signed rank test using the ranks you computed:
+Run the Wilcoxon signed rank test using the ranks you computed. You can use `qsignrank(p = 0.05 / 2, n = M)` to compute the critical value for the lower tail of the two-sided test for a 5% significance level.
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("<!--")
@@ -374,12 +387,17 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
+# Test Statistic
 r_plus = sum(as.numeric(ranktable_wide_rpart_ranger$rpart == 1))
 r_minus = sum(as.numeric(ranktable_wide_rpart_ranger$rpart == 2))
 M = nrow(ranktable_wide_rpart_ranger)
 wilcoxon = (min(r_plus, r_minus) - ((1 / 4) * M * (M + 1))) / sqrt((1 / 24) * M * (M + 1) * (2 * M + 1)) 
-wilcoxon
+# Critical value for the lower tail
+lower_crit <- qsignrank(p = 0.05 / 2, n = M)
+# Perform test
+wilcoxon < lower_crit
+# We reject H0
 ```
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
@@ -400,15 +418,14 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 learners = lapply(c("classif.featureless",  "classif.cv_glmnet", "classif.rpart", "classif.ranger", "classif.kknn", "classif.svm"), lrn)
 poe = po("encode", method = "one-hot")
 learners = lapply(learners, FUN = function(x) {po("encode") %>>% x})
 
-resamplings = rsmp("cv", folds = 3)
-design = benchmark_grid(tasklist, learners, resamplings)
+resampling = rsmp("cv", folds = 3)
+design = benchmark_grid(tasklist, learners, resampling)
 
-set.seed(123)
 bmr = benchmark(design)
 
 aggr = bmr$aggregate()
@@ -437,7 +454,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 ranktable = aggr %>%
   group_by(task_id) %>%
   mutate(rank_on_task = rank(classif.ce)) %>%
@@ -447,17 +464,12 @@ averageranks = ranktable %>%
   group_by(learner_id) %>%
   summarize(average_rank_on_task = mean(rank_on_task))
 
-averageranks
-
 meanrank = (1 / nrow(ranktable)) * sum(ranktable$rank_on_task)
-meanrank
 
 sstotal = length(tasklist) *
   sum((averageranks$average_rank_on_task- meanrank)^2)
-sstotal
 
 sserror = (1 / (length(tasklist) * (length(learners) - 1))) * sum((ranktable$rank_on_task - meanrank)^2)
-sserror
 
 friedmanstat = sstotal / sserror
 friedmanstat
@@ -479,7 +491,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 ce_table_wide = ranktable %>%
   select(c(task_id, learner_id, classif.ce)) %>%
   pivot_wider(names_from = learner_id, values_from = classif.ce) %>%
@@ -509,8 +521,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
-library(PMCMRplus) 
+```{r, eval = show.solution}
 rownames(ce_table_wide) = LETTERS[1:nrow(ce_table_wide)]
 nemenyi_test = frdAllPairsNemenyiTest(y = ce_table_wide)
 nemenyi_test$statistic
@@ -540,7 +551,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 mean_diff_rpart_ranger = averageranks[averageranks$learner_id == "rpart", 2] - averageranks[averageranks$learner_id == "ranger", 2]
 # # critical mean rank difference
 crit_value_mean_rank_diff = (qtukey(p = 0.05, df = Inf, nmeans = 6, lower.tail = FALSE) / sqrt(2)) * (sqrt((6 * (6 + 1)) / (6 * 16)))
@@ -560,7 +571,7 @@ Manually compare `rpart` and `ranger` with the Bonferroni-Dunn test.
 <details>
 <summary>**Hint 1:**</summary>
 
-The probability of observing the test statistic under the null hypothesis is given by `pnorm(<...>, 0, 1, lower.tail = FALSE)`.
+The probability of observing the test statistic under the null hypothesis is given by `pnorm(..., 0, 1, lower.tail = FALSE)`.
 
 </details>
 
@@ -572,7 +583,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 # bonferroni dunn test
 dunn_stat = (abs(mean_diff_rpart_ranger$average_rank_on_task) / sqrt((6 * 7) / 6 * 16))
 # prob of observing dunn statistic under h0:
@@ -586,7 +597,7 @@ cat("-->")
 
 ## 3.7 Criticial difference plot
 
-Interestingly, both tests differ in this case. The Nemenyi test lets us reject the null, while the Bonferroni-Dunn test does not let us reject the null. Next, compute a criticial difference plot with `mlr3`.
+Interestingly, both tests differ in this case. The Nemenyi test lets us reject the null, while the Bonferroni-Dunn test does not let us reject the null. Next, compute a critical difference plot with `mlr3`.
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("<!--")
@@ -596,9 +607,8 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
-# sanity check with mlr3
-library(mlr3benchmark)
+```{r, eval = show.solution}
+# Sanity check with mlr3
 benchmark_aggr = as_benchmark_aggr(bmr, measures = msr("classif.ce"))
 benchmark_aggr$friedman_test()
 cd_plot = autoplot(benchmark_aggr, type = "cd", meas = "ce", minimize = TRUE)
