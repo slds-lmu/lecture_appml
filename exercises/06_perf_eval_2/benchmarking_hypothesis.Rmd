@@ -10,8 +10,17 @@ output:
 ---
 
 ```{r, eval = TRUE, echo = FALSE, include=FALSE}
-sys.source("../setup/setup.R", envir = knitr::knit_global())
+sys.source("setup.R", envir = knitr::knit_global())
 options(timeout = 10000)
+```
+
+# Goal
+
+Our goal for this exercise sheet is to use `mlr3` to benchmark models in multiple scenarios, using hypothesis tests as an additional diagnostic tool to make the benchmark more rigorous.
+
+# Required packages
+
+```{r, message = FALSE}
 library(mlr3oml)
 library(mlr3verse)
 library(mlr3learners)
@@ -21,10 +30,6 @@ library(ggplot2)
 library(PMCMRplus)
 set.seed(20220801)
 ```
-
-# Goals
-
-Our goal for this exercise sheet is to use `mlr3` to benchmark models in multiple scenarios, using hypothesis tests as an additional diagnostic tool to make the benchmark more rigorous.
 
 # 1 Two Algorithms on One Data Set
 
@@ -42,7 +47,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 credit.task = tsk("german_credit")
 
 rpart.model = mlr_learners$get("classif.rpart")
@@ -77,7 +82,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 rpart.predictions = rpart.model$predict_newdata(newdata = credit.task$data())$print()
 ranger.predictions = ranger.model$predict_newdata(newdata = credit.task$data())$print()
 conf.mat = rpart.predictions[ , c("row_ids", "truth", "response", "prob.good")]
@@ -103,7 +108,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 conf.mat = conf.mat %>%
   mutate(
     rpart_loss = (rpart_prob - ifelse(truth == "good", 1, 0))^2
@@ -139,7 +144,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 conf.mat = conf.mat %>%
   mutate(
     diff_loss = rpart_loss - ranger_loss
@@ -187,7 +192,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 conf.mat = conf.mat %>%
   rowwise() %>%
   mutate(
@@ -252,7 +257,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 otasks = list_oml_tasks(
   type = "classif",
   number_features = c(5, 10),
@@ -278,7 +283,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 otasks = otasks %>%
   filter(data_id != 720) %>%
   filter(MajorityClassSize / MinorityClassSize < 1.2) %>%
@@ -320,11 +325,11 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
-tasklist = lapply(otasks$task_id, FUN = function(x) otsk(x))
+```{r, eval = show.solution}
+tasklist = lapply(otasks$task_id, FUN = otsk)
 unlist(lapply(tasklist, FUN = function(x) x[["data_name"]]))
 
-learners = lapply(c("classif.rpart", "classif.ranger"), lrn)
+learners = lrns(c("classif.rpart", "classif.ranger"))
 poe = po("encode", method = "one-hot")
 learners = lapply(learners, FUN = function(x) {po("encode") %>>% x})
 
@@ -350,7 +355,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 aggr = bmr$aggregate()
 aggr = aggr %>%
   mutate(learner_id = replace(learner_id, learner_id == "encode.classif.ranger", "ranger")) %>%
@@ -382,7 +387,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 # Test Statistic
 r_plus = sum(as.numeric(ranktable_wide_rpart_ranger$rpart == 1))
 r_minus = sum(as.numeric(ranktable_wide_rpart_ranger$rpart == 2))
@@ -413,7 +418,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 learners = lapply(c("classif.featureless",  "classif.cv_glmnet", "classif.rpart", "classif.ranger", "classif.kknn", "classif.svm"), lrn)
 poe = po("encode", method = "one-hot")
 learners = lapply(learners, FUN = function(x) {po("encode") %>>% x})
@@ -449,7 +454,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 ranktable = aggr %>%
   group_by(task_id) %>%
   mutate(rank_on_task = rank(classif.ce)) %>%
@@ -486,7 +491,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 ce_table_wide = ranktable %>%
   select(c(task_id, learner_id, classif.ce)) %>%
   pivot_wider(names_from = learner_id, values_from = classif.ce) %>%
@@ -516,7 +521,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 rownames(ce_table_wide) = LETTERS[1:nrow(ce_table_wide)]
 nemenyi_test = frdAllPairsNemenyiTest(y = ce_table_wide)
 nemenyi_test$statistic
@@ -546,7 +551,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 mean_diff_rpart_ranger = averageranks[averageranks$learner_id == "rpart", 2] - averageranks[averageranks$learner_id == "ranger", 2]
 # # critical mean rank difference
 crit_value_mean_rank_diff = (qtukey(p = 0.05, df = Inf, nmeans = 6, lower.tail = FALSE) / sqrt(2)) * (sqrt((6 * (6 + 1)) / (6 * 16)))
@@ -566,7 +571,7 @@ Manually compare `rpart` and `ranger` with the Bonferroni-Dunn test.
 <details>
 <summary>**Hint 1:**</summary>
 
-The probability of observing the test statistic under the null hypothesis is given by `pnorm(<...>, 0, 1, lower.tail = FALSE)`.
+The probability of observing the test statistic under the null hypothesis is given by `pnorm(..., 0, 1, lower.tail = FALSE)`.
 
 </details>
 
@@ -578,7 +583,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 # bonferroni dunn test
 dunn_stat = (abs(mean_diff_rpart_ranger$average_rank_on_task) / sqrt((6 * 7) / 6 * 16))
 # prob of observing dunn statistic under h0:
@@ -592,7 +597,7 @@ cat("-->")
 
 ## 3.7 Criticial difference plot
 
-Interestingly, both tests differ in this case. The Nemenyi test lets us reject the null, while the Bonferroni-Dunn test does not let us reject the null. Next, compute a criticial difference plot with `mlr3`.
+Interestingly, both tests differ in this case. The Nemenyi test lets us reject the null, while the Bonferroni-Dunn test does not let us reject the null. Next, compute a critical difference plot with `mlr3`.
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("<!--")
@@ -602,7 +607,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-```{r}
+```{r, eval = show.solution}
 # Sanity check with mlr3
 benchmark_aggr = as_benchmark_aggr(bmr, measures = msr("classif.ce"))
 benchmark_aggr$friedman_test()
