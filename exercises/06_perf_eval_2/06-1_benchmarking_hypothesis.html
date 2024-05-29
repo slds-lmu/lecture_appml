@@ -146,7 +146,7 @@ pointer-events: auto;
 <header class="header-title">
 <div class="header-title-wrap">
 <h1 class="title toc-ignore entry-title">Applied Machine Learning</h1>
-<h2 class="subtitle">Homework exercise 04-1</h2>
+<h2 class="subtitle">In-class exercise 06-1</h2>
 </div><!-- /.header-title-wrap -->
 </header>
 
@@ -155,290 +155,637 @@ pointer-events: auto;
 <div id="TOC" class="toc">
 <ul>
 <li><a href="#goal" id="toc-goal">Goal</a></li>
-<li><a href="#house-prices-in-king-county" id="toc-house-prices-in-king-county">House Prices in King
-county</a></li>
-<li><a href="#add-uncorrelated-features-to-data" id="toc-add-uncorrelated-features-to-data">Add uncorrelated features to
-data</a></li>
-<li><a href="#train-test-split" id="toc-train-test-split">Train-test
-Split</a></li>
-<li><a href="#conditional-encoding" id="toc-conditional-encoding">Conditional Encoding</a></li>
-<li><a href="#filters" id="toc-filters">Filters</a></li>
-<li><a href="#exercises" id="toc-exercises">Exercises</a>
+<li><a href="#required-packages" id="toc-required-packages">Required
+packages</a></li>
+<li><a href="#two-algorithms-on-one-data-set" id="toc-two-algorithms-on-one-data-set">1 Two Algorithms on One Data
+Set</a>
 <ul>
-<li><a href="#exercise-1-create-a-complex-pipeline" id="toc-exercise-1-create-a-complex-pipeline">Exercise 1: Create a
-complex pipeline</a></li>
-<li><a href="#exercise-2-information-gain" id="toc-exercise-2-information-gain">Exercise 2: Information
-gain</a></li>
-<li><a href="#exercise-3-pearson-correlation-vs.-information-gain" id="toc-exercise-3-pearson-correlation-vs.-information-gain">Exercise 3:
-Pearson correlation vs. Information gain</a></li>
-<li><a href="#exercise-4-imputation" id="toc-exercise-4-imputation">Exercise 4: Imputation</a></li>
+<li><a href="#train-models" id="toc-train-models">1.1 Train
+Models</a></li>
+<li><a href="#get-predictions" id="toc-get-predictions">1.2 Get
+Predictions</a></li>
+<li><a href="#evaluate-models" id="toc-evaluate-models">1.3 Evaluate
+models</a></li>
+<li><a href="#two-sample-t-test" id="toc-two-sample-t-test">1.4 Two
+sample t-test</a></li>
+<li><a href="#mcnemar-test" id="toc-mcnemar-test">1.5 McNemar
+test</a></li>
 </ul></li>
-<li><a href="#summary" id="toc-summary">Summary</a></li>
+<li><a href="#two-algorithms-on-multiple-data-sets" id="toc-two-algorithms-on-multiple-data-sets">2 Two Algorithms on
+Multiple Data Sets</a>
+<ul>
+<li><a href="#get-tasks-from-openml" id="toc-get-tasks-from-openml">2.1
+Get Tasks from OpenML</a></li>
+<li><a href="#filter-tasks" id="toc-filter-tasks">2.2 Filter
+tasks</a></li>
+<li><a href="#benchmark-tasks" id="toc-benchmark-tasks">2.3 Benchmark
+tasks</a></li>
+<li><a href="#compare-learners" id="toc-compare-learners">2.4 Compare
+Learners</a></li>
+<li><a href="#wilcoxon-test" id="toc-wilcoxon-test">2.5 Wilcoxon
+test</a></li>
+</ul></li>
+<li><a href="#multiple-algorithms-on-multiple-data-sets" id="toc-multiple-algorithms-on-multiple-data-sets">3 Multiple Algorithms
+on Multiple Data Sets</a>
+<ul>
+<li><a href="#benchmark-learners" id="toc-benchmark-learners">3.1
+Benchmark learners</a></li>
+<li><a href="#friedman-test" id="toc-friedman-test">3.2 Friedman
+test</a></li>
+<li><a href="#friedman-test-stats" id="toc-friedman-test-stats">3.3
+Friedman test (stats)</a></li>
+<li><a href="#nemenyi-test" id="toc-nemenyi-test">3.4 Nemenyi
+test</a></li>
+<li><a href="#compute-critical-difference" id="toc-compute-critical-difference">3.5 Compute critical
+difference</a></li>
+<li><a href="#bonferroni-dunn-test" id="toc-bonferroni-dunn-test">3.6
+Bonferroni-Dunn test</a></li>
+<li><a href="#criticial-difference-plot" id="toc-criticial-difference-plot">3.7 Criticial difference
+plot</a></li>
+</ul></li>
 </ul>
 </div>
 
 <div id="goal" class="section level1">
 <h1>Goal</h1>
-<p>Apply what you have learned about using pipelines for efficient
-pre-processing and model training on a regression problem.</p>
+<p>Our goal for this exercise sheet is to use <code>mlr3</code> to
+benchmark models in multiple scenarios, using hypothesis tests as an
+additional diagnostic tool to make the benchmark more rigorous.</p>
 </div>
-<div id="house-prices-in-king-county" class="section level1">
-<h1>House Prices in King county</h1>
-<p>In this exercise, we want to model house sale prices in King county
-in the state of Washington, USA.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">124</span>)</span>
+<div id="required-packages" class="section level1">
+<h1>Required packages</h1>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(mlr3oml)</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(mlr3verse)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;mlr3tuningspaces&quot;</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;kc_housing&quot;</span>, <span class="at">package =</span> <span class="st">&quot;mlr3data&quot;</span>)</span></code></pre></div>
-<p>We do some simple feature pre-processing first:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Transform time to numeric variable:</span></span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">library</span>(anytime)</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>dates <span class="ot">=</span> <span class="fu">anytime</span>(kc_housing<span class="sc">$</span>date)</span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>kc_housing<span class="sc">$</span>date <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="fu">difftime</span>(dates, <span class="fu">min</span>(dates), <span class="at">units =</span> <span class="st">&quot;days&quot;</span>))</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co"># Scale prices:</span></span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>kc_housing<span class="sc">$</span>price <span class="ot">=</span> kc_housing<span class="sc">$</span>price <span class="sc">/</span> <span class="dv">1000</span></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co"># For this task, delete columns containing NAs:</span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>yr_renovated <span class="ot">=</span> kc_housing<span class="sc">$</span>yr_renovated</span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>sqft_basement <span class="ot">=</span> kc_housing<span class="sc">$</span>sqft_basement</span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>kc_housing[,<span class="fu">c</span>(<span class="dv">13</span>, <span class="dv">15</span>)] <span class="ot">=</span> <span class="cn">NULL</span></span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co"># Create factor columns:</span></span>
-<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>kc_housing[,<span class="fu">c</span>(<span class="dv">8</span>, <span class="dv">14</span>)] <span class="ot">=</span> <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="dv">8</span>, <span class="dv">14</span>), <span class="cf">function</span>(x) {<span class="fu">as.factor</span>(kc_housing[,x])})</span>
-<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co"># Get an overview:</span></span>
-<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="fu">str</span>(kc_housing)</span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="do">## &#39;data.frame&#39;:    21613 obs. of  18 variables:</span></span>
-<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="do">##  $ date         : num  164 221 299 221 292 ...</span></span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="do">##  $ price        : num  222 538 180 604 510 ...</span></span>
-<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="do">##  $ bedrooms     : int  3 3 2 4 3 4 3 3 3 3 ...</span></span>
-<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="do">##  $ bathrooms    : num  1 2.25 1 3 2 4.5 2.25 1.5 1 2.5 ...</span></span>
-<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="do">##  $ sqft_living  : int  1180 2570 770 1960 1680 5420 1715 1060 1780 1890 ...</span></span>
-<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="do">##  $ sqft_lot     : int  5650 7242 10000 5000 8080 101930 6819 9711 7470 6560 ...</span></span>
-<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="do">##  $ floors       : num  1 2 1 1 1 1 2 1 1 2 ...</span></span>
-<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="do">##  $ waterfront   : Factor w/ 2 levels &quot;FALSE&quot;,&quot;TRUE&quot;: 1 1 1 1 1 1 1 1 1 1 ...</span></span>
-<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="do">##  $ view         : int  0 0 0 0 0 0 0 0 0 0 ...</span></span>
-<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="do">##  $ condition    : int  3 3 3 5 3 3 3 3 3 3 ...</span></span>
-<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a><span class="do">##  $ grade        : int  7 7 6 7 8 11 7 7 7 7 ...</span></span>
-<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a><span class="do">##  $ sqft_above   : int  1180 2170 770 1050 1680 3890 1715 1060 1050 1890 ...</span></span>
-<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a><span class="do">##  $ yr_built     : int  1955 1951 1933 1965 1987 2001 1995 1963 1960 2003 ...</span></span>
-<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a><span class="do">##  $ zipcode      : Factor w/ 70 levels &quot;98001&quot;,&quot;98002&quot;,..: 67 56 17 59 38 30 3 69 61 24 ...</span></span>
-<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a><span class="do">##  $ lat          : num  47.5 47.7 47.7 47.5 47.6 ...</span></span>
-<span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a><span class="do">##  $ long         : num  -122 -122 -122 -122 -122 ...</span></span>
-<span id="cb2-32"><a href="#cb2-32" tabindex="-1"></a><span class="do">##  $ sqft_living15: int  1340 1690 2720 1360 1800 4760 2238 1650 1780 2390 ...</span></span>
-<span id="cb2-33"><a href="#cb2-33" tabindex="-1"></a><span class="do">##  $ sqft_lot15   : int  5650 7639 8062 5000 7503 101930 6819 9711 8113 7570 ...</span></span>
-<span id="cb2-34"><a href="#cb2-34" tabindex="-1"></a><span class="do">##  - attr(*, &quot;index&quot;)= int(0)</span></span></code></pre></div>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(mlr3learners)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">library</span>(mlr3benchmark)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">library</span>(PMCMRplus)</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20220801</span>)</span></code></pre></div>
 </div>
-<div id="add-uncorrelated-features-to-data" class="section level1">
-<h1>Add uncorrelated features to data</h1>
-<p>To test different strategies for feature selection in this exercise,
-we create two artificial features that are (mostly) uncorrelated with
-the outcome <code>price</code>:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Uncorrelated feature x1:</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>kc_housing<span class="sc">$</span>x1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="at">n =</span> <span class="fu">nrow</span>(kc_housing))</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="fu">cor</span>(kc_housing<span class="sc">$</span>x1, kc_housing<span class="sc">$</span>price)</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="do">## [1] 0.002249436</span></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co"># Uncorrelated feature x2:</span></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>kc_housing<span class="sc">$</span>x2 <span class="ot">&lt;-</span> <span class="fu">sin</span>(<span class="fl">0.01</span><span class="sc">*</span>kc_housing<span class="sc">$</span>price<span class="sc">*</span>kc_housing<span class="sc">$</span>grade)</span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="fu">cor</span>(kc_housing<span class="sc">$</span>x2, kc_housing<span class="sc">$</span>price)</span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="do">## [1] 0.01329962</span></span></code></pre></div>
-</div>
-<div id="train-test-split" class="section level1">
-<h1>Train-test Split</h1>
-<p>Before we train a model, let’s reserve some data for evaluating our
-model later on:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>task <span class="ot">=</span> <span class="fu">as_task_regr</span>(kc_housing, <span class="at">target =</span> <span class="st">&quot;price&quot;</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>split <span class="ot">=</span> <span class="fu">partition</span>(task, <span class="at">ratio =</span> <span class="fl">0.6</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>tasktrain <span class="ot">=</span> task<span class="sc">$</span><span class="fu">clone</span>()</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>tasktrain<span class="sc">$</span><span class="fu">filter</span>(split<span class="sc">$</span>train)</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a></span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>tasktest <span class="ot">=</span> task<span class="sc">$</span><span class="fu">clone</span>()</span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>tasktest<span class="sc">$</span><span class="fu">filter</span>(split<span class="sc">$</span>test)</span></code></pre></div>
-</div>
-<div id="conditional-encoding" class="section level1">
-<h1>Conditional Encoding</h1>
-<p>In the King county data, there are two categorial features encoded as
-<code>factor</code>:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">lengths</span>(task<span class="sc">$</span><span class="fu">levels</span>())</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="do">## waterfront    zipcode </span></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="do">##          2         70</span></span></code></pre></div>
-<p>Obviously, <code>waterfront</code> is a low-cardinality feature
-suitable for one-hot encoding and <code>zipcode</code> is a very
-high-cardinality feature. Therefore, it would make sense to create a
-pipeline that first pre-processes each factor variable with either
-impact or one-hot encoding, depending on the feature cardinality.</p>
-</div>
-<div id="filters" class="section level1">
-<h1>Filters</h1>
-<p>Filter algorithms select features by assigning numeric scores to each
-feature, e.g. correlation between features and target variable, use
-these to rank the features and select a feature subset based on the
-ranking. Features that are assigned lower scores are then omitted in
-subsequent modeling steps. All filters are implemented via the package
-<code>mlr3filters</code>. A very simple filter approach could look like
-this:</p>
-<ol style="list-style-type: decimal">
-<li>Calculate the correlation coefficient between each feature and a
-numeric target variable</li>
-<li>Select the 10 features with the highest correlation for further
-modeling steps.</li>
-</ol>
-<p>A different strategy could entail selecting only features above a
-certain threshold of correlation with the outcome. For a full list of
-all implemented filter methods, take a look at <a href="https://mlr3filters.mlr-org.com" class="uri">https://mlr3filters.mlr-org.com</a>.</p>
-</div>
-<div id="exercises" class="section level1">
-<h1>Exercises</h1>
-<div id="exercise-1-create-a-complex-pipeline" class="section level2">
-<h2>Exercise 1: Create a complex pipeline</h2>
-<p>Create a pipeline with the following sequence of elements:</p>
-<ol style="list-style-type: decimal">
-<li>Each factor variable gets pre-processed with either one-hot or
-impact encoding, depending on the cardinality of the feature.</li>
-<li>A filter selector is applied to the features, sorting them by their
-Pearson correlation coefficient and selecting the 3 features with the
-highest correlation.</li>
-<li>A random forest (<code>regr.ranger</code>) is trained.</li>
-</ol>
-<p>The pipeline should be tuned within an <code>autotuner</code> with
-random search, two-fold CV and MSE as performance measure, and a search
-space from <code>mlr3tuningspaces</code>. Train the
-<code>autotuner</code> on the training data, and evaluate the
-performance on the holdout test data.</p>
+<div id="two-algorithms-on-one-data-set" class="section level1">
+<h1>1 Two Algorithms on One Data Set</h1>
+<p>Let’s start with a simple example that compares two different
+learners on a single data set.</p>
+<div id="train-models" class="section level2">
+<h2>1.1 Train Models</h2>
+<p>Train a random forest from the <code>ranger</code> package and a
+regression tree from the <code>rpart</code> package using
+<code>mlr3</code> with default hyperparameters on the German credit task
+<code>&quot;german_credit&quot;</code>. The models are used in the next step to
+predict class probabilities.</p>
 <!--
 
 ### Solution:
-
 <details>
-<summary>Click me:</summary>
-
-
-
-
--->
-</div>
-<div id="exercise-2-information-gain" class="section level2">
-<h2>Exercise 2: Information gain</h2>
-<p>An alternative filter method is information gain (<a href="https://mlr3filters.mlr-org.com/reference/mlr_filters_information_gain.html" class="uri">https://mlr3filters.mlr-org.com/reference/mlr_filters_information_gain.html</a>).
-Recreate the pipeline from exercise 1, but use information gain as
-filter. Again, select the three features with the highest information
-gain. Train the <code>autotuner</code> on the training data, and
-evaluate the performance on the holdout test data.</p>
-<!--
-
-### Solution:
-
-<details>
-<summary>Click me:</summary>
-
-
-
-
--->
-</div>
-<div id="exercise-3-pearson-correlation-vs.-information-gain" class="section level2">
-<h2>Exercise 3: Pearson correlation vs. Information gain</h2>
-<p>We receive the following performance scores for the two filter
-methods:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>score_rf_cor</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="do">## regr.mse </span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="do">## 27982.83</span></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>score_rf_info</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="do">## regr.mse </span></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="do">## 37820.29</span></span></code></pre></div>
-<p>As you can see, the Pearson correlation filter seems to select
-features that result in a better model. To investigate why that may have
-happened, inspect the trained autotuners. Which features have been
-selected? Given the selected features, reason to what extent which
-filter methods may be more helpful than others in determining features
-to select for the model training process.</p>
-<!--
-
-### Solution:
-
-<details>
-<summary>Click me:</summary>
+<summary>**Click me:**</summary>
 
 
 ```r
-auto_rf_cor$model$learner$model$correlation$features
-auto_rf_info$model$learner$model$information_gain$features
-```
+credit.task = tsk("german_credit")
 
-The correlation filter does not select `x2`, a feature that we artificially created and is uncorrelated with the outcome `price`. However, the information gain filter selects for `x2`. This can be seen from how it was computed in the first place:
+rpart.model = mlr_learners$get("classif.rpart")
+rpart.model$predict_type = "prob"
+rpart.model$train(credit.task)
 
-
-```r
-kc_housing$x2 <- sin(0.01*kc_housing$price*kc_housing$grade)
-```
-
-Indeed, it is a sin-transformed function of the `price` and `grade`, something that is not necessarily obvious from a simple visual inspection:
-
-
-```r
-plot(kc_housing$x2, kc_housing$price)
+ranger.model = mlr_learners$get("classif.ranger")
+ranger.model$predict_type = "prob"
+ranger.model$train(credit.task)
 ```
 
 -->
 </div>
-<div id="exercise-4-imputation" class="section level2">
-<h2>Exercise 4: Imputation</h2>
-<p>In the three exercises before, we excluded two variables from the
-<code>kc_housing</code> data with missing values. Let’s add them back to
-the data set and try to impute missing values automatically with a
-pipeline.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>kc_housing<span class="sc">$</span>yr_renovated <span class="ot">=</span> yr_renovated</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>kc_housing<span class="sc">$</span>sqft_basement <span class="ot">=</span> sqft_basement</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>task <span class="ot">=</span> <span class="fu">as_task_regr</span>(kc_housing, <span class="at">target =</span> <span class="st">&quot;price&quot;</span>)</span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co"># Check again which features in the task have NAs:</span></span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="fu">names</span>(<span class="fu">which</span>(task<span class="sc">$</span><span class="fu">missings</span>() <span class="sc">&gt;</span> <span class="dv">0</span>))</span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="do">## [1] &quot;sqft_basement&quot; &quot;yr_renovated&quot;</span></span></code></pre></div>
-<p>Further, we use a simple train-test split as before:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>split <span class="ot">=</span> <span class="fu">partition</span>(task, <span class="at">ratio =</span> <span class="fl">0.6</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>tasktrain <span class="ot">=</span> task<span class="sc">$</span><span class="fu">clone</span>()</span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>tasktrain<span class="sc">$</span><span class="fu">filter</span>(split<span class="sc">$</span>train)</span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a></span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>tasktest <span class="ot">=</span> task<span class="sc">$</span><span class="fu">clone</span>()</span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>tasktest<span class="sc">$</span><span class="fu">filter</span>(split<span class="sc">$</span>test)</span></code></pre></div>
-<p>As the two features with missing values are both numeric, we can
-compare two simple strategies for imputation: mean imputation and
-histogram imputation. While the former replaces <code>NAs</code> with
-the mean value of a feature, the latter samples from the empirical
-distribution of the non-<code>NA</code> values of the feature, ensuring
-that the marginal distribution is preserved. For each imputation method,
-construct a simple pipeline that trains a random forest without any HPO
-on the <code>tasktrain</code>, and evaluate the model on
-<code>tasktest</code> using MSE.</p>
+<div id="get-predictions" class="section level2">
+<h2>1.2 Get Predictions</h2>
+<p>Create a <code>data.frame</code>. For each row in the credit data, it
+should contain the ground truth label as well as both the predicted
+probabilities and predicted labels by <code>rpart</code> and
+<code>ranger</code>, respectively.</p>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<p>You can call <code>$predict_newdata()</code> on the trained model
+object to make predictions.</p>
+</details>
 <!--
 
 ### Solution:
-
 <details>
-<summary>Click me:</summary>
+<summary>**Click me:**</summary>
 
 
 ```r
-# Mean imputation:
-imp_mean_ranger = as_learner(po("imputemean") %>>% lrn("regr.ranger"))
-imp_mean_ranger$train(tasktrain)
-
-# Histogram imputation:
-imp_hist_ranger = as_learner(po("imputehist") %>>% lrn("regr.ranger"))
-imp_hist_ranger$train(tasktrain)
-
-# Evaluate performance:
-imp_mean_ranger$predict(tasktest)$score()
-imp_hist_ranger$predict(tasktest)$score()
+rpart.predictions = rpart.model$predict_newdata(newdata = credit.task$data())$print()
+ranger.predictions = ranger.model$predict_newdata(newdata = credit.task$data())$print()
+conf.mat = rpart.predictions[ , c("row_ids", "truth", "response", "prob.good")]
+conf.mat$ranger = ranger.predictions$response
+conf.mat$ranger_prob = ranger.predictions$prob.good
+colnames(conf.mat) = c("id", "truth", "rpart", "rpart_prob", "ranger", "ranger_prob")
+conf.mat
 ```
 
+-->
+</div>
+<div id="evaluate-models" class="section level2">
+<h2>1.3 Evaluate models</h2>
+<p>Add two new columns with the observation-wise loss value for the
+Brier score. Compare the performance of both models using these
+columns.</p>
+<!--
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+
+```r
+conf.mat = conf.mat %>%
+  mutate(
+    rpart_loss = (rpart_prob - ifelse(truth == "good", 1, 0))^2
+  ) %>%
+  mutate(
+    ranger_loss = (ranger_prob - ifelse(truth == "good", 1, 0))^2
+  )
+
+mean(conf.mat$rpart_loss)
+mean(conf.mat$ranger_loss)
+```
+
+-->
+</div>
+<div id="two-sample-t-test" class="section level2">
+<h2>1.4 Two sample t-test</h2>
+<p>Use a two sample t-test for an alpha of 5% to evaluate whether both
+samples of performance scores come from different populations.</p>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<p>Add another column with the difference between observation-wise loss
+values. Then run the t-test. The value of the quantile function of the
+t-distribution can be computed with <code>qt()</code>.</p>
+</details>
+<!--
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+
+```r
+conf.mat = conf.mat %>%
+  mutate(
+    diff_loss = rpart_loss - ranger_loss
+  )
+
+mean_diff_loss = conf.mat %>%
+  ungroup() %>%
+  summarize(diff_loss = mean(diff_loss))
+
+t_var = sqrt((1 / (nrow(conf.mat) - 1)) * sum((conf.mat$diff_loss - as.numeric(mean_diff_loss))^2))
+
+t_statistic = sqrt(nrow(conf.mat)) * (mean_diff_loss / t_var)
+t_statistic
+# lower critical value, reject H0 if t-stat smaller
+qt(0.025, df = nrow(conf.mat) - 1)
+# OR
+# upper critical value, reject H0 if t-stat larger
+qt(0.975, df = nrow(conf.mat) - 1)
+
+t_statistic > qt(0.975, df = nrow(conf.mat) - 1)
+```
+
+-->
+<!-- We reject the null. This means the difference in model performance is significant. -->
+</div>
+<div id="mcnemar-test" class="section level2">
+<h2>1.5 McNemar test</h2>
+<p>Now run the McNemar test for an alpha of 5%. This is a non-parametric
+test that compares only the labels predicted by two models.</p>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<p>You will need the total number of observations that are classified
+correctly by <code>rpart</code> only and those that are classified
+correctly by <code>ranger</code> only. The value of the quantile
+function of the chi-sqaured-distribution can be computed with
+<code>qchisq()</code>.</p>
+</details>
+<!--
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+
+```r
+conf.mat = conf.mat %>%
+  rowwise() %>%
+  mutate(
+    rpart_correct = case_when(
+      truth == "good" & rpart == "good" |
+        truth == "bad" & rpart == "bad"
+      ~ 1,
+      .default = 0)) %>% 
+  mutate(
+    ranger_correct = case_when(
+      truth == "good" & ranger == "good" |
+        truth == "bad" & ranger == "bad"
+      ~ 1,
+      .default = 0)) %>%
+  mutate(
+    only_rpart_correct = case_when(
+      rpart_correct == 1 & ranger_correct == 0
+      ~ 1,
+      .default = 0)) %>% 
+  mutate(
+    only_ranger_correct = case_when(
+      rpart_correct == 0 & ranger_correct == 1
+      ~ 1,
+      .default = 0))
+
+n_only_rpart_correct = sum(conf.mat$only_rpart_correct)
+n_only_ranger_correct = sum(conf.mat$only_ranger_correct)
+
+mcnemar_stat = (abs(n_only_rpart_correct - n_only_ranger_correct) - 1)^2 / (n_only_rpart_correct + n_only_ranger_correct)
+mcnemar_stat
+
+# critical value for alpha = 5%, reject H0 if mcnemar_stat larger
+crit = qchisq(0.95, df = 1)
+
+mcnemar_stat > crit
+```
+
+-->
+<!-- We reject the null. This means that also for the McNemar test, the difference in performance is statistically significant. -->
+</div>
+</div>
+<div id="two-algorithms-on-multiple-data-sets" class="section level1">
+<h1>2 Two Algorithms on Multiple Data Sets</h1>
+<p>Let us now confirm whether this result holds for other data sets as
+well. We will first scout <code>OpenML</code> (package
+<code>mlr3oml</code>) for suitable classification tasks.</p>
+<div id="get-tasks-from-openml" class="section level2">
+<h2>2.1 Get Tasks from OpenML</h2>
+<p>Use the function <code>list_oml_tasks()</code> to look for tasks with
+the following characteristics:</p>
+<ul>
+<li>binary classification</li>
+<li>number of features between 5 and 10</li>
+<li>number of instances between 500 and 10000</li>
+<li>no missing values</li>
+</ul>
+<!--
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+
+```r
+otasks = list_oml_tasks(
+  type = "classif",
+  number_features = c(5, 10),
+  number_instances = c(500, 10000),
+  number_classes = 2,
+  number_missing_values = 0
+)
+```
+
+-->
+</div>
+<div id="filter-tasks" class="section level2">
+<h2>2.2 Filter tasks</h2>
+<p>Filter out tasks with the same <code>data_id</code>. Use only tasks
+with balanced data sets where the ratio between the majority and
+minority class is smaller than 1.2. Also, remove tasks with a
+<code>data_id</code> of 720. You should receive a total number of 20
+tasks.</p>
+<!--
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+
+```r
+otasks = otasks %>%
+  filter(data_id != 720) %>%
+  filter(MajorityClassSize / MinorityClassSize < 1.2) %>%
+  group_by(name) %>%
+  filter(row_number(data_id) == 1) %>%
+  group_by(data_id) %>%
+  filter(row_number(data_id) == 1)
+
+nrow(otasks)
+```
+
+-->
+</div>
+<div id="benchmark-tasks" class="section level2">
+<h2>2.3 Benchmark tasks</h2>
+<p>Benchmark <code>rpart</code> and <code>ranger</code> on all found
+tasks with <code>mlr3</code>. Use one-hot encoding and three-fold
+cross-validation.</p>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<p>Use <code>po(&quot;encode&quot;, method = &quot;one-hot&quot;)</code>.</p>
+</details>
+<details>
+<summary>
+<strong>Hint 2:</strong>
+</summary>
+<p>A benchmark design can be created with
+<code>design = benchmark_grid(tasklist, learners, resampling)</code> and
+evaluated with <code>benchmark(design)</code>.</p>
+</details>
+<!--
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+
+```r
+tasklist = lapply(otasks$task_id, FUN = otsk)
+unlist(lapply(tasklist, FUN = function(x) x[["data_name"]]))
+
+learners = lrns(c("classif.rpart", "classif.ranger"))
+poe = po("encode", method = "one-hot")
+learners = lapply(learners, FUN = function(x) {po("encode") %>>% x})
+
+resampling = rsmp("cv", folds = 3)
+design = benchmark_grid(tasklist, learners, resampling)
+
+bmr = benchmark(design)
+```
+
+-->
+</div>
+<div id="compare-learners" class="section level2">
+<h2>2.4 Compare Learners</h2>
+<p>Apply the <code>$aggregate()</code> function to the <code>mlr3</code>
+benchmark object and compare the ranks of both algorithms on all
+tasks.</p>
+<!--
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+
+```r
+aggr = bmr$aggregate()
+aggr = aggr %>%
+  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.ranger", "ranger")) %>%
+  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.rpart", "rpart"))
+
+ranktable_wide_rpart_ranger = aggr %>%
+  group_by(task_id) %>%
+  mutate(rank_on_task = rank(classif.ce)) %>%
+  mutate(ce_rank = rank_on_task) %>%
+  select(c(task_id, learner_id, ce_rank)) %>%
+  pivot_wider(names_from = learner_id, values_from = ce_rank)
+
+ranktable_wide_rpart_ranger
+```
+
+-->
+</div>
+<div id="wilcoxon-test" class="section level2">
+<h2>2.5 Wilcoxon test</h2>
+<p>Run the Wilcoxon signed rank test using the ranks you computed. You
+can use <code>qsignrank(p = 0.05 / 2, n = M)</code> to compute the
+critical value for the lower tail of the two-sided test for a 5%
+significance level.</p>
+<!--
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+
+```r
+# Test Statistic
+r_plus = sum(as.numeric(ranktable_wide_rpart_ranger$rpart == 1))
+r_minus = sum(as.numeric(ranktable_wide_rpart_ranger$rpart == 2))
+M = nrow(ranktable_wide_rpart_ranger)
+wilcoxon = (min(r_plus, r_minus) - ((1 / 4) * M * (M + 1))) / sqrt((1 / 24) * M * (M + 1) * (2 * M + 1)) 
+# Critical value for the lower tail
+lower_crit <- qsignrank(p = 0.05 / 2, n = M)
+# Perform test
+wilcoxon < lower_crit
+# We reject H0
+```
 
 -->
 </div>
 </div>
-<div id="summary" class="section level1">
-<h1>Summary</h1>
-<p>We learned about more complex pipelines, including pre-processing
-methods for imputation, variable encoding and feature filtering.</p>
+<div id="multiple-algorithms-on-multiple-data-sets" class="section level1">
+<h1>3 Multiple Algorithms on Multiple Data Sets</h1>
+<div id="benchmark-learners" class="section level2">
+<h2>3.1 Benchmark learners</h2>
+<p>Let us now compare more algorithms on each task. Rerun the benchmark
+with the learners “classif.featureless”, “classif.cv_glmnet”,
+“classif.rpart”, “classif.ranger”, “classif.kknn”, and “classif.svm”. As
+before, use one-hot encodings.</p>
+<!--
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+
+```r
+learners = lapply(c("classif.featureless",  "classif.cv_glmnet", "classif.rpart", "classif.ranger", "classif.kknn", "classif.svm"), lrn)
+poe = po("encode", method = "one-hot")
+learners = lapply(learners, FUN = function(x) {po("encode") %>>% x})
+
+resampling = rsmp("cv", folds = 3)
+design = benchmark_grid(tasklist, learners, resampling)
+
+bmr = benchmark(design)
+
+aggr = bmr$aggregate()
+aggr = aggr %>%
+  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.featureless", "featureless")) %>%
+  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.ranger", "ranger")) %>%
+  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.kknn", "kknn")) %>%
+  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.rpart", "rpart")) %>%
+  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.svm", "svm")) %>%
+  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.cv_glmnet", "cv_glmnet"))
+```
+
+-->
+</div>
+<div id="friedman-test" class="section level2">
+<h2>3.2 Friedman test</h2>
+<p>Given multiple algorithms on multiple data sets, we have to use an
+omnibus test such as the Friedman test. Compute a rank table that tells
+you the rank of each algorithm for each task. Then, compute the average
+rank of each algorithm and proceed with the computation of the Friedman
+statistic.</p>
+<!--
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+
+```r
+ranktable = aggr %>%
+  group_by(task_id) %>%
+  mutate(rank_on_task = rank(classif.ce)) %>%
+  mutate(ce_rank = paste(round(classif.ce, 4), " (", rank_on_task, ")", sep =  ""))
+
+averageranks = ranktable %>%
+  group_by(learner_id) %>%
+  summarize(average_rank_on_task = mean(rank_on_task))
+
+meanrank = (1 / nrow(ranktable)) * sum(ranktable$rank_on_task)
+
+sstotal = length(tasklist) *
+  sum((averageranks$average_rank_on_task- meanrank)^2)
+
+sserror = (1 / (length(tasklist) * (length(learners) - 1))) * sum((ranktable$rank_on_task - meanrank)^2)
+
+friedmanstat = sstotal / sserror
+friedmanstat
+```
+
+-->
+</div>
+<div id="friedman-test-stats" class="section level2">
+<h2>3.3 Friedman test (stats)</h2>
+<p>Run a sanity check with the <code>friedman.test</code> function
+implemented in the <code>stats</code> package.</p>
+<!--
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+
+```r
+ce_table_wide = ranktable %>%
+  select(c(task_id, learner_id, classif.ce)) %>%
+  pivot_wider(names_from = learner_id, values_from = classif.ce) %>%
+  ungroup() %>%
+  select(-task_id) %>%
+  as.matrix()
+ce_table_wide
+
+friedman.test(ce_table_wide)
+```
+
+-->
+</div>
+<div id="nemenyi-test" class="section level2">
+<h2>3.4 Nemenyi test</h2>
+<p>As the Friedman test indicates that at least one algorithm performs
+differently, we can run pairwise comparisons with post-hoc tests such as
+the Nemenyi or Bonferroni-Dunn test.</p>
+<p>Use the function <code>frdAllPairsNemenyiTest</code> from the
+<code>PMCMRplus</code> package to run all pairwise Nemenyi tests.</p>
+<!--
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+
+```r
+rownames(ce_table_wide) = LETTERS[1:nrow(ce_table_wide)]
+nemenyi_test = frdAllPairsNemenyiTest(y = ce_table_wide)
+nemenyi_test$statistic
+nemenyi_test$p.value
+```
+
+-->
+</div>
+<div id="compute-critical-difference" class="section level2">
+<h2>3.5 Compute critical difference</h2>
+<p>Manually compute the critical difference for rpart and ranger.</p>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<p>Use the <code>qtukey</code> function.</p>
+</details>
+<!--
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+
+```r
+mean_diff_rpart_ranger = averageranks[averageranks$learner_id == "rpart", 2] - averageranks[averageranks$learner_id == "ranger", 2]
+# # critical mean rank difference
+crit_value_mean_rank_diff = (qtukey(p = 0.05, df = Inf, nmeans = 6, lower.tail = FALSE) / sqrt(2)) * (sqrt((6 * (6 + 1)) / (6 * 16)))
+
+mean_diff_rpart_ranger > crit_value_mean_rank_diff
+# reject H_0!
+```
+
+-->
+</div>
+<div id="bonferroni-dunn-test" class="section level2">
+<h2>3.6 Bonferroni-Dunn test</h2>
+<p>Manually compare <code>rpart</code> and <code>ranger</code> with the
+Bonferroni-Dunn test.</p>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<p>The probability of observing the test statistic under the null
+hypothesis is given by
+<code>pnorm(..., 0, 1, lower.tail = FALSE)</code>.</p>
+</details>
+<!--
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+
+```r
+# bonferroni dunn test
+dunn_stat = (abs(mean_diff_rpart_ranger$average_rank_on_task) / sqrt((6 * 7) / 6 * 16))
+# prob of observing dunn statistic under h0:
+pnorm(dunn_stat, 0, 1, lower.tail = FALSE)
+# do not reject H_0
+```
+
+-->
+</div>
+<div id="criticial-difference-plot" class="section level2">
+<h2>3.7 Criticial difference plot</h2>
+<p>Interestingly, both tests differ in this case. The Nemenyi test lets
+us reject the null, while the Bonferroni-Dunn test does not let us
+reject the null. Next, compute a critical difference plot with
+<code>mlr3</code>.</p>
+<!--
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+
+```r
+# Sanity check with mlr3
+benchmark_aggr = as_benchmark_aggr(bmr, measures = msr("classif.ce"))
+benchmark_aggr$friedman_test()
+cd_plot = autoplot(benchmark_aggr, type = "cd", meas = "ce", minimize = TRUE)
+cd_plot
+```
+
+-->
+</div>
 </div>
 </div><!-- /.entry-content -->
 </article>

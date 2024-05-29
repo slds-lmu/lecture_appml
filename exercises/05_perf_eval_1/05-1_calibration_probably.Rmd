@@ -1,6 +1,6 @@
 ---
-title: "An Introduction to Calibration"
-subtitle: "Calibrate models with tidymodels and probably"
+title: "Applied Machine Learning"
+subtitle: "In-class exercise 05-1"
 output:
   prettydoc::html_pretty:
     theme: hpstr
@@ -21,7 +21,7 @@ Our goal for this exercise sheet is to learn the basics of `tidymodels` for supe
 well-calibrated, and calibrate it with `probably`.
 We will do so by using a train-validate-test split: the model is first fitted on training data and then calibrated on validation data. Test data will be used to compare the performance of the un-calibrated and calibrated models. Later, we will see how `probably` can be used to construct more refined resampling workflows for calibration.
 
-## Required packages
+# Required packages
 
 We will use `tidymodels` for machine learning and `probably` for calibration:
 
@@ -36,7 +36,7 @@ tidymodels_prefer()
 set.seed(12345)
 ```
 
-## Data: predicting cell segmentation quality
+# Data: predicting cell segmentation quality
 
 The `modeldata` package contains a data set called `cells`. Initially distributed by [Hill and Haney (2007)](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-8-340), they showed how to create models that predict the _quality_ of the image analysis of cells. The outcome has two levels `"PS"` (for poorly segmented images) or `"WS"` (well-segmented). There are 56 image features that can be used to build a classifier. 
 
@@ -47,9 +47,9 @@ data(cells)
 cells$case <- NULL
 ```
 
-# Exercises
+# 1 Checking cardinality properties
 
-## 1 Creating a split with rsample
+## 1.1 Creating a split with rsample
 
 Let's use `initial_split()` from `rsample`, a package integrated in tidymodels, to create a train-test-validate split. To do so, split the data twice: First, create a simple train-test split, and then split the training data again into training and validation data.
 
@@ -89,7 +89,7 @@ cells_test <- testing(trainval_test_split)
 cat("-->")
 ```
 
-## 2 Training a Naive Bayes model
+## 1.2 Training a Naive Bayes model
 
 We'll show the utility of calibration tools by using a type of model that, in this instance, is likely to produce a poorly calibrated model. The Naive Bayes classifier is a well-established model that assumes that the predictors are statistically _independent_ of one another (to simplify the calculations).  While that is certainly not the case for this data, the model can be effective at discriminating between the classes. Unfortunately, when there are many predictors in the model, it has a tendency to produce class probability distributions that are pathological. The predictions tend to gravitate to values near zero or one, producing distributions that are "U"-shaped ([Kuhn and Johnson, 2013](https://scholar.google.com/scholar?hl=en&as_sdt=0%2C7&q=%22Applied+Predictive+Modeling%22&btnG=)). 
 
@@ -126,7 +126,7 @@ nb_fit <- learner %>% fit(class ~ ., data = cells_train)
 cat("-->")
 ```
 
-## 3 Predicting on unseen test data
+## 1.3 Predicting on unseen test data
 
 Next, use the trained model to predict on unseen test data. In `tidymodels`, this will return two columns of predicted probabilities, one for `"PS"` and one for `"WS"`. Select for the predicted probabilities of class `"PS"` since for binary classification, we only need one column representing label probabilities to compute the model performance in the next step. You can do this by repeatedly using the `%>%` pipe operator.
 
@@ -165,7 +165,7 @@ head(predictions_test)[1:5]
 cat("-->")
 ```
 
-## 4 Assessing model performance
+## 1.4 Assessing model performance
 
 We want to use two metrics from the `yardstick` package that comes with `tidymodels` to judge how well the model performs. First, the area under the ROC curve (ROC AUC) is used to measure the ability of the model to separate the classes (its mere ability to discriminate correctly). Second, the Brier score is used to measure how close the probability estimates are to the actual outcome values (its ability to express confidence in the label predictions). Compute the ROC AUC and the Brier Score on the test data predictions.
 
@@ -193,7 +193,7 @@ brier_class(predictions_test, class, .pred_PS)
 cat("-->")
 ```
 
-## 5 Assessing model calibration
+## 1.5 Assessing model calibration
 
 Let's assess if our model is well-calibrated. Spoiler: it is not. The first clue is the extremely U-shaped distribution of the probability scores:
 
@@ -226,7 +226,7 @@ grid.arrange(uncalibrated10, uncalibrated5, ncol = 2)
 cat("-->")
 ```
 
-## 6 Platt scaling
+# 2 Platt scaling
 
 The good news is that we can do something about this. There are tools to "fix" the probability estimates so that they have better properties, such as falling along the diagonal lines in the diagnostic plots shown above. Different methods improve the predictions in different ways. 
 
@@ -234,9 +234,9 @@ The most common approach is Platt scaling, also called logistic calibration. Thi
 
 If effective, the logistic regression model estimates the probability regions where the original model is off (as shown in the diagnostic plot). For example, suppose that when the model predicts a 2% event rate, the logistic regression model estimates that it under-predicts the probability by 5% (relative to the observed data). Given this gap, new predictions are adjusted up so that the probability estimates are more in-line with the data.  
 
-## 6.1 Platt scaling with {base R}
+## 2.1 Platt scaling with {base R}
 
-## 6.1.1 Task
+## 2.1.1 Task
 
 Let's do this with base R. First, we need predictions of the model on the validation data:
 
@@ -279,7 +279,7 @@ calibrator_logreg <- glm(class ~ .pred_PS, family = binomial, data = predictions
 cat("-->")
 ```
 
-## 6.1.2 Discussion
+## 2.1.2 Discussion
 
 How do we know if this works? As we used training data to fit the Naive Bayes model and validation data to fit the logistic regression model, we need to use testing data to assess the performance of the combined (and hopefully well-calibrated) model:
 
@@ -322,9 +322,9 @@ An improvement can also be observed here, as the calibration diagrams of the cal
 cat("-->")
 ```
 
-## 6.2 Platt scaling with {probably}
+## 2.2 Platt scaling with {probably}
 
-## 6.2.1 Task
+## 2.2.1 Task
 
 Now, apply Platt scaling using `cal_*` functions from `probably`.
 
@@ -390,7 +390,7 @@ predictions_test_calibrated_alt <- cal_apply(predictions_test, calibrator_logreg
 cat("-->")
 ```
 
-## 6.2.2 Discussion
+## 2.2.2 Discussion
 
 Let's check if the metrics for the approach using `probably` match with the results we got using base R.
 
@@ -414,7 +414,7 @@ Indeed, both approaches yield the same results.
 cat("-->")
 ```
 
-## 7 Isotonic regression
+# 3 Isotonic regression
 
 A different approach to calibration is to use isotonic regression. In a manner similar to logistic calibration, use `probably` to calibrate the Naive Bayes model using isotonic regression. Do we improve the calibration in comparison to Platt scaling?
 
@@ -448,10 +448,10 @@ grid.arrange(log_calibrated10, iso_calibrated10, log_calibrated5, iso_calibrated
 cat("-->")
 ```
 
-## 8 Resamping for Calibration with probably
+# 4 Resamping for Calibration with probably
 
 The advantage of using `probably` for calibration is that one can easily access different calibration methods within a unified framework.
-In the examples above, we have used a simple train-validate-test split to perform calibration and evaluate the resulting models. In practice, we would prefer to use resampling, e.g. as in cross-validation (CV), to assess calibration methods. This can also be done with `probably`. In fact, we can use the `cal_validate_*()` function family to calibrate models contained in `resample_results` objects created with tidymodels. Fit 10 Naive Bayes models using 10-fold CV and calibrate each of these models using beta calibration, another calibration method.
+In the examples above, we have used a simple train-validate-test split to perform calibration and evaluate the resulting models. In practice, we would prefer to use resampling, e.g. as in cross-validation (CV), to assess calibration methods. This can also be done with `probably`. In fact, we can use the `cal_validate_*()` function family to calibrate models contained in `resample_results` objects created with `tidymodels`. Fit 10 Naive Bayes models using 10-fold CV and calibrate each of these models using beta calibration, another calibration method.
 
 <details>
 <summary>**Hint 1:**</summary>

@@ -1,5 +1,6 @@
 ---
-title: "Hypothesis Testing for Benchmarking"
+title: "Applied Machine Learning"
+subtitle: "In-class exercise 06-1"
 output:
   prettydoc::html_pretty:
     theme: hpstr

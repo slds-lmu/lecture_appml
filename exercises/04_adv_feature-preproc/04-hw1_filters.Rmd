@@ -133,7 +133,7 @@ cor_filter$param_set$values$filter.nfeat = 3
 
 # Create conditional encoding pipeline element
 factor_po = po("encode", method = "one-hot",
-               affect_columns = selector_cardinality_greater_than(1),
+               affect_columns = selector_invert(selector_cardinality_greater_than(10)),
                id = "low_card_enc") %>>%
             po("encodeimpact",
                affect_columns = selector_cardinality_greater_than(10),
@@ -217,7 +217,7 @@ score_rf_cor
 score_rf_info
 ```
 
-As you can see, the information gain filter seems to select features that result in a better model. To investigate why that may have happened, inspect the trained autotuners. Which features have been selected? Given the selected features, reason to what extent which filter methods may be more helpful than others in determining features to select for the model training process.
+As you can see, the Pearson correlation filter seems to select features that result in a better model. To investigate why that may have happened, inspect the trained autotuners. Which features have been selected? Given the selected features, reason to what extent which filter methods may be more helpful than others in determining features to select for the model training process.
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("<!--")
