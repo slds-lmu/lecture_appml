@@ -1,11 +1,9 @@
-Stacking:
-* wie funktioniert AutoGluon / performance auf AMLB
-* einfache Animation, stacking mit CV
-* bsp dass stacking funktioniert
-
 Todos:
 fix math bold, math and notation
 re-generate figures from raschka in google pres
-averaging: x
-stacking: maybe include an example for single and multi layer
+averaging:
+    Further reading
+stacking:
+    Maybe include an example for single and multi layer
+    Further reading
 
