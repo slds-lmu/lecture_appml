@@ -5,16 +5,7 @@ Stacking:
 
 Todos:
 fix math bold, math and notation
-re-generate figures in google pres
+re-generate figures from raschka in google pres
 averaging: x
-stacking: finish, example for single and multi layer
+stacking: maybe include an example for single and multi layer
 
-
-use cases:
-1) implement GES
-2) benchmark GES to CMAES
-
-3) build a stacking pipeline keep orig features vs. not
-4) conduct HPO
-
-5) try to mimick autogluon in mlr3?
