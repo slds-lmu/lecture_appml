@@ -20,8 +20,19 @@
 \lecturechapter{Model Selection \& Hypothesis Testing}
 \lecture{Applied Machine Learning}
 
+\begin{frame}{Model evaluation, Model selection and Algorithm selection}
+\vfill
+\begin{itemize}
+    \item Model evaluation: estimate how well one model performs
+    \item Model selection: select between two or more models
+    \item Algorithm selection: select between two or more algorithms (inducers)
+\end{itemize}
+\vfill    
+\end{frame}
 
+% Use this as a structure to improve the model selection lecture
 % https://sebastianraschka.com/pdf/lecture-notes/stat479fs18/11_eval-algo_slides.pdf
+% Also use the book of Rietzler as a source of terminology
 
 % Raschka paper
 % https://arxiv.org/pdf/1811.12808.pdf
@@ -71,7 +82,27 @@ Hypothesis tests can (a) quantify evidence that a difference in model performanc
     \item Given our preferences, we decide that the given difference in performance needs to be significant to accept an increase in model complexity. In scenario A, we choose the linear model; in scenario B we choose the random forest.
 \end{itemize}
 
+\end{frame}
 
+\begin{frame}{But First: How to measure ML performance?}
+% TODO: this slide can be greatly improved: show some plots of how the resampling can influence the performance
+% TODO: discuss intenral and external validity
+% TODO: discuss the questions that we aim to answer better in the beginning: what do we want to compare? And why? We need to improve the introduction a lot here!!!
+\vfill
+We can choose between:
+\vfill
+\begin{itemize}
+    \item Holdout
+    \item Repeated Holdout
+    \item Cross-Validation
+    \item Repeated Cross-Validation
+    \item Bootstrap
+\end{itemize}
+\vfill
+But which ones is best?
+\pause
+\newline{}
+Generally: the more resources invested, the better we can select a model.
 \end{frame}
 
 % \begin{frame}{Scenarios in Benchmarking}
@@ -922,6 +953,7 @@ where $q_{\alpha, \infty, K}$ is the studentized range statistic for significanc
         \item Know what you are optimizing $\rightarrow$ be suspicious of huge improvements
         \item Understand the difference between comparing trained models and machine learning algorithms
         \item Your machine learning metric is only a proxy for your business metric $\rightarrow$ gains might not materialize in real-world improvement
+        \item Non-i.i.d. data require special treatment
         \item Multi-objective model selection and tests are still an open area of research
     \end{itemize}
     \vfill
