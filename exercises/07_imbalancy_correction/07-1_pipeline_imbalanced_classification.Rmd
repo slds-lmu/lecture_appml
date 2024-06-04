@@ -1,6 +1,6 @@
 ---
-title: ""
-subtitle: "Imbalanced Classification"
+title: "Applied Machine Learning"
+subtitle: "In-class exercise 07-1"
 output:
   prettydoc::html_pretty:
     theme: hpstr
@@ -43,7 +43,9 @@ The data does not contain the original images but extracted numerical features.
 
 ```{r}
 library(data.table)
-oil = fread("data/oil_spill.csv")
+library(future)
+future::plan("multisession")
+oil = fread("../data/oil_spill.csv")
 ```
 In our modeling approach we ignore spatial correlation in the patches and therefore drop the first column.
 
@@ -146,19 +148,18 @@ task$col_roles$stratum = "oilspill"
 task$positive = "yes"
 ```
 
-Now we conduct the benchmark experiment and compare the resulting predictions sing the accuracy,
-FPR and TPR.
+Now we conduct the benchmark experiment and compare the resulting predictions using the accuracy, FPR and TPR.
 
 ```{r}
 learners = lrns(c("classif.rpart", "classif.ranger"))
 design = benchmark_grid(task, learners, rsmp("repeated_cv", folds = 3, repeats = 5))
 
 bmr = benchmark(design)
-bmr$aggregate(msrs(c("classif.acc", "classif.fpr", "classif.tpr")))[, -2]
+bmr$aggregate(msrs(c("classif.acc", "classif.fpr", "classif.tpr")))
 ```
 
 The accuracy is problematic for this problem, because it focuses too heavily on the majority class.
-The FPR and TPR show that despite the high accuracy, we classify most of the positive instances incorrectly for both models Interestingly, the simple classification tree has a higher TPR than the - usually superior - random forest.
+The FPR and TPR show that, despite the high accuracy, we classify most of the positive instances incorrectly for both models. Interestingly, the simple classification tree has a higher TPR than the - usually superior - random forest.
 
 </details>
 
@@ -169,14 +170,14 @@ cat("-->")
 ## Selecting a suitable performance metric
 
 When selecting a suitable performance metric, we have to take the properties of
-the task we are trying to solve into consideration. The detection of a spill
+the task into consideration. The detection of a spill
 requires mobilizing an expensive response, and missing an event is equally
 expensive, causing damage to the environment. Therefore, both class labels are
 important.
 
 For that reason we want to select a measure that is insensitive to
 changes in the class distribution in the test data. Can you modify the
-definition of the accuracy so it does not depend on the distribution of target
+definition of the accuracy so that it does not depend on the distribution of the target
 variable? Compare this new metric with the standard accuracy used in the previous exercise.
 
 <details>
@@ -184,7 +185,7 @@ variable? Compare this new metric with the standard accuracy used in the previou
   The accuracy can be defined as
   $$ACC = P(\hat{Y} = 1 | Y = 1) \times P(Y = 1) + P(\hat{Y} = 0 | Y = 0) \times P(Y = 0)$$
   Note that $TPR = P(\hat{Y} = 1 | Y = 1)$ is the true positive rate and $TNR = P(\hat{Y} = 0 | Y = 0)$ the true negative rate, where TNR = 1 - FPR (false positive rate). Hence, the accuracy can be viewed as a weighted average of TPR and TNR, where $P(Y = 1)$ (and $P(Y = 0) = 1 - P(Y = 1)$) are used as the corresponding weights.
-  The new metric should **not** depend on the class distribution $P(Y = 1)$ (and $P(Y = 0) = 1 - P(Y = 1)$). That is we can equally weight the TPR and TNR to obtain a metric that does not take into account the class distribution. The resulting metric is known as the balanced
+  The new metric should **not** depend on the class distribution $P(Y = 1)$ (and $P(Y = 0) = 1 - P(Y = 1)$), i.e., we can equally weight the TPR and TNR to obtain a metric that does not take into account the class distribution. The resulting metric is known as the balanced
   accuracy: $BACC = 0.5 \cdot TPR + 0.5 \cdot TNR = 0.5 \cdot TPR + 0.5 \cdot (1-FPR)$
 
 </details>
@@ -279,7 +280,7 @@ cat("<!--")
 We start by creating and visualizing the machine learning pipeline.
 
 ```{r}
-graph = po("classbalancing", ratio = 2.0, reference = "minor", adjust = "minor") %>>%
+graph = po("classbalancing", ratio = 2, reference = "minor", adjust = "minor") %>>%
   lrn("classif.ranger")
 
 graph$plot()
@@ -319,7 +320,7 @@ cat("-->")
 ```
 
 
-## Downsampling the majority class
+## Additional downsampling of the majority class
 
 
 Repeat the previous experiment, but now not only upsample the minority class like in the
@@ -376,7 +377,7 @@ bmr = c(bmr, rr)
 autoplot(bmr, measure = msr("classif.bacc"))
 ```
 
-Downsampling the majority class improved the result even further and is our best model so far.
+Additional downsampling of the majority class improved the result even further and is our best model so far.
 
 </details>
 
@@ -389,15 +390,10 @@ cat("-->")
 
 In the previous exercise we set the ratio to 2.
 See if tuning this value improves the result.
+Construct an `auto_tuner` with a 3-fold inner CV and a grid search over a suitable range of ratio.
 
 <details>
   <summary>**Hint 1:**</summary>
-  Construct an `auto_tuner` with a 3-fold inner cv and a grid search over a suitable range of ratio.
-</details>
-
-
-<details>
-  <summary>**Hint 2:**</summary>
 
 ```{r, eval = FALSE}
 

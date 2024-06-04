@@ -12,7 +12,7 @@
 
 
 
-<title>pipeline_imbalanced_classification.knit</title>
+<title>Applied Machine Learning</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -145,6 +145,8 @@ pointer-events: auto;
 <article class="hentry">
 <header class="header-title">
 <div class="header-title-wrap">
+<h1 class="title toc-ignore entry-title">Applied Machine Learning</h1>
+<h2 class="subtitle">In-class exercise 07-1</h2>
 </div><!-- /.header-title-wrap -->
 </header>
 
@@ -170,8 +172,8 @@ algorithms</a></li>
 performance metric</a></li>
 <li><a href="#upsamling-the-minority-class" id="toc-upsamling-the-minority-class">Upsamling the minority
 class</a></li>
-<li><a href="#downsampling-the-majority-class" id="toc-downsampling-the-majority-class">Downsampling the majority
-class</a></li>
+<li><a href="#additional-downsampling-of-the-majority-class" id="toc-additional-downsampling-of-the-majority-class">Additional
+downsampling of the majority class</a></li>
 <li><a href="#bonus-tuning-the-sampling-rate" id="toc-bonus-tuning-the-sampling-rate">Bonus: Tuning the sampling
 rate</a></li>
 </ul></li>
@@ -214,7 +216,9 @@ as 1)</li>
 <div id="descriptive-analysis-and-preprocessing" class="section level2">
 <h2>Descriptive analysis and preprocessing</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>oil <span class="ot">=</span> <span class="fu">fread</span>(<span class="st">&quot;data/oil_spill.csv&quot;</span>)</span></code></pre></div>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(future)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>future<span class="sc">::</span><span class="fu">plan</span>(<span class="st">&quot;multisession&quot;</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>oil <span class="ot">=</span> <span class="fu">fread</span>(<span class="st">&quot;../data/oil_spill.csv&quot;</span>)</span></code></pre></div>
 <p>In our modeling approach we ignore spatial correlation in the patches
 and therefore drop the first column.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>oil<span class="sc">$</span>V1 <span class="ot">=</span> <span class="cn">NULL</span></span></code></pre></div>
@@ -1047,19 +1051,20 @@ class.</p>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>task<span class="sc">$</span>col_roles<span class="sc">$</span>stratum <span class="ot">=</span> <span class="st">&quot;oilspill&quot;</span></span>
 <span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>task<span class="sc">$</span>positive <span class="ot">=</span> <span class="st">&quot;yes&quot;</span></span></code></pre></div>
 <p>Now we conduct the benchmark experiment and compare the resulting
-predictions sing the accuracy, FPR and TPR.</p>
+predictions using the accuracy, FPR and TPR.</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>learners <span class="ot">=</span> <span class="fu">lrns</span>(<span class="fu">c</span>(<span class="st">&quot;classif.rpart&quot;</span>, <span class="st">&quot;classif.ranger&quot;</span>))</span>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>design <span class="ot">=</span> <span class="fu">benchmark_grid</span>(task, learners, <span class="fu">rsmp</span>(<span class="st">&quot;repeated_cv&quot;</span>, <span class="at">folds =</span> <span class="dv">3</span>, <span class="at">repeats =</span> <span class="dv">5</span>))</span>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a></span>
 <span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>bmr <span class="ot">=</span> <span class="fu">benchmark</span>(design)</span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>bmr<span class="sc">$</span><span class="fu">aggregate</span>(<span class="fu">msrs</span>(<span class="fu">c</span>(<span class="st">&quot;classif.acc&quot;</span>, <span class="st">&quot;classif.fpr&quot;</span>, <span class="st">&quot;classif.tpr&quot;</span>)))[, <span class="sc">-</span><span class="dv">2</span>]</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>bmr<span class="sc">$</span><span class="fu">aggregate</span>(<span class="fu">msrs</span>(<span class="fu">c</span>(<span class="st">&quot;classif.acc&quot;</span>, <span class="st">&quot;classif.fpr&quot;</span>, <span class="st">&quot;classif.tpr&quot;</span>)))</span>
 <span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="do">##    nr task_id     learner_id resampling_id iters classif.acc classif.fpr classif.tpr</span></span>
 <span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="do">## 1:  1     oil  classif.rpart   repeated_cv    15   0.9622236 0.011601685   0.3879121</span></span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="do">## 2:  2     oil classif.ranger   repeated_cv    15   0.9620065 0.002901544   0.1941392</span></span></code></pre></div>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="do">## 2:  2     oil classif.ranger   repeated_cv    15   0.9620065 0.002901544   0.1941392</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="do">## Hidden columns: resample_result</span></span></code></pre></div>
 <p>The accuracy is problematic for this problem, because it focuses too
-heavily on the majority class. The FPR and TPR show that despite the
+heavily on the majority class. The FPR and TPR show that, despite the
 high accuracy, we classify most of the positive instances incorrectly
-for both models Interestingly, the simple classification tree has a
+for both models. Interestingly, the simple classification tree has a
 higher TPR than the - usually superior - random forest.</p>
 </details>
 </div>
@@ -1067,15 +1072,15 @@ higher TPR than the - usually superior - random forest.</p>
 <div id="selecting-a-suitable-performance-metric" class="section level2">
 <h2>Selecting a suitable performance metric</h2>
 <p>When selecting a suitable performance metric, we have to take the
-properties of the task we are trying to solve into consideration. The
-detection of a spill requires mobilizing an expensive response, and
-missing an event is equally expensive, causing damage to the
-environment. Therefore, both class labels are important.</p>
+properties of the task into consideration. The detection of a spill
+requires mobilizing an expensive response, and missing an event is
+equally expensive, causing damage to the environment. Therefore, both
+class labels are important.</p>
 <p>For that reason we want to select a measure that is insensitive to
 changes in the class distribution in the test data. Can you modify the
-definition of the accuracy so it does not depend on the distribution of
-target variable? Compare this new metric with the standard accuracy used
-in the previous exercise.</p>
+definition of the accuracy so that it does not depend on the
+distribution of the target variable? Compare this new metric with the
+standard accuracy used in the previous exercise.</p>
 <details>
 <summary>
 <strong>Hint 1:</strong>
@@ -1088,8 +1093,8 @@ negative rate, where TNR = 1 - FPR (false positive rate). Hence, the
 accuracy can be viewed as a weighted average of TPR and TNR, where <span class="math inline">\(P(Y = 1)\)</span> (and <span class="math inline">\(P(Y = 0) = 1 - P(Y = 1)\)</span>) are used as the
 corresponding weights. The new metric should <strong>not</strong> depend
 on the class distribution <span class="math inline">\(P(Y = 1)\)</span>
-(and <span class="math inline">\(P(Y = 0) = 1 - P(Y = 1)\)</span>). That
-is we can equally weight the TPR and TNR to obtain a metric that does
+(and <span class="math inline">\(P(Y = 0) = 1 - P(Y = 1)\)</span>),
+i.e., we can equally weight the TPR and TNR to obtain a metric that does
 not take into account the class distribution. The resulting metric is
 known as the balanced accuracy: <span class="math inline">\(BACC = 0.5
 \cdot TPR + 0.5 \cdot TNR = 0.5 \cdot TPR + 0.5 \cdot
@@ -1179,7 +1184,7 @@ A new resample result can be added to a benchmark result using
 </summary>
 <p>We start by creating and visualizing the machine learning
 pipeline.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>graph <span class="ot">=</span> <span class="fu">po</span>(<span class="st">&quot;classbalancing&quot;</span>, <span class="at">ratio =</span> <span class="fl">2.0</span>, <span class="at">reference =</span> <span class="st">&quot;minor&quot;</span>, <span class="at">adjust =</span> <span class="st">&quot;minor&quot;</span>) <span class="sc">%&gt;&gt;%</span></span>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>graph <span class="ot">=</span> <span class="fu">po</span>(<span class="st">&quot;classbalancing&quot;</span>, <span class="at">ratio =</span> <span class="dv">2</span>, <span class="at">reference =</span> <span class="st">&quot;minor&quot;</span>, <span class="at">adjust =</span> <span class="st">&quot;minor&quot;</span>) <span class="sc">%&gt;&gt;%</span></span>
 <span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>  <span class="fu">lrn</span>(<span class="st">&quot;classif.ranger&quot;</span>)</span>
 <span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a></span>
 <span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>graph<span class="sc">$</span><span class="fu">plot</span>()</span></code></pre></div>
@@ -1206,8 +1211,8 @@ forest, there is still room for improvement</p>
 </details>
 </div>
 </div>
-<div id="downsampling-the-majority-class" class="section level2">
-<h2>Downsampling the majority class</h2>
+<div id="additional-downsampling-of-the-majority-class" class="section level2">
+<h2>Additional downsampling of the majority class</h2>
 <p>Repeat the previous experiment, but now not only upsample the
 minority class like in the previous exercise, but also downsample the
 majority class to the same count.</p>
@@ -1256,25 +1261,19 @@ be set to.
 <span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a></span>
 <span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a><span class="fu">autoplot</span>(bmr, <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">&quot;classif.bacc&quot;</span>))</span></code></pre></div>
 <p><img src="data:image/png;base64,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" /><!-- --></p>
-<p>Downsampling the majority class improved the result even further and
-is our best model so far.</p>
+<p>Additional downsampling of the majority class improved the result
+even further and is our best model so far.</p>
 </details>
 </div>
 </div>
 <div id="bonus-tuning-the-sampling-rate" class="section level2">
 <h2>Bonus: Tuning the sampling rate</h2>
 <p>In the previous exercise we set the ratio to 2. See if tuning this
-value improves the result.</p>
+value improves the result. Construct an <code>auto_tuner</code> with a
+3-fold inner CV and a grid search over a suitable range of ratio.</p>
 <details>
 <summary>
 <strong>Hint 1:</strong>
-</summary>
-Construct an <code>auto_tuner</code> with a 3-fold inner cv and a grid
-search over a suitable range of ratio.
-</details>
-<details>
-<summary>
-<strong>Hint 2:</strong>
 </summary>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a></span>
 <span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>graph <span class="ot">=</span> <span class="fu">po</span>(<span class="st">&quot;classbalancing&quot;</span>, <span class="at">reference =</span> <span class="st">&quot;minor&quot;</span>, <span class="at">adjust =</span> <span class="st">&quot;all&quot;</span>) <span class="sc">%&gt;&gt;%</span></span>
@@ -1321,441 +1320,441 @@ search over a suitable range of ratio.
 <span id="cb18-15"><a href="#cb18-15" tabindex="-1"></a>)</span>
 <span id="cb18-16"><a href="#cb18-16" tabindex="-1"></a></span>
 <span id="cb18-17"><a href="#cb18-17" tabindex="-1"></a>rr <span class="ot">=</span> <span class="fu">resample</span>(task, balanced_autotuner, resampling)</span>
-<span id="cb18-18"><a href="#cb18-18" tabindex="-1"></a><span class="do">## INFO  [11:22:13.553] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
-<span id="cb18-19"><a href="#cb18-19" tabindex="-1"></a><span class="do">## INFO  [11:22:13.586] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-20"><a href="#cb18-20" tabindex="-1"></a><span class="do">## INFO  [11:22:14.907] [bbotk] Result of batch 1:</span></span>
-<span id="cb18-21"><a href="#cb18-21" tabindex="-1"></a><span class="do">## INFO  [11:22:14.912] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-22"><a href="#cb18-22" tabindex="-1"></a><span class="do">## INFO  [11:22:14.912] [bbotk]                     5    0.6919784        0      0             1.02 c7f996cf-114d-4cc4-bd4e-937f8faf261d</span></span>
-<span id="cb18-23"><a href="#cb18-23" tabindex="-1"></a><span class="do">## INFO  [11:22:14.916] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-24"><a href="#cb18-24" tabindex="-1"></a><span class="do">## INFO  [11:22:16.363] [bbotk] Result of batch 2:</span></span>
-<span id="cb18-25"><a href="#cb18-25" tabindex="-1"></a><span class="do">## INFO  [11:22:16.368] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-26"><a href="#cb18-26" tabindex="-1"></a><span class="do">## INFO  [11:22:16.368] [bbotk]                     3    0.7384143        0      0             1.11 aae98514-7e04-4643-b72f-f13f1656d6ce</span></span>
-<span id="cb18-27"><a href="#cb18-27" tabindex="-1"></a><span class="do">## INFO  [11:22:16.372] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-28"><a href="#cb18-28" tabindex="-1"></a><span class="do">## INFO  [11:22:18.232] [bbotk] Result of batch 3:</span></span>
-<span id="cb18-29"><a href="#cb18-29" tabindex="-1"></a><span class="do">## INFO  [11:22:18.236] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-30"><a href="#cb18-30" tabindex="-1"></a><span class="do">## INFO  [11:22:18.236] [bbotk]                     4    0.7223153        0      0             1.21 b25c6768-cfa0-40c5-865e-e6e40459ad1f</span></span>
-<span id="cb18-31"><a href="#cb18-31" tabindex="-1"></a><span class="do">## INFO  [11:22:18.240] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-32"><a href="#cb18-32" tabindex="-1"></a><span class="do">## INFO  [11:22:19.396] [bbotk] Result of batch 4:</span></span>
-<span id="cb18-33"><a href="#cb18-33" tabindex="-1"></a><span class="do">## INFO  [11:22:19.401] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-34"><a href="#cb18-34" tabindex="-1"></a><span class="do">## INFO  [11:22:19.401] [bbotk]                     1    0.8002047        0      0             0.88 ab7202f6-1180-414b-a651-cc8f85a0d6eb</span></span>
-<span id="cb18-35"><a href="#cb18-35" tabindex="-1"></a><span class="do">## INFO  [11:22:19.405] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-36"><a href="#cb18-36" tabindex="-1"></a><span class="do">## INFO  [11:22:20.795] [bbotk] Result of batch 5:</span></span>
-<span id="cb18-37"><a href="#cb18-37" tabindex="-1"></a><span class="do">## INFO  [11:22:20.799] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-38"><a href="#cb18-38" tabindex="-1"></a><span class="do">## INFO  [11:22:20.799] [bbotk]                     2    0.7419505        0      0             1.09 619465ec-e4cc-476e-9410-268fd36a8dcf</span></span>
-<span id="cb18-39"><a href="#cb18-39" tabindex="-1"></a><span class="do">## INFO  [11:22:20.802] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-40"><a href="#cb18-40" tabindex="-1"></a><span class="do">## INFO  [11:22:22.439] [bbotk] Result of batch 6:</span></span>
-<span id="cb18-41"><a href="#cb18-41" tabindex="-1"></a><span class="do">## INFO  [11:22:22.444] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-42"><a href="#cb18-42" tabindex="-1"></a><span class="do">## INFO  [11:22:22.444] [bbotk]                     6    0.6507538        0      0             1.33 b5280834-a92f-4bb0-aa58-fe4b581943e6</span></span>
-<span id="cb18-43"><a href="#cb18-43" tabindex="-1"></a><span class="do">## INFO  [11:22:22.461] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
-<span id="cb18-44"><a href="#cb18-44" tabindex="-1"></a><span class="do">## INFO  [11:22:22.463] [bbotk] Result:</span></span>
-<span id="cb18-45"><a href="#cb18-45" tabindex="-1"></a><span class="do">## INFO  [11:22:22.466] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
-<span id="cb18-46"><a href="#cb18-46" tabindex="-1"></a><span class="do">## INFO  [11:22:22.466] [bbotk]                     1          &lt;list[5]&gt; &lt;list[1]&gt;    0.8002047</span></span>
-<span id="cb18-47"><a href="#cb18-47" tabindex="-1"></a><span class="do">## INFO  [11:22:23.202] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
-<span id="cb18-48"><a href="#cb18-48" tabindex="-1"></a><span class="do">## INFO  [11:22:23.208] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-49"><a href="#cb18-49" tabindex="-1"></a><span class="do">## INFO  [11:22:24.286] [bbotk] Result of batch 1:</span></span>
-<span id="cb18-50"><a href="#cb18-50" tabindex="-1"></a><span class="do">## INFO  [11:22:24.288] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-51"><a href="#cb18-51" tabindex="-1"></a><span class="do">## INFO  [11:22:24.288] [bbotk]                     2     0.797413        0      0             0.84 b52978ee-ad62-4902-aca0-2a29b093eaec</span></span>
-<span id="cb18-52"><a href="#cb18-52" tabindex="-1"></a><span class="do">## INFO  [11:22:24.289] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-53"><a href="#cb18-53" tabindex="-1"></a><span class="do">## INFO  [11:22:24.916] [bbotk] Result of batch 2:</span></span>
-<span id="cb18-54"><a href="#cb18-54" tabindex="-1"></a><span class="do">## INFO  [11:22:24.917] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-55"><a href="#cb18-55" tabindex="-1"></a><span class="do">## INFO  [11:22:24.917] [bbotk]                     3    0.8300763        0      0             0.49 d8e59518-a7c3-4425-bb0f-15e90884b22d</span></span>
-<span id="cb18-56"><a href="#cb18-56" tabindex="-1"></a><span class="do">## INFO  [11:22:24.919] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-57"><a href="#cb18-57" tabindex="-1"></a><span class="do">## INFO  [11:22:25.517] [bbotk] Result of batch 3:</span></span>
-<span id="cb18-58"><a href="#cb18-58" tabindex="-1"></a><span class="do">## INFO  [11:22:25.518] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-59"><a href="#cb18-59" tabindex="-1"></a><span class="do">## INFO  [11:22:25.518] [bbotk]                     4    0.8140704        0      0             0.51 350cb422-0368-4cd5-8416-1e2a959251d2</span></span>
-<span id="cb18-60"><a href="#cb18-60" tabindex="-1"></a><span class="do">## INFO  [11:22:25.519] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-61"><a href="#cb18-61" tabindex="-1"></a><span class="do">## INFO  [11:22:26.093] [bbotk] Result of batch 4:</span></span>
-<span id="cb18-62"><a href="#cb18-62" tabindex="-1"></a><span class="do">## INFO  [11:22:26.094] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-63"><a href="#cb18-63" tabindex="-1"></a><span class="do">## INFO  [11:22:26.094] [bbotk]                     5    0.7989019        0      0             0.41 d3feedad-766f-4d88-9910-2b4398701bc6</span></span>
-<span id="cb18-64"><a href="#cb18-64" tabindex="-1"></a><span class="do">## INFO  [11:22:26.095] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-65"><a href="#cb18-65" tabindex="-1"></a><span class="do">## INFO  [11:22:26.671] [bbotk] Result of batch 5:</span></span>
-<span id="cb18-66"><a href="#cb18-66" tabindex="-1"></a><span class="do">## INFO  [11:22:26.673] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-67"><a href="#cb18-67" tabindex="-1"></a><span class="do">## INFO  [11:22:26.673] [bbotk]                     6    0.8014145        0      0             0.44 aa28fdfd-40a6-4943-a8c7-e41321d699cf</span></span>
-<span id="cb18-68"><a href="#cb18-68" tabindex="-1"></a><span class="do">## INFO  [11:22:26.675] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-69"><a href="#cb18-69" tabindex="-1"></a><span class="do">## INFO  [11:22:27.133] [bbotk] Result of batch 6:</span></span>
-<span id="cb18-70"><a href="#cb18-70" tabindex="-1"></a><span class="do">## INFO  [11:22:27.135] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-71"><a href="#cb18-71" tabindex="-1"></a><span class="do">## INFO  [11:22:27.135] [bbotk]                     1    0.8355667        0      0             0.33 025b3afa-ebca-4528-b5a3-af76278e74de</span></span>
-<span id="cb18-72"><a href="#cb18-72" tabindex="-1"></a><span class="do">## INFO  [11:22:27.143] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
-<span id="cb18-73"><a href="#cb18-73" tabindex="-1"></a><span class="do">## INFO  [11:22:27.144] [bbotk] Result:</span></span>
-<span id="cb18-74"><a href="#cb18-74" tabindex="-1"></a><span class="do">## INFO  [11:22:27.145] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
-<span id="cb18-75"><a href="#cb18-75" tabindex="-1"></a><span class="do">## INFO  [11:22:27.145] [bbotk]                     1          &lt;list[5]&gt; &lt;list[1]&gt;    0.8355667</span></span>
-<span id="cb18-76"><a href="#cb18-76" tabindex="-1"></a><span class="do">## INFO  [11:22:27.415] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
-<span id="cb18-77"><a href="#cb18-77" tabindex="-1"></a><span class="do">## INFO  [11:22:27.418] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-78"><a href="#cb18-78" tabindex="-1"></a><span class="do">## INFO  [11:22:27.978] [bbotk] Result of batch 1:</span></span>
-<span id="cb18-79"><a href="#cb18-79" tabindex="-1"></a><span class="do">## INFO  [11:22:27.979] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-80"><a href="#cb18-80" tabindex="-1"></a><span class="do">## INFO  [11:22:27.979] [bbotk]                     4    0.7149497        0      0             0.46 fb6a1ee4-1919-4642-af1a-a12187251559</span></span>
-<span id="cb18-81"><a href="#cb18-81" tabindex="-1"></a><span class="do">## INFO  [11:22:27.981] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-82"><a href="#cb18-82" tabindex="-1"></a><span class="do">## INFO  [11:22:28.591] [bbotk] Result of batch 2:</span></span>
-<span id="cb18-83"><a href="#cb18-83" tabindex="-1"></a><span class="do">## INFO  [11:22:28.592] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-84"><a href="#cb18-84" tabindex="-1"></a><span class="do">## INFO  [11:22:28.592] [bbotk]                     6    0.6872897        0      0             0.48 51b436e8-f058-4866-949d-4cd52f0e69f9</span></span>
-<span id="cb18-85"><a href="#cb18-85" tabindex="-1"></a><span class="do">## INFO  [11:22:28.593] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-86"><a href="#cb18-86" tabindex="-1"></a><span class="do">## INFO  [11:22:29.079] [bbotk] Result of batch 3:</span></span>
-<span id="cb18-87"><a href="#cb18-87" tabindex="-1"></a><span class="do">## INFO  [11:22:29.081] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-88"><a href="#cb18-88" tabindex="-1"></a><span class="do">## INFO  [11:22:29.081] [bbotk]                     1    0.7808063        0      0             0.34 604d6844-cfe5-4407-a5ec-f4d31482002e</span></span>
-<span id="cb18-89"><a href="#cb18-89" tabindex="-1"></a><span class="do">## INFO  [11:22:29.083] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-90"><a href="#cb18-90" tabindex="-1"></a><span class="do">## INFO  [11:22:29.681] [bbotk] Result of batch 4:</span></span>
-<span id="cb18-91"><a href="#cb18-91" tabindex="-1"></a><span class="do">## INFO  [11:22:29.683] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-92"><a href="#cb18-92" tabindex="-1"></a><span class="do">## INFO  [11:22:29.683] [bbotk]                     5    0.6847813        0      0             0.48 76cb64ef-204b-436a-a3fe-b7acc06cfdc9</span></span>
-<span id="cb18-93"><a href="#cb18-93" tabindex="-1"></a><span class="do">## INFO  [11:22:29.685] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-94"><a href="#cb18-94" tabindex="-1"></a><span class="do">## INFO  [11:22:30.316] [bbotk] Result of batch 5:</span></span>
-<span id="cb18-95"><a href="#cb18-95" tabindex="-1"></a><span class="do">## INFO  [11:22:30.318] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-96"><a href="#cb18-96" tabindex="-1"></a><span class="do">## INFO  [11:22:30.318] [bbotk]                     3    0.7505393        0      0             0.46 c86b6c13-8e1d-4aa9-ab0f-b0adf0ae99e9</span></span>
-<span id="cb18-97"><a href="#cb18-97" tabindex="-1"></a><span class="do">## INFO  [11:22:30.319] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-98"><a href="#cb18-98" tabindex="-1"></a><span class="do">## INFO  [11:22:30.927] [bbotk] Result of batch 6:</span></span>
-<span id="cb18-99"><a href="#cb18-99" tabindex="-1"></a><span class="do">## INFO  [11:22:30.935] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-100"><a href="#cb18-100" tabindex="-1"></a><span class="do">## INFO  [11:22:30.935] [bbotk]                     2    0.7698325        0      0             0.49 1e37aca5-d286-4550-a3db-4b4b85202447</span></span>
-<span id="cb18-101"><a href="#cb18-101" tabindex="-1"></a><span class="do">## INFO  [11:22:30.944] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
-<span id="cb18-102"><a href="#cb18-102" tabindex="-1"></a><span class="do">## INFO  [11:22:30.945] [bbotk] Result:</span></span>
-<span id="cb18-103"><a href="#cb18-103" tabindex="-1"></a><span class="do">## INFO  [11:22:30.946] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
-<span id="cb18-104"><a href="#cb18-104" tabindex="-1"></a><span class="do">## INFO  [11:22:30.946] [bbotk]                     1          &lt;list[5]&gt; &lt;list[1]&gt;    0.7808063</span></span>
-<span id="cb18-105"><a href="#cb18-105" tabindex="-1"></a><span class="do">## INFO  [11:22:31.245] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
-<span id="cb18-106"><a href="#cb18-106" tabindex="-1"></a><span class="do">## INFO  [11:22:31.248] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-107"><a href="#cb18-107" tabindex="-1"></a><span class="do">## INFO  [11:22:31.926] [bbotk] Result of batch 1:</span></span>
-<span id="cb18-108"><a href="#cb18-108" tabindex="-1"></a><span class="do">## INFO  [11:22:31.928] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-109"><a href="#cb18-109" tabindex="-1"></a><span class="do">## INFO  [11:22:31.928] [bbotk]                     6    0.7635399        0      0             0.55 63c0fbf7-17aa-404d-9bff-ad9f9838f517</span></span>
-<span id="cb18-110"><a href="#cb18-110" tabindex="-1"></a><span class="do">## INFO  [11:22:31.930] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-111"><a href="#cb18-111" tabindex="-1"></a><span class="do">## INFO  [11:22:32.869] [bbotk] Result of batch 2:</span></span>
-<span id="cb18-112"><a href="#cb18-112" tabindex="-1"></a><span class="do">## INFO  [11:22:32.871] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-113"><a href="#cb18-113" tabindex="-1"></a><span class="do">## INFO  [11:22:32.871] [bbotk]                     5    0.7576773        0      0             0.78 80531583-0f25-4a82-b0cf-74d7f1148460</span></span>
-<span id="cb18-114"><a href="#cb18-114" tabindex="-1"></a><span class="do">## INFO  [11:22:32.872] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-115"><a href="#cb18-115" tabindex="-1"></a><span class="do">## INFO  [11:22:33.406] [bbotk] Result of batch 3:</span></span>
-<span id="cb18-116"><a href="#cb18-116" tabindex="-1"></a><span class="do">## INFO  [11:22:33.408] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-117"><a href="#cb18-117" tabindex="-1"></a><span class="do">## INFO  [11:22:33.408] [bbotk]                     2    0.8243998        0      0              0.4 b58a4c5f-440c-4706-bc14-fe8330059d7e</span></span>
-<span id="cb18-118"><a href="#cb18-118" tabindex="-1"></a><span class="do">## INFO  [11:22:33.409] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-119"><a href="#cb18-119" tabindex="-1"></a><span class="do">## INFO  [11:22:33.934] [bbotk] Result of batch 4:</span></span>
-<span id="cb18-120"><a href="#cb18-120" tabindex="-1"></a><span class="do">## INFO  [11:22:33.935] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-121"><a href="#cb18-121" tabindex="-1"></a><span class="do">## INFO  [11:22:33.935] [bbotk]                     3    0.7493951        0      0              0.4 eb8bf20c-1c96-4361-bf66-8ef81aa152da</span></span>
-<span id="cb18-122"><a href="#cb18-122" tabindex="-1"></a><span class="do">## INFO  [11:22:33.936] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-123"><a href="#cb18-123" tabindex="-1"></a><span class="do">## INFO  [11:22:34.391] [bbotk] Result of batch 5:</span></span>
-<span id="cb18-124"><a href="#cb18-124" tabindex="-1"></a><span class="do">## INFO  [11:22:34.393] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-125"><a href="#cb18-125" tabindex="-1"></a><span class="do">## INFO  [11:22:34.393] [bbotk]                     1    0.7649358        0      0             0.34 977f96fb-052f-45e9-9cc9-1e61e76d51fd</span></span>
-<span id="cb18-126"><a href="#cb18-126" tabindex="-1"></a><span class="do">## INFO  [11:22:34.395] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-127"><a href="#cb18-127" tabindex="-1"></a><span class="do">## INFO  [11:22:34.929] [bbotk] Result of batch 6:</span></span>
-<span id="cb18-128"><a href="#cb18-128" tabindex="-1"></a><span class="do">## INFO  [11:22:34.932] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-129"><a href="#cb18-129" tabindex="-1"></a><span class="do">## INFO  [11:22:34.932] [bbotk]                     4    0.8158385        0      0              0.4 750e1d09-3bf1-4dc2-8c1d-81bfd029eea2</span></span>
-<span id="cb18-130"><a href="#cb18-130" tabindex="-1"></a><span class="do">## INFO  [11:22:34.940] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
-<span id="cb18-131"><a href="#cb18-131" tabindex="-1"></a><span class="do">## INFO  [11:22:34.941] [bbotk] Result:</span></span>
-<span id="cb18-132"><a href="#cb18-132" tabindex="-1"></a><span class="do">## INFO  [11:22:34.942] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
-<span id="cb18-133"><a href="#cb18-133" tabindex="-1"></a><span class="do">## INFO  [11:22:34.942] [bbotk]                     2          &lt;list[5]&gt; &lt;list[1]&gt;    0.8243998</span></span>
-<span id="cb18-134"><a href="#cb18-134" tabindex="-1"></a><span class="do">## INFO  [11:22:35.220] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
-<span id="cb18-135"><a href="#cb18-135" tabindex="-1"></a><span class="do">## INFO  [11:22:35.222] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-136"><a href="#cb18-136" tabindex="-1"></a><span class="do">## INFO  [11:22:35.721] [bbotk] Result of batch 1:</span></span>
-<span id="cb18-137"><a href="#cb18-137" tabindex="-1"></a><span class="do">## INFO  [11:22:35.723] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-138"><a href="#cb18-138" tabindex="-1"></a><span class="do">## INFO  [11:22:35.723] [bbotk]                     2    0.7933184        0      0             0.37 5a30cc81-d02d-414c-be58-e326e10e8b80</span></span>
-<span id="cb18-139"><a href="#cb18-139" tabindex="-1"></a><span class="do">## INFO  [11:22:35.724] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-140"><a href="#cb18-140" tabindex="-1"></a><span class="do">## INFO  [11:22:36.234] [bbotk] Result of batch 2:</span></span>
-<span id="cb18-141"><a href="#cb18-141" tabindex="-1"></a><span class="do">## INFO  [11:22:36.236] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-142"><a href="#cb18-142" tabindex="-1"></a><span class="do">## INFO  [11:22:36.236] [bbotk]                     4    0.7761958        0      0              0.4 938ba3a5-3e68-4786-98b8-3490a0118963</span></span>
-<span id="cb18-143"><a href="#cb18-143" tabindex="-1"></a><span class="do">## INFO  [11:22:36.237] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-144"><a href="#cb18-144" tabindex="-1"></a><span class="do">## INFO  [11:22:36.744] [bbotk] Result of batch 3:</span></span>
-<span id="cb18-145"><a href="#cb18-145" tabindex="-1"></a><span class="do">## INFO  [11:22:36.746] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-146"><a href="#cb18-146" tabindex="-1"></a><span class="do">## INFO  [11:22:36.746] [bbotk]                     3    0.7846641        0      0             0.38 0742dc86-eeb8-46ca-96aa-af3d5bcf2c7d</span></span>
-<span id="cb18-147"><a href="#cb18-147" tabindex="-1"></a><span class="do">## INFO  [11:22:36.747] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-148"><a href="#cb18-148" tabindex="-1"></a><span class="do">## INFO  [11:22:37.183] [bbotk] Result of batch 4:</span></span>
-<span id="cb18-149"><a href="#cb18-149" tabindex="-1"></a><span class="do">## INFO  [11:22:37.184] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-150"><a href="#cb18-150" tabindex="-1"></a><span class="do">## INFO  [11:22:37.184] [bbotk]                     1    0.7741485        0      0             0.29 4c98f849-f673-47de-8523-eeed37bce32c</span></span>
-<span id="cb18-151"><a href="#cb18-151" tabindex="-1"></a><span class="do">## INFO  [11:22:37.186] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-152"><a href="#cb18-152" tabindex="-1"></a><span class="do">## INFO  [11:22:37.770] [bbotk] Result of batch 5:</span></span>
-<span id="cb18-153"><a href="#cb18-153" tabindex="-1"></a><span class="do">## INFO  [11:22:37.771] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-154"><a href="#cb18-154" tabindex="-1"></a><span class="do">## INFO  [11:22:37.771] [bbotk]                     5    0.7466964        0      0             0.49 0007e0fe-2353-42d8-847b-8b89258c2827</span></span>
-<span id="cb18-155"><a href="#cb18-155" tabindex="-1"></a><span class="do">## INFO  [11:22:37.773] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-156"><a href="#cb18-156" tabindex="-1"></a><span class="do">## INFO  [11:22:38.416] [bbotk] Result of batch 6:</span></span>
-<span id="cb18-157"><a href="#cb18-157" tabindex="-1"></a><span class="do">## INFO  [11:22:38.418] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-158"><a href="#cb18-158" tabindex="-1"></a><span class="do">## INFO  [11:22:38.418] [bbotk]                     6    0.7348781        0      0             0.51 a5e2f464-3c85-4b56-a33e-4654c7cc1f57</span></span>
-<span id="cb18-159"><a href="#cb18-159" tabindex="-1"></a><span class="do">## INFO  [11:22:38.424] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
-<span id="cb18-160"><a href="#cb18-160" tabindex="-1"></a><span class="do">## INFO  [11:22:38.425] [bbotk] Result:</span></span>
-<span id="cb18-161"><a href="#cb18-161" tabindex="-1"></a><span class="do">## INFO  [11:22:38.426] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
-<span id="cb18-162"><a href="#cb18-162" tabindex="-1"></a><span class="do">## INFO  [11:22:38.426] [bbotk]                     2          &lt;list[5]&gt; &lt;list[1]&gt;    0.7933184</span></span>
-<span id="cb18-163"><a href="#cb18-163" tabindex="-1"></a><span class="do">## INFO  [11:22:38.709] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
-<span id="cb18-164"><a href="#cb18-164" tabindex="-1"></a><span class="do">## INFO  [11:22:38.711] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-165"><a href="#cb18-165" tabindex="-1"></a><span class="do">## INFO  [11:22:39.270] [bbotk] Result of batch 1:</span></span>
-<span id="cb18-166"><a href="#cb18-166" tabindex="-1"></a><span class="do">## INFO  [11:22:39.271] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-167"><a href="#cb18-167" tabindex="-1"></a><span class="do">## INFO  [11:22:39.271] [bbotk]                     4    0.7823111        0      0             0.48 813bb5f3-d2f1-4e92-820d-2eb0f4d2337c</span></span>
-<span id="cb18-168"><a href="#cb18-168" tabindex="-1"></a><span class="do">## INFO  [11:22:39.273] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-169"><a href="#cb18-169" tabindex="-1"></a><span class="do">## INFO  [11:22:39.903] [bbotk] Result of batch 2:</span></span>
-<span id="cb18-170"><a href="#cb18-170" tabindex="-1"></a><span class="do">## INFO  [11:22:39.905] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-171"><a href="#cb18-171" tabindex="-1"></a><span class="do">## INFO  [11:22:39.905] [bbotk]                     6     0.738485        0      0             0.49 90bcf350-56ce-4920-bbe9-691f77b6b37b</span></span>
-<span id="cb18-172"><a href="#cb18-172" tabindex="-1"></a><span class="do">## INFO  [11:22:39.906] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-173"><a href="#cb18-173" tabindex="-1"></a><span class="do">## INFO  [11:22:40.409] [bbotk] Result of batch 3:</span></span>
-<span id="cb18-174"><a href="#cb18-174" tabindex="-1"></a><span class="do">## INFO  [11:22:40.411] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-175"><a href="#cb18-175" tabindex="-1"></a><span class="do">## INFO  [11:22:40.411] [bbotk]                     2    0.7891974        0      0             0.38 f042cc4f-5f45-4899-8f1b-dc0f14ff4dd5</span></span>
-<span id="cb18-176"><a href="#cb18-176" tabindex="-1"></a><span class="do">## INFO  [11:22:40.412] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-177"><a href="#cb18-177" tabindex="-1"></a><span class="do">## INFO  [11:22:40.876] [bbotk] Result of batch 4:</span></span>
-<span id="cb18-178"><a href="#cb18-178" tabindex="-1"></a><span class="do">## INFO  [11:22:40.878] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-179"><a href="#cb18-179" tabindex="-1"></a><span class="do">## INFO  [11:22:40.878] [bbotk]                     1    0.7847366        0      0             0.33 76230706-dc91-48f7-a9fc-b675eaebed88</span></span>
-<span id="cb18-180"><a href="#cb18-180" tabindex="-1"></a><span class="do">## INFO  [11:22:40.879] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-181"><a href="#cb18-181" tabindex="-1"></a><span class="do">## INFO  [11:22:41.464] [bbotk] Result of batch 5:</span></span>
-<span id="cb18-182"><a href="#cb18-182" tabindex="-1"></a><span class="do">## INFO  [11:22:41.466] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-183"><a href="#cb18-183" tabindex="-1"></a><span class="do">## INFO  [11:22:41.466] [bbotk]                     3    0.8242434        0      0             0.43 7d36382b-ed55-47b5-bb83-faf791ff89fa</span></span>
-<span id="cb18-184"><a href="#cb18-184" tabindex="-1"></a><span class="do">## INFO  [11:22:41.467] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-185"><a href="#cb18-185" tabindex="-1"></a><span class="do">## INFO  [11:22:42.043] [bbotk] Result of batch 6:</span></span>
-<span id="cb18-186"><a href="#cb18-186" tabindex="-1"></a><span class="do">## INFO  [11:22:42.044] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-187"><a href="#cb18-187" tabindex="-1"></a><span class="do">## INFO  [11:22:42.044] [bbotk]                     5    0.7721594        0      0             0.43 e8547b2f-3cbb-48bc-a8f6-f6bac7c95672</span></span>
-<span id="cb18-188"><a href="#cb18-188" tabindex="-1"></a><span class="do">## INFO  [11:22:42.049] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
-<span id="cb18-189"><a href="#cb18-189" tabindex="-1"></a><span class="do">## INFO  [11:22:42.050] [bbotk] Result:</span></span>
-<span id="cb18-190"><a href="#cb18-190" tabindex="-1"></a><span class="do">## INFO  [11:22:42.051] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
-<span id="cb18-191"><a href="#cb18-191" tabindex="-1"></a><span class="do">## INFO  [11:22:42.051] [bbotk]                     3          &lt;list[5]&gt; &lt;list[1]&gt;    0.8242434</span></span>
-<span id="cb18-192"><a href="#cb18-192" tabindex="-1"></a><span class="do">## INFO  [11:22:42.334] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
-<span id="cb18-193"><a href="#cb18-193" tabindex="-1"></a><span class="do">## INFO  [11:22:42.337] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-194"><a href="#cb18-194" tabindex="-1"></a><span class="do">## INFO  [11:22:42.888] [bbotk] Result of batch 1:</span></span>
-<span id="cb18-195"><a href="#cb18-195" tabindex="-1"></a><span class="do">## INFO  [11:22:42.890] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-196"><a href="#cb18-196" tabindex="-1"></a><span class="do">## INFO  [11:22:42.890] [bbotk]                     5    0.7441839        0      0             0.44 febbbb60-e2e4-411e-853f-6bbd2b9f6301</span></span>
-<span id="cb18-197"><a href="#cb18-197" tabindex="-1"></a><span class="do">## INFO  [11:22:42.891] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-198"><a href="#cb18-198" tabindex="-1"></a><span class="do">## INFO  [11:22:43.422] [bbotk] Result of batch 2:</span></span>
-<span id="cb18-199"><a href="#cb18-199" tabindex="-1"></a><span class="do">## INFO  [11:22:43.424] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-200"><a href="#cb18-200" tabindex="-1"></a><span class="do">## INFO  [11:22:43.424] [bbotk]                     2    0.7864322        0      0             0.41 591b9d83-c32f-4448-a997-c51789435154</span></span>
-<span id="cb18-201"><a href="#cb18-201" tabindex="-1"></a><span class="do">## INFO  [11:22:43.425] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-202"><a href="#cb18-202" tabindex="-1"></a><span class="do">## INFO  [11:22:44.013] [bbotk] Result of batch 3:</span></span>
-<span id="cb18-203"><a href="#cb18-203" tabindex="-1"></a><span class="do">## INFO  [11:22:44.015] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-204"><a href="#cb18-204" tabindex="-1"></a><span class="do">## INFO  [11:22:44.015] [bbotk]                     6    0.7306905        0      0             0.47 ecb57126-5d82-4510-af60-bac21a5416b6</span></span>
-<span id="cb18-205"><a href="#cb18-205" tabindex="-1"></a><span class="do">## INFO  [11:22:44.016] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-206"><a href="#cb18-206" tabindex="-1"></a><span class="do">## INFO  [11:22:44.559] [bbotk] Result of batch 4:</span></span>
-<span id="cb18-207"><a href="#cb18-207" tabindex="-1"></a><span class="do">## INFO  [11:22:44.561] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-208"><a href="#cb18-208" tabindex="-1"></a><span class="do">## INFO  [11:22:44.561] [bbotk]                     4    0.7214778        0      0             0.47 91f76d03-0b7b-4e72-ba3a-8975cc9c32c8</span></span>
-<span id="cb18-209"><a href="#cb18-209" tabindex="-1"></a><span class="do">## INFO  [11:22:44.562] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-210"><a href="#cb18-210" tabindex="-1"></a><span class="do">## INFO  [11:22:45.010] [bbotk] Result of batch 5:</span></span>
-<span id="cb18-211"><a href="#cb18-211" tabindex="-1"></a><span class="do">## INFO  [11:22:45.012] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-212"><a href="#cb18-212" tabindex="-1"></a><span class="do">## INFO  [11:22:45.012] [bbotk]                     1    0.7473479        0      0             0.33 c7749a6b-eff5-4a0d-a164-1da430f3999e</span></span>
-<span id="cb18-213"><a href="#cb18-213" tabindex="-1"></a><span class="do">## INFO  [11:22:45.013] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-214"><a href="#cb18-214" tabindex="-1"></a><span class="do">## INFO  [11:22:45.547] [bbotk] Result of batch 6:</span></span>
-<span id="cb18-215"><a href="#cb18-215" tabindex="-1"></a><span class="do">## INFO  [11:22:45.549] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-216"><a href="#cb18-216" tabindex="-1"></a><span class="do">## INFO  [11:22:45.549] [bbotk]                     3    0.7173832        0      0             0.39 2fec2fd6-d22d-43a8-8bed-f0b540ab3fb3</span></span>
-<span id="cb18-217"><a href="#cb18-217" tabindex="-1"></a><span class="do">## INFO  [11:22:45.555] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
-<span id="cb18-218"><a href="#cb18-218" tabindex="-1"></a><span class="do">## INFO  [11:22:45.555] [bbotk] Result:</span></span>
-<span id="cb18-219"><a href="#cb18-219" tabindex="-1"></a><span class="do">## INFO  [11:22:45.557] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
-<span id="cb18-220"><a href="#cb18-220" tabindex="-1"></a><span class="do">## INFO  [11:22:45.557] [bbotk]                     2          &lt;list[5]&gt; &lt;list[1]&gt;    0.7864322</span></span>
-<span id="cb18-221"><a href="#cb18-221" tabindex="-1"></a><span class="do">## INFO  [11:22:45.862] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
-<span id="cb18-222"><a href="#cb18-222" tabindex="-1"></a><span class="do">## INFO  [11:22:45.865] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-223"><a href="#cb18-223" tabindex="-1"></a><span class="do">## INFO  [11:22:46.406] [bbotk] Result of batch 1:</span></span>
-<span id="cb18-224"><a href="#cb18-224" tabindex="-1"></a><span class="do">## INFO  [11:22:46.408] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-225"><a href="#cb18-225" tabindex="-1"></a><span class="do">## INFO  [11:22:46.408] [bbotk]                     3    0.7560953        0      0             0.42 667acc9e-79df-4275-828e-806bd114669d</span></span>
-<span id="cb18-226"><a href="#cb18-226" tabindex="-1"></a><span class="do">## INFO  [11:22:46.409] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-227"><a href="#cb18-227" tabindex="-1"></a><span class="do">## INFO  [11:22:46.944] [bbotk] Result of batch 2:</span></span>
-<span id="cb18-228"><a href="#cb18-228" tabindex="-1"></a><span class="do">## INFO  [11:22:46.945] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-229"><a href="#cb18-229" tabindex="-1"></a><span class="do">## INFO  [11:22:46.945] [bbotk]                     2     0.815187        0      0             0.39 c4040a58-8682-46c0-85a9-029a0543eb11</span></span>
-<span id="cb18-230"><a href="#cb18-230" tabindex="-1"></a><span class="do">## INFO  [11:22:46.947] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-231"><a href="#cb18-231" tabindex="-1"></a><span class="do">## INFO  [11:22:47.531] [bbotk] Result of batch 3:</span></span>
-<span id="cb18-232"><a href="#cb18-232" tabindex="-1"></a><span class="do">## INFO  [11:22:47.533] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-233"><a href="#cb18-233" tabindex="-1"></a><span class="do">## INFO  [11:22:47.533] [bbotk]                     6    0.6549414        0      0             0.46 7776c4fc-12a7-42b5-a96a-28a94c2909d1</span></span>
-<span id="cb18-234"><a href="#cb18-234" tabindex="-1"></a><span class="do">## INFO  [11:22:47.534] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-235"><a href="#cb18-235" tabindex="-1"></a><span class="do">## INFO  [11:22:48.006] [bbotk] Result of batch 4:</span></span>
-<span id="cb18-236"><a href="#cb18-236" tabindex="-1"></a><span class="do">## INFO  [11:22:48.008] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-237"><a href="#cb18-237" tabindex="-1"></a><span class="do">## INFO  [11:22:48.008] [bbotk]                     1    0.7237111        0      0             0.36 a6d168a6-09ce-4462-9a40-1c1d758febc5</span></span>
-<span id="cb18-238"><a href="#cb18-238" tabindex="-1"></a><span class="do">## INFO  [11:22:48.009] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-239"><a href="#cb18-239" tabindex="-1"></a><span class="do">## INFO  [11:22:48.572] [bbotk] Result of batch 5:</span></span>
-<span id="cb18-240"><a href="#cb18-240" tabindex="-1"></a><span class="do">## INFO  [11:22:48.573] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-241"><a href="#cb18-241" tabindex="-1"></a><span class="do">## INFO  [11:22:48.573] [bbotk]                     4     0.676903        0      0             0.43 eb8eb139-2a5a-43c1-a333-a027df3364dd</span></span>
-<span id="cb18-242"><a href="#cb18-242" tabindex="-1"></a><span class="do">## INFO  [11:22:48.574] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-243"><a href="#cb18-243" tabindex="-1"></a><span class="do">## INFO  [11:22:49.158] [bbotk] Result of batch 6:</span></span>
-<span id="cb18-244"><a href="#cb18-244" tabindex="-1"></a><span class="do">## INFO  [11:22:49.160] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-245"><a href="#cb18-245" tabindex="-1"></a><span class="do">## INFO  [11:22:49.160] [bbotk]                     5    0.6877908        0      0             0.49 c3ab9d43-c3d0-4729-9f2d-a0b448649595</span></span>
-<span id="cb18-246"><a href="#cb18-246" tabindex="-1"></a><span class="do">## INFO  [11:22:49.166] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
-<span id="cb18-247"><a href="#cb18-247" tabindex="-1"></a><span class="do">## INFO  [11:22:49.167] [bbotk] Result:</span></span>
-<span id="cb18-248"><a href="#cb18-248" tabindex="-1"></a><span class="do">## INFO  [11:22:49.168] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
-<span id="cb18-249"><a href="#cb18-249" tabindex="-1"></a><span class="do">## INFO  [11:22:49.168] [bbotk]                     2          &lt;list[5]&gt; &lt;list[1]&gt;     0.815187</span></span>
-<span id="cb18-250"><a href="#cb18-250" tabindex="-1"></a><span class="do">## INFO  [11:22:49.446] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
-<span id="cb18-251"><a href="#cb18-251" tabindex="-1"></a><span class="do">## INFO  [11:22:49.448] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-252"><a href="#cb18-252" tabindex="-1"></a><span class="do">## INFO  [11:22:50.024] [bbotk] Result of batch 1:</span></span>
-<span id="cb18-253"><a href="#cb18-253" tabindex="-1"></a><span class="do">## INFO  [11:22:50.026] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-254"><a href="#cb18-254" tabindex="-1"></a><span class="do">## INFO  [11:22:50.026] [bbotk]                     4    0.8188219        0      0             0.46 99fe3e2e-c03b-41ad-a9e9-2ac6a7e45a6a</span></span>
-<span id="cb18-255"><a href="#cb18-255" tabindex="-1"></a><span class="do">## INFO  [11:22:50.027] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-256"><a href="#cb18-256" tabindex="-1"></a><span class="do">## INFO  [11:22:50.710] [bbotk] Result of batch 2:</span></span>
-<span id="cb18-257"><a href="#cb18-257" tabindex="-1"></a><span class="do">## INFO  [11:22:50.712] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-258"><a href="#cb18-258" tabindex="-1"></a><span class="do">## INFO  [11:22:50.712] [bbotk]                     5    0.8255053        0      0             0.52 6065b000-316d-4bdd-9f89-9b6c7376b32f</span></span>
-<span id="cb18-259"><a href="#cb18-259" tabindex="-1"></a><span class="do">## INFO  [11:22:50.715] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-260"><a href="#cb18-260" tabindex="-1"></a><span class="do">## INFO  [11:22:51.279] [bbotk] Result of batch 3:</span></span>
-<span id="cb18-261"><a href="#cb18-261" tabindex="-1"></a><span class="do">## INFO  [11:22:51.280] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-262"><a href="#cb18-262" tabindex="-1"></a><span class="do">## INFO  [11:22:51.280] [bbotk]                     3    0.8256235        0      0             0.41 510cb0fc-09a5-4420-bfcb-672431be3a94</span></span>
-<span id="cb18-263"><a href="#cb18-263" tabindex="-1"></a><span class="do">## INFO  [11:22:51.282] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-264"><a href="#cb18-264" tabindex="-1"></a><span class="do">## INFO  [11:22:51.825] [bbotk] Result of batch 4:</span></span>
-<span id="cb18-265"><a href="#cb18-265" tabindex="-1"></a><span class="do">## INFO  [11:22:51.827] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-266"><a href="#cb18-266" tabindex="-1"></a><span class="do">## INFO  [11:22:51.827] [bbotk]                     2    0.8137674        0      0             0.45 bf895959-b2a6-476f-821f-8085becd58dc</span></span>
-<span id="cb18-267"><a href="#cb18-267" tabindex="-1"></a><span class="do">## INFO  [11:22:51.828] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-268"><a href="#cb18-268" tabindex="-1"></a><span class="do">## INFO  [11:22:52.314] [bbotk] Result of batch 5:</span></span>
-<span id="cb18-269"><a href="#cb18-269" tabindex="-1"></a><span class="do">## INFO  [11:22:52.316] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-270"><a href="#cb18-270" tabindex="-1"></a><span class="do">## INFO  [11:22:52.316] [bbotk]                     1    0.7869082        0      0             0.34 1e1e4e3e-b33b-4585-a16d-93a06a77e47f</span></span>
-<span id="cb18-271"><a href="#cb18-271" tabindex="-1"></a><span class="do">## INFO  [11:22:52.317] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-272"><a href="#cb18-272" tabindex="-1"></a><span class="do">## INFO  [11:22:52.920] [bbotk] Result of batch 6:</span></span>
-<span id="cb18-273"><a href="#cb18-273" tabindex="-1"></a><span class="do">## INFO  [11:22:52.922] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-274"><a href="#cb18-274" tabindex="-1"></a><span class="do">## INFO  [11:22:52.922] [bbotk]                     6    0.7391248        0      0             0.46 f4f0ee9a-fb91-41c5-8d1e-9ad6f4b2e25e</span></span>
-<span id="cb18-275"><a href="#cb18-275" tabindex="-1"></a><span class="do">## INFO  [11:22:52.928] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
-<span id="cb18-276"><a href="#cb18-276" tabindex="-1"></a><span class="do">## INFO  [11:22:52.928] [bbotk] Result:</span></span>
-<span id="cb18-277"><a href="#cb18-277" tabindex="-1"></a><span class="do">## INFO  [11:22:52.930] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
-<span id="cb18-278"><a href="#cb18-278" tabindex="-1"></a><span class="do">## INFO  [11:22:52.930] [bbotk]                     3          &lt;list[5]&gt; &lt;list[1]&gt;    0.8256235</span></span>
-<span id="cb18-279"><a href="#cb18-279" tabindex="-1"></a><span class="do">## INFO  [11:22:53.245] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
-<span id="cb18-280"><a href="#cb18-280" tabindex="-1"></a><span class="do">## INFO  [11:22:53.247] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-281"><a href="#cb18-281" tabindex="-1"></a><span class="do">## INFO  [11:22:53.855] [bbotk] Result of batch 1:</span></span>
-<span id="cb18-282"><a href="#cb18-282" tabindex="-1"></a><span class="do">## INFO  [11:22:53.856] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-283"><a href="#cb18-283" tabindex="-1"></a><span class="do">## INFO  [11:22:53.856] [bbotk]                     6    0.7483715        0      0             0.48 50acb4d4-e595-45df-ba9e-12ee3b5ef766</span></span>
-<span id="cb18-284"><a href="#cb18-284" tabindex="-1"></a><span class="do">## INFO  [11:22:53.857] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-285"><a href="#cb18-285" tabindex="-1"></a><span class="do">## INFO  [11:22:54.454] [bbotk] Result of batch 2:</span></span>
-<span id="cb18-286"><a href="#cb18-286" tabindex="-1"></a><span class="do">## INFO  [11:22:54.456] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-287"><a href="#cb18-287" tabindex="-1"></a><span class="do">## INFO  [11:22:54.456] [bbotk]                     5    0.7290154        0      0             0.48 25da2a48-2400-4e38-8864-d5ea0102cedf</span></span>
-<span id="cb18-288"><a href="#cb18-288" tabindex="-1"></a><span class="do">## INFO  [11:22:54.458] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-289"><a href="#cb18-289" tabindex="-1"></a><span class="do">## INFO  [11:22:55.014] [bbotk] Result of batch 3:</span></span>
-<span id="cb18-290"><a href="#cb18-290" tabindex="-1"></a><span class="do">## INFO  [11:22:55.016] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-291"><a href="#cb18-291" tabindex="-1"></a><span class="do">## INFO  [11:22:55.016] [bbotk]                     2    0.7839196        0      0             0.43 31c33553-acb2-4bc0-893e-94c5664faf20</span></span>
-<span id="cb18-292"><a href="#cb18-292" tabindex="-1"></a><span class="do">## INFO  [11:22:55.018] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-293"><a href="#cb18-293" tabindex="-1"></a><span class="do">## INFO  [11:22:55.577] [bbotk] Result of batch 4:</span></span>
-<span id="cb18-294"><a href="#cb18-294" tabindex="-1"></a><span class="do">## INFO  [11:22:55.579] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-295"><a href="#cb18-295" tabindex="-1"></a><span class="do">## INFO  [11:22:55.579] [bbotk]                     3    0.7509771        0      0              0.4 5834e9d5-6a8b-45fc-b610-6057eb7157a0</span></span>
-<span id="cb18-296"><a href="#cb18-296" tabindex="-1"></a><span class="do">## INFO  [11:22:55.581] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-297"><a href="#cb18-297" tabindex="-1"></a><span class="do">## INFO  [11:22:56.129] [bbotk] Result of batch 5:</span></span>
-<span id="cb18-298"><a href="#cb18-298" tabindex="-1"></a><span class="do">## INFO  [11:22:56.131] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-299"><a href="#cb18-299" tabindex="-1"></a><span class="do">## INFO  [11:22:56.131] [bbotk]                     4    0.7728457        0      0              0.4 32ae0daa-c75b-4d32-92db-7a74fe041d2e</span></span>
-<span id="cb18-300"><a href="#cb18-300" tabindex="-1"></a><span class="do">## INFO  [11:22:56.132] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-301"><a href="#cb18-301" tabindex="-1"></a><span class="do">## INFO  [11:22:56.615] [bbotk] Result of batch 6:</span></span>
-<span id="cb18-302"><a href="#cb18-302" tabindex="-1"></a><span class="do">## INFO  [11:22:56.616] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-303"><a href="#cb18-303" tabindex="-1"></a><span class="do">## INFO  [11:22:56.616] [bbotk]                     1    0.7790806        0      0             0.35 45840371-32ca-4c78-a89d-cec37cd18a5a</span></span>
-<span id="cb18-304"><a href="#cb18-304" tabindex="-1"></a><span class="do">## INFO  [11:22:56.622] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
-<span id="cb18-305"><a href="#cb18-305" tabindex="-1"></a><span class="do">## INFO  [11:22:56.623] [bbotk] Result:</span></span>
-<span id="cb18-306"><a href="#cb18-306" tabindex="-1"></a><span class="do">## INFO  [11:22:56.624] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
-<span id="cb18-307"><a href="#cb18-307" tabindex="-1"></a><span class="do">## INFO  [11:22:56.624] [bbotk]                     2          &lt;list[5]&gt; &lt;list[1]&gt;    0.7839196</span></span>
-<span id="cb18-308"><a href="#cb18-308" tabindex="-1"></a><span class="do">## INFO  [11:22:56.940] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
-<span id="cb18-309"><a href="#cb18-309" tabindex="-1"></a><span class="do">## INFO  [11:22:56.942] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-310"><a href="#cb18-310" tabindex="-1"></a><span class="do">## INFO  [11:22:57.393] [bbotk] Result of batch 1:</span></span>
-<span id="cb18-311"><a href="#cb18-311" tabindex="-1"></a><span class="do">## INFO  [11:22:57.395] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-312"><a href="#cb18-312" tabindex="-1"></a><span class="do">## INFO  [11:22:57.395] [bbotk]                     1    0.7389726        0      0              0.3 e35ce1ac-878d-47c0-9a86-c9e1105165d5</span></span>
-<span id="cb18-313"><a href="#cb18-313" tabindex="-1"></a><span class="do">## INFO  [11:22:57.397] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-314"><a href="#cb18-314" tabindex="-1"></a><span class="do">## INFO  [11:22:57.995] [bbotk] Result of batch 2:</span></span>
-<span id="cb18-315"><a href="#cb18-315" tabindex="-1"></a><span class="do">## INFO  [11:22:57.997] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-316"><a href="#cb18-316" tabindex="-1"></a><span class="do">## INFO  [11:22:57.997] [bbotk]                     5    0.6701098        0      0             0.51 37e06f4c-bba7-4a2f-9b8b-97f096156857</span></span>
-<span id="cb18-317"><a href="#cb18-317" tabindex="-1"></a><span class="do">## INFO  [11:22:57.998] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-318"><a href="#cb18-318" tabindex="-1"></a><span class="do">## INFO  [11:22:58.615] [bbotk] Result of batch 3:</span></span>
-<span id="cb18-319"><a href="#cb18-319" tabindex="-1"></a><span class="do">## INFO  [11:22:58.617] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-320"><a href="#cb18-320" tabindex="-1"></a><span class="do">## INFO  [11:22:58.617] [bbotk]                     4    0.6448911        0      0              0.5 18eb2a6f-3cf2-4dee-a3aa-0576693ff3f8</span></span>
-<span id="cb18-321"><a href="#cb18-321" tabindex="-1"></a><span class="do">## INFO  [11:22:58.619] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-322"><a href="#cb18-322" tabindex="-1"></a><span class="do">## INFO  [11:22:59.300] [bbotk] Result of batch 4:</span></span>
-<span id="cb18-323"><a href="#cb18-323" tabindex="-1"></a><span class="do">## INFO  [11:22:59.302] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-324"><a href="#cb18-324" tabindex="-1"></a><span class="do">## INFO  [11:22:59.302] [bbotk]                     6    0.6010609        0      0             0.51 14ed88a8-7f6c-40ca-b803-40821b37a561</span></span>
-<span id="cb18-325"><a href="#cb18-325" tabindex="-1"></a><span class="do">## INFO  [11:22:59.304] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-326"><a href="#cb18-326" tabindex="-1"></a><span class="do">## INFO  [11:22:59.955] [bbotk] Result of batch 5:</span></span>
-<span id="cb18-327"><a href="#cb18-327" tabindex="-1"></a><span class="do">## INFO  [11:22:59.957] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-328"><a href="#cb18-328" tabindex="-1"></a><span class="do">## INFO  [11:22:59.957] [bbotk]                     3    0.6718779        0      0             0.51 d9a493d1-49dc-433b-8123-d802b1562b67</span></span>
-<span id="cb18-329"><a href="#cb18-329" tabindex="-1"></a><span class="do">## INFO  [11:22:59.959] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-330"><a href="#cb18-330" tabindex="-1"></a><span class="do">## INFO  [11:23:00.559] [bbotk] Result of batch 6:</span></span>
-<span id="cb18-331"><a href="#cb18-331" tabindex="-1"></a><span class="do">## INFO  [11:23:00.561] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-332"><a href="#cb18-332" tabindex="-1"></a><span class="do">## INFO  [11:23:00.561] [bbotk]                     2    0.7242695        0      0             0.46 5f1f3a46-1806-4202-beb3-6a210ab30cb7</span></span>
-<span id="cb18-333"><a href="#cb18-333" tabindex="-1"></a><span class="do">## INFO  [11:23:00.567] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
-<span id="cb18-334"><a href="#cb18-334" tabindex="-1"></a><span class="do">## INFO  [11:23:00.568] [bbotk] Result:</span></span>
-<span id="cb18-335"><a href="#cb18-335" tabindex="-1"></a><span class="do">## INFO  [11:23:00.569] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
-<span id="cb18-336"><a href="#cb18-336" tabindex="-1"></a><span class="do">## INFO  [11:23:00.569] [bbotk]                     1          &lt;list[5]&gt; &lt;list[1]&gt;    0.7389726</span></span>
-<span id="cb18-337"><a href="#cb18-337" tabindex="-1"></a><span class="do">## INFO  [11:23:00.898] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
-<span id="cb18-338"><a href="#cb18-338" tabindex="-1"></a><span class="do">## INFO  [11:23:00.901] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-339"><a href="#cb18-339" tabindex="-1"></a><span class="do">## INFO  [11:23:01.543] [bbotk] Result of batch 1:</span></span>
-<span id="cb18-340"><a href="#cb18-340" tabindex="-1"></a><span class="do">## INFO  [11:23:01.545] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-341"><a href="#cb18-341" tabindex="-1"></a><span class="do">## INFO  [11:23:01.545] [bbotk]                     5    0.7938512        0      0             0.53 3228d12e-8d9f-41db-b756-5ddfb3c7f80c</span></span>
-<span id="cb18-342"><a href="#cb18-342" tabindex="-1"></a><span class="do">## INFO  [11:23:01.546] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-343"><a href="#cb18-343" tabindex="-1"></a><span class="do">## INFO  [11:23:02.186] [bbotk] Result of batch 2:</span></span>
-<span id="cb18-344"><a href="#cb18-344" tabindex="-1"></a><span class="do">## INFO  [11:23:02.189] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-345"><a href="#cb18-345" tabindex="-1"></a><span class="do">## INFO  [11:23:02.189] [bbotk]                     3    0.7929509        0      0             0.49 fce034c0-d22e-4bed-9a9b-7c0e61f3df86</span></span>
-<span id="cb18-346"><a href="#cb18-346" tabindex="-1"></a><span class="do">## INFO  [11:23:02.191] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-347"><a href="#cb18-347" tabindex="-1"></a><span class="do">## INFO  [11:23:02.836] [bbotk] Result of batch 3:</span></span>
-<span id="cb18-348"><a href="#cb18-348" tabindex="-1"></a><span class="do">## INFO  [11:23:02.839] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-349"><a href="#cb18-349" tabindex="-1"></a><span class="do">## INFO  [11:23:02.839] [bbotk]                     2    0.8374544        0      0             0.49 33140112-222e-4104-b45d-5e3656aaf888</span></span>
-<span id="cb18-350"><a href="#cb18-350" tabindex="-1"></a><span class="do">## INFO  [11:23:02.841] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-351"><a href="#cb18-351" tabindex="-1"></a><span class="do">## INFO  [11:23:03.529] [bbotk] Result of batch 4:</span></span>
-<span id="cb18-352"><a href="#cb18-352" tabindex="-1"></a><span class="do">## INFO  [11:23:03.531] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-353"><a href="#cb18-353" tabindex="-1"></a><span class="do">## INFO  [11:23:03.531] [bbotk]                     6    0.7224707        0      0             0.56 31df4484-2791-46f5-b056-4491f9e2ce72</span></span>
-<span id="cb18-354"><a href="#cb18-354" tabindex="-1"></a><span class="do">## INFO  [11:23:03.532] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-355"><a href="#cb18-355" tabindex="-1"></a><span class="do">## INFO  [11:23:04.032] [bbotk] Result of batch 5:</span></span>
-<span id="cb18-356"><a href="#cb18-356" tabindex="-1"></a><span class="do">## INFO  [11:23:04.034] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-357"><a href="#cb18-357" tabindex="-1"></a><span class="do">## INFO  [11:23:04.034] [bbotk]                     1    0.7513363        0      0             0.39 34265298-1321-4c92-bd51-38c3b4c7a087</span></span>
-<span id="cb18-358"><a href="#cb18-358" tabindex="-1"></a><span class="do">## INFO  [11:23:04.036] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-359"><a href="#cb18-359" tabindex="-1"></a><span class="do">## INFO  [11:23:04.755] [bbotk] Result of batch 6:</span></span>
-<span id="cb18-360"><a href="#cb18-360" tabindex="-1"></a><span class="do">## INFO  [11:23:04.758] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-361"><a href="#cb18-361" tabindex="-1"></a><span class="do">## INFO  [11:23:04.758] [bbotk]                     4    0.7676307        0      0              0.5 6eece619-ca39-4b7c-8c8a-989da49cad57</span></span>
-<span id="cb18-362"><a href="#cb18-362" tabindex="-1"></a><span class="do">## INFO  [11:23:04.767] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
-<span id="cb18-363"><a href="#cb18-363" tabindex="-1"></a><span class="do">## INFO  [11:23:04.768] [bbotk] Result:</span></span>
-<span id="cb18-364"><a href="#cb18-364" tabindex="-1"></a><span class="do">## INFO  [11:23:04.770] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
-<span id="cb18-365"><a href="#cb18-365" tabindex="-1"></a><span class="do">## INFO  [11:23:04.770] [bbotk]                     2          &lt;list[5]&gt; &lt;list[1]&gt;    0.8374544</span></span>
-<span id="cb18-366"><a href="#cb18-366" tabindex="-1"></a><span class="do">## INFO  [11:23:05.132] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
-<span id="cb18-367"><a href="#cb18-367" tabindex="-1"></a><span class="do">## INFO  [11:23:05.135] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-368"><a href="#cb18-368" tabindex="-1"></a><span class="do">## INFO  [11:23:05.783] [bbotk] Result of batch 1:</span></span>
-<span id="cb18-369"><a href="#cb18-369" tabindex="-1"></a><span class="do">## INFO  [11:23:05.785] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-370"><a href="#cb18-370" tabindex="-1"></a><span class="do">## INFO  [11:23:05.785] [bbotk]                     4    0.8149079        0      0             0.54 99873fcd-403c-47ec-a153-d3299a8956da</span></span>
-<span id="cb18-371"><a href="#cb18-371" tabindex="-1"></a><span class="do">## INFO  [11:23:05.787] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-372"><a href="#cb18-372" tabindex="-1"></a><span class="do">## INFO  [11:23:06.418] [bbotk] Result of batch 2:</span></span>
-<span id="cb18-373"><a href="#cb18-373" tabindex="-1"></a><span class="do">## INFO  [11:23:06.420] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-374"><a href="#cb18-374" tabindex="-1"></a><span class="do">## INFO  [11:23:06.420] [bbotk]                     3    0.7888517        0      0             0.48 4c554f65-692d-475b-a557-2e2c1dfe2f4b</span></span>
-<span id="cb18-375"><a href="#cb18-375" tabindex="-1"></a><span class="do">## INFO  [11:23:06.422] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-376"><a href="#cb18-376" tabindex="-1"></a><span class="do">## INFO  [11:23:07.148] [bbotk] Result of batch 3:</span></span>
-<span id="cb18-377"><a href="#cb18-377" tabindex="-1"></a><span class="do">## INFO  [11:23:07.150] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-378"><a href="#cb18-378" tabindex="-1"></a><span class="do">## INFO  [11:23:07.150] [bbotk]                     6     0.712172        0      0             0.58 c7b05069-feda-4ab8-af84-3bffbd03fa1d</span></span>
-<span id="cb18-379"><a href="#cb18-379" tabindex="-1"></a><span class="do">## INFO  [11:23:07.152] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-380"><a href="#cb18-380" tabindex="-1"></a><span class="do">## INFO  [11:23:07.663] [bbotk] Result of batch 4:</span></span>
-<span id="cb18-381"><a href="#cb18-381" tabindex="-1"></a><span class="do">## INFO  [11:23:07.665] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-382"><a href="#cb18-382" tabindex="-1"></a><span class="do">## INFO  [11:23:07.665] [bbotk]                     1    0.7883864        0      0             0.39 ad4b417a-b736-42cf-a34c-0084de1a78df</span></span>
-<span id="cb18-383"><a href="#cb18-383" tabindex="-1"></a><span class="do">## INFO  [11:23:07.666] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-384"><a href="#cb18-384" tabindex="-1"></a><span class="do">## INFO  [11:23:08.346] [bbotk] Result of batch 5:</span></span>
-<span id="cb18-385"><a href="#cb18-385" tabindex="-1"></a><span class="do">## INFO  [11:23:08.348] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-386"><a href="#cb18-386" tabindex="-1"></a><span class="do">## INFO  [11:23:08.348] [bbotk]                     5    0.7113345        0      0             0.54 5cd6e313-a6be-4359-a49b-64dedff89657</span></span>
-<span id="cb18-387"><a href="#cb18-387" tabindex="-1"></a><span class="do">## INFO  [11:23:08.350] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-388"><a href="#cb18-388" tabindex="-1"></a><span class="do">## INFO  [11:23:08.963] [bbotk] Result of batch 6:</span></span>
-<span id="cb18-389"><a href="#cb18-389" tabindex="-1"></a><span class="do">## INFO  [11:23:08.965] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-390"><a href="#cb18-390" tabindex="-1"></a><span class="do">## INFO  [11:23:08.965] [bbotk]                     2    0.8184441        0      0             0.49 ac92d5a7-9196-4bf7-9c55-5af1b1e0deef</span></span>
-<span id="cb18-391"><a href="#cb18-391" tabindex="-1"></a><span class="do">## INFO  [11:23:08.971] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
-<span id="cb18-392"><a href="#cb18-392" tabindex="-1"></a><span class="do">## INFO  [11:23:08.972] [bbotk] Result:</span></span>
-<span id="cb18-393"><a href="#cb18-393" tabindex="-1"></a><span class="do">## INFO  [11:23:08.973] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
-<span id="cb18-394"><a href="#cb18-394" tabindex="-1"></a><span class="do">## INFO  [11:23:08.973] [bbotk]                     2          &lt;list[5]&gt; &lt;list[1]&gt;    0.8184441</span></span>
-<span id="cb18-395"><a href="#cb18-395" tabindex="-1"></a><span class="do">## INFO  [11:23:09.308] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
-<span id="cb18-396"><a href="#cb18-396" tabindex="-1"></a><span class="do">## INFO  [11:23:09.311] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-397"><a href="#cb18-397" tabindex="-1"></a><span class="do">## INFO  [11:23:09.942] [bbotk] Result of batch 1:</span></span>
-<span id="cb18-398"><a href="#cb18-398" tabindex="-1"></a><span class="do">## INFO  [11:23:09.944] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-399"><a href="#cb18-399" tabindex="-1"></a><span class="do">## INFO  [11:23:09.944] [bbotk]                     2    0.8008561        0      0             0.53 3d859157-1eee-4245-b91e-b3066b28167a</span></span>
-<span id="cb18-400"><a href="#cb18-400" tabindex="-1"></a><span class="do">## INFO  [11:23:09.945] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-401"><a href="#cb18-401" tabindex="-1"></a><span class="do">## INFO  [11:23:10.591] [bbotk] Result of batch 2:</span></span>
-<span id="cb18-402"><a href="#cb18-402" tabindex="-1"></a><span class="do">## INFO  [11:23:10.593] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-403"><a href="#cb18-403" tabindex="-1"></a><span class="do">## INFO  [11:23:10.593] [bbotk]                     3    0.7981575        0      0             0.51 85b119d5-e2e2-42d5-8dbe-e3a017322966</span></span>
-<span id="cb18-404"><a href="#cb18-404" tabindex="-1"></a><span class="do">## INFO  [11:23:10.594] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-405"><a href="#cb18-405" tabindex="-1"></a><span class="do">## INFO  [11:23:11.265] [bbotk] Result of batch 3:</span></span>
-<span id="cb18-406"><a href="#cb18-406" tabindex="-1"></a><span class="do">## INFO  [11:23:11.266] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-407"><a href="#cb18-407" tabindex="-1"></a><span class="do">## INFO  [11:23:11.266] [bbotk]                     5    0.7660525        0      0             0.55 c3b26014-d6ae-40f6-9a1a-dc32a53d6ea8</span></span>
-<span id="cb18-408"><a href="#cb18-408" tabindex="-1"></a><span class="do">## INFO  [11:23:11.268] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-409"><a href="#cb18-409" tabindex="-1"></a><span class="do">## INFO  [11:23:11.928] [bbotk] Result of batch 4:</span></span>
-<span id="cb18-410"><a href="#cb18-410" tabindex="-1"></a><span class="do">## INFO  [11:23:11.930] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-411"><a href="#cb18-411" tabindex="-1"></a><span class="do">## INFO  [11:23:11.930] [bbotk]                     4    0.7543272        0      0             0.54 5837a19d-3ba1-4e60-8fbf-b0004643e3da</span></span>
-<span id="cb18-412"><a href="#cb18-412" tabindex="-1"></a><span class="do">## INFO  [11:23:11.931] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-413"><a href="#cb18-413" tabindex="-1"></a><span class="do">## INFO  [11:23:12.630] [bbotk] Result of batch 5:</span></span>
-<span id="cb18-414"><a href="#cb18-414" tabindex="-1"></a><span class="do">## INFO  [11:23:12.631] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-415"><a href="#cb18-415" tabindex="-1"></a><span class="do">## INFO  [11:23:12.631] [bbotk]                     6    0.7104969        0      0             0.55 94cf54b7-a82b-466d-88a5-a403ff8ce791</span></span>
-<span id="cb18-416"><a href="#cb18-416" tabindex="-1"></a><span class="do">## INFO  [11:23:12.633] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-417"><a href="#cb18-417" tabindex="-1"></a><span class="do">## INFO  [11:23:13.152] [bbotk] Result of batch 6:</span></span>
-<span id="cb18-418"><a href="#cb18-418" tabindex="-1"></a><span class="do">## INFO  [11:23:13.154] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-419"><a href="#cb18-419" tabindex="-1"></a><span class="do">## INFO  [11:23:13.154] [bbotk]                     1     0.736367        0      0             0.38 94f9383b-c838-45ec-af4a-8a8fbba7c3f5</span></span>
-<span id="cb18-420"><a href="#cb18-420" tabindex="-1"></a><span class="do">## INFO  [11:23:13.161] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
-<span id="cb18-421"><a href="#cb18-421" tabindex="-1"></a><span class="do">## INFO  [11:23:13.161] [bbotk] Result:</span></span>
-<span id="cb18-422"><a href="#cb18-422" tabindex="-1"></a><span class="do">## INFO  [11:23:13.163] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
-<span id="cb18-423"><a href="#cb18-423" tabindex="-1"></a><span class="do">## INFO  [11:23:13.163] [bbotk]                     2          &lt;list[5]&gt; &lt;list[1]&gt;    0.8008561</span></span>
-<span id="cb18-424"><a href="#cb18-424" tabindex="-1"></a><span class="do">## INFO  [11:23:13.490] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
-<span id="cb18-425"><a href="#cb18-425" tabindex="-1"></a><span class="do">## INFO  [11:23:13.493] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-426"><a href="#cb18-426" tabindex="-1"></a><span class="do">## INFO  [11:23:14.145] [bbotk] Result of batch 1:</span></span>
-<span id="cb18-427"><a href="#cb18-427" tabindex="-1"></a><span class="do">## INFO  [11:23:14.147] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-428"><a href="#cb18-428" tabindex="-1"></a><span class="do">## INFO  [11:23:14.147] [bbotk]                     4    0.8019658        0      0              0.5 48363ca8-087d-4505-9876-7cfbc31e072a</span></span>
-<span id="cb18-429"><a href="#cb18-429" tabindex="-1"></a><span class="do">## INFO  [11:23:14.149] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-430"><a href="#cb18-430" tabindex="-1"></a><span class="do">## INFO  [11:23:14.857] [bbotk] Result of batch 2:</span></span>
-<span id="cb18-431"><a href="#cb18-431" tabindex="-1"></a><span class="do">## INFO  [11:23:14.860] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-432"><a href="#cb18-432" tabindex="-1"></a><span class="do">## INFO  [11:23:14.860] [bbotk]                     6     0.713077        0      0             0.53 28cc558e-5dbe-4ed7-8117-dea122c2e3b7</span></span>
-<span id="cb18-433"><a href="#cb18-433" tabindex="-1"></a><span class="do">## INFO  [11:23:14.862] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-434"><a href="#cb18-434" tabindex="-1"></a><span class="do">## INFO  [11:23:15.468] [bbotk] Result of batch 3:</span></span>
-<span id="cb18-435"><a href="#cb18-435" tabindex="-1"></a><span class="do">## INFO  [11:23:15.471] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-436"><a href="#cb18-436" tabindex="-1"></a><span class="do">## INFO  [11:23:15.471] [bbotk]                     2    0.7994417        0      0             0.41 5e8616d3-7071-4329-a1a7-f03f0bbf159b</span></span>
-<span id="cb18-437"><a href="#cb18-437" tabindex="-1"></a><span class="do">## INFO  [11:23:15.474] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-438"><a href="#cb18-438" tabindex="-1"></a><span class="do">## INFO  [11:23:16.118] [bbotk] Result of batch 4:</span></span>
-<span id="cb18-439"><a href="#cb18-439" tabindex="-1"></a><span class="do">## INFO  [11:23:16.121] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-440"><a href="#cb18-440" tabindex="-1"></a><span class="do">## INFO  [11:23:16.121] [bbotk]                     3    0.7373116        0      0              0.5 10a1d566-fa0a-4577-a0a5-a310f4c049b3</span></span>
-<span id="cb18-441"><a href="#cb18-441" tabindex="-1"></a><span class="do">## INFO  [11:23:16.123] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-442"><a href="#cb18-442" tabindex="-1"></a><span class="do">## INFO  [11:23:16.791] [bbotk] Result of batch 5:</span></span>
-<span id="cb18-443"><a href="#cb18-443" tabindex="-1"></a><span class="do">## INFO  [11:23:16.792] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-444"><a href="#cb18-444" tabindex="-1"></a><span class="do">## INFO  [11:23:16.792] [bbotk]                     5    0.6782412        0      0             0.57 8012c7b5-221b-401c-95a0-92bd3ad4f478</span></span>
-<span id="cb18-445"><a href="#cb18-445" tabindex="-1"></a><span class="do">## INFO  [11:23:16.794] [bbotk] Evaluating 1 configuration(s)</span></span>
-<span id="cb18-446"><a href="#cb18-446" tabindex="-1"></a><span class="do">## INFO  [11:23:17.318] [bbotk] Result of batch 6:</span></span>
-<span id="cb18-447"><a href="#cb18-447" tabindex="-1"></a><span class="do">## INFO  [11:23:17.320] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
-<span id="cb18-448"><a href="#cb18-448" tabindex="-1"></a><span class="do">## INFO  [11:23:17.320] [bbotk]                     1    0.6281584        0      0              0.4 21baccce-5a73-48f7-b98e-c972bb66a6b2</span></span>
-<span id="cb18-449"><a href="#cb18-449" tabindex="-1"></a><span class="do">## INFO  [11:23:17.326] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
-<span id="cb18-450"><a href="#cb18-450" tabindex="-1"></a><span class="do">## INFO  [11:23:17.327] [bbotk] Result:</span></span>
-<span id="cb18-451"><a href="#cb18-451" tabindex="-1"></a><span class="do">## INFO  [11:23:17.329] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
-<span id="cb18-452"><a href="#cb18-452" tabindex="-1"></a><span class="do">## INFO  [11:23:17.329] [bbotk]                     4          &lt;list[5]&gt; &lt;list[1]&gt;    0.8019658</span></span>
+<span id="cb18-18"><a href="#cb18-18" tabindex="-1"></a><span class="do">## INFO  [10:02:34.735] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
+<span id="cb18-19"><a href="#cb18-19" tabindex="-1"></a><span class="do">## INFO  [10:02:34.815] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-20"><a href="#cb18-20" tabindex="-1"></a><span class="do">## INFO  [10:02:36.774] [bbotk] Result of batch 1:</span></span>
+<span id="cb18-21"><a href="#cb18-21" tabindex="-1"></a><span class="do">## INFO  [10:02:36.783] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-22"><a href="#cb18-22" tabindex="-1"></a><span class="do">## INFO  [10:02:36.783] [bbotk]                     5    0.6919784        0      0             1.56 e3cee0e9-f902-4c19-b10a-6ab5712c8cbf</span></span>
+<span id="cb18-23"><a href="#cb18-23" tabindex="-1"></a><span class="do">## INFO  [10:02:36.787] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-24"><a href="#cb18-24" tabindex="-1"></a><span class="do">## INFO  [10:02:38.511] [bbotk] Result of batch 2:</span></span>
+<span id="cb18-25"><a href="#cb18-25" tabindex="-1"></a><span class="do">## INFO  [10:02:38.516] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-26"><a href="#cb18-26" tabindex="-1"></a><span class="do">## INFO  [10:02:38.516] [bbotk]                     3    0.7384143        0      0             1.34 4fbe9ec9-6916-45d7-8cb3-a3079b6a0586</span></span>
+<span id="cb18-27"><a href="#cb18-27" tabindex="-1"></a><span class="do">## INFO  [10:02:38.526] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-28"><a href="#cb18-28" tabindex="-1"></a><span class="do">## INFO  [10:02:40.595] [bbotk] Result of batch 3:</span></span>
+<span id="cb18-29"><a href="#cb18-29" tabindex="-1"></a><span class="do">## INFO  [10:02:40.602] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-30"><a href="#cb18-30" tabindex="-1"></a><span class="do">## INFO  [10:02:40.602] [bbotk]                     4    0.7223153        0      0             1.67 0045573b-eb73-44a8-93d3-3aa6c0795e16</span></span>
+<span id="cb18-31"><a href="#cb18-31" tabindex="-1"></a><span class="do">## INFO  [10:02:40.607] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-32"><a href="#cb18-32" tabindex="-1"></a><span class="do">## INFO  [10:02:42.633] [bbotk] Result of batch 4:</span></span>
+<span id="cb18-33"><a href="#cb18-33" tabindex="-1"></a><span class="do">## INFO  [10:02:42.638] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-34"><a href="#cb18-34" tabindex="-1"></a><span class="do">## INFO  [10:02:42.638] [bbotk]                     1    0.8002047        0      0             1.47 e0da79bd-3910-4b37-807d-2c5ab09c6a52</span></span>
+<span id="cb18-35"><a href="#cb18-35" tabindex="-1"></a><span class="do">## INFO  [10:02:42.645] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-36"><a href="#cb18-36" tabindex="-1"></a><span class="do">## INFO  [10:02:44.992] [bbotk] Result of batch 5:</span></span>
+<span id="cb18-37"><a href="#cb18-37" tabindex="-1"></a><span class="do">## INFO  [10:02:44.997] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-38"><a href="#cb18-38" tabindex="-1"></a><span class="do">## INFO  [10:02:44.997] [bbotk]                     2    0.7419505        0      0             1.81 6540706f-9b4f-411d-bc71-73a38969ce01</span></span>
+<span id="cb18-39"><a href="#cb18-39" tabindex="-1"></a><span class="do">## INFO  [10:02:45.001] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-40"><a href="#cb18-40" tabindex="-1"></a><span class="do">## INFO  [10:02:47.740] [bbotk] Result of batch 6:</span></span>
+<span id="cb18-41"><a href="#cb18-41" tabindex="-1"></a><span class="do">## INFO  [10:02:47.746] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-42"><a href="#cb18-42" tabindex="-1"></a><span class="do">## INFO  [10:02:47.746] [bbotk]                     6    0.6507538        0      0              2.2 99f33f86-be58-4082-a090-5e1942d503b7</span></span>
+<span id="cb18-43"><a href="#cb18-43" tabindex="-1"></a><span class="do">## INFO  [10:02:47.773] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
+<span id="cb18-44"><a href="#cb18-44" tabindex="-1"></a><span class="do">## INFO  [10:02:47.775] [bbotk] Result:</span></span>
+<span id="cb18-45"><a href="#cb18-45" tabindex="-1"></a><span class="do">## INFO  [10:02:47.780] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
+<span id="cb18-46"><a href="#cb18-46" tabindex="-1"></a><span class="do">## INFO  [10:02:47.780] [bbotk]                     1          &lt;list[5]&gt; &lt;list[1]&gt;    0.8002047</span></span>
+<span id="cb18-47"><a href="#cb18-47" tabindex="-1"></a><span class="do">## INFO  [10:02:35.064] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
+<span id="cb18-48"><a href="#cb18-48" tabindex="-1"></a><span class="do">## INFO  [10:02:35.158] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-49"><a href="#cb18-49" tabindex="-1"></a><span class="do">## INFO  [10:02:37.078] [bbotk] Result of batch 1:</span></span>
+<span id="cb18-50"><a href="#cb18-50" tabindex="-1"></a><span class="do">## INFO  [10:02:37.086] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-51"><a href="#cb18-51" tabindex="-1"></a><span class="do">## INFO  [10:02:37.086] [bbotk]                     2     0.797413        0      0             1.49 ae586b13-f441-49b1-a0ba-6f2620f62f68</span></span>
+<span id="cb18-52"><a href="#cb18-52" tabindex="-1"></a><span class="do">## INFO  [10:02:37.089] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-53"><a href="#cb18-53" tabindex="-1"></a><span class="do">## INFO  [10:02:38.817] [bbotk] Result of batch 2:</span></span>
+<span id="cb18-54"><a href="#cb18-54" tabindex="-1"></a><span class="do">## INFO  [10:02:38.821] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-55"><a href="#cb18-55" tabindex="-1"></a><span class="do">## INFO  [10:02:38.821] [bbotk]                     3    0.8300763        0      0             1.35 df11cf20-1150-41e8-a2d3-c1a7aa5f9a55</span></span>
+<span id="cb18-56"><a href="#cb18-56" tabindex="-1"></a><span class="do">## INFO  [10:02:38.825] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-57"><a href="#cb18-57" tabindex="-1"></a><span class="do">## INFO  [10:02:40.820] [bbotk] Result of batch 3:</span></span>
+<span id="cb18-58"><a href="#cb18-58" tabindex="-1"></a><span class="do">## INFO  [10:02:40.825] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-59"><a href="#cb18-59" tabindex="-1"></a><span class="do">## INFO  [10:02:40.825] [bbotk]                     4    0.8140704        0      0             1.53 3c097267-e325-4f1a-a254-5a67fa70f2f8</span></span>
+<span id="cb18-60"><a href="#cb18-60" tabindex="-1"></a><span class="do">## INFO  [10:02:40.829] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-61"><a href="#cb18-61" tabindex="-1"></a><span class="do">## INFO  [10:02:43.370] [bbotk] Result of batch 4:</span></span>
+<span id="cb18-62"><a href="#cb18-62" tabindex="-1"></a><span class="do">## INFO  [10:02:43.377] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-63"><a href="#cb18-63" tabindex="-1"></a><span class="do">## INFO  [10:02:43.377] [bbotk]                     5    0.7989019        0      0             1.97 debd57f0-39d3-4e33-b9a9-f1039364429f</span></span>
+<span id="cb18-64"><a href="#cb18-64" tabindex="-1"></a><span class="do">## INFO  [10:02:43.386] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-65"><a href="#cb18-65" tabindex="-1"></a><span class="do">## INFO  [10:02:45.982] [bbotk] Result of batch 5:</span></span>
+<span id="cb18-66"><a href="#cb18-66" tabindex="-1"></a><span class="do">## INFO  [10:02:45.989] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-67"><a href="#cb18-67" tabindex="-1"></a><span class="do">## INFO  [10:02:45.989] [bbotk]                     6    0.8014145        0      0             2.02 40f59f9f-1460-40aa-b393-a06b1d42fe55</span></span>
+<span id="cb18-68"><a href="#cb18-68" tabindex="-1"></a><span class="do">## INFO  [10:02:45.997] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-69"><a href="#cb18-69" tabindex="-1"></a><span class="do">## INFO  [10:02:47.863] [bbotk] Result of batch 6:</span></span>
+<span id="cb18-70"><a href="#cb18-70" tabindex="-1"></a><span class="do">## INFO  [10:02:47.868] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-71"><a href="#cb18-71" tabindex="-1"></a><span class="do">## INFO  [10:02:47.868] [bbotk]                     1    0.8355667        0      0             1.35 a580305c-5b06-4bbc-b7cb-95f6da77326f</span></span>
+<span id="cb18-72"><a href="#cb18-72" tabindex="-1"></a><span class="do">## INFO  [10:02:47.892] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
+<span id="cb18-73"><a href="#cb18-73" tabindex="-1"></a><span class="do">## INFO  [10:02:47.895] [bbotk] Result:</span></span>
+<span id="cb18-74"><a href="#cb18-74" tabindex="-1"></a><span class="do">## INFO  [10:02:47.900] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
+<span id="cb18-75"><a href="#cb18-75" tabindex="-1"></a><span class="do">## INFO  [10:02:47.900] [bbotk]                     1          &lt;list[5]&gt; &lt;list[1]&gt;    0.8355667</span></span>
+<span id="cb18-76"><a href="#cb18-76" tabindex="-1"></a><span class="do">## INFO  [10:02:35.349] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
+<span id="cb18-77"><a href="#cb18-77" tabindex="-1"></a><span class="do">## INFO  [10:02:35.455] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-78"><a href="#cb18-78" tabindex="-1"></a><span class="do">## INFO  [10:02:37.442] [bbotk] Result of batch 1:</span></span>
+<span id="cb18-79"><a href="#cb18-79" tabindex="-1"></a><span class="do">## INFO  [10:02:37.450] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-80"><a href="#cb18-80" tabindex="-1"></a><span class="do">## INFO  [10:02:37.450] [bbotk]                     4    0.7149497        0      0             1.53 a5355bc0-3e3f-473d-a398-8c8924869926</span></span>
+<span id="cb18-81"><a href="#cb18-81" tabindex="-1"></a><span class="do">## INFO  [10:02:37.454] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-82"><a href="#cb18-82" tabindex="-1"></a><span class="do">## INFO  [10:02:39.469] [bbotk] Result of batch 2:</span></span>
+<span id="cb18-83"><a href="#cb18-83" tabindex="-1"></a><span class="do">## INFO  [10:02:39.473] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-84"><a href="#cb18-84" tabindex="-1"></a><span class="do">## INFO  [10:02:39.473] [bbotk]                     6    0.6872897        0      0             1.63 888b4095-877e-4d88-9870-adf514186091</span></span>
+<span id="cb18-85"><a href="#cb18-85" tabindex="-1"></a><span class="do">## INFO  [10:02:39.477] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-86"><a href="#cb18-86" tabindex="-1"></a><span class="do">## INFO  [10:02:41.174] [bbotk] Result of batch 3:</span></span>
+<span id="cb18-87"><a href="#cb18-87" tabindex="-1"></a><span class="do">## INFO  [10:02:41.179] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-88"><a href="#cb18-88" tabindex="-1"></a><span class="do">## INFO  [10:02:41.179] [bbotk]                     1    0.7808063        0      0             1.18 5020900f-6a24-4900-b59a-f0972e355846</span></span>
+<span id="cb18-89"><a href="#cb18-89" tabindex="-1"></a><span class="do">## INFO  [10:02:41.187] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-90"><a href="#cb18-90" tabindex="-1"></a><span class="do">## INFO  [10:02:43.700] [bbotk] Result of batch 4:</span></span>
+<span id="cb18-91"><a href="#cb18-91" tabindex="-1"></a><span class="do">## INFO  [10:02:43.705] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-92"><a href="#cb18-92" tabindex="-1"></a><span class="do">## INFO  [10:02:43.705] [bbotk]                     5    0.6847813        0      0             1.95 60e60f3c-da69-4775-bea7-e7eb2e0d12a1</span></span>
+<span id="cb18-93"><a href="#cb18-93" tabindex="-1"></a><span class="do">## INFO  [10:02:43.710] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-94"><a href="#cb18-94" tabindex="-1"></a><span class="do">## INFO  [10:02:46.100] [bbotk] Result of batch 5:</span></span>
+<span id="cb18-95"><a href="#cb18-95" tabindex="-1"></a><span class="do">## INFO  [10:02:46.106] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-96"><a href="#cb18-96" tabindex="-1"></a><span class="do">## INFO  [10:02:46.106] [bbotk]                     3    0.7505393        0      0             1.86 2efb22be-ed1f-4187-aee6-f959ecc8898d</span></span>
+<span id="cb18-97"><a href="#cb18-97" tabindex="-1"></a><span class="do">## INFO  [10:02:46.110] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-98"><a href="#cb18-98" tabindex="-1"></a><span class="do">## INFO  [10:02:48.511] [bbotk] Result of batch 6:</span></span>
+<span id="cb18-99"><a href="#cb18-99" tabindex="-1"></a><span class="do">## INFO  [10:02:48.520] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-100"><a href="#cb18-100" tabindex="-1"></a><span class="do">## INFO  [10:02:48.520] [bbotk]                     2    0.7698325        0      0             1.87 9375e8aa-18a3-4d49-8765-3f5792b002f7</span></span>
+<span id="cb18-101"><a href="#cb18-101" tabindex="-1"></a><span class="do">## INFO  [10:02:48.551] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
+<span id="cb18-102"><a href="#cb18-102" tabindex="-1"></a><span class="do">## INFO  [10:02:48.553] [bbotk] Result:</span></span>
+<span id="cb18-103"><a href="#cb18-103" tabindex="-1"></a><span class="do">## INFO  [10:02:48.560] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
+<span id="cb18-104"><a href="#cb18-104" tabindex="-1"></a><span class="do">## INFO  [10:02:48.560] [bbotk]                     1          &lt;list[5]&gt; &lt;list[1]&gt;    0.7808063</span></span>
+<span id="cb18-105"><a href="#cb18-105" tabindex="-1"></a><span class="do">## INFO  [10:02:35.572] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
+<span id="cb18-106"><a href="#cb18-106" tabindex="-1"></a><span class="do">## INFO  [10:02:35.673] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-107"><a href="#cb18-107" tabindex="-1"></a><span class="do">## INFO  [10:02:37.721] [bbotk] Result of batch 1:</span></span>
+<span id="cb18-108"><a href="#cb18-108" tabindex="-1"></a><span class="do">## INFO  [10:02:37.732] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-109"><a href="#cb18-109" tabindex="-1"></a><span class="do">## INFO  [10:02:37.732] [bbotk]                     6    0.7635399        0      0             1.55 d392c807-731b-4761-9341-0da1fe9e5215</span></span>
+<span id="cb18-110"><a href="#cb18-110" tabindex="-1"></a><span class="do">## INFO  [10:02:37.736] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-111"><a href="#cb18-111" tabindex="-1"></a><span class="do">## INFO  [10:02:39.702] [bbotk] Result of batch 2:</span></span>
+<span id="cb18-112"><a href="#cb18-112" tabindex="-1"></a><span class="do">## INFO  [10:02:39.706] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-113"><a href="#cb18-113" tabindex="-1"></a><span class="do">## INFO  [10:02:39.706] [bbotk]                     5    0.7576773        0      0             1.57 9820ae11-2d01-4d4c-8940-2f02e739459b</span></span>
+<span id="cb18-114"><a href="#cb18-114" tabindex="-1"></a><span class="do">## INFO  [10:02:39.712] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-115"><a href="#cb18-115" tabindex="-1"></a><span class="do">## INFO  [10:02:41.963] [bbotk] Result of batch 3:</span></span>
+<span id="cb18-116"><a href="#cb18-116" tabindex="-1"></a><span class="do">## INFO  [10:02:41.967] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-117"><a href="#cb18-117" tabindex="-1"></a><span class="do">## INFO  [10:02:41.967] [bbotk]                     2    0.8243998        0      0             1.76 41af501a-7d4a-4342-93de-d5347752fd3e</span></span>
+<span id="cb18-118"><a href="#cb18-118" tabindex="-1"></a><span class="do">## INFO  [10:02:41.971] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-119"><a href="#cb18-119" tabindex="-1"></a><span class="do">## INFO  [10:02:44.317] [bbotk] Result of batch 4:</span></span>
+<span id="cb18-120"><a href="#cb18-120" tabindex="-1"></a><span class="do">## INFO  [10:02:44.324] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-121"><a href="#cb18-121" tabindex="-1"></a><span class="do">## INFO  [10:02:44.324] [bbotk]                     3    0.7493951        0      0             1.88 f9598813-7295-47e5-9cb2-3e9413ab8d47</span></span>
+<span id="cb18-122"><a href="#cb18-122" tabindex="-1"></a><span class="do">## INFO  [10:02:44.328] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-123"><a href="#cb18-123" tabindex="-1"></a><span class="do">## INFO  [10:02:46.233] [bbotk] Result of batch 5:</span></span>
+<span id="cb18-124"><a href="#cb18-124" tabindex="-1"></a><span class="do">## INFO  [10:02:46.238] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-125"><a href="#cb18-125" tabindex="-1"></a><span class="do">## INFO  [10:02:46.238] [bbotk]                     1    0.7649358        0      0             1.39 e7138433-9157-482f-aa83-d33152bc9704</span></span>
+<span id="cb18-126"><a href="#cb18-126" tabindex="-1"></a><span class="do">## INFO  [10:02:46.243] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-127"><a href="#cb18-127" tabindex="-1"></a><span class="do">## INFO  [10:02:48.830] [bbotk] Result of batch 6:</span></span>
+<span id="cb18-128"><a href="#cb18-128" tabindex="-1"></a><span class="do">## INFO  [10:02:48.835] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-129"><a href="#cb18-129" tabindex="-1"></a><span class="do">## INFO  [10:02:48.835] [bbotk]                     4    0.8158385        0      0             2.05 43e61a05-0fde-4322-bbf1-a29c96decfc5</span></span>
+<span id="cb18-130"><a href="#cb18-130" tabindex="-1"></a><span class="do">## INFO  [10:02:48.856] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
+<span id="cb18-131"><a href="#cb18-131" tabindex="-1"></a><span class="do">## INFO  [10:02:48.858] [bbotk] Result:</span></span>
+<span id="cb18-132"><a href="#cb18-132" tabindex="-1"></a><span class="do">## INFO  [10:02:48.863] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
+<span id="cb18-133"><a href="#cb18-133" tabindex="-1"></a><span class="do">## INFO  [10:02:48.863] [bbotk]                     2          &lt;list[5]&gt; &lt;list[1]&gt;    0.8243998</span></span>
+<span id="cb18-134"><a href="#cb18-134" tabindex="-1"></a><span class="do">## INFO  [10:02:35.923] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
+<span id="cb18-135"><a href="#cb18-135" tabindex="-1"></a><span class="do">## INFO  [10:02:36.034] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-136"><a href="#cb18-136" tabindex="-1"></a><span class="do">## INFO  [10:02:37.807] [bbotk] Result of batch 1:</span></span>
+<span id="cb18-137"><a href="#cb18-137" tabindex="-1"></a><span class="do">## INFO  [10:02:37.815] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-138"><a href="#cb18-138" tabindex="-1"></a><span class="do">## INFO  [10:02:37.815] [bbotk]                     2    0.7933184        0      0             1.33 887831d3-af50-4630-ad57-e3ed3e5b22dd</span></span>
+<span id="cb18-139"><a href="#cb18-139" tabindex="-1"></a><span class="do">## INFO  [10:02:37.818] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-140"><a href="#cb18-140" tabindex="-1"></a><span class="do">## INFO  [10:02:39.699] [bbotk] Result of batch 2:</span></span>
+<span id="cb18-141"><a href="#cb18-141" tabindex="-1"></a><span class="do">## INFO  [10:02:39.703] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-142"><a href="#cb18-142" tabindex="-1"></a><span class="do">## INFO  [10:02:39.703] [bbotk]                     4    0.7761958        0      0             1.49 ad7b017d-d637-4835-80b5-094bf80d6cf0</span></span>
+<span id="cb18-143"><a href="#cb18-143" tabindex="-1"></a><span class="do">## INFO  [10:02:39.706] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-144"><a href="#cb18-144" tabindex="-1"></a><span class="do">## INFO  [10:02:42.017] [bbotk] Result of batch 3:</span></span>
+<span id="cb18-145"><a href="#cb18-145" tabindex="-1"></a><span class="do">## INFO  [10:02:42.024] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-146"><a href="#cb18-146" tabindex="-1"></a><span class="do">## INFO  [10:02:42.024] [bbotk]                     3    0.7846641        0      0             1.87 55c0d465-7e93-4323-b79d-723734428183</span></span>
+<span id="cb18-147"><a href="#cb18-147" tabindex="-1"></a><span class="do">## INFO  [10:02:42.033] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-148"><a href="#cb18-148" tabindex="-1"></a><span class="do">## INFO  [10:02:43.970] [bbotk] Result of batch 4:</span></span>
+<span id="cb18-149"><a href="#cb18-149" tabindex="-1"></a><span class="do">## INFO  [10:02:43.979] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-150"><a href="#cb18-150" tabindex="-1"></a><span class="do">## INFO  [10:02:43.979] [bbotk]                     1    0.7741485        0      0             1.41 747ef688-6c67-4440-9b52-1d88bf78d463</span></span>
+<span id="cb18-151"><a href="#cb18-151" tabindex="-1"></a><span class="do">## INFO  [10:02:43.983] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-152"><a href="#cb18-152" tabindex="-1"></a><span class="do">## INFO  [10:02:46.464] [bbotk] Result of batch 5:</span></span>
+<span id="cb18-153"><a href="#cb18-153" tabindex="-1"></a><span class="do">## INFO  [10:02:46.469] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-154"><a href="#cb18-154" tabindex="-1"></a><span class="do">## INFO  [10:02:46.469] [bbotk]                     5    0.7466964        0      0             1.91 fb176c78-a679-4a4b-8b6a-9aa2cd33daa1</span></span>
+<span id="cb18-155"><a href="#cb18-155" tabindex="-1"></a><span class="do">## INFO  [10:02:46.476] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-156"><a href="#cb18-156" tabindex="-1"></a><span class="do">## INFO  [10:02:49.050] [bbotk] Result of batch 6:</span></span>
+<span id="cb18-157"><a href="#cb18-157" tabindex="-1"></a><span class="do">## INFO  [10:02:49.057] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-158"><a href="#cb18-158" tabindex="-1"></a><span class="do">## INFO  [10:02:49.057] [bbotk]                     6    0.7348781        0      0             2.13 61065099-b3d8-44e5-8f1b-a7e4ca36d601</span></span>
+<span id="cb18-159"><a href="#cb18-159" tabindex="-1"></a><span class="do">## INFO  [10:02:49.090] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
+<span id="cb18-160"><a href="#cb18-160" tabindex="-1"></a><span class="do">## INFO  [10:02:49.094] [bbotk] Result:</span></span>
+<span id="cb18-161"><a href="#cb18-161" tabindex="-1"></a><span class="do">## INFO  [10:02:49.098] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
+<span id="cb18-162"><a href="#cb18-162" tabindex="-1"></a><span class="do">## INFO  [10:02:49.098] [bbotk]                     2          &lt;list[5]&gt; &lt;list[1]&gt;    0.7933184</span></span>
+<span id="cb18-163"><a href="#cb18-163" tabindex="-1"></a><span class="do">## INFO  [10:02:36.092] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
+<span id="cb18-164"><a href="#cb18-164" tabindex="-1"></a><span class="do">## INFO  [10:02:36.202] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-165"><a href="#cb18-165" tabindex="-1"></a><span class="do">## INFO  [10:02:38.111] [bbotk] Result of batch 1:</span></span>
+<span id="cb18-166"><a href="#cb18-166" tabindex="-1"></a><span class="do">## INFO  [10:02:38.120] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-167"><a href="#cb18-167" tabindex="-1"></a><span class="do">## INFO  [10:02:38.120] [bbotk]                     4    0.7823111        0      0             1.45 c254aa76-9d93-4128-847c-721efeb307fe</span></span>
+<span id="cb18-168"><a href="#cb18-168" tabindex="-1"></a><span class="do">## INFO  [10:02:38.124] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-169"><a href="#cb18-169" tabindex="-1"></a><span class="do">## INFO  [10:02:40.156] [bbotk] Result of batch 2:</span></span>
+<span id="cb18-170"><a href="#cb18-170" tabindex="-1"></a><span class="do">## INFO  [10:02:40.161] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-171"><a href="#cb18-171" tabindex="-1"></a><span class="do">## INFO  [10:02:40.161] [bbotk]                     6     0.738485        0      0             1.62 6ea05f13-dd7e-45da-be92-6fe2f628d89c</span></span>
+<span id="cb18-172"><a href="#cb18-172" tabindex="-1"></a><span class="do">## INFO  [10:02:40.165] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-173"><a href="#cb18-173" tabindex="-1"></a><span class="do">## INFO  [10:02:42.319] [bbotk] Result of batch 3:</span></span>
+<span id="cb18-174"><a href="#cb18-174" tabindex="-1"></a><span class="do">## INFO  [10:02:42.325] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-175"><a href="#cb18-175" tabindex="-1"></a><span class="do">## INFO  [10:02:42.325] [bbotk]                     2    0.7891974        0      0             1.71 8bfc34f4-7eb1-4a9f-8b2c-d1196f46c870</span></span>
+<span id="cb18-176"><a href="#cb18-176" tabindex="-1"></a><span class="do">## INFO  [10:02:42.330] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-177"><a href="#cb18-177" tabindex="-1"></a><span class="do">## INFO  [10:02:44.305] [bbotk] Result of batch 4:</span></span>
+<span id="cb18-178"><a href="#cb18-178" tabindex="-1"></a><span class="do">## INFO  [10:02:44.311] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-179"><a href="#cb18-179" tabindex="-1"></a><span class="do">## INFO  [10:02:44.311] [bbotk]                     1    0.7847366        0      0             1.51 1f50be91-48b5-43e2-b702-5f372f44b7b4</span></span>
+<span id="cb18-180"><a href="#cb18-180" tabindex="-1"></a><span class="do">## INFO  [10:02:44.315] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-181"><a href="#cb18-181" tabindex="-1"></a><span class="do">## INFO  [10:02:46.660] [bbotk] Result of batch 5:</span></span>
+<span id="cb18-182"><a href="#cb18-182" tabindex="-1"></a><span class="do">## INFO  [10:02:46.666] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-183"><a href="#cb18-183" tabindex="-1"></a><span class="do">## INFO  [10:02:46.666] [bbotk]                     3    0.8242434        0      0             1.84 08c56851-4eea-4a66-98a3-5855ba267339</span></span>
+<span id="cb18-184"><a href="#cb18-184" tabindex="-1"></a><span class="do">## INFO  [10:02:46.670] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-185"><a href="#cb18-185" tabindex="-1"></a><span class="do">## INFO  [10:02:49.262] [bbotk] Result of batch 6:</span></span>
+<span id="cb18-186"><a href="#cb18-186" tabindex="-1"></a><span class="do">## INFO  [10:02:49.270] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-187"><a href="#cb18-187" tabindex="-1"></a><span class="do">## INFO  [10:02:49.270] [bbotk]                     5    0.7721594        0      0             2.08 2937581b-ba44-4cd8-9752-9926a561852a</span></span>
+<span id="cb18-188"><a href="#cb18-188" tabindex="-1"></a><span class="do">## INFO  [10:02:49.297] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
+<span id="cb18-189"><a href="#cb18-189" tabindex="-1"></a><span class="do">## INFO  [10:02:49.299] [bbotk] Result:</span></span>
+<span id="cb18-190"><a href="#cb18-190" tabindex="-1"></a><span class="do">## INFO  [10:02:49.302] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
+<span id="cb18-191"><a href="#cb18-191" tabindex="-1"></a><span class="do">## INFO  [10:02:49.302] [bbotk]                     3          &lt;list[5]&gt; &lt;list[1]&gt;    0.8242434</span></span>
+<span id="cb18-192"><a href="#cb18-192" tabindex="-1"></a><span class="do">## INFO  [10:02:36.345] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
+<span id="cb18-193"><a href="#cb18-193" tabindex="-1"></a><span class="do">## INFO  [10:02:36.482] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-194"><a href="#cb18-194" tabindex="-1"></a><span class="do">## INFO  [10:02:38.409] [bbotk] Result of batch 1:</span></span>
+<span id="cb18-195"><a href="#cb18-195" tabindex="-1"></a><span class="do">## INFO  [10:02:38.417] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-196"><a href="#cb18-196" tabindex="-1"></a><span class="do">## INFO  [10:02:38.417] [bbotk]                     5    0.7441839        0      0             1.46 843fdd35-f4d0-4629-9008-73714b282b6f</span></span>
+<span id="cb18-197"><a href="#cb18-197" tabindex="-1"></a><span class="do">## INFO  [10:02:38.422] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-198"><a href="#cb18-198" tabindex="-1"></a><span class="do">## INFO  [10:02:40.269] [bbotk] Result of batch 2:</span></span>
+<span id="cb18-199"><a href="#cb18-199" tabindex="-1"></a><span class="do">## INFO  [10:02:40.275] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-200"><a href="#cb18-200" tabindex="-1"></a><span class="do">## INFO  [10:02:40.275] [bbotk]                     2    0.7864322        0      0             1.45 89f11e3a-480f-46b7-ae73-28bec325f056</span></span>
+<span id="cb18-201"><a href="#cb18-201" tabindex="-1"></a><span class="do">## INFO  [10:02:40.280] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-202"><a href="#cb18-202" tabindex="-1"></a><span class="do">## INFO  [10:02:42.757] [bbotk] Result of batch 3:</span></span>
+<span id="cb18-203"><a href="#cb18-203" tabindex="-1"></a><span class="do">## INFO  [10:02:42.764] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-204"><a href="#cb18-204" tabindex="-1"></a><span class="do">## INFO  [10:02:42.764] [bbotk]                     6    0.7306905        0      0             2.01 32fa32e4-44e8-451a-820d-cc780218cdeb</span></span>
+<span id="cb18-205"><a href="#cb18-205" tabindex="-1"></a><span class="do">## INFO  [10:02:42.769] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-206"><a href="#cb18-206" tabindex="-1"></a><span class="do">## INFO  [10:02:45.190] [bbotk] Result of batch 4:</span></span>
+<span id="cb18-207"><a href="#cb18-207" tabindex="-1"></a><span class="do">## INFO  [10:02:45.195] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-208"><a href="#cb18-208" tabindex="-1"></a><span class="do">## INFO  [10:02:45.195] [bbotk]                     4    0.7214778        0      0             1.96 aec8d508-0d78-4dc1-81e9-2860c81a6bcf</span></span>
+<span id="cb18-209"><a href="#cb18-209" tabindex="-1"></a><span class="do">## INFO  [10:02:45.199] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-210"><a href="#cb18-210" tabindex="-1"></a><span class="do">## INFO  [10:02:47.133] [bbotk] Result of batch 5:</span></span>
+<span id="cb18-211"><a href="#cb18-211" tabindex="-1"></a><span class="do">## INFO  [10:02:47.139] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-212"><a href="#cb18-212" tabindex="-1"></a><span class="do">## INFO  [10:02:47.139] [bbotk]                     1    0.7473479        0      0             1.39 c7d38287-16df-47a7-8367-35dea440ca04</span></span>
+<span id="cb18-213"><a href="#cb18-213" tabindex="-1"></a><span class="do">## INFO  [10:02:47.144] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-214"><a href="#cb18-214" tabindex="-1"></a><span class="do">## INFO  [10:02:49.808] [bbotk] Result of batch 6:</span></span>
+<span id="cb18-215"><a href="#cb18-215" tabindex="-1"></a><span class="do">## INFO  [10:02:49.813] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-216"><a href="#cb18-216" tabindex="-1"></a><span class="do">## INFO  [10:02:49.813] [bbotk]                     3    0.7173832        0      0             2.06 416c08a4-4c8c-4724-bdec-303281242a32</span></span>
+<span id="cb18-217"><a href="#cb18-217" tabindex="-1"></a><span class="do">## INFO  [10:02:49.837] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
+<span id="cb18-218"><a href="#cb18-218" tabindex="-1"></a><span class="do">## INFO  [10:02:49.839] [bbotk] Result:</span></span>
+<span id="cb18-219"><a href="#cb18-219" tabindex="-1"></a><span class="do">## INFO  [10:02:49.843] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
+<span id="cb18-220"><a href="#cb18-220" tabindex="-1"></a><span class="do">## INFO  [10:02:49.843] [bbotk]                     2          &lt;list[5]&gt; &lt;list[1]&gt;    0.7864322</span></span>
+<span id="cb18-221"><a href="#cb18-221" tabindex="-1"></a><span class="do">## INFO  [10:02:36.692] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
+<span id="cb18-222"><a href="#cb18-222" tabindex="-1"></a><span class="do">## INFO  [10:02:36.801] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-223"><a href="#cb18-223" tabindex="-1"></a><span class="do">## INFO  [10:02:38.662] [bbotk] Result of batch 1:</span></span>
+<span id="cb18-224"><a href="#cb18-224" tabindex="-1"></a><span class="do">## INFO  [10:02:38.670] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-225"><a href="#cb18-225" tabindex="-1"></a><span class="do">## INFO  [10:02:38.670] [bbotk]                     3    0.7560953        0      0             1.36 84d62e0e-7829-4309-840e-a539a79b51b4</span></span>
+<span id="cb18-226"><a href="#cb18-226" tabindex="-1"></a><span class="do">## INFO  [10:02:38.674] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-227"><a href="#cb18-227" tabindex="-1"></a><span class="do">## INFO  [10:02:40.436] [bbotk] Result of batch 2:</span></span>
+<span id="cb18-228"><a href="#cb18-228" tabindex="-1"></a><span class="do">## INFO  [10:02:40.441] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-229"><a href="#cb18-229" tabindex="-1"></a><span class="do">## INFO  [10:02:40.441] [bbotk]                     2     0.815187        0      0             1.37 699a6a8e-653f-4262-ae23-634673634254</span></span>
+<span id="cb18-230"><a href="#cb18-230" tabindex="-1"></a><span class="do">## INFO  [10:02:40.444] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-231"><a href="#cb18-231" tabindex="-1"></a><span class="do">## INFO  [10:02:43.101] [bbotk] Result of batch 3:</span></span>
+<span id="cb18-232"><a href="#cb18-232" tabindex="-1"></a><span class="do">## INFO  [10:02:43.106] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-233"><a href="#cb18-233" tabindex="-1"></a><span class="do">## INFO  [10:02:43.106] [bbotk]                     6    0.6549414        0      0             2.15 75c87892-df4b-4aa5-bee2-9b283b8b7e83</span></span>
+<span id="cb18-234"><a href="#cb18-234" tabindex="-1"></a><span class="do">## INFO  [10:02:43.111] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-235"><a href="#cb18-235" tabindex="-1"></a><span class="do">## INFO  [10:02:45.001] [bbotk] Result of batch 4:</span></span>
+<span id="cb18-236"><a href="#cb18-236" tabindex="-1"></a><span class="do">## INFO  [10:02:45.007] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-237"><a href="#cb18-237" tabindex="-1"></a><span class="do">## INFO  [10:02:45.007] [bbotk]                     1    0.7237111        0      0             1.42 be2faca6-4508-4884-a003-74799e8b3c89</span></span>
+<span id="cb18-238"><a href="#cb18-238" tabindex="-1"></a><span class="do">## INFO  [10:02:45.012] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-239"><a href="#cb18-239" tabindex="-1"></a><span class="do">## INFO  [10:02:47.495] [bbotk] Result of batch 5:</span></span>
+<span id="cb18-240"><a href="#cb18-240" tabindex="-1"></a><span class="do">## INFO  [10:02:47.500] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-241"><a href="#cb18-241" tabindex="-1"></a><span class="do">## INFO  [10:02:47.500] [bbotk]                     4     0.676903        0      0             1.91 8eedb6b2-403a-4f21-8671-0add1abc741c</span></span>
+<span id="cb18-242"><a href="#cb18-242" tabindex="-1"></a><span class="do">## INFO  [10:02:47.504] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-243"><a href="#cb18-243" tabindex="-1"></a><span class="do">## INFO  [10:02:50.461] [bbotk] Result of batch 6:</span></span>
+<span id="cb18-244"><a href="#cb18-244" tabindex="-1"></a><span class="do">## INFO  [10:02:50.467] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-245"><a href="#cb18-245" tabindex="-1"></a><span class="do">## INFO  [10:02:50.467] [bbotk]                     5    0.6877908        0      0             2.32 45aae573-d46f-406d-959c-37eaad04a01f</span></span>
+<span id="cb18-246"><a href="#cb18-246" tabindex="-1"></a><span class="do">## INFO  [10:02:50.491] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
+<span id="cb18-247"><a href="#cb18-247" tabindex="-1"></a><span class="do">## INFO  [10:02:50.493] [bbotk] Result:</span></span>
+<span id="cb18-248"><a href="#cb18-248" tabindex="-1"></a><span class="do">## INFO  [10:02:50.497] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
+<span id="cb18-249"><a href="#cb18-249" tabindex="-1"></a><span class="do">## INFO  [10:02:50.497] [bbotk]                     2          &lt;list[5]&gt; &lt;list[1]&gt;     0.815187</span></span>
+<span id="cb18-250"><a href="#cb18-250" tabindex="-1"></a><span class="do">## INFO  [10:02:49.535] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
+<span id="cb18-251"><a href="#cb18-251" tabindex="-1"></a><span class="do">## INFO  [10:02:49.547] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-252"><a href="#cb18-252" tabindex="-1"></a><span class="do">## INFO  [10:02:51.993] [bbotk] Result of batch 1:</span></span>
+<span id="cb18-253"><a href="#cb18-253" tabindex="-1"></a><span class="do">## INFO  [10:02:51.998] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-254"><a href="#cb18-254" tabindex="-1"></a><span class="do">## INFO  [10:02:51.998] [bbotk]                     4    0.8188219        0      0             1.94 39d15bc4-e4d1-4ace-a3fc-5b498cec52da</span></span>
+<span id="cb18-255"><a href="#cb18-255" tabindex="-1"></a><span class="do">## INFO  [10:02:52.002] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-256"><a href="#cb18-256" tabindex="-1"></a><span class="do">## INFO  [10:02:54.134] [bbotk] Result of batch 2:</span></span>
+<span id="cb18-257"><a href="#cb18-257" tabindex="-1"></a><span class="do">## INFO  [10:02:54.139] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-258"><a href="#cb18-258" tabindex="-1"></a><span class="do">## INFO  [10:02:54.139] [bbotk]                     5    0.8255053        0      0             1.74 2e1943b4-d580-4135-a690-7aef6872215f</span></span>
+<span id="cb18-259"><a href="#cb18-259" tabindex="-1"></a><span class="do">## INFO  [10:02:54.143] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-260"><a href="#cb18-260" tabindex="-1"></a><span class="do">## INFO  [10:02:56.235] [bbotk] Result of batch 3:</span></span>
+<span id="cb18-261"><a href="#cb18-261" tabindex="-1"></a><span class="do">## INFO  [10:02:56.241] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-262"><a href="#cb18-262" tabindex="-1"></a><span class="do">## INFO  [10:02:56.241] [bbotk]                     3    0.8256235        0      0             1.69 f6aa082d-13c3-48eb-afdd-a5550344ef28</span></span>
+<span id="cb18-263"><a href="#cb18-263" tabindex="-1"></a><span class="do">## INFO  [10:02:56.245] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-264"><a href="#cb18-264" tabindex="-1"></a><span class="do">## INFO  [10:02:58.051] [bbotk] Result of batch 4:</span></span>
+<span id="cb18-265"><a href="#cb18-265" tabindex="-1"></a><span class="do">## INFO  [10:02:58.057] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-266"><a href="#cb18-266" tabindex="-1"></a><span class="do">## INFO  [10:02:58.057] [bbotk]                     2    0.8137674        0      0              1.4 36e3f6d6-8484-4391-ac54-112f2c73fc02</span></span>
+<span id="cb18-267"><a href="#cb18-267" tabindex="-1"></a><span class="do">## INFO  [10:02:58.061] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-268"><a href="#cb18-268" tabindex="-1"></a><span class="do">## INFO  [10:02:59.810] [bbotk] Result of batch 5:</span></span>
+<span id="cb18-269"><a href="#cb18-269" tabindex="-1"></a><span class="do">## INFO  [10:02:59.816] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-270"><a href="#cb18-270" tabindex="-1"></a><span class="do">## INFO  [10:02:59.816] [bbotk]                     1    0.7869082        0      0             1.26 fe05d5fd-d960-4e99-b96a-29c858a85da6</span></span>
+<span id="cb18-271"><a href="#cb18-271" tabindex="-1"></a><span class="do">## INFO  [10:02:59.820] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-272"><a href="#cb18-272" tabindex="-1"></a><span class="do">## INFO  [10:03:02.310] [bbotk] Result of batch 6:</span></span>
+<span id="cb18-273"><a href="#cb18-273" tabindex="-1"></a><span class="do">## INFO  [10:03:02.315] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-274"><a href="#cb18-274" tabindex="-1"></a><span class="do">## INFO  [10:03:02.315] [bbotk]                     6    0.7391248        0      0             2.05 696cbc43-56a5-4f21-a480-dee1ddb170ed</span></span>
+<span id="cb18-275"><a href="#cb18-275" tabindex="-1"></a><span class="do">## INFO  [10:03:02.334] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
+<span id="cb18-276"><a href="#cb18-276" tabindex="-1"></a><span class="do">## INFO  [10:03:02.337] [bbotk] Result:</span></span>
+<span id="cb18-277"><a href="#cb18-277" tabindex="-1"></a><span class="do">## INFO  [10:03:02.340] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
+<span id="cb18-278"><a href="#cb18-278" tabindex="-1"></a><span class="do">## INFO  [10:03:02.340] [bbotk]                     3          &lt;list[5]&gt; &lt;list[1]&gt;    0.8256235</span></span>
+<span id="cb18-279"><a href="#cb18-279" tabindex="-1"></a><span class="do">## INFO  [10:02:49.861] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
+<span id="cb18-280"><a href="#cb18-280" tabindex="-1"></a><span class="do">## INFO  [10:02:49.869] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-281"><a href="#cb18-281" tabindex="-1"></a><span class="do">## INFO  [10:02:52.211] [bbotk] Result of batch 1:</span></span>
+<span id="cb18-282"><a href="#cb18-282" tabindex="-1"></a><span class="do">## INFO  [10:02:52.215] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-283"><a href="#cb18-283" tabindex="-1"></a><span class="do">## INFO  [10:02:52.215] [bbotk]                     6    0.7483715        0      0             1.91 99f6814f-97c1-4b75-94e6-b8acb4e4f258</span></span>
+<span id="cb18-284"><a href="#cb18-284" tabindex="-1"></a><span class="do">## INFO  [10:02:52.219] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-285"><a href="#cb18-285" tabindex="-1"></a><span class="do">## INFO  [10:02:54.316] [bbotk] Result of batch 2:</span></span>
+<span id="cb18-286"><a href="#cb18-286" tabindex="-1"></a><span class="do">## INFO  [10:02:54.324] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-287"><a href="#cb18-287" tabindex="-1"></a><span class="do">## INFO  [10:02:54.324] [bbotk]                     5    0.7290154        0      0             1.68 c06c504b-050e-4820-9097-165a7eb53e73</span></span>
+<span id="cb18-288"><a href="#cb18-288" tabindex="-1"></a><span class="do">## INFO  [10:02:54.328] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-289"><a href="#cb18-289" tabindex="-1"></a><span class="do">## INFO  [10:02:56.400] [bbotk] Result of batch 3:</span></span>
+<span id="cb18-290"><a href="#cb18-290" tabindex="-1"></a><span class="do">## INFO  [10:02:56.405] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-291"><a href="#cb18-291" tabindex="-1"></a><span class="do">## INFO  [10:02:56.405] [bbotk]                     2    0.7839196        0      0             1.65 27c95300-cc46-4074-9281-22932bde1735</span></span>
+<span id="cb18-292"><a href="#cb18-292" tabindex="-1"></a><span class="do">## INFO  [10:02:56.410] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-293"><a href="#cb18-293" tabindex="-1"></a><span class="do">## INFO  [10:02:58.321] [bbotk] Result of batch 4:</span></span>
+<span id="cb18-294"><a href="#cb18-294" tabindex="-1"></a><span class="do">## INFO  [10:02:58.326] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-295"><a href="#cb18-295" tabindex="-1"></a><span class="do">## INFO  [10:02:58.326] [bbotk]                     3    0.7509771        0      0              1.5 bdd5c428-627a-4847-b127-d4ba69087e0a</span></span>
+<span id="cb18-296"><a href="#cb18-296" tabindex="-1"></a><span class="do">## INFO  [10:02:58.330] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-297"><a href="#cb18-297" tabindex="-1"></a><span class="do">## INFO  [10:03:00.876] [bbotk] Result of batch 5:</span></span>
+<span id="cb18-298"><a href="#cb18-298" tabindex="-1"></a><span class="do">## INFO  [10:03:00.881] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-299"><a href="#cb18-299" tabindex="-1"></a><span class="do">## INFO  [10:03:00.881] [bbotk]                     4    0.7728457        0      0             2.07 5565b3ea-1198-4b9e-9986-6a6e212e0817</span></span>
+<span id="cb18-300"><a href="#cb18-300" tabindex="-1"></a><span class="do">## INFO  [10:03:00.885] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-301"><a href="#cb18-301" tabindex="-1"></a><span class="do">## INFO  [10:03:02.618] [bbotk] Result of batch 6:</span></span>
+<span id="cb18-302"><a href="#cb18-302" tabindex="-1"></a><span class="do">## INFO  [10:03:02.624] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-303"><a href="#cb18-303" tabindex="-1"></a><span class="do">## INFO  [10:03:02.624] [bbotk]                     1    0.7790806        0      0             1.27 b7ca80f3-24dc-4eb2-83e7-7f8e68334539</span></span>
+<span id="cb18-304"><a href="#cb18-304" tabindex="-1"></a><span class="do">## INFO  [10:03:02.641] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
+<span id="cb18-305"><a href="#cb18-305" tabindex="-1"></a><span class="do">## INFO  [10:03:02.643] [bbotk] Result:</span></span>
+<span id="cb18-306"><a href="#cb18-306" tabindex="-1"></a><span class="do">## INFO  [10:03:02.646] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
+<span id="cb18-307"><a href="#cb18-307" tabindex="-1"></a><span class="do">## INFO  [10:03:02.646] [bbotk]                     2          &lt;list[5]&gt; &lt;list[1]&gt;    0.7839196</span></span>
+<span id="cb18-308"><a href="#cb18-308" tabindex="-1"></a><span class="do">## INFO  [10:02:50.207] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
+<span id="cb18-309"><a href="#cb18-309" tabindex="-1"></a><span class="do">## INFO  [10:02:50.214] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-310"><a href="#cb18-310" tabindex="-1"></a><span class="do">## INFO  [10:02:52.091] [bbotk] Result of batch 1:</span></span>
+<span id="cb18-311"><a href="#cb18-311" tabindex="-1"></a><span class="do">## INFO  [10:02:52.095] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-312"><a href="#cb18-312" tabindex="-1"></a><span class="do">## INFO  [10:02:52.095] [bbotk]                     1    0.7389726        0      0             1.38 154b65a8-db0d-4271-b3fc-1f95552f53fa</span></span>
+<span id="cb18-313"><a href="#cb18-313" tabindex="-1"></a><span class="do">## INFO  [10:02:52.099] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-314"><a href="#cb18-314" tabindex="-1"></a><span class="do">## INFO  [10:02:54.231] [bbotk] Result of batch 2:</span></span>
+<span id="cb18-315"><a href="#cb18-315" tabindex="-1"></a><span class="do">## INFO  [10:02:54.236] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-316"><a href="#cb18-316" tabindex="-1"></a><span class="do">## INFO  [10:02:54.236] [bbotk]                     5    0.6701098        0      0             1.72 a46f0fda-1e46-44de-b2c9-170efc64c884</span></span>
+<span id="cb18-317"><a href="#cb18-317" tabindex="-1"></a><span class="do">## INFO  [10:02:54.242] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-318"><a href="#cb18-318" tabindex="-1"></a><span class="do">## INFO  [10:02:56.403] [bbotk] Result of batch 3:</span></span>
+<span id="cb18-319"><a href="#cb18-319" tabindex="-1"></a><span class="do">## INFO  [10:02:56.408] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-320"><a href="#cb18-320" tabindex="-1"></a><span class="do">## INFO  [10:02:56.408] [bbotk]                     4    0.6448911        0      0             1.73 d1d2d5f7-0bbd-4fa0-9d52-51407d3e78ac</span></span>
+<span id="cb18-321"><a href="#cb18-321" tabindex="-1"></a><span class="do">## INFO  [10:02:56.412] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-322"><a href="#cb18-322" tabindex="-1"></a><span class="do">## INFO  [10:02:58.500] [bbotk] Result of batch 4:</span></span>
+<span id="cb18-323"><a href="#cb18-323" tabindex="-1"></a><span class="do">## INFO  [10:02:58.508] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-324"><a href="#cb18-324" tabindex="-1"></a><span class="do">## INFO  [10:02:58.508] [bbotk]                     6    0.6010609        0      0             1.67 78f8afc1-5018-4db7-9e2a-3ccf690d4ed3</span></span>
+<span id="cb18-325"><a href="#cb18-325" tabindex="-1"></a><span class="do">## INFO  [10:02:58.513] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-326"><a href="#cb18-326" tabindex="-1"></a><span class="do">## INFO  [10:03:00.898] [bbotk] Result of batch 5:</span></span>
+<span id="cb18-327"><a href="#cb18-327" tabindex="-1"></a><span class="do">## INFO  [10:03:00.906] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-328"><a href="#cb18-328" tabindex="-1"></a><span class="do">## INFO  [10:03:00.906] [bbotk]                     3    0.6718779        0      0             1.87 7dc1f2a3-7b8c-4930-8a98-383b750631f7</span></span>
+<span id="cb18-329"><a href="#cb18-329" tabindex="-1"></a><span class="do">## INFO  [10:03:00.911] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-330"><a href="#cb18-330" tabindex="-1"></a><span class="do">## INFO  [10:03:02.948] [bbotk] Result of batch 6:</span></span>
+<span id="cb18-331"><a href="#cb18-331" tabindex="-1"></a><span class="do">## INFO  [10:03:02.953] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-332"><a href="#cb18-332" tabindex="-1"></a><span class="do">## INFO  [10:03:02.953] [bbotk]                     2    0.7242695        0      0             1.59 8f298898-cde5-4057-b1c4-a5a56cda49a9</span></span>
+<span id="cb18-333"><a href="#cb18-333" tabindex="-1"></a><span class="do">## INFO  [10:03:02.972] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
+<span id="cb18-334"><a href="#cb18-334" tabindex="-1"></a><span class="do">## INFO  [10:03:02.974] [bbotk] Result:</span></span>
+<span id="cb18-335"><a href="#cb18-335" tabindex="-1"></a><span class="do">## INFO  [10:03:02.978] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
+<span id="cb18-336"><a href="#cb18-336" tabindex="-1"></a><span class="do">## INFO  [10:03:02.978] [bbotk]                     1          &lt;list[5]&gt; &lt;list[1]&gt;    0.7389726</span></span>
+<span id="cb18-337"><a href="#cb18-337" tabindex="-1"></a><span class="do">## INFO  [10:02:50.560] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
+<span id="cb18-338"><a href="#cb18-338" tabindex="-1"></a><span class="do">## INFO  [10:02:50.567] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-339"><a href="#cb18-339" tabindex="-1"></a><span class="do">## INFO  [10:02:52.866] [bbotk] Result of batch 1:</span></span>
+<span id="cb18-340"><a href="#cb18-340" tabindex="-1"></a><span class="do">## INFO  [10:02:52.875] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-341"><a href="#cb18-341" tabindex="-1"></a><span class="do">## INFO  [10:02:52.875] [bbotk]                     5    0.7938512        0      0             1.85 a72af05a-c1d2-4f85-93d4-58e61a8154a2</span></span>
+<span id="cb18-342"><a href="#cb18-342" tabindex="-1"></a><span class="do">## INFO  [10:02:52.881] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-343"><a href="#cb18-343" tabindex="-1"></a><span class="do">## INFO  [10:02:54.971] [bbotk] Result of batch 2:</span></span>
+<span id="cb18-344"><a href="#cb18-344" tabindex="-1"></a><span class="do">## INFO  [10:02:54.980] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-345"><a href="#cb18-345" tabindex="-1"></a><span class="do">## INFO  [10:02:54.980] [bbotk]                     3    0.7929509        0      0             1.58 98c8cb05-5a51-48d2-bf9c-8a7efa76bce5</span></span>
+<span id="cb18-346"><a href="#cb18-346" tabindex="-1"></a><span class="do">## INFO  [10:02:54.986] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-347"><a href="#cb18-347" tabindex="-1"></a><span class="do">## INFO  [10:02:56.893] [bbotk] Result of batch 3:</span></span>
+<span id="cb18-348"><a href="#cb18-348" tabindex="-1"></a><span class="do">## INFO  [10:02:56.898] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-349"><a href="#cb18-349" tabindex="-1"></a><span class="do">## INFO  [10:02:56.898] [bbotk]                     2    0.8374544        0      0             1.45 28c4c0cf-eb74-4fb5-8dec-f1dafa0fe775</span></span>
+<span id="cb18-350"><a href="#cb18-350" tabindex="-1"></a><span class="do">## INFO  [10:02:56.902] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-351"><a href="#cb18-351" tabindex="-1"></a><span class="do">## INFO  [10:02:59.213] [bbotk] Result of batch 4:</span></span>
+<span id="cb18-352"><a href="#cb18-352" tabindex="-1"></a><span class="do">## INFO  [10:02:59.217] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-353"><a href="#cb18-353" tabindex="-1"></a><span class="do">## INFO  [10:02:59.217] [bbotk]                     6    0.7224707        0      0             1.88 b8aa58b6-b519-44c1-8e95-02b8f3cfba1f</span></span>
+<span id="cb18-354"><a href="#cb18-354" tabindex="-1"></a><span class="do">## INFO  [10:02:59.223] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-355"><a href="#cb18-355" tabindex="-1"></a><span class="do">## INFO  [10:03:01.055] [bbotk] Result of batch 5:</span></span>
+<span id="cb18-356"><a href="#cb18-356" tabindex="-1"></a><span class="do">## INFO  [10:03:01.063] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-357"><a href="#cb18-357" tabindex="-1"></a><span class="do">## INFO  [10:03:01.063] [bbotk]                     1    0.7513363        0      0             1.36 46b5f085-04ed-4bce-a9e2-a0e0f5025edd</span></span>
+<span id="cb18-358"><a href="#cb18-358" tabindex="-1"></a><span class="do">## INFO  [10:03:01.067] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-359"><a href="#cb18-359" tabindex="-1"></a><span class="do">## INFO  [10:03:03.199] [bbotk] Result of batch 6:</span></span>
+<span id="cb18-360"><a href="#cb18-360" tabindex="-1"></a><span class="do">## INFO  [10:03:03.205] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-361"><a href="#cb18-361" tabindex="-1"></a><span class="do">## INFO  [10:03:03.205] [bbotk]                     4    0.7676307        0      0             1.67 9fce1b47-73bb-4796-8732-f6f4bdaa241c</span></span>
+<span id="cb18-362"><a href="#cb18-362" tabindex="-1"></a><span class="do">## INFO  [10:03:03.222] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
+<span id="cb18-363"><a href="#cb18-363" tabindex="-1"></a><span class="do">## INFO  [10:03:03.224] [bbotk] Result:</span></span>
+<span id="cb18-364"><a href="#cb18-364" tabindex="-1"></a><span class="do">## INFO  [10:03:03.228] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
+<span id="cb18-365"><a href="#cb18-365" tabindex="-1"></a><span class="do">## INFO  [10:03:03.228] [bbotk]                     2          &lt;list[5]&gt; &lt;list[1]&gt;    0.8374544</span></span>
+<span id="cb18-366"><a href="#cb18-366" tabindex="-1"></a><span class="do">## INFO  [10:02:50.856] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
+<span id="cb18-367"><a href="#cb18-367" tabindex="-1"></a><span class="do">## INFO  [10:02:50.865] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-368"><a href="#cb18-368" tabindex="-1"></a><span class="do">## INFO  [10:02:53.241] [bbotk] Result of batch 1:</span></span>
+<span id="cb18-369"><a href="#cb18-369" tabindex="-1"></a><span class="do">## INFO  [10:02:53.247] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-370"><a href="#cb18-370" tabindex="-1"></a><span class="do">## INFO  [10:02:53.247] [bbotk]                     4    0.8149079        0      0             1.96 76d368df-16c1-4a54-a062-d2e02edaa9c6</span></span>
+<span id="cb18-371"><a href="#cb18-371" tabindex="-1"></a><span class="do">## INFO  [10:02:53.253] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-372"><a href="#cb18-372" tabindex="-1"></a><span class="do">## INFO  [10:02:55.617] [bbotk] Result of batch 2:</span></span>
+<span id="cb18-373"><a href="#cb18-373" tabindex="-1"></a><span class="do">## INFO  [10:02:55.623] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-374"><a href="#cb18-374" tabindex="-1"></a><span class="do">## INFO  [10:02:55.623] [bbotk]                     3    0.7888517        0      0             1.94 2c2c6ba6-3d57-4f0e-a4a2-887ca41b0c03</span></span>
+<span id="cb18-375"><a href="#cb18-375" tabindex="-1"></a><span class="do">## INFO  [10:02:55.627] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-376"><a href="#cb18-376" tabindex="-1"></a><span class="do">## INFO  [10:02:57.643] [bbotk] Result of batch 3:</span></span>
+<span id="cb18-377"><a href="#cb18-377" tabindex="-1"></a><span class="do">## INFO  [10:02:57.648] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-378"><a href="#cb18-378" tabindex="-1"></a><span class="do">## INFO  [10:02:57.648] [bbotk]                     6     0.712172        0      0             1.59 ab1b3299-69e6-4b47-b683-0cad4baa0cd4</span></span>
+<span id="cb18-379"><a href="#cb18-379" tabindex="-1"></a><span class="do">## INFO  [10:02:57.651] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-380"><a href="#cb18-380" tabindex="-1"></a><span class="do">## INFO  [10:02:59.426] [bbotk] Result of batch 4:</span></span>
+<span id="cb18-381"><a href="#cb18-381" tabindex="-1"></a><span class="do">## INFO  [10:02:59.431] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-382"><a href="#cb18-382" tabindex="-1"></a><span class="do">## INFO  [10:02:59.431] [bbotk]                     1    0.7883864        0      0             1.32 134a6fdb-1f54-4dd5-aace-913c178507c3</span></span>
+<span id="cb18-383"><a href="#cb18-383" tabindex="-1"></a><span class="do">## INFO  [10:02:59.435] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-384"><a href="#cb18-384" tabindex="-1"></a><span class="do">## INFO  [10:03:01.980] [bbotk] Result of batch 5:</span></span>
+<span id="cb18-385"><a href="#cb18-385" tabindex="-1"></a><span class="do">## INFO  [10:03:01.985] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-386"><a href="#cb18-386" tabindex="-1"></a><span class="do">## INFO  [10:03:01.985] [bbotk]                     5    0.7113345        0      0                2 10c3fa32-8a1f-4c62-8489-b21a0f7231ff</span></span>
+<span id="cb18-387"><a href="#cb18-387" tabindex="-1"></a><span class="do">## INFO  [10:03:01.990] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-388"><a href="#cb18-388" tabindex="-1"></a><span class="do">## INFO  [10:03:03.688] [bbotk] Result of batch 6:</span></span>
+<span id="cb18-389"><a href="#cb18-389" tabindex="-1"></a><span class="do">## INFO  [10:03:03.692] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-390"><a href="#cb18-390" tabindex="-1"></a><span class="do">## INFO  [10:03:03.692] [bbotk]                     2    0.8184441        0      0             1.35 0dd935ad-a61f-47fe-ab09-05544a77f440</span></span>
+<span id="cb18-391"><a href="#cb18-391" tabindex="-1"></a><span class="do">## INFO  [10:03:03.709] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
+<span id="cb18-392"><a href="#cb18-392" tabindex="-1"></a><span class="do">## INFO  [10:03:03.711] [bbotk] Result:</span></span>
+<span id="cb18-393"><a href="#cb18-393" tabindex="-1"></a><span class="do">## INFO  [10:03:03.714] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
+<span id="cb18-394"><a href="#cb18-394" tabindex="-1"></a><span class="do">## INFO  [10:03:03.714] [bbotk]                     2          &lt;list[5]&gt; &lt;list[1]&gt;    0.8184441</span></span>
+<span id="cb18-395"><a href="#cb18-395" tabindex="-1"></a><span class="do">## INFO  [10:02:51.052] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
+<span id="cb18-396"><a href="#cb18-396" tabindex="-1"></a><span class="do">## INFO  [10:02:51.063] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-397"><a href="#cb18-397" tabindex="-1"></a><span class="do">## INFO  [10:02:52.995] [bbotk] Result of batch 1:</span></span>
+<span id="cb18-398"><a href="#cb18-398" tabindex="-1"></a><span class="do">## INFO  [10:02:53.000] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-399"><a href="#cb18-399" tabindex="-1"></a><span class="do">## INFO  [10:02:53.000] [bbotk]                     2    0.8008561        0      0             1.54 a35c50ee-a1bd-4471-a2cd-2dc2be234199</span></span>
+<span id="cb18-400"><a href="#cb18-400" tabindex="-1"></a><span class="do">## INFO  [10:02:53.008] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-401"><a href="#cb18-401" tabindex="-1"></a><span class="do">## INFO  [10:02:55.110] [bbotk] Result of batch 2:</span></span>
+<span id="cb18-402"><a href="#cb18-402" tabindex="-1"></a><span class="do">## INFO  [10:02:55.118] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-403"><a href="#cb18-403" tabindex="-1"></a><span class="do">## INFO  [10:02:55.118] [bbotk]                     3    0.7981575        0      0             1.64 c2306c3b-b738-48d6-8e06-775b19780b4e</span></span>
+<span id="cb18-404"><a href="#cb18-404" tabindex="-1"></a><span class="do">## INFO  [10:02:55.122] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-405"><a href="#cb18-405" tabindex="-1"></a><span class="do">## INFO  [10:02:57.110] [bbotk] Result of batch 3:</span></span>
+<span id="cb18-406"><a href="#cb18-406" tabindex="-1"></a><span class="do">## INFO  [10:02:57.115] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-407"><a href="#cb18-407" tabindex="-1"></a><span class="do">## INFO  [10:02:57.115] [bbotk]                     5    0.7660525        0      0             1.61 5dc279b1-cae9-4471-9aed-5a382e17efc5</span></span>
+<span id="cb18-408"><a href="#cb18-408" tabindex="-1"></a><span class="do">## INFO  [10:02:57.119] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-409"><a href="#cb18-409" tabindex="-1"></a><span class="do">## INFO  [10:02:59.321] [bbotk] Result of batch 4:</span></span>
+<span id="cb18-410"><a href="#cb18-410" tabindex="-1"></a><span class="do">## INFO  [10:02:59.326] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-411"><a href="#cb18-411" tabindex="-1"></a><span class="do">## INFO  [10:02:59.326] [bbotk]                     4    0.7543272        0      0             1.71 bd69d7a7-63fc-4912-bf5e-47b2a406852e</span></span>
+<span id="cb18-412"><a href="#cb18-412" tabindex="-1"></a><span class="do">## INFO  [10:02:59.330] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-413"><a href="#cb18-413" tabindex="-1"></a><span class="do">## INFO  [10:03:01.973] [bbotk] Result of batch 5:</span></span>
+<span id="cb18-414"><a href="#cb18-414" tabindex="-1"></a><span class="do">## INFO  [10:03:01.979] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-415"><a href="#cb18-415" tabindex="-1"></a><span class="do">## INFO  [10:03:01.979] [bbotk]                     6    0.7104969        0      0             2.16 59fbc45b-5f31-453e-833c-5229f226d38e</span></span>
+<span id="cb18-416"><a href="#cb18-416" tabindex="-1"></a><span class="do">## INFO  [10:03:01.982] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-417"><a href="#cb18-417" tabindex="-1"></a><span class="do">## INFO  [10:03:03.393] [bbotk] Result of batch 6:</span></span>
+<span id="cb18-418"><a href="#cb18-418" tabindex="-1"></a><span class="do">## INFO  [10:03:03.398] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-419"><a href="#cb18-419" tabindex="-1"></a><span class="do">## INFO  [10:03:03.398] [bbotk]                     1     0.736367        0      0             1.04 9940198b-ae1b-48f2-bed3-ec100dafd720</span></span>
+<span id="cb18-420"><a href="#cb18-420" tabindex="-1"></a><span class="do">## INFO  [10:03:03.416] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
+<span id="cb18-421"><a href="#cb18-421" tabindex="-1"></a><span class="do">## INFO  [10:03:03.418] [bbotk] Result:</span></span>
+<span id="cb18-422"><a href="#cb18-422" tabindex="-1"></a><span class="do">## INFO  [10:03:03.423] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
+<span id="cb18-423"><a href="#cb18-423" tabindex="-1"></a><span class="do">## INFO  [10:03:03.423] [bbotk]                     2          &lt;list[5]&gt; &lt;list[1]&gt;    0.8008561</span></span>
+<span id="cb18-424"><a href="#cb18-424" tabindex="-1"></a><span class="do">## INFO  [10:02:51.396] [bbotk] Starting to optimize 1 parameter(s) with &#39;&lt;TunerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39;</span></span>
+<span id="cb18-425"><a href="#cb18-425" tabindex="-1"></a><span class="do">## INFO  [10:02:51.412] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-426"><a href="#cb18-426" tabindex="-1"></a><span class="do">## INFO  [10:02:53.408] [bbotk] Result of batch 1:</span></span>
+<span id="cb18-427"><a href="#cb18-427" tabindex="-1"></a><span class="do">## INFO  [10:02:53.413] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-428"><a href="#cb18-428" tabindex="-1"></a><span class="do">## INFO  [10:02:53.413] [bbotk]                     4    0.8019658        0      0              1.6 f0db9c36-f5e6-4d01-9bea-1c0f92cd08e7</span></span>
+<span id="cb18-429"><a href="#cb18-429" tabindex="-1"></a><span class="do">## INFO  [10:02:53.418] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-430"><a href="#cb18-430" tabindex="-1"></a><span class="do">## INFO  [10:02:55.791] [bbotk] Result of batch 2:</span></span>
+<span id="cb18-431"><a href="#cb18-431" tabindex="-1"></a><span class="do">## INFO  [10:02:55.797] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-432"><a href="#cb18-432" tabindex="-1"></a><span class="do">## INFO  [10:02:55.797] [bbotk]                     6     0.713077        0      0             1.87 a0576fb7-64c5-4093-88a8-d53eea272d24</span></span>
+<span id="cb18-433"><a href="#cb18-433" tabindex="-1"></a><span class="do">## INFO  [10:02:55.801] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-434"><a href="#cb18-434" tabindex="-1"></a><span class="do">## INFO  [10:02:57.575] [bbotk] Result of batch 3:</span></span>
+<span id="cb18-435"><a href="#cb18-435" tabindex="-1"></a><span class="do">## INFO  [10:02:57.581] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-436"><a href="#cb18-436" tabindex="-1"></a><span class="do">## INFO  [10:02:57.581] [bbotk]                     2    0.7994417        0      0             1.39 4f92ce39-0eea-44cb-9b5c-acae3e6fa87b</span></span>
+<span id="cb18-437"><a href="#cb18-437" tabindex="-1"></a><span class="do">## INFO  [10:02:57.585] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-438"><a href="#cb18-438" tabindex="-1"></a><span class="do">## INFO  [10:02:59.833] [bbotk] Result of batch 4:</span></span>
+<span id="cb18-439"><a href="#cb18-439" tabindex="-1"></a><span class="do">## INFO  [10:02:59.840] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-440"><a href="#cb18-440" tabindex="-1"></a><span class="do">## INFO  [10:02:59.840] [bbotk]                     3    0.7373116        0      0             1.78 063f9a39-2b41-4c61-b3b4-3eb9d7cb3e4f</span></span>
+<span id="cb18-441"><a href="#cb18-441" tabindex="-1"></a><span class="do">## INFO  [10:02:59.847] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-442"><a href="#cb18-442" tabindex="-1"></a><span class="do">## INFO  [10:03:02.340] [bbotk] Result of batch 5:</span></span>
+<span id="cb18-443"><a href="#cb18-443" tabindex="-1"></a><span class="do">## INFO  [10:03:02.345] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-444"><a href="#cb18-444" tabindex="-1"></a><span class="do">## INFO  [10:03:02.345] [bbotk]                     5    0.6782412        0      0             2.03 e4bfcb6c-ae27-452f-90b0-d065114de163</span></span>
+<span id="cb18-445"><a href="#cb18-445" tabindex="-1"></a><span class="do">## INFO  [10:03:02.349] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb18-446"><a href="#cb18-446" tabindex="-1"></a><span class="do">## INFO  [10:03:03.693] [bbotk] Result of batch 6:</span></span>
+<span id="cb18-447"><a href="#cb18-447" tabindex="-1"></a><span class="do">## INFO  [10:03:03.696] [bbotk]  classbalancing.ratio classif.bacc warnings errors runtime_learners                                uhash</span></span>
+<span id="cb18-448"><a href="#cb18-448" tabindex="-1"></a><span class="do">## INFO  [10:03:03.696] [bbotk]                     1    0.6281584        0      0                1 de95e504-1f2d-4dc8-9fb8-38682e425491</span></span>
+<span id="cb18-449"><a href="#cb18-449" tabindex="-1"></a><span class="do">## INFO  [10:03:03.712] [bbotk] Finished optimizing after 6 evaluation(s)</span></span>
+<span id="cb18-450"><a href="#cb18-450" tabindex="-1"></a><span class="do">## INFO  [10:03:03.714] [bbotk] Result:</span></span>
+<span id="cb18-451"><a href="#cb18-451" tabindex="-1"></a><span class="do">## INFO  [10:03:03.717] [bbotk]  classbalancing.ratio learner_param_vals  x_domain classif.bacc</span></span>
+<span id="cb18-452"><a href="#cb18-452" tabindex="-1"></a><span class="do">## INFO  [10:03:03.717] [bbotk]                     4          &lt;list[5]&gt; &lt;list[1]&gt;    0.8019658</span></span>
 <span id="cb18-453"><a href="#cb18-453" tabindex="-1"></a></span>
 <span id="cb18-454"><a href="#cb18-454" tabindex="-1"></a>bmr <span class="ot">=</span> <span class="fu">c</span>(bmr, rr)</span>
 <span id="cb18-455"><a href="#cb18-455" tabindex="-1"></a></span>
