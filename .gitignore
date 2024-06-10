@@ -19,6 +19,7 @@
 !slides-pdf/*.pdf
 !exercises-pdf/*.pdf
 !style/**/*.pdf
+!slides/IML_pdfs_AML/*.pdf
 *.gz
 *.ps
 *.tex.tex
