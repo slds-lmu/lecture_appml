@@ -1,6 +1,6 @@
 ---
 title: "Applied Machine Learning"
-subtitle: "In-class exercise 07-1"
+subtitle: "In-class exercise 07-2"
 output:
   prettydoc::html_pretty:
     theme: hpstr
@@ -19,8 +19,7 @@ set.seed(123)
 
 The goal of this exercise is to learn how to deal with imbalanced
 classification problems. This consists of being able to select an appropriate
-performance metric and learn about methods to adjust the standard machine learning models
-to improve with respect to that metric.
+performance metric and learn about methods to adjust the standard machine learning models to improve with respect to that metric.
 
 # Oil spill data
 
@@ -43,8 +42,6 @@ The data does not contain the original images but extracted numerical features.
 
 ```{r}
 library(data.table)
-library(future)
-future::plan("multisession")
 oil = fread("../data/oil_spill.csv")
 ```
 In our modeling approach we ignore spatial correlation in the patches and therefore drop the first column.
@@ -78,9 +75,8 @@ oil$V33 = NULL
 oil$V23 = NULL
 ```
 
-# Exercises
 
-## Benchmarking standard algorithms
+# 1 Benchmarking standard algorithms
 
 We will start by comparing two standard ML algorithms - a classification tree and a random forest - without taking the imbalanced class distribution into account.
 Inspecting some standard measures will reveal problems that will be addressed in the subsequent exercises.
@@ -95,40 +91,39 @@ We only use 3 folds because we have very few positive labels and we repeat the c
 Inspect the results and answer whether accuracy is a good metric for this problem.
 
 <details>
-<summary>**Recap: Stratification**</summary>
-Stratification consists of dividing the population into subsets (called strata)
-within each of which an independent sample is selected. When setting the column role `"stratum"`,
-resamplings that are applied to the task will automatically take the set stratum into account.
+  <summary>**Recap: Stratification**</summary>
+  
+  Stratification consists of dividing the population into subsets (called strata) within each of which an independent sample is selected. When setting the column role `"stratum"`, resamplings that are applied to the task will automatically take the set stratum into account.
 
-For binary classification problems, the column role `"positive"` is important, because metrics
-like the TPR and FPR can only be understood when knowing what is defined as the positive class.
+  For binary classification problems, the column role `"positive"` is important, because metrics like the TPR and FPR can only be understood when knowing what is defined as the positive class.
+  
 </details>
 
 <details>
   <summary>**Hint 1:**</summary>
+  
   The function `as_task_classif()` can help to create a classification task from the dataset.
-  You can set the positive class and the stratification role by changing
-  `task$positive` and `task$col_roles$stratum` after creating the task.
+  You can set the positive class and the stratification role by changing `task$positive` and `task$col_roles$stratum` after creating the task.
 
-  Then, create the benchmark design using `benchmark_grid()` and execute it using
-  `benchmark()`. To calculate the performance metrics use the method `$aggregate()`, which takes
-  a list of measures that can be constructed using `msrs()`.
+  Then, create the benchmark design using `benchmark_grid()` and execute it using `benchmark()`. To calculate the performance metrics use the method `$aggregate()`, which takes a list of measures that can be constructed using `msrs()`.
 
 </details>
 
 <details>
   <summary>**Hint 2:**</summary>
-  ```{r, eval = FALSE}
-  library(mlr3verse)
-  task = as_task_classif(...)
-  task$col_roles$stratum = ...
-  task$positive = ...
 
-  learners = lrns(...)
-  design = benchmark_grid(...)
-  bmr = benchmark(...)
-  bmr$aggregate(...)
-  ```
+```{r, eval = FALSE}
+library(mlr3verse)
+task = as_task_classif(...)
+task$col_roles$stratum = ...
+task$positive = ...
+
+learners = lrns(...)
+design = benchmark_grid(...)
+bmr = benchmark(...)
+bmr$aggregate(...)
+```
+
 </details>
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
@@ -138,9 +133,9 @@ cat("<!--")
 ### Solution:
 
 <details>
-<summary>**Clicke me:**</summary>
+  <summary>**Click me:**</summary>
 
-We convert the dataset to a task and set the stratum and the positive class.
+  We convert the dataset to a task and set the stratum and the positive class.
 ```{r}
 library(mlr3verse)
 task = as_task_classif(oil, target = "oilspill")
@@ -148,7 +143,7 @@ task$col_roles$stratum = "oilspill"
 task$positive = "yes"
 ```
 
-Now we conduct the benchmark experiment and compare the resulting predictions using the accuracy, FPR and TPR.
+  Now we conduct the benchmark experiment and compare the resulting predictions using the accuracy, FPR and TPR.
 
 ```{r}
 learners = lrns(c("classif.rpart", "classif.ranger"))
@@ -158,8 +153,8 @@ bmr = benchmark(design)
 bmr$aggregate(msrs(c("classif.acc", "classif.fpr", "classif.tpr")))
 ```
 
-The accuracy is problematic for this problem, because it focuses too heavily on the majority class.
-The FPR and TPR show that, despite the high accuracy, we classify most of the positive instances incorrectly for both models. Interestingly, the simple classification tree has a higher TPR than the - usually superior - random forest.
+  The accuracy is problematic for this problem, because it focuses too heavily on the majority class.
+  The FPR and TPR show that, despite the high accuracy, we classify most of the positive instances incorrectly for both models. Interestingly, the simple classification tree has a higher TPR than the - usually superior - random forest.
 
 </details>
 
@@ -167,7 +162,7 @@ The FPR and TPR show that, despite the high accuracy, we classify most of the po
 cat("-->")
 ```
 
-## Selecting a suitable performance metric
+# 2 Selecting a suitable performance metric
 
 When selecting a suitable performance metric, we have to take the properties of
 the task into consideration. The detection of a spill
@@ -182,17 +177,18 @@ variable? Compare this new metric with the standard accuracy used in the previou
 
 <details>
   <summary>**Hint 1:**</summary>
-  The accuracy can be defined as
-  $$ACC = P(\hat{Y} = 1 | Y = 1) \times P(Y = 1) + P(\hat{Y} = 0 | Y = 0) \times P(Y = 0)$$
+
+  The accuracy can be defined as $$ACC = P(\hat{Y} = 1 | Y = 1) \times P(Y = 1) + P(\hat{Y} = 0 | Y = 0) \times P(Y = 0)$$
   Note that $TPR = P(\hat{Y} = 1 | Y = 1)$ is the true positive rate and $TNR = P(\hat{Y} = 0 | Y = 0)$ the true negative rate, where TNR = 1 - FPR (false positive rate). Hence, the accuracy can be viewed as a weighted average of TPR and TNR, where $P(Y = 1)$ (and $P(Y = 0) = 1 - P(Y = 1)$) are used as the corresponding weights.
-  The new metric should **not** depend on the class distribution $P(Y = 1)$ (and $P(Y = 0) = 1 - P(Y = 1)$), i.e., we can equally weight the TPR and TNR to obtain a metric that does not take into account the class distribution. The resulting metric is known as the balanced
-  accuracy: $BACC = 0.5 \cdot TPR + 0.5 \cdot TNR = 0.5 \cdot TPR + 0.5 \cdot (1-FPR)$
+  The new metric should **not** depend on the class distribution $P(Y = 1)$ (and $P(Y = 0) = 1 - P(Y = 1)$), i.e., we can equally weight the TPR and TNR to obtain a metric that does not take into account the class distribution. The resulting metric is known as the balanced accuracy: $BACC = 0.5 \cdot TPR + 0.5 \cdot TNR = 0.5 \cdot TPR + 0.5 \cdot (1-FPR)$
 
 </details>
 
 <details>
   <summary>**Hint 2:**</summary>
+
   Read `msr("classif.bacc")$help()`.
+
 </details>
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
@@ -202,17 +198,14 @@ cat("<!--")
 ### Solution:
 
 <details>
-<summary>**Click me:**</summary>
+  <summary>**Click me:**</summary>
 
-As defined in the hint, we have the accuracy
-$$ACC = P(\hat{Y} = 1 | Y = 1) \times P(Y = 1) + P(\hat{Y} = 0 | Y = 0) \times P(Y = 0)$$
-We can remove the effects of the class distribution by dividing the first term by $P(Y = 1)$ and the second
-term by $P(Y = 0)$. When dividing the resulting expression by 2, we get what is referred to as the balanced accuracy (BACC).
-$$BACC = 0.5 \times (P(\hat{Y} = 1 | Y = 1) + P(\hat{Y} = 0 | Y = 0))$$
+  As defined in the hint, we have the accuracy $$ACC = P(\hat{Y} = 1 | Y = 1) \times P(Y = 1) + P(\hat{Y} = 0 | Y = 0) \times P(Y = 0)$$
+  We can remove the effects of the class distribution by dividing the first term by $P(Y = 1)$ and the second term by $P(Y = 0)$. When dividing the resulting expression by 2, we get what is referred to as the balanced accuracy (BACC). $$BACC = 0.5 \times (P(\hat{Y} = 1 | Y = 1) + P(\hat{Y} = 0 | Y = 0))$$
 
-The balanced accuracy is the mean of sensitivity and specificity.
+  The balanced accuracy is the mean of sensitivity and specificity.
 
-Comparing the balanced accuracy with the standard accuracy paints a very different picture.
+  Comparing the balanced accuracy with the standard accuracy paints a very different picture.
 
 ```{r}
 bmr$aggregate(msrs(c("classif.acc", "classif.bacc")))
@@ -225,7 +218,7 @@ cat("-->")
 ```
 
 
-## Upsamling the minority class
+# 3 Upsamling the minority class
 
 Although we have selected a performance metric (balanced accuracy) that is insensitive to the class distribution in the **test** data, we have considerably fewer positive than negative observations in the **training** data.
 This will make the random forest focus on the latter (no spill).
@@ -235,35 +228,42 @@ Add it to the benchmark result and compare the models with respect to the balanc
 
 <details>
   <summary>**Recap: Upsampling**</summary>
+
   Upsampling is a procedure where synthetically generated data points (corresponding to minority class) are injected into the dataset.
+
 </details>
 
 <details>
   <summary>**Hint 1:**</summary>
-  Use `po("classbalancing")` and combine it with the learner. PipeOps can be chained to a
-  graph using `%>>%`. You can convert a graph to a learner using `as_learner()`
-  Remember to use the instantiated resampling from the previous benchmark
-  experiment. A new resample result can be added to a benchmark result using
-  `c(...)`.
+
+  Use `po("classbalancing")` and combine it with the learner. PipeOps can be chained to a graph using `%>>%`. You can convert a graph to a learner using `as_learner()`
+  Remember to use the instantiated resampling from the previous benchmark experiment. A new resample result can be added to a benchmark result using `c(...)`.
+
 </details>
 
 <details>
   <summary>**Hint 2:**</summary>
-  ```{r, eval = FALSE}
 
-  graph = po("classbalancing", ratio = ..., reference = ..., adjust = ...) %>>%
-    lrn(...)
+```{r, eval = FALSE}
+graph = po(
+  "classbalancing",
+  ratio = ...,
+  reference = ...,
+  adjust = ...
+) %>>%
+  lrn(...)
 
-  resampling = design$resampling[[1L]]
+resampling = design$resampling[[1L]]
 
-  learner_balanced = as_learner(...)
+learner_balanced = as_learner(...)
 
-  rr = resample(...)
+rr = resample(...)
 
-  bmr = c(...)
+bmr = c(...)
 
-  autoplot(bmr, measure = ...)
-  ```
+autoplot(bmr, measure = ...)
+```
+
 </details>
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
@@ -276,26 +276,24 @@ cat("<!--")
 <details>
   <summary>**Click me:**</summary>
 
+  We start by creating and visualizing the machine learning pipeline.
 
-We start by creating and visualizing the machine learning pipeline.
-
-```{r}
+```{r, eval = show.solution}
 graph = po("classbalancing", ratio = 2, reference = "minor", adjust = "minor") %>>%
   lrn("classif.ranger")
 
 graph$plot()
 ```
 
-The instantiated resampling can be retrieved from the design. We can select any row, because
-all instantiated resamplings from the previous benchmark experiment are identical.
+  The instantiated resampling can be retrieved from the design. We can select any row, because all instantiated resamplings from the previous benchmark experiment are identical.
 
-```{r}
+```{r, eval = show.solution}
 resampling = design$resampling[[1L]]
 identical(design$resampling[[1L]], design$resampling[[2L]])
 ```
 
-We convert the graph to a learner and execute our usual routine.
-```{r}
+  We convert the graph to a learner and execute our usual routine.
+```{r, eval = show.solution}
 learner_balanced = as_learner(graph)
 
 rr = resample(task, learner_balanced, resampling)
@@ -303,15 +301,13 @@ rr = resample(task, learner_balanced, resampling)
 bmr = c(bmr, rr)
 ```
 
-This time we compare the balanced accuracies using a boxplot. The individual data-points for
-each boxplot are folds of the repeated crossvalidation.
+  This time we compare the balanced accuracy values using a boxplot. The individual data-points for each boxplot are folds of the repeated crossvalidation.
 
-```{r}
+```{r, eval = show.solution}
 autoplot(bmr, measure = msr("classif.bacc"))
 ```
 
-Although the upsampling approach is superior to the vanilla random forest, there is still room
-for improvement
+  Although the upsampling approach is superior to the vanilla random forest, there is still room for improvement
 
 </details>
 
@@ -320,34 +316,41 @@ cat("-->")
 ```
 
 
-## Additional downsampling of the majority class
+# 4 Additional downsampling of the majority class
 
 
-Repeat the previous experiment, but now not only upsample the minority class like in the
-previous exercise, but also downsample the majority class to the same count.
+Repeat the previous experiment, but now not only upsample the minority class like in the previous exercise, but also downsample the majority class to the same count.
 
 <details>
-<summary>**Recap: Downsampling**</summary>
-Downsampling is a mechanism that reduces the count of training samples falling
+  <summary>**Recap: Downsampling**</summary>
+  
+  Downsampling is a mechanism that reduces the count of training samples falling
 under the majority class.
+
 </details>
 
 <details>
   <summary>**Hint 1:**</summary>
+  
   Adjust the pipeline from the previous exercise.
   Have a look what the `adjust` parameter of `po("classbalancing")` can be set to.
+
 </details>
 
 <details>
   <summary>**Hint 2:**</summary>
 
 ```{r, eval = FALSE}
-graph = po("classbalancing", ratio = ..., reference = ..., adjust = ...) %>>%
+graph = po(
+  "classbalancing",
+  ratio = ...,
+  reference = ...,
+  adjust = ...
+) %>>%
   ...
 
 learner_balanced_all = as_learner(graph)
 learner_balanced_all$id = ... # Set an id so that you can distinguish the pipelines when plotting the results
-
 ...
 
 ```
@@ -363,8 +366,13 @@ cat("<!--")
 <details>
   <summary>**Click me:**</summary>
 
-```{r}
-graph = po("classbalancing", ratio = 2, reference = "minor", adjust = "all") %>>%
+```{r, eval = show.solution}
+graph = po(
+  "classbalancing",
+  ratio = 2,
+  reference = "minor",
+  adjust = "all"
+) %>>%
   lrn("classif.ranger")
 
 learner_balanced_all = as_learner(graph)
@@ -377,7 +385,7 @@ bmr = c(bmr, rr)
 autoplot(bmr, measure = msr("classif.bacc"))
 ```
 
-Additional downsampling of the majority class improved the result even further and is our best model so far.
+  Additional downsampling of the majority class improved the result even further and is our best model so far.
 
 </details>
 
@@ -386,7 +394,7 @@ cat("-->")
 ```
 
 
-## Bonus: Tuning the sampling rate
+# Bonus exercise: Tuning the sampling rate
 
 In the previous exercise we set the ratio to 2.
 See if tuning this value improves the result.
@@ -396,7 +404,6 @@ Construct an `auto_tuner` with a 3-fold inner CV and a grid search over a suitab
   <summary>**Hint 1:**</summary>
 
 ```{r, eval = FALSE}
-
 graph = po("classbalancing", reference = "minor", adjust = "all") %>>%
   lrn("classif.ranger")
 
@@ -417,7 +424,6 @@ rr = resample(task, balanced_autotuner, resampling)
 bmr = c(bmr, rr)
 
 autoplot(bmr, measure = msr("classif.bacc"))
-
 ```
 
 </details>
@@ -431,7 +437,7 @@ cat("<!--")
 <details>
   <summary>**Click me:**</summary>
 
-```{r, eval = TRUE}
+```{r, eval = show.solution}
 
 graph = po("classbalancing", reference = "minor", adjust = "all") %>>%
   lrn("classif.ranger")
@@ -456,7 +462,7 @@ autoplot(bmr, measure = msr("classif.bacc"))
 
 ```
 
-There is no (real) improvement in tuning, so a ratio of 2 seems like a reasonable choice.
+  There is no (real) improvement in tuning, so a ratio of 2 seems like a reasonable choice.
 
 </details>
 

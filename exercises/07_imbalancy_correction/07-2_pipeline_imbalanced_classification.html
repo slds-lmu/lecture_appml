@@ -12,7 +12,7 @@
 
 
 
-<title>Hypothesis Testing for Benchmarking</title>
+<title>Applied Machine Learning</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -145,8 +145,8 @@ pointer-events: auto;
 <article class="hentry">
 <header class="header-title">
 <div class="header-title-wrap">
-<h1 class="title toc-ignore entry-title">Hypothesis Testing for
-Benchmarking</h1>
+<h1 class="title toc-ignore entry-title">Applied Machine Learning</h1>
+<h2 class="subtitle">In-class exercise 07-2</h2>
 </div><!-- /.header-title-wrap -->
 </header>
 
@@ -155,836 +155,1233 @@ Benchmarking</h1>
 <div id="TOC" class="toc">
 <ul>
 <li><a href="#goal" id="toc-goal">Goal</a></li>
-<li><a href="#required-packages" id="toc-required-packages">Required
-packages</a></li>
-<li><a href="#two-algorithms-on-one-data-set" id="toc-two-algorithms-on-one-data-set">1 Two Algorithms on One Data
-Set</a>
+<li><a href="#oil-spill-data" id="toc-oil-spill-data">Oil spill data</a>
 <ul>
-<li><a href="#train-models" id="toc-train-models">1.1 Train
-Models</a></li>
-<li><a href="#get-predictions" id="toc-get-predictions">1.2 Get
-Predictions</a></li>
-<li><a href="#evaluate-models" id="toc-evaluate-models">1.3 Evaluate
-models</a></li>
-<li><a href="#two-sample-t-test" id="toc-two-sample-t-test">1.4 Two
-sample t-test</a></li>
-<li><a href="#mcnemar-test" id="toc-mcnemar-test">1.5 McNemar
-test</a></li>
+<li><a href="#data-description" id="toc-data-description">Data
+description</a></li>
+<li><a href="#data-dictionary" id="toc-data-dictionary">Data
+dictionary</a></li>
+<li><a href="#descriptive-analysis-and-preprocessing" id="toc-descriptive-analysis-and-preprocessing">Descriptive analysis and
+preprocessing</a></li>
 </ul></li>
-<li><a href="#two-algorithms-on-multiple-data-sets" id="toc-two-algorithms-on-multiple-data-sets">2 Two Algorithms on
-Multiple Data Sets</a>
-<ul>
-<li><a href="#get-tasks-from-openml" id="toc-get-tasks-from-openml">2.1
-Get Tasks from OpenML</a></li>
-<li><a href="#filter-tasks" id="toc-filter-tasks">2.2 Filter
-tasks</a></li>
-<li><a href="#benchmark-tasks" id="toc-benchmark-tasks">2.3 Benchmark
-tasks</a></li>
-<li><a href="#compare-learners" id="toc-compare-learners">2.4 Compare
-Learners</a></li>
-<li><a href="#wilcoxon-test" id="toc-wilcoxon-test">2.5 Wilcoxon
-test</a></li>
-</ul></li>
-<li><a href="#multiple-algorithms-on-multiple-data-sets" id="toc-multiple-algorithms-on-multiple-data-sets">3 Multiple Algorithms
-on Multiple Data Sets</a>
-<ul>
-<li><a href="#benchmark-learners" id="toc-benchmark-learners">3.1
-Benchmark learners</a></li>
-<li><a href="#friedman-test" id="toc-friedman-test">3.2 Friedman
-test</a></li>
-<li><a href="#friedman-test-stats" id="toc-friedman-test-stats">3.3
-Friedman test (stats)</a></li>
-<li><a href="#nemenyi-test" id="toc-nemenyi-test">3.4 Nemenyi
-test</a></li>
-<li><a href="#compute-critical-difference" id="toc-compute-critical-difference">3.5 Compute critical
-difference</a></li>
-<li><a href="#bonferroni-dunn-test" id="toc-bonferroni-dunn-test">3.6
-Bonferroni-Dunn test</a></li>
-<li><a href="#criticial-difference-plot" id="toc-criticial-difference-plot">3.7 Criticial difference
-plot</a></li>
-</ul></li>
+<li><a href="#benchmarking-standard-algorithms" id="toc-benchmarking-standard-algorithms">1 Benchmarking standard
+algorithms</a></li>
+<li><a href="#selecting-a-suitable-performance-metric" id="toc-selecting-a-suitable-performance-metric">2 Selecting a suitable
+performance metric</a></li>
+<li><a href="#upsamling-the-minority-class" id="toc-upsamling-the-minority-class">3 Upsamling the minority
+class</a></li>
+<li><a href="#additional-downsampling-of-the-majority-class" id="toc-additional-downsampling-of-the-majority-class">4 Additional
+downsampling of the majority class</a></li>
+<li><a href="#bonus-exercise-tuning-the-sampling-rate" id="toc-bonus-exercise-tuning-the-sampling-rate">Bonus exercise: Tuning
+the sampling rate</a></li>
+<li><a href="#summary" id="toc-summary">Summary</a></li>
 </ul>
 </div>
 
 <div id="goal" class="section level1">
 <h1>Goal</h1>
-<p>Our goal for this exercise sheet is to use <code>mlr3</code> to
-benchmark models in multiple scenarios, using hypothesis tests as an
-additional diagnostic tool to make the benchmark more rigorous.</p>
+<p>The goal of this exercise is to learn how to deal with imbalanced
+classification problems. This consists of being able to select an
+appropriate performance metric and learn about methods to adjust the
+standard machine learning models to improve with respect to that
+metric.</p>
 </div>
-<div id="required-packages" class="section level1">
-<h1>Required packages</h1>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(mlr3oml)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(mlr3verse)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(mlr3learners)</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">library</span>(mlr3benchmark)</span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">library</span>(PMCMRplus)</span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20220801</span>)</span></code></pre></div>
+<div id="oil-spill-data" class="section level1">
+<h1>Oil spill data</h1>
+<div id="data-description" class="section level2">
+<h2>Data description</h2>
+<p>The data we will be using in this exercise was first used in the 1998
+paper by Miroslav Kubat, et al. named <a href="https://link.springer.com/article/10.1023/A:1007452223027">“Machine
+Learning for the Detection of Oil Spills in Satellite Radar
+Images.”</a>.</p>
+<p>The dataset contains a total of 937 observations. Each observation
+represents a patch of one of nine satellite images and contains
+information about the patch number and whether an oil spill is present.
+The rows in the dataset are ordered by image and patch. The data does
+not contain the original images but extracted numerical features.</p>
 </div>
-<div id="two-algorithms-on-one-data-set" class="section level1">
-<h1>1 Two Algorithms on One Data Set</h1>
-<p>Let’s start with a simple example that compares two different
-learners on a single data set.</p>
-<div id="train-models" class="section level2">
-<h2>1.1 Train Models</h2>
-<p>Train a random forest from the <code>ranger</code> package and a
-regression tree from the <code>rpart</code> package using
-<code>mlr3</code> with default hyperparameters on the German credit task
-<code>&quot;german_credit&quot;</code>. The models are used in the next step to
-predict class probabilities.</p>
-<!--
-
-### Solution:
-<details>
-<summary>**Click me:**</summary>
-
-
-```r
-credit.task = tsk("german_credit")
-
-rpart.model = mlr_learners$get("classif.rpart")
-rpart.model$predict_type = "prob"
-rpart.model$train(credit.task)
-
-ranger.model = mlr_learners$get("classif.ranger")
-ranger.model$predict_type = "prob"
-ranger.model$train(credit.task)
-```
-
--->
-</div>
-<div id="get-predictions" class="section level2">
-<h2>1.2 Get Predictions</h2>
-<p>Create a <code>data.frame</code>. For each row in the credit data, it
-should contain the ground truth label as well as both the predicted
-probabilities and predicted labels by <code>rpart</code> and
-<code>ranger</code>, respectively.</p>
-<details>
-<summary>
-<strong>Hint 1:</strong>
-</summary>
-<p>You can call <code>$predict_newdata()</code> on the trained model
-object to make predictions.</p>
-</details>
-<!--
-
-### Solution:
-<details>
-<summary>**Click me:**</summary>
-
-
-```r
-rpart.predictions = rpart.model$predict_newdata(newdata = credit.task$data())$print()
-## <PredictionClassif> for 1000 observations:
-##     row_ids truth response prob.good  prob.bad
-##           1  good     good 0.8767123 0.1232877
-##           2   bad      bad 0.1388889 0.8611111
-##           3  good     good 0.8687090 0.1312910
-## ---                                           
-##         998  good     good 0.8687090 0.1312910
-##         999   bad      bad 0.3795620 0.6204380
-##        1000  good     good 0.7391304 0.2608696
-ranger.predictions = ranger.model$predict_newdata(newdata = credit.task$data())$print()
-## <PredictionClassif> for 1000 observations:
-##     row_ids truth response prob.good   prob.bad
-##           1  good     good 0.9217135 0.07828651
-##           2   bad      bad 0.2194533 0.78054673
-##           3  good     good 0.9483270 0.05167302
-## ---                                            
-##         998  good     good 0.9385048 0.06149524
-##         999   bad      bad 0.1990500 0.80095000
-##        1000  good     good 0.6853873 0.31461270
-conf.mat = rpart.predictions[ , c("row_ids", "truth", "response", "prob.good")]
-conf.mat$ranger = ranger.predictions$response
-conf.mat$ranger_prob = ranger.predictions$prob.good
-colnames(conf.mat) = c("id", "truth", "rpart", "rpart_prob", "ranger", "ranger_prob")
-conf.mat
-##         id truth rpart rpart_prob ranger ranger_prob
-##    1:    1  good  good  0.8767123   good   0.9217135
-##    2:    2   bad   bad  0.1388889    bad   0.2194533
-##    3:    3  good  good  0.8687090   good   0.9483270
-##    4:    4  good   bad  0.3795620   good   0.6457634
-##    5:    5   bad   bad  0.3795620    bad   0.3019817
-##   ---                                               
-##  996:  996  good  good  0.8687090   good   0.9111111
-##  997:  997  good  good  0.7391304   good   0.6542218
-##  998:  998  good  good  0.8687090   good   0.9385048
-##  999:  999   bad   bad  0.3795620    bad   0.1990500
-## 1000: 1000  good  good  0.7391304   good   0.6853873
-```
-
--->
-</div>
-<div id="evaluate-models" class="section level2">
-<h2>1.3 Evaluate models</h2>
-<p>Add two new columns with the observation-wise loss value for the
-Brier score. Compare the performance of both models using these
-columns.</p>
-<!--
-
-### Solution:
-<details>
-<summary>**Click me:**</summary>
-
-
-```r
-conf.mat = conf.mat %>%
-  mutate(
-    rpart_loss = (rpart_prob - ifelse(truth == "good", 1, 0))^2
-  ) %>%
-  mutate(
-    ranger_loss = (ranger_prob - ifelse(truth == "good", 1, 0))^2
-  )
-
-mean(conf.mat$rpart_loss)
-## [1] 0.1530117
-mean(conf.mat$ranger_loss)
-## [1] 0.06355003
-```
-
--->
-</div>
-<div id="two-sample-t-test" class="section level2">
-<h2>1.4 Two sample t-test</h2>
-<p>Use a two sample t-test for an alpha of 5% to evaluate whether both
-samples of performance scores come from different populations.</p>
-<details>
-<summary>
-<strong>Hint 1:</strong>
-</summary>
-<p>Add another column with the difference between observation-wise loss
-values. Then run the t-test. The value of the quantile function of the
-t-distribution can be computed with <code>qt()</code>.</p>
-</details>
-<!--
-
-### Solution:
-<details>
-<summary>**Click me:**</summary>
-
-
-```r
-conf.mat = conf.mat %>%
-  mutate(
-    diff_loss = rpart_loss - ranger_loss
-  )
-
-mean_diff_loss = conf.mat %>%
-  ungroup() %>%
-  summarize(diff_loss = mean(diff_loss))
-
-t_var = sqrt((1 / (nrow(conf.mat) - 1)) * sum((conf.mat$diff_loss - as.numeric(mean_diff_loss))^2))
-
-t_statistic = sqrt(nrow(conf.mat)) * (mean_diff_loss / t_var)
-t_statistic
-##   diff_loss
-## 1  16.10745
-# lower critical value, reject H0 if t-stat smaller
-qt(0.025, df = nrow(conf.mat) - 1)
-## [1] -1.962341
-# OR
-# upper critical value, reject H0 if t-stat larger
-qt(0.975, df = nrow(conf.mat) - 1)
-## [1] 1.962341
-
-t_statistic > qt(0.975, df = nrow(conf.mat) - 1)
-##      diff_loss
-## [1,]      TRUE
-```
-
--->
-<!-- We reject the null. This means the difference in model performance is significant. -->
-</div>
-<div id="mcnemar-test" class="section level2">
-<h2>1.5 McNemar test</h2>
-<p>Now run the McNemar test for an alpha of 5%. This is a non-parametric
-test that compares only the labels predicted by two models.</p>
-<details>
-<summary>
-<strong>Hint 1:</strong>
-</summary>
-<p>You will need the total number of observations that are classified
-correctly by <code>rpart</code> only and those that are classified
-correctly by <code>ranger</code> only. The value of the quantile
-function of the chi-sqaured-distribution can be computed with
-<code>qchisq()</code>.</p>
-</details>
-<!--
-
-### Solution:
-<details>
-<summary>**Click me:**</summary>
-
-
-```r
-conf.mat = conf.mat %>%
-  rowwise() %>%
-  mutate(
-    rpart_correct = case_when(
-      truth == "good" & rpart == "good" |
-        truth == "bad" & rpart == "bad"
-      ~ 1,
-      .default = 0)) %>% 
-  mutate(
-    ranger_correct = case_when(
-      truth == "good" & ranger == "good" |
-        truth == "bad" & ranger == "bad"
-      ~ 1,
-      .default = 0)) %>%
-  mutate(
-    only_rpart_correct = case_when(
-      rpart_correct == 1 & ranger_correct == 0
-      ~ 1,
-      .default = 0)) %>% 
-  mutate(
-    only_ranger_correct = case_when(
-      rpart_correct == 0 & ranger_correct == 1
-      ~ 1,
-      .default = 0))
-
-n_only_rpart_correct = sum(conf.mat$only_rpart_correct)
-n_only_ranger_correct = sum(conf.mat$only_ranger_correct)
-
-mcnemar_stat = (abs(n_only_rpart_correct - n_only_ranger_correct) - 1)^2 / (n_only_rpart_correct + n_only_ranger_correct)
-mcnemar_stat
-## [1] 161.0539
-
-# critical value for alpha = 5%, reject H0 if mcnemar_stat larger
-crit = qchisq(0.95, df = 1)
-
-mcnemar_stat > crit
-## [1] TRUE
-```
-
--->
-<!-- We reject the null. This means that also for the McNemar test, the difference in performance is statistically significant. -->
-</div>
-</div>
-<div id="two-algorithms-on-multiple-data-sets" class="section level1">
-<h1>2 Two Algorithms on Multiple Data Sets</h1>
-<p>Let us now confirm whether this result holds for other data sets as
-well. We will first scout <code>OpenML</code> (package
-<code>mlr3oml</code>) for suitable classification tasks.</p>
-<div id="get-tasks-from-openml" class="section level2">
-<h2>2.1 Get Tasks from OpenML</h2>
-<p>Use the function <code>list_oml_tasks()</code> to look for tasks with
-the following characteristics:</p>
+<div id="data-dictionary" class="section level2">
+<h2>Data dictionary</h2>
 <ul>
-<li>binary classification</li>
-<li>number of features between 5 and 10</li>
-<li>number of instances between 500 and 10000</li>
-<li>no missing values</li>
+<li>V1: The patch number</li>
+<li>V2 - V49: The features that were extracted from the images by the
+Canadian Environmental Hazards Detection System (CEHDS).</li>
+<li>V50: Whether an oil spill is present (encoded as 0) or not (encoded
+as 1)</li>
 </ul>
-<!--
-
-### Solution:
-<details>
-<summary>**Click me:**</summary>
-
-
-```r
-otasks = list_oml_tasks(
-  type = "classif",
-  number_features = c(5, 10),
-  number_instances = c(500, 10000),
-  number_classes = 2,
-  number_missing_values = 0
-)
-## INFO  [17:57:55.138] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/list/number_instances/500..10000/number_features/5..10/number_classes/2/number_missing_values/0/type/1/limit/1000`, authenticated: `FALSE`}
-```
-
--->
 </div>
-<div id="filter-tasks" class="section level2">
-<h2>2.2 Filter tasks</h2>
-<p>Filter out tasks with the same <code>data_id</code>. Use only tasks
-with balanced data sets where the ratio between the majority and
-minority class is smaller than 1.2. Also, remove tasks with a
-<code>data_id</code> of 720. You should receive a total number of 20
-tasks.</p>
-<!--
-
-### Solution:
-<details>
-<summary>**Click me:**</summary>
-
-
-```r
-otasks = otasks %>%
-  filter(data_id != 720) %>%
-  filter(MajorityClassSize / MinorityClassSize < 1.2) %>%
-  group_by(name) %>%
-  filter(row_number(data_id) == 1) %>%
-  group_by(data_id) %>%
-  filter(row_number(data_id) == 1)
-
-nrow(otasks)
-## [1] 20
-```
-
--->
+<div id="descriptive-analysis-and-preprocessing" class="section level2">
+<h2>Descriptive analysis and preprocessing</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>oil <span class="ot">=</span> <span class="fu">fread</span>(<span class="st">&quot;../data/oil_spill.csv&quot;</span>)</span></code></pre></div>
+<p>In our modeling approach we ignore spatial correlation in the patches
+and therefore drop the first column.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>oil<span class="sc">$</span>V1 <span class="ot">=</span> <span class="cn">NULL</span></span></code></pre></div>
+<p>We also encode the target variable as a factor and rename it.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>oil<span class="sc">$</span>oilspill <span class="ot">=</span> <span class="fu">factor</span>(oil<span class="sc">$</span>V50, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;no&quot;</span>, <span class="st">&quot;yes&quot;</span>))</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>oil<span class="sc">$</span>V50 <span class="ot">=</span> <span class="cn">NULL</span></span></code></pre></div>
+<p>The following gives us a nice compact summary of the data.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>skimr<span class="sc">::</span><span class="fu">skim</span>(oil)</span></code></pre></div>
+<table>
+<caption>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td align="left">Name</td>
+<td align="left">oil</td>
+</tr>
+<tr class="even">
+<td align="left">Number of rows</td>
+<td align="left">937</td>
+</tr>
+<tr class="odd">
+<td align="left">Number of columns</td>
+<td align="left">49</td>
+</tr>
+<tr class="even">
+<td align="left">Key</td>
+<td align="left">NULL</td>
+</tr>
+<tr class="odd">
+<td align="left">_______________________</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Column type frequency:</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">factor</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left">numeric</td>
+<td align="left">48</td>
+</tr>
+<tr class="odd">
+<td align="left">________________________</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Group variables</td>
+<td align="left">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: factor</strong></p>
+<table>
+<colgroup>
+<col width="19%" />
+<col width="13%" />
+<col width="19%" />
+<col width="11%" />
+<col width="12%" />
+<col width="23%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="left">ordered</th>
+<th align="right">n_unique</th>
+<th align="left">top_counts</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">oilspill</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+<td align="right">2</td>
+<td align="left">no: 896, yes: 41</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table style="width:100%;">
+<colgroup>
+<col width="12%" />
+<col width="8%" />
+<col width="12%" />
+<col width="8%" />
+<col width="9%" />
+<col width="7%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="10%" />
+<col width="5%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">p0</th>
+<th align="right">p25</th>
+<th align="right">p50</th>
+<th align="right">p75</th>
+<th align="right">p100</th>
+<th align="left">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">V2</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">332.84</td>
+<td align="right">1931.94</td>
+<td align="right">10.00</td>
+<td align="right">20.00</td>
+<td align="right">65.00</td>
+<td align="right">132.00</td>
+<td align="right">32389.00</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">V3</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">698.71</td>
+<td align="right">599.97</td>
+<td align="right">1.92</td>
+<td align="right">85.27</td>
+<td align="right">704.37</td>
+<td align="right">1223.48</td>
+<td align="right">1893.08</td>
+<td align="left">▇▁▃▃▂</td>
+</tr>
+<tr class="odd">
+<td align="left">V4</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">870.99</td>
+<td align="right">522.80</td>
+<td align="right">1.00</td>
+<td align="right">444.20</td>
+<td align="right">761.28</td>
+<td align="right">1260.37</td>
+<td align="right">2724.57</td>
+<td align="left">▇▇▆▂▁</td>
+</tr>
+<tr class="even">
+<td align="left">V5</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">84.12</td>
+<td align="right">45.36</td>
+<td align="right">0.00</td>
+<td align="right">54.00</td>
+<td align="right">73.00</td>
+<td align="right">117.00</td>
+<td align="right">180.00</td>
+<td align="left">▃▇▅▃▃</td>
+</tr>
+<tr class="odd">
+<td align="left">V6</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">769696.38</td>
+<td align="right">3831151.03</td>
+<td align="right">70312.00</td>
+<td align="right">125000.00</td>
+<td align="right">186300.00</td>
+<td align="right">330468.00</td>
+<td align="right">71315000.00</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">V7</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">43.24</td>
+<td align="right">12.72</td>
+<td align="right">21.24</td>
+<td align="right">33.65</td>
+<td align="right">39.97</td>
+<td align="right">52.42</td>
+<td align="right">82.64</td>
+<td align="left">▅▇▆▂▁</td>
+</tr>
+<tr class="odd">
+<td align="left">V8</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">9.13</td>
+<td align="right">3.59</td>
+<td align="right">0.83</td>
+<td align="right">6.75</td>
+<td align="right">8.20</td>
+<td align="right">10.76</td>
+<td align="right">24.69</td>
+<td align="left">▁▇▂▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">V9</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">3940.71</td>
+<td align="right">8167.43</td>
+<td align="right">667.00</td>
+<td align="right">1371.00</td>
+<td align="right">2090.00</td>
+<td align="right">3435.00</td>
+<td align="right">160740.00</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">V10</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.22</td>
+<td align="right">0.09</td>
+<td align="right">0.02</td>
+<td align="right">0.16</td>
+<td align="right">0.20</td>
+<td align="right">0.26</td>
+<td align="right">0.74</td>
+<td align="left">▃▇▂▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">V11</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">109.89</td>
+<td align="right">61.46</td>
+<td align="right">41.00</td>
+<td align="right">83.50</td>
+<td align="right">99.80</td>
+<td align="right">115.40</td>
+<td align="right">901.70</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">V12</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.25</td>
+<td align="right">0.09</td>
+<td align="right">0.02</td>
+<td align="right">0.20</td>
+<td align="right">0.24</td>
+<td align="right">0.29</td>
+<td align="right">0.66</td>
+<td align="left">▁▇▃▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">V13</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.31</td>
+<td align="right">0.12</td>
+<td align="right">0.03</td>
+<td align="right">0.24</td>
+<td align="right">0.29</td>
+<td align="right">0.35</td>
+<td align="right">0.83</td>
+<td align="left">▁▇▂▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">V14</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.48</td>
+<td align="right">0.22</td>
+<td align="right">0.05</td>
+<td align="right">0.33</td>
+<td align="right">0.43</td>
+<td align="right">0.61</td>
+<td align="right">1.23</td>
+<td align="left">▂▇▃▂▁</td>
+</tr>
+<tr class="even">
+<td align="left">V15</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.18</td>
+<td align="right">0.08</td>
+<td align="right">0.01</td>
+<td align="right">0.13</td>
+<td align="right">0.17</td>
+<td align="right">0.22</td>
+<td align="right">0.65</td>
+<td align="left">▃▇▁▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">V16</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.30</td>
+<td align="right">0.20</td>
+<td align="right">0.01</td>
+<td align="right">0.13</td>
+<td align="right">0.27</td>
+<td align="right">0.41</td>
+<td align="right">1.12</td>
+<td align="left">▇▆▂▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">V17</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">77.41</td>
+<td align="right">304.33</td>
+<td align="right">4.82</td>
+<td align="right">21.09</td>
+<td align="right">34.72</td>
+<td align="right">65.95</td>
+<td align="right">6058.23</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">V18</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">31.15</td>
+<td align="right">152.69</td>
+<td align="right">1.96</td>
+<td align="right">11.68</td>
+<td align="right">16.49</td>
+<td align="right">24.75</td>
+<td align="right">4061.15</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">V19</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.91</td>
+<td align="right">0.68</td>
+<td align="right">0.13</td>
+<td align="right">0.37</td>
+<td align="right">0.70</td>
+<td align="right">1.06</td>
+<td align="right">2.60</td>
+<td align="left">▇▆▁▂▂</td>
+</tr>
+<tr class="odd">
+<td align="left">V20</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.23</td>
+<td align="right">0.08</td>
+<td align="right">0.02</td>
+<td align="right">0.18</td>
+<td align="right">0.22</td>
+<td align="right">0.27</td>
+<td align="right">0.65</td>
+<td align="left">▁▇▂▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">V21</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.29</td>
+<td align="right">0.11</td>
+<td align="right">0.02</td>
+<td align="right">0.23</td>
+<td align="right">0.27</td>
+<td align="right">0.32</td>
+<td align="right">0.77</td>
+<td align="left">▁▇▂▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">V22</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">76.09</td>
+<td align="right">22.94</td>
+<td align="right">47.66</td>
+<td align="right">55.85</td>
+<td align="right">69.09</td>
+<td align="right">85.22</td>
+<td align="right">126.08</td>
+<td align="left">▆▇▃▁▃</td>
+</tr>
+<tr class="even">
+<td align="left">V23</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="left">▁▁▇▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">V24</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.64</td>
+<td align="right">0.30</td>
+<td align="right">0.17</td>
+<td align="right">0.45</td>
+<td align="right">0.50</td>
+<td align="right">0.96</td>
+<td align="right">1.33</td>
+<td align="left">▃▇▁▆▁</td>
+</tr>
+<tr class="even">
+<td align="left">V25</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">559.91</td>
+<td align="right">612.46</td>
+<td align="right">132.78</td>
+<td align="right">221.97</td>
+<td align="right">351.67</td>
+<td align="right">422.12</td>
+<td align="right">2036.80</td>
+<td align="left">▇▁▁▁▂</td>
+</tr>
+<tr class="odd">
+<td align="left">V26</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.58</td>
+<td align="right">0.70</td>
+<td align="right">-0.71</td>
+<td align="right">0.18</td>
+<td align="right">0.87</td>
+<td align="right">1.01</td>
+<td align="right">1.83</td>
+<td align="left">▂▆▁▇▂</td>
+</tr>
+<tr class="even">
+<td align="left">V27</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">7.50</td>
+<td align="right">3.97</td>
+<td align="right">2.96</td>
+<td align="right">4.66</td>
+<td align="right">5.07</td>
+<td align="right">12.06</td>
+<td align="right">14.78</td>
+<td align="left">▇▁▃▂▂</td>
+</tr>
+<tr class="odd">
+<td align="left">V28</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.61</td>
+<td align="right">0.85</td>
+<td align="right">-1.79</td>
+<td align="right">0.09</td>
+<td align="right">0.48</td>
+<td align="right">0.98</td>
+<td align="right">5.72</td>
+<td align="left">▁▇▂▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">V29</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">4.27</td>
+<td align="right">3.62</td>
+<td align="right">1.44</td>
+<td align="right">2.64</td>
+<td align="right">3.33</td>
+<td align="right">4.50</td>
+<td align="right">39.42</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">V30</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">-2.83</td>
+<td align="right">1.62</td>
+<td align="right">-7.81</td>
+<td align="right">-3.25</td>
+<td align="right">-2.78</td>
+<td align="right">-1.62</td>
+<td align="right">1.28</td>
+<td align="left">▂▁▇▇▁</td>
+</tr>
+<tr class="even">
+<td align="left">V31</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">-0.43</td>
+<td align="right">0.22</td>
+<td align="right">-1.37</td>
+<td align="right">-0.53</td>
+<td align="right">-0.38</td>
+<td align="right">-0.28</td>
+<td align="right">0.00</td>
+<td align="left">▁▁▂▇▃</td>
+</tr>
+<tr class="odd">
+<td align="left">V32</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1.82</td>
+<td align="right">0.64</td>
+<td align="right">0.00</td>
+<td align="right">1.22</td>
+<td align="right">1.95</td>
+<td align="right">2.17</td>
+<td align="right">2.98</td>
+<td align="left">▁▅▂▇▂</td>
+</tr>
+<tr class="even">
+<td align="left">V33</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.00</td>
+<td align="right">0.05</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.87</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">V34</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1.82</td>
+<td align="right">0.64</td>
+<td align="right">0.00</td>
+<td align="right">1.21</td>
+<td align="right">1.95</td>
+<td align="right">2.17</td>
+<td align="right">2.98</td>
+<td align="left">▁▅▂▇▂</td>
+</tr>
+<tr class="even">
+<td align="left">V35</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">43.09</td>
+<td align="right">95.17</td>
+<td align="right">3.00</td>
+<td align="right">12.00</td>
+<td align="right">23.00</td>
+<td align="right">39.00</td>
+<td align="right">1695.00</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">V36</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">2432.69</td>
+<td align="right">5219.38</td>
+<td align="right">360.00</td>
+<td align="right">720.00</td>
+<td align="right">1350.00</td>
+<td align="right">2160.00</td>
+<td align="right">95310.00</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">V37</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.01</td>
+<td align="right">0.01</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.01</td>
+<td align="right">0.01</td>
+<td align="right">0.02</td>
+<td align="left">▅▁▇▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">V38</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">31.24</td>
+<td align="right">31.58</td>
+<td align="right">5.05</td>
+<td align="right">13.45</td>
+<td align="right">23.63</td>
+<td align="right">37.76</td>
+<td align="right">441.23</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">V39</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">91.19</td>
+<td align="right">21.98</td>
+<td align="right">64.00</td>
+<td align="right">78.00</td>
+<td align="right">82.00</td>
+<td align="right">99.00</td>
+<td align="right">143.00</td>
+<td align="left">▆▇▃▁▃</td>
+</tr>
+<tr class="odd">
+<td align="left">V40</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">60.55</td>
+<td align="right">13.84</td>
+<td align="right">39.00</td>
+<td align="right">50.00</td>
+<td align="right">55.00</td>
+<td align="right">67.00</td>
+<td align="right">86.00</td>
+<td align="left">▂▇▅▂▃</td>
+</tr>
+<tr class="even">
+<td align="left">V41</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">933.93</td>
+<td align="right">1001.68</td>
+<td align="right">0.00</td>
+<td align="right">450.00</td>
+<td align="right">685.42</td>
+<td align="right">1053.42</td>
+<td align="right">11949.33</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">V42</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">427.57</td>
+<td align="right">715.39</td>
+<td align="right">0.00</td>
+<td align="right">180.00</td>
+<td align="right">270.00</td>
+<td align="right">460.98</td>
+<td align="right">11500.00</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">V43</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">255.44</td>
+<td align="right">534.31</td>
+<td align="right">0.00</td>
+<td align="right">90.80</td>
+<td align="right">161.65</td>
+<td align="right">265.51</td>
+<td align="right">9593.48</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">V44</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">106.11</td>
+<td align="right">135.62</td>
+<td align="right">0.00</td>
+<td align="right">50.12</td>
+<td align="right">73.85</td>
+<td align="right">125.81</td>
+<td align="right">1748.13</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">V45</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">5.01</td>
+<td align="right">5.03</td>
+<td align="right">0.00</td>
+<td align="right">2.37</td>
+<td align="right">3.85</td>
+<td align="right">6.32</td>
+<td align="right">76.63</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">V46</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.13</td>
+<td align="right">0.33</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">1.00</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">V47</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">7985.72</td>
+<td align="right">6854.50</td>
+<td align="right">2051.50</td>
+<td align="right">3760.57</td>
+<td align="right">5509.43</td>
+<td align="right">9521.93</td>
+<td align="right">55128.46</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">V48</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">61.69</td>
+<td align="right">10.41</td>
+<td align="right">35.95</td>
+<td align="right">65.72</td>
+<td align="right">65.93</td>
+<td align="right">66.13</td>
+<td align="right">66.45</td>
+<td align="left">▂▁▁▁▇</td>
+</tr>
+<tr class="even">
+<td align="left">V49</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">8.12</td>
+<td align="right">2.91</td>
+<td align="right">5.81</td>
+<td align="right">6.34</td>
+<td align="right">7.22</td>
+<td align="right">7.84</td>
+<td align="right">15.44</td>
+<td align="left">▇▂▁▁▂</td>
+</tr>
+</tbody>
+</table>
+<p>After inspecting the distribution in more detail, we notice the
+following:</p>
+<ul>
+<li>The target feature oilspill is highly imbalanced. There are 896
+observations without and only 41 with an oil spill</li>
+<li>The feature V23 is constantly 0 and we can remove it</li>
+<li>The feature V33 only has 4 non-zero values and we could drop it, as
+we do not expect our machine learning algorithm to learn a lot from
+it</li>
+<li>The features are not scaled. Because we will only use tree-based
+learners in this exercise, this is not a problem</li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>oil<span class="sc">$</span>V33 <span class="ot">=</span> <span class="cn">NULL</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>oil<span class="sc">$</span>V23 <span class="ot">=</span> <span class="cn">NULL</span></span></code></pre></div>
 </div>
-<div id="benchmark-tasks" class="section level2">
-<h2>2.3 Benchmark tasks</h2>
-<p>Benchmark <code>rpart</code> and <code>ranger</code> on all found
-tasks with <code>mlr3</code>. Use one-hot encoding and three-fold
-cross-validation.</p>
+</div>
+<div id="benchmarking-standard-algorithms" class="section level1">
+<h1>1 Benchmarking standard algorithms</h1>
+<p>We will start by comparing two standard ML algorithms - a
+classification tree and a random forest - without taking the imbalanced
+class distribution into account. Inspecting some standard measures will
+reveal problems that will be addressed in the subsequent exercises.</p>
+<p>Start by creating a classification task with <code>&quot;oilspill&quot;</code>
+as the target variable and all other variables as features (except the
+ones we removed earlier). Set “yes” as the positive class and stratify
+with respect to the target variable to ensure the same class
+distribution in each fold.</p>
+<p>Then, compare a classification tree with a random forest with respect
+to their accuracy, FPR and TPR. As a validation strategy we use repeated
+(5 times) 3-fold stratified crossvalidation. We only use 3 folds because
+we have very few positive labels and we repeat the crossvalidation
+because the dataset is small.</p>
+<p>Inspect the results and answer whether accuracy is a good metric for
+this problem.</p>
+<details>
+<summary>
+<strong>Recap: Stratification</strong>
+</summary>
+<p>Stratification consists of dividing the population into subsets
+(called strata) within each of which an independent sample is selected.
+When setting the column role <code>&quot;stratum&quot;</code>, resamplings that
+are applied to the task will automatically take the set stratum into
+account.</p>
+<p>For binary classification problems, the column role
+<code>&quot;positive&quot;</code> is important, because metrics like the TPR and
+FPR can only be understood when knowing what is defined as the positive
+class.</p>
+</details>
 <details>
 <summary>
 <strong>Hint 1:</strong>
 </summary>
-<p>Use <code>po(&quot;encode&quot;, method = &quot;one-hot&quot;)</code>.</p>
+<p>The function <code>as_task_classif()</code> can help to create a
+classification task from the dataset. You can set the positive class and
+the stratification role by changing <code>task$positive</code> and
+<code>task$col_roles$stratum</code> after creating the task.</p>
+<p>Then, create the benchmark design using <code>benchmark_grid()</code>
+and execute it using <code>benchmark()</code>. To calculate the
+performance metrics use the method <code>$aggregate()</code>, which
+takes a list of measures that can be constructed using
+<code>msrs()</code>.</p>
 </details>
 <details>
 <summary>
 <strong>Hint 2:</strong>
 </summary>
-<p>A benchmark design can be created with
-<code>design = benchmark_grid(tasklist, learners, resampling)</code> and
-evaluated with <code>benchmark(design)</code>.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">library</span>(mlr3verse)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>task <span class="ot">=</span> <span class="fu">as_task_classif</span>(...)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>task<span class="sc">$</span>col_roles<span class="sc">$</span>stratum <span class="ot">=</span> ...</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>task<span class="sc">$</span>positive <span class="ot">=</span> ...</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>learners <span class="ot">=</span> <span class="fu">lrns</span>(...)</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>design <span class="ot">=</span> <span class="fu">benchmark_grid</span>(...)</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>bmr <span class="ot">=</span> <span class="fu">benchmark</span>(...)</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>bmr<span class="sc">$</span><span class="fu">aggregate</span>(...)</span></code></pre></div>
 </details>
 <!--
 
 ### Solution:
+
 <details>
-<summary>**Click me:**</summary>
+  <summary>**Click me:**</summary>
+
+  We convert the dataset to a task and set the stratum and the positive class.
+
+```r
+library(mlr3verse)
+task = as_task_classif(oil, target = "oilspill")
+task$col_roles$stratum = "oilspill"
+task$positive = "yes"
+```
+
+  Now we conduct the benchmark experiment and compare the resulting predictions using the accuracy, FPR and TPR.
 
 
 ```r
-tasklist = lapply(otasks$task_id, FUN = otsk)
-unlist(lapply(tasklist, FUN = function(x) x[["data_name"]]))
-## INFO  [17:58:05.692] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3053`, authenticated: `FALSE`}
-## INFO  [17:58:05.766] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3055`, authenticated: `FALSE`}
-## INFO  [17:58:05.826] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3603`, authenticated: `FALSE`}
-## INFO  [17:58:05.903] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3609`, authenticated: `FALSE`}
-## INFO  [17:58:05.976] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3615`, authenticated: `FALSE`}
-## INFO  [17:58:06.050] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3616`, authenticated: `FALSE`}
-## INFO  [17:58:06.130] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3636`, authenticated: `FALSE`}
-## INFO  [17:58:06.206] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3664`, authenticated: `FALSE`}
-## INFO  [17:58:06.287] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3668`, authenticated: `FALSE`}
-## INFO  [17:58:06.365] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3672`, authenticated: `FALSE`}
-## INFO  [17:58:06.435] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3681`, authenticated: `FALSE`}
-## INFO  [17:58:06.507] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3684`, authenticated: `FALSE`}
-## INFO  [17:58:06.580] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3706`, authenticated: `FALSE`}
-## INFO  [17:58:06.645] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3734`, authenticated: `FALSE`}
-## INFO  [17:58:06.717] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3735`, authenticated: `FALSE`}
-## INFO  [17:58:06.791] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3747`, authenticated: `FALSE`}
-## INFO  [17:58:06.862] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3749`, authenticated: `FALSE`}
-## INFO  [17:58:06.939] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3860`, authenticated: `FALSE`}
-## INFO  [17:58:07.014] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/146216`, authenticated: `FALSE`}
-## INFO  [17:58:07.085] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/361038`, authenticated: `FALSE`}
-##  [1] "monks-problems-1" "monks-problems-3" "space_ga"         "fri_c1_1000_5"    "fri_c3_500_5"     "pm10"            
-##  [7] "strikes"          "fri_c0_1000_5"    "delta_ailerons"   "kin8nm"           "puma8NH"          "delta_elevators" 
-## [13] "stock"            "fri_c1_500_5"     "pollen"           "fri_c0_500_5"     "no2"              "balance-scale"   
-## [19] "threeOf9"         "phoneme"
-
 learners = lrns(c("classif.rpart", "classif.ranger"))
-poe = po("encode", method = "one-hot")
-learners = lapply(learners, FUN = function(x) {po("encode") %>>% x})
-
-resampling = rsmp("cv", folds = 3)
-design = benchmark_grid(tasklist, learners, resampling)
-## INFO  [17:58:07.470] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/333`, authenticated: `FALSE`}
-## INFO  [17:58:07.524] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/333`, authenticated: `FALSE`}
-## INFO  [17:58:07.590] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/52236/monks-problems-1.arff`, authenticated: `FALSE`}
-## INFO  [17:58:09.663] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/335`, authenticated: `FALSE`}
-## INFO  [17:58:09.723] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/335`, authenticated: `FALSE`}
-## INFO  [17:58:09.797] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/52238/monks-problems-3.arff`, authenticated: `FALSE`}
-## INFO  [17:58:09.910] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/737`, authenticated: `FALSE`}
-## INFO  [17:58:09.972] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/737`, authenticated: `FALSE`}
-## INFO  [17:58:10.040] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53271/space_ga.arff`, authenticated: `FALSE`}
-## INFO  [17:58:10.424] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/743`, authenticated: `FALSE`}
-## INFO  [17:58:10.486] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/743`, authenticated: `FALSE`}
-## INFO  [17:58:10.557] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53277/fri_c1_1000_5.arff`, authenticated: `FALSE`}
-## INFO  [17:58:10.725] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/749`, authenticated: `FALSE`}
-## INFO  [17:58:10.781] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/749`, authenticated: `FALSE`}
-## INFO  [17:58:10.848] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53283/fri_c3_500_5.arff`, authenticated: `FALSE`}
-## INFO  [17:58:11.104] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/750`, authenticated: `FALSE`}
-## INFO  [17:58:11.157] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/750`, authenticated: `FALSE`}
-## INFO  [17:58:11.239] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53284/pm10.arff`, authenticated: `FALSE`}
-## INFO  [17:58:11.378] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/770`, authenticated: `FALSE`}
-## INFO  [17:58:11.439] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/770`, authenticated: `FALSE`}
-## INFO  [17:58:11.509] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53304/strikes.arff`, authenticated: `FALSE`}
-## INFO  [17:58:11.728] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/799`, authenticated: `FALSE`}
-## INFO  [17:58:11.786] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/799`, authenticated: `FALSE`}
-## INFO  [17:58:11.852] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53333/fri_c0_1000_5.arff`, authenticated: `FALSE`}
-## INFO  [17:58:12.030] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/803`, authenticated: `FALSE`}
-## INFO  [17:58:12.087] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/803`, authenticated: `FALSE`}
-## INFO  [17:58:12.152] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53337/delta_ailerons.arff`, authenticated: `FALSE`}
-## INFO  [17:58:14.511] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/807`, authenticated: `FALSE`}
-## INFO  [17:58:14.564] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/807`, authenticated: `FALSE`}
-## INFO  [17:58:14.626] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53341/kin8nm.arff`, authenticated: `FALSE`}
-## INFO  [17:58:15.913] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/816`, authenticated: `FALSE`}
-## INFO  [17:58:15.971] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/816`, authenticated: `FALSE`}
-## INFO  [17:58:16.035] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53350/puma8NH.arff`, authenticated: `FALSE`}
-## INFO  [17:58:16.563] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/819`, authenticated: `FALSE`}
-## INFO  [17:58:16.616] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/819`, authenticated: `FALSE`}
-## INFO  [17:58:16.680] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53353/delta_elevators.arff`, authenticated: `FALSE`}
-## INFO  [17:58:16.963] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/841`, authenticated: `FALSE`}
-## INFO  [17:58:17.022] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/841`, authenticated: `FALSE`}
-## INFO  [17:58:17.086] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53375/stock.arff`, authenticated: `FALSE`}
-## INFO  [17:58:17.237] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/870`, authenticated: `FALSE`}
-## INFO  [17:58:17.297] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/870`, authenticated: `FALSE`}
-## INFO  [17:58:17.365] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53404/fri_c1_500_5.arff`, authenticated: `FALSE`}
-## INFO  [17:58:17.455] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/871`, authenticated: `FALSE`}
-## INFO  [17:58:17.530] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/871`, authenticated: `FALSE`}
-## INFO  [17:58:17.598] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53405/pollen.arff`, authenticated: `FALSE`}
-## INFO  [17:58:17.826] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/884`, authenticated: `FALSE`}
-## INFO  [17:58:17.890] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/884`, authenticated: `FALSE`}
-## INFO  [17:58:17.956] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53418/fri_c0_500_5.arff`, authenticated: `FALSE`}
-## INFO  [17:58:18.034] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/886`, authenticated: `FALSE`}
-## INFO  [17:58:18.094] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/886`, authenticated: `FALSE`}
-## INFO  [17:58:18.159] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53420/no2.arff`, authenticated: `FALSE`}
-## INFO  [17:58:18.257] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/997`, authenticated: `FALSE`}
-## INFO  [17:58:18.318] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/997`, authenticated: `FALSE`}
-## INFO  [17:58:18.622] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53531/balance-scale.arff`, authenticated: `FALSE`}
-## INFO  [17:58:18.693] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/40690`, authenticated: `FALSE`}
-## INFO  [17:58:18.984] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/40690`, authenticated: `FALSE`}
-## INFO  [17:58:19.054] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/4965267/threeOf9.arff`, authenticated: `FALSE`}
-## INFO  [17:58:19.166] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/44075`, authenticated: `FALSE`}
-## INFO  [17:58:19.481] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/44075`, authenticated: `FALSE`}
-## INFO  [17:58:19.555] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/22103171/phoneme.arff`, authenticated: `FALSE`}
+design = benchmark_grid(task, learners, rsmp("repeated_cv", folds = 3, repeats = 5))
 
 bmr = benchmark(design)
+bmr$aggregate(msrs(c("classif.acc", "classif.fpr", "classif.tpr")))
+##    nr task_id     learner_id resampling_id iters classif.acc classif.fpr classif.tpr
+## 1:  1     oil  classif.rpart   repeated_cv    15   0.9622236 0.011601685   0.3879121
+## 2:  2     oil classif.ranger   repeated_cv    15   0.9620065 0.002901544   0.1941392
+## Hidden columns: resample_result
 ```
+
+  The accuracy is problematic for this problem, because it focuses too heavily on the majority class.
+  The FPR and TPR show that, despite the high accuracy, we classify most of the positive instances incorrectly for both models. Interestingly, the simple classification tree has a higher TPR than the - usually superior - random forest.
+
+</details>
 
 -->
 </div>
-<div id="compare-learners" class="section level2">
-<h2>2.4 Compare Learners</h2>
-<p>Apply the <code>$aggregate()</code> function to the <code>mlr3</code>
-benchmark object and compare the ranks of both algorithms on all
-tasks.</p>
-<!--
-
-### Solution:
-<details>
-<summary>**Click me:**</summary>
-
-
-```r
-aggr = bmr$aggregate()
-aggr = aggr %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.ranger", "ranger")) %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.rpart", "rpart"))
-
-ranktable_wide_rpart_ranger = aggr %>%
-  group_by(task_id) %>%
-  mutate(rank_on_task = rank(classif.ce)) %>%
-  mutate(ce_rank = rank_on_task) %>%
-  select(c(task_id, learner_id, ce_rank)) %>%
-  pivot_wider(names_from = learner_id, values_from = ce_rank)
-
-ranktable_wide_rpart_ranger
-## # A tibble: 20 × 3
-## # Groups:   task_id [20]
-##    task_id          rpart ranger
-##    <chr>            <dbl>  <dbl>
-##  1 monks-problems-1     2      1
-##  2 monks-problems-3     1      2
-##  3 space_ga             2      1
-##  4 fri_c1_1000_5        2      1
-##  5 fri_c3_500_5         2      1
-##  6 pm10                 2      1
-##  7 strikes              2      1
-##  8 fri_c0_1000_5        2      1
-##  9 delta_ailerons       2      1
-## 10 kin8nm               2      1
-## 11 puma8NH              2      1
-## 12 delta_elevators      2      1
-## 13 stock                2      1
-## 14 fri_c1_500_5         2      1
-## 15 pollen               1      2
-## 16 fri_c0_500_5         2      1
-## 17 no2                  2      1
-## 18 balance-scale        2      1
-## 19 threeOf9             2      1
-## 20 phoneme              2      1
-```
-
--->
-</div>
-<div id="wilcoxon-test" class="section level2">
-<h2>2.5 Wilcoxon test</h2>
-<p>Run the Wilcoxon signed rank test using the ranks you computed. You
-can use <code>qsignrank(p = 0.05 / 2, n = M)</code> to compute the
-critical value for the lower tail of the two-sided test for a 5%
-significance level.</p>
-<!--
-
-### Solution:
-<details>
-<summary>**Click me:**</summary>
-
-
-```r
-# Test Statistic
-r_plus = sum(as.numeric(ranktable_wide_rpart_ranger$rpart == 1))
-r_minus = sum(as.numeric(ranktable_wide_rpart_ranger$rpart == 2))
-M = nrow(ranktable_wide_rpart_ranger)
-wilcoxon = (min(r_plus, r_minus) - ((1 / 4) * M * (M + 1))) / sqrt((1 / 24) * M * (M + 1) * (2 * M + 1)) 
-# Critical value for the lower tail
-lower_crit <- qsignrank(p = 0.05 / 2, n = M)
-# Perform test
-wilcoxon < lower_crit
-## [1] TRUE
-# We reject H0
-```
-
--->
-</div>
-</div>
-<div id="multiple-algorithms-on-multiple-data-sets" class="section level1">
-<h1>3 Multiple Algorithms on Multiple Data Sets</h1>
-<div id="benchmark-learners" class="section level2">
-<h2>3.1 Benchmark learners</h2>
-<p>Let us now compare more algorithms on each task. Rerun the benchmark
-with the learners “classif.featureless”, “classif.cv_glmnet”,
-“classif.rpart”, “classif.ranger”, “classif.kknn”, and “classif.svm”. As
-before, use one-hot encodings.</p>
-<!--
-
-### Solution:
-<details>
-<summary>**Click me:**</summary>
-
-
-```r
-learners = lapply(c("classif.featureless",  "classif.cv_glmnet", "classif.rpart", "classif.ranger", "classif.kknn", "classif.svm"), lrn)
-poe = po("encode", method = "one-hot")
-learners = lapply(learners, FUN = function(x) {po("encode") %>>% x})
-
-resampling = rsmp("cv", folds = 3)
-design = benchmark_grid(tasklist, learners, resampling)
-
-bmr = benchmark(design)
-
-aggr = bmr$aggregate()
-aggr = aggr %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.featureless", "featureless")) %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.ranger", "ranger")) %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.kknn", "kknn")) %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.rpart", "rpart")) %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.svm", "svm")) %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.cv_glmnet", "cv_glmnet"))
-```
-
--->
-</div>
-<div id="friedman-test" class="section level2">
-<h2>3.2 Friedman test</h2>
-<p>Given multiple algorithms on multiple data sets, we have to use an
-omnibus test such as the Friedman test. Compute a rank table that tells
-you the rank of each algorithm for each task. Then, compute the average
-rank of each algorithm and proceed with the computation of the Friedman
-statistic.</p>
-<!--
-
-### Solution:
-<details>
-<summary>**Click me:**</summary>
-
-
-```r
-ranktable = aggr %>%
-  group_by(task_id) %>%
-  mutate(rank_on_task = rank(classif.ce)) %>%
-  mutate(ce_rank = paste(round(classif.ce, 4), " (", rank_on_task, ")", sep =  ""))
-
-averageranks = ranktable %>%
-  group_by(learner_id) %>%
-  summarize(average_rank_on_task = mean(rank_on_task))
-
-meanrank = (1 / nrow(ranktable)) * sum(ranktable$rank_on_task)
-
-sstotal = length(tasklist) *
-  sum((averageranks$average_rank_on_task- meanrank)^2)
-
-sserror = (1 / (length(tasklist) * (length(learners) - 1))) * sum((ranktable$rank_on_task - meanrank)^2)
-
-friedmanstat = sstotal / sserror
-friedmanstat
-## [1] 67.83046
-```
-
--->
-</div>
-<div id="friedman-test-stats" class="section level2">
-<h2>3.3 Friedman test (stats)</h2>
-<p>Run a sanity check with the <code>friedman.test</code> function
-implemented in the <code>stats</code> package.</p>
-<!--
-
-### Solution:
-<details>
-<summary>**Click me:**</summary>
-
-
-```r
-ce_table_wide = ranktable %>%
-  select(c(task_id, learner_id, classif.ce)) %>%
-  pivot_wider(names_from = learner_id, values_from = classif.ce) %>%
-  ungroup() %>%
-  select(-task_id) %>%
-  as.matrix()
-ce_table_wide
-##       featureless  cv_glmnet      rpart      ranger       kknn         svm
-##  [1,]   0.5413639 0.25354064 0.12405309 0.005376344 0.01980045 0.000000000
-##  [2,]   0.4801312 0.03611438 0.01083040 0.010830396 0.01444379 0.014453584
-##  [3,]   0.5059476 0.16253365 0.21950460 0.164786215 0.18989238 0.150948464
-##  [4,]   0.4570169 0.37303171 0.14500429 0.082001163 0.10801520 0.089011167
-##  [5,]   0.4740519 0.37603107 0.16798932 0.116032994 0.13198903 0.123992978
-##  [6,]   0.5280523 0.52805233 0.41791117 0.355998846 0.43202751 0.431967391
-##  [7,]   0.5375797 0.39843271 0.08641578 0.041574653 0.15679058 0.260865231
-##  [8,]   0.5229841 0.15499931 0.18901536 0.119985255 0.13398428 0.111000222
-##  [9,]   0.4693501 0.06003645 0.06312234 0.055267063 0.06228112 0.058633712
-## [10,]   0.4912109 0.26892058 0.27783031 0.161375945 0.15771509 0.109618771
-## [11,]   0.5023189 0.17431605 0.19323612 0.173094918 0.22314417 0.172240218
-## [12,]   0.4972157 0.11926072 0.12997904 0.119470855 0.14132643 0.117369462
-## [13,]   0.4863102 0.17789402 0.07578964 0.037894821 0.03789482 0.063151380
-## [14,]   0.4660679 0.35001082 0.15399322 0.110008898 0.15797321 0.133997066
-## [15,]   0.5109162 0.51039616 0.51377609 0.509099959 0.51636931 0.503903196
-## [16,]   0.5200082 0.18398143 0.18402953 0.155941130 0.20592550 0.147945074
-## [17,]   0.5079961 0.47206791 0.37997499 0.362010918 0.40193108 0.379974990
-## [18,]   0.4608177 0.04801558 0.16155993 0.084813213 0.09283370 0.033615507
-## [19,]   0.4647976 0.18950808 0.14263273 0.017601193 0.13281734 0.007820204
-## [20,]   0.5271080 0.26009280 0.20618686 0.125479073 0.14502351 0.165198374
-
-friedman.test(ce_table_wide)
-## 
-##  Friedman rank sum test
-## 
-## data:  ce_table_wide
-## Friedman chi-squared = 67.83, df = 5, p-value = 0.0000000000002896
-```
-
--->
-</div>
-<div id="nemenyi-test" class="section level2">
-<h2>3.4 Nemenyi test</h2>
-<p>As the Friedman test indicates that at least one algorithm performs
-differently, we can run pairwise comparisons with post-hoc tests such as
-the Nemenyi or Bonferroni-Dunn test.</p>
-<p>Use the function <code>frdAllPairsNemenyiTest</code> from the
-<code>PMCMRplus</code> package to run all pairwise Nemenyi tests.</p>
-<!--
-
-### Solution:
-<details>
-<summary>**Click me:**</summary>
-
-
-```r
-rownames(ce_table_wide) = LETTERS[1:nrow(ce_table_wide)]
-nemenyi_test = frdAllPairsNemenyiTest(y = ce_table_wide)
-nemenyi_test$statistic
-##           featureless cv_glmnet     rpart    ranger     kknn
-## cv_glmnet    4.302823        NA        NA        NA       NA
-## rpart        4.840676 0.5378529        NA        NA       NA
-## ranger       9.860636 5.5578130 5.0199602        NA       NA
-## kknn         5.498052 1.1952286 0.6573757 4.3625844       NA
-## svm          9.561829 5.2590059 4.7211530 0.2988072 4.063777
-nemenyi_test$p.value
-##                   featureless   cv_glmnet       rpart     ranger       kknn
-## cv_glmnet 0.02837197129588753          NA          NA         NA         NA
-## rpart     0.00814557617108247 0.998971463          NA         NA         NA
-## ranger    0.00000000004673151 0.001194554 0.005177601         NA         NA
-## kknn      0.00141696717571715 0.958997390 0.997302554 0.02490802         NA
-## svm       0.00000000020521607 0.002751490 0.010906812 0.99994248 0.04673625
-```
-
--->
-</div>
-<div id="compute-critical-difference" class="section level2">
-<h2>3.5 Compute critical difference</h2>
-<p>Manually compute the critical difference for rpart and ranger.</p>
+<div id="selecting-a-suitable-performance-metric" class="section level1">
+<h1>2 Selecting a suitable performance metric</h1>
+<p>When selecting a suitable performance metric, we have to take the
+properties of the task into consideration. The detection of a spill
+requires mobilizing an expensive response, and missing an event is
+equally expensive, causing damage to the environment. Therefore, both
+class labels are important.</p>
+<p>For that reason we want to select a measure that is insensitive to
+changes in the class distribution in the test data. Can you modify the
+definition of the accuracy so that it does not depend on the
+distribution of the target variable? Compare this new metric with the
+standard accuracy used in the previous exercise.</p>
 <details>
 <summary>
 <strong>Hint 1:</strong>
 </summary>
-<p>Use the <code>qtukey</code> function.</p>
+<p>The accuracy can be defined as <span class="math display">\[ACC =
+P(\hat{Y} = 1 | Y = 1) \times P(Y = 1) + P(\hat{Y} = 0 | Y = 0) \times
+P(Y = 0)\]</span> Note that <span class="math inline">\(TPR = P(\hat{Y}
+= 1 | Y = 1)\)</span> is the true positive rate and <span class="math inline">\(TNR = P(\hat{Y} = 0 | Y = 0)\)</span> the true
+negative rate, where TNR = 1 - FPR (false positive rate). Hence, the
+accuracy can be viewed as a weighted average of TPR and TNR, where <span class="math inline">\(P(Y = 1)\)</span> (and <span class="math inline">\(P(Y = 0) = 1 - P(Y = 1)\)</span>) are used as the
+corresponding weights. The new metric should <strong>not</strong> depend
+on the class distribution <span class="math inline">\(P(Y = 1)\)</span>
+(and <span class="math inline">\(P(Y = 0) = 1 - P(Y = 1)\)</span>),
+i.e., we can equally weight the TPR and TNR to obtain a metric that does
+not take into account the class distribution. The resulting metric is
+known as the balanced accuracy: <span class="math inline">\(BACC = 0.5
+\cdot TPR + 0.5 \cdot TNR = 0.5 \cdot TPR + 0.5 \cdot
+(1-FPR)\)</span></p>
+</details>
+<details>
+<summary>
+<strong>Hint 2:</strong>
+</summary>
+<p>Read <code>msr(&quot;classif.bacc&quot;)$help()</code>.</p>
 </details>
 <!--
 
 ### Solution:
+
 <details>
-<summary>**Click me:**</summary>
+  <summary>**Click me:**</summary>
+
+  As defined in the hint, we have the accuracy $$ACC = P(\hat{Y} = 1 | Y = 1) \times P(Y = 1) + P(\hat{Y} = 0 | Y = 0) \times P(Y = 0)$$
+  We can remove the effects of the class distribution by dividing the first term by $P(Y = 1)$ and the second term by $P(Y = 0)$. When dividing the resulting expression by 2, we get what is referred to as the balanced accuracy (BACC). $$BACC = 0.5 \times (P(\hat{Y} = 1 | Y = 1) + P(\hat{Y} = 0 | Y = 0))$$
+
+  The balanced accuracy is the mean of sensitivity and specificity.
+
+  Comparing the balanced accuracy with the standard accuracy paints a very different picture.
 
 
 ```r
-mean_diff_rpart_ranger = averageranks[averageranks$learner_id == "rpart", 2] - averageranks[averageranks$learner_id == "ranger", 2]
-# # critical mean rank difference
-crit_value_mean_rank_diff = (qtukey(p = 0.05, df = Inf, nmeans = 6, lower.tail = FALSE) / sqrt(2)) * (sqrt((6 * (6 + 1)) / (6 * 16)))
-
-mean_diff_rpart_ranger > crit_value_mean_rank_diff
-##      average_rank_on_task
-## [1,]                 TRUE
-# reject H_0!
+bmr$aggregate(msrs(c("classif.acc", "classif.bacc")))
+##    nr task_id     learner_id resampling_id iters classif.acc classif.bacc
+## 1:  1     oil  classif.rpart   repeated_cv    15   0.9622236    0.6881552
+## 2:  2     oil classif.ranger   repeated_cv    15   0.9620065    0.5956188
+## Hidden columns: resample_result
 ```
+
+</details>
 
 -->
 </div>
-<div id="bonferroni-dunn-test" class="section level2">
-<h2>3.6 Bonferroni-Dunn test</h2>
-<p>Manually compare <code>rpart</code> and <code>ranger</code> with the
-Bonferroni-Dunn test.</p>
+<div id="upsamling-the-minority-class" class="section level1">
+<h1>3 Upsamling the minority class</h1>
+<p>Although we have selected a performance metric (balanced accuracy)
+that is insensitive to the class distribution in the
+<strong>test</strong> data, we have considerably fewer positive than
+negative observations in the <strong>training</strong> data. This will
+make the random forest focus on the latter (no spill).</p>
+<p>To address that, create a machine learning pipeline that first
+upsamples the minority class by a factor of two and then fits a random
+forest. Add it to the benchmark result and compare the models with
+respect to the balanced accuracy.</p>
+<details>
+<summary>
+<strong>Recap: Upsampling</strong>
+</summary>
+<p>Upsampling is a procedure where synthetically generated data points
+(corresponding to minority class) are injected into the dataset.</p>
+</details>
 <details>
 <summary>
 <strong>Hint 1:</strong>
 </summary>
-<p>The probability of observing the test statistic under the null
-hypothesis is given by
-<code>pnorm(..., 0, 1, lower.tail = FALSE)</code>.</p>
+<p>Use <code>po(&quot;classbalancing&quot;)</code> and combine it with the
+learner. PipeOps can be chained to a graph using
+<code>%&gt;&gt;%</code>. You can convert a graph to a learner using
+<code>as_learner()</code> Remember to use the instantiated resampling
+from the previous benchmark experiment. A new resample result can be
+added to a benchmark result using <code>c(...)</code>.</p>
+</details>
+<details>
+<summary>
+<strong>Hint 2:</strong>
+</summary>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>graph <span class="ot">=</span> <span class="fu">po</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="st">&quot;classbalancing&quot;</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="at">ratio =</span> ...,</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="at">reference =</span> ...,</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="at">adjust =</span> ...</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>) <span class="sc">%&gt;&gt;%</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>  <span class="fu">lrn</span>(...)</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>resampling <span class="ot">=</span> design<span class="sc">$</span>resampling[[1L]]</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>learner_balanced <span class="ot">=</span> <span class="fu">as_learner</span>(...)</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>rr <span class="ot">=</span> <span class="fu">resample</span>(...)</span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>bmr <span class="ot">=</span> <span class="fu">c</span>(...)</span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="fu">autoplot</span>(bmr, <span class="at">measure =</span> ...)</span></code></pre></div>
 </details>
 <!--
 
 ### Solution:
+
+
 <details>
-<summary>**Click me:**</summary>
+  <summary>**Click me:**</summary>
+
+  We start by creating and visualizing the machine learning pipeline.
 
 
 ```r
-# bonferroni dunn test
-dunn_stat = (abs(mean_diff_rpart_ranger$average_rank_on_task) / sqrt((6 * 7) / 6 * 16))
-# prob of observing dunn statistic under h0:
-pnorm(dunn_stat, 0, 1, lower.tail = FALSE)
-## [1] 0.4213538
-# do not reject H_0
+graph = po("classbalancing", ratio = 2, reference = "minor", adjust = "minor") %>>%
+  lrn("classif.ranger")
+
+graph$plot()
 ```
+
+  The instantiated resampling can be retrieved from the design. We can select any row, because all instantiated resamplings from the previous benchmark experiment are identical.
+
+
+```r
+resampling = design$resampling[[1L]]
+identical(design$resampling[[1L]], design$resampling[[2L]])
+```
+
+  We convert the graph to a learner and execute our usual routine.
+
+```r
+learner_balanced = as_learner(graph)
+
+rr = resample(task, learner_balanced, resampling)
+
+bmr = c(bmr, rr)
+```
+
+  This time we compare the balanced accuracy values using a boxplot. The individual data-points for each boxplot are folds of the repeated crossvalidation.
+
+
+```r
+autoplot(bmr, measure = msr("classif.bacc"))
+```
+
+  Although the upsampling approach is superior to the vanilla random forest, there is still room for improvement
+
+</details>
 
 -->
 </div>
-<div id="criticial-difference-plot" class="section level2">
-<h2>3.7 Criticial difference plot</h2>
-<p>Interestingly, both tests differ in this case. The Nemenyi test lets
-us reject the null, while the Bonferroni-Dunn test does not let us
-reject the null. Next, compute a critical difference plot with
-<code>mlr3</code>.</p>
+<div id="additional-downsampling-of-the-majority-class" class="section level1">
+<h1>4 Additional downsampling of the majority class</h1>
+<p>Repeat the previous experiment, but now not only upsample the
+minority class like in the previous exercise, but also downsample the
+majority class to the same count.</p>
+<details>
+<summary>
+<strong>Recap: Downsampling</strong>
+</summary>
+<p>Downsampling is a mechanism that reduces the count of training
+samples falling under the majority class.</p>
+</details>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<p>Adjust the pipeline from the previous exercise. Have a look what the
+<code>adjust</code> parameter of <code>po(&quot;classbalancing&quot;)</code> can
+be set to.</p>
+</details>
+<details>
+<summary>
+<strong>Hint 2:</strong>
+</summary>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>graph <span class="ot">=</span> <span class="fu">po</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  <span class="st">&quot;classbalancing&quot;</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="at">ratio =</span> ...,</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">reference =</span> ...,</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="at">adjust =</span> ...</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>) <span class="sc">%&gt;&gt;%</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>  ...</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>learner_balanced_all <span class="ot">=</span> <span class="fu">as_learner</span>(graph)</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>learner_balanced_all<span class="sc">$</span>id <span class="ot">=</span> ... <span class="co"># Set an id so that you can distinguish the pipelines when plotting the results</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>...</span></code></pre></div>
+</details>
 <!--
 
 ### Solution:
+
 <details>
-<summary>**Click me:**</summary>
+  <summary>**Click me:**</summary>
 
 
 ```r
-# Sanity check with mlr3
-benchmark_aggr = as_benchmark_aggr(bmr, measures = msr("classif.ce"))
-benchmark_aggr$friedman_test()
-## 
-##  Friedman rank sum test
-## 
-## data:  ce and learner_id and task_id
-## Friedman chi-squared = 67.83, df = 5, p-value = 0.0000000000002896
-cd_plot = autoplot(benchmark_aggr, type = "cd", meas = "ce", minimize = TRUE)
-cd_plot
+graph = po(
+  "classbalancing",
+  ratio = 2,
+  reference = "minor",
+  adjust = "all"
+) %>>%
+  lrn("classif.ranger")
+
+learner_balanced_all = as_learner(graph)
+learner_balanced_all$id = "upanddown"
+
+rr = resample(task, learner_balanced_all, resampling)
+
+bmr = c(bmr, rr)
+
+autoplot(bmr, measure = msr("classif.bacc"))
 ```
 
-![](benchmarking_hypothesis_files/figure-html/unnamed-chunk-52-1.png)<!-- -->
-<p>–&gt;</p>
+  Additional downsampling of the majority class improved the result even further and is our best model so far.
+
+</details>
+
+-->
 </div>
+<div id="bonus-exercise-tuning-the-sampling-rate" class="section level1">
+<h1>Bonus exercise: Tuning the sampling rate</h1>
+<p>In the previous exercise we set the ratio to 2. See if tuning this
+value improves the result. Construct an <code>auto_tuner</code> with a
+3-fold inner CV and a grid search over a suitable range of ratio.</p>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>graph <span class="ot">=</span> <span class="fu">po</span>(<span class="st">&quot;classbalancing&quot;</span>, <span class="at">reference =</span> <span class="st">&quot;minor&quot;</span>, <span class="at">adjust =</span> <span class="st">&quot;all&quot;</span>) <span class="sc">%&gt;&gt;%</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  <span class="fu">lrn</span>(<span class="st">&quot;classif.ranger&quot;</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>learner_balanced_tuned <span class="ot">=</span> <span class="fu">as_learner</span>(graph)</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>search_space <span class="ot">=</span> <span class="fu">ps</span>(<span class="at">classbalancing.ratio =</span> ...)</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>balanced_autotuner <span class="ot">=</span> <span class="fu">auto_tuner</span>(</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>  <span class="at">tuner =</span> <span class="fu">tnr</span>(..., <span class="at">resolution =</span> ...),</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>  <span class="at">learner =</span> ...,</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>  <span class="at">resampling =</span> <span class="fu">rsmp</span>(...),</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>  <span class="at">measure =</span> <span class="fu">msr</span>(...),</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>  <span class="at">search_space =</span> search_space</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>)</span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>rr <span class="ot">=</span> <span class="fu">resample</span>(task, balanced_autotuner, resampling)</span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a>bmr <span class="ot">=</span> <span class="fu">c</span>(bmr, rr)</span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="fu">autoplot</span>(bmr, <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">&quot;classif.bacc&quot;</span>))</span></code></pre></div>
+</details>
+<!--
+
+### Solution:
+
+<details>
+  <summary>**Click me:**</summary>
+
+
+```r
+
+graph = po("classbalancing", reference = "minor", adjust = "all") %>>%
+  lrn("classif.ranger")
+
+learner_balanced_tuned = as_learner(graph)
+
+search_space = ps(classbalancing.ratio = p_dbl(1, 6))
+
+balanced_autotuner = auto_tuner(
+  tuner = tnr("grid_search", resolution = 6),
+  learner = learner_balanced_tuned,
+  resampling = rsmp("cv", folds = 3),
+  measure = msr("classif.bacc"),
+  search_space = search_space
+)
+
+rr = resample(task, balanced_autotuner, resampling)
+
+bmr = c(bmr, rr)
+
+autoplot(bmr, measure = msr("classif.bacc"))
+
+```
+
+  There is no (real) improvement in tuning, so a ratio of 2 seems like a reasonable choice.
+
+</details>
+
+-->
+</div>
+<div id="summary" class="section level1">
+<h1>Summary</h1>
+<p>In this exercise we addressed the problem of imbalanced class
+distribution in classification problems. We have seen that standard
+metrics like accuracy can be misleading for such problems and learned
+how it can be modified to obtain a balanced accuracy. We then learned
+how to change the training distribution - using up- and downsampling -
+to improve the results. Finally, we got a better understanding of the
+importance of using stratification when having only very few positive
+labels.</p>
+<p>A similar usecase can be found here: <a href="https://mlr-org.com/gallery/2020-03-30-imbalanced-data/" class="uri">https://mlr-org.com/gallery/2020-03-30-imbalanced-data/</a></p>
 </div>
 </div><!-- /.entry-content -->
 </article>

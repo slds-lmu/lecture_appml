@@ -12,7 +12,6 @@ output:
 
 ```{r, eval = TRUE, echo = FALSE, include=FALSE}
 sys.source("setup.R", envir = knitr::knit_global())
-options(timeout = 10000)
 ```
 
 # Goal

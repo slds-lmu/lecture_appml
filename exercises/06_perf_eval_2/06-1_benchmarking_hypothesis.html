@@ -234,26 +234,22 @@ regression tree from the <code>rpart</code> package using
 <code>mlr3</code> with default hyperparameters on the German credit task
 <code>&quot;german_credit&quot;</code>. The models are used in the next step to
 predict class probabilities.</p>
-<!--
-
-### Solution:
+<div id="solution" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-credit.task = tsk("german_credit")
-
-rpart.model = mlr_learners$get("classif.rpart")
-rpart.model$predict_type = "prob"
-rpart.model$train(credit.task)
-
-ranger.model = mlr_learners$get("classif.ranger")
-ranger.model$predict_type = "prob"
-ranger.model$train(credit.task)
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>credit.task <span class="ot">=</span> <span class="fu">tsk</span>(<span class="st">&quot;german_credit&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>rpart.model <span class="ot">=</span> mlr_learners<span class="sc">$</span><span class="fu">get</span>(<span class="st">&quot;classif.rpart&quot;</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>rpart.model<span class="sc">$</span>predict_type <span class="ot">=</span> <span class="st">&quot;prob&quot;</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>rpart.model<span class="sc">$</span><span class="fu">train</span>(credit.task)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>ranger.model <span class="ot">=</span> mlr_learners<span class="sc">$</span><span class="fu">get</span>(<span class="st">&quot;classif.ranger&quot;</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>ranger.model<span class="sc">$</span>predict_type <span class="ot">=</span> <span class="st">&quot;prob&quot;</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>ranger.model<span class="sc">$</span><span class="fu">train</span>(credit.task)</span></code></pre></div>
+</div>
 </div>
 <div id="get-predictions" class="section level2">
 <h2>1.2 Get Predictions</h2>
@@ -268,51 +264,75 @@ probabilities and predicted labels by <code>rpart</code> and
 <p>You can call <code>$predict_newdata()</code> on the trained model
 object to make predictions.</p>
 </details>
-<!--
-
-### Solution:
+<div id="solution-1" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-rpart.predictions = rpart.model$predict_newdata(newdata = credit.task$data())$print()
-ranger.predictions = ranger.model$predict_newdata(newdata = credit.task$data())$print()
-conf.mat = rpart.predictions[ , c("row_ids", "truth", "response", "prob.good")]
-conf.mat$ranger = ranger.predictions$response
-conf.mat$ranger_prob = ranger.predictions$prob.good
-colnames(conf.mat) = c("id", "truth", "rpart", "rpart_prob", "ranger", "ranger_prob")
-conf.mat
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>rpart.predictions <span class="ot">=</span> rpart.model<span class="sc">$</span><span class="fu">predict_newdata</span>(<span class="at">newdata =</span> credit.task<span class="sc">$</span><span class="fu">data</span>())<span class="sc">$</span><span class="fu">print</span>()</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="do">## &lt;PredictionClassif&gt; for 1000 observations:</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="do">##     row_ids truth response prob.good  prob.bad</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="do">##           1  good     good 0.8767123 0.1232877</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="do">##           2   bad      bad 0.1388889 0.8611111</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="do">##           3  good     good 0.8687090 0.1312910</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="do">## ---                                           </span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="do">##         998  good     good 0.8687090 0.1312910</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="do">##         999   bad      bad 0.3795620 0.6204380</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="do">##        1000  good     good 0.7391304 0.2608696</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>ranger.predictions <span class="ot">=</span> ranger.model<span class="sc">$</span><span class="fu">predict_newdata</span>(<span class="at">newdata =</span> credit.task<span class="sc">$</span><span class="fu">data</span>())<span class="sc">$</span><span class="fu">print</span>()</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="do">## &lt;PredictionClassif&gt; for 1000 observations:</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="do">##     row_ids truth response prob.good   prob.bad</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="do">##           1  good     good 0.9217135 0.07828651</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="do">##           2   bad      bad 0.2194533 0.78054673</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="do">##           3  good     good 0.9483270 0.05167302</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="do">## ---                                            </span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="do">##         998  good     good 0.9385048 0.06149524</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="do">##         999   bad      bad 0.1990500 0.80095000</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="do">##        1000  good     good 0.6853873 0.31461270</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>conf.mat <span class="ot">=</span> rpart.predictions[ , <span class="fu">c</span>(<span class="st">&quot;row_ids&quot;</span>, <span class="st">&quot;truth&quot;</span>, <span class="st">&quot;response&quot;</span>, <span class="st">&quot;prob.good&quot;</span>)]</span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>conf.mat<span class="sc">$</span>ranger <span class="ot">=</span> ranger.predictions<span class="sc">$</span>response</span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a>conf.mat<span class="sc">$</span>ranger_prob <span class="ot">=</span> ranger.predictions<span class="sc">$</span>prob.good</span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="fu">colnames</span>(conf.mat) <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;id&quot;</span>, <span class="st">&quot;truth&quot;</span>, <span class="st">&quot;rpart&quot;</span>, <span class="st">&quot;rpart_prob&quot;</span>, <span class="st">&quot;ranger&quot;</span>, <span class="st">&quot;ranger_prob&quot;</span>)</span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a>conf.mat</span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="do">##         id truth rpart rpart_prob ranger ranger_prob</span></span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="do">##    1:    1  good  good  0.8767123   good   0.9217135</span></span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="do">##    2:    2   bad   bad  0.1388889    bad   0.2194533</span></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a><span class="do">##    3:    3  good  good  0.8687090   good   0.9483270</span></span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="do">##    4:    4  good   bad  0.3795620   good   0.6457634</span></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a><span class="do">##    5:    5   bad   bad  0.3795620    bad   0.3019817</span></span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a><span class="do">##   ---                                               </span></span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a><span class="do">##  996:  996  good  good  0.8687090   good   0.9111111</span></span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a><span class="do">##  997:  997  good  good  0.7391304   good   0.6542218</span></span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a><span class="do">##  998:  998  good  good  0.8687090   good   0.9385048</span></span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a><span class="do">##  999:  999   bad   bad  0.3795620    bad   0.1990500</span></span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a><span class="do">## 1000: 1000  good  good  0.7391304   good   0.6853873</span></span></code></pre></div>
+</div>
 </div>
 <div id="evaluate-models" class="section level2">
 <h2>1.3 Evaluate models</h2>
 <p>Add two new columns with the observation-wise loss value for the
 Brier score. Compare the performance of both models using these
 columns.</p>
-<!--
-
-### Solution:
+<div id="solution-2" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-conf.mat = conf.mat %>%
-  mutate(
-    rpart_loss = (rpart_prob - ifelse(truth == "good", 1, 0))^2
-  ) %>%
-  mutate(
-    ranger_loss = (ranger_prob - ifelse(truth == "good", 1, 0))^2
-  )
-
-mean(conf.mat$rpart_loss)
-mean(conf.mat$ranger_loss)
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>conf.mat <span class="ot">=</span> conf.mat <span class="sc">%&gt;%</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>    <span class="at">rpart_loss =</span> (rpart_prob <span class="sc">-</span> <span class="fu">ifelse</span>(truth <span class="sc">==</span> <span class="st">&quot;good&quot;</span>, <span class="dv">1</span>, <span class="dv">0</span>))<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>    <span class="at">ranger_loss =</span> (ranger_prob <span class="sc">-</span> <span class="fu">ifelse</span>(truth <span class="sc">==</span> <span class="st">&quot;good&quot;</span>, <span class="dv">1</span>, <span class="dv">0</span>))<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  )</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="fu">mean</span>(conf.mat<span class="sc">$</span>rpart_loss)</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="do">## [1] 0.1530117</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="fu">mean</span>(conf.mat<span class="sc">$</span>ranger_loss)</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="do">## [1] 0.06355003</span></span></code></pre></div>
+</div>
 </div>
 <div id="two-sample-t-test" class="section level2">
 <h2>1.4 Two sample t-test</h2>
@@ -326,38 +346,40 @@ samples of performance scores come from different populations.</p>
 values. Then run the t-test. The value of the quantile function of the
 t-distribution can be computed with <code>qt()</code>.</p>
 </details>
-<!--
-
-### Solution:
+<div id="solution-3" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-conf.mat = conf.mat %>%
-  mutate(
-    diff_loss = rpart_loss - ranger_loss
-  )
-
-mean_diff_loss = conf.mat %>%
-  ungroup() %>%
-  summarize(diff_loss = mean(diff_loss))
-
-t_var = sqrt((1 / (nrow(conf.mat) - 1)) * sum((conf.mat$diff_loss - as.numeric(mean_diff_loss))^2))
-
-t_statistic = sqrt(nrow(conf.mat)) * (mean_diff_loss / t_var)
-t_statistic
-# lower critical value, reject H0 if t-stat smaller
-qt(0.025, df = nrow(conf.mat) - 1)
-# OR
-# upper critical value, reject H0 if t-stat larger
-qt(0.975, df = nrow(conf.mat) - 1)
-
-t_statistic > qt(0.975, df = nrow(conf.mat) - 1)
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>conf.mat <span class="ot">=</span> conf.mat <span class="sc">%&gt;%</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>    <span class="at">diff_loss =</span> rpart_loss <span class="sc">-</span> ranger_loss</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  )</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>mean_diff_loss <span class="ot">=</span> conf.mat <span class="sc">%&gt;%</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">diff_loss =</span> <span class="fu">mean</span>(diff_loss))</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>t_var <span class="ot">=</span> <span class="fu">sqrt</span>((<span class="dv">1</span> <span class="sc">/</span> (<span class="fu">nrow</span>(conf.mat) <span class="sc">-</span> <span class="dv">1</span>)) <span class="sc">*</span> <span class="fu">sum</span>((conf.mat<span class="sc">$</span>diff_loss <span class="sc">-</span> <span class="fu">as.numeric</span>(mean_diff_loss))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>t_statistic <span class="ot">=</span> <span class="fu">sqrt</span>(<span class="fu">nrow</span>(conf.mat)) <span class="sc">*</span> (mean_diff_loss <span class="sc">/</span> t_var)</span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>t_statistic</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="do">##   diff_loss</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="do">## 1  16.10745</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co"># lower critical value, reject H0 if t-stat smaller</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="fu">qt</span>(<span class="fl">0.025</span>, <span class="at">df =</span> <span class="fu">nrow</span>(conf.mat) <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="do">## [1] -1.962341</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co"># OR</span></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="co"># upper critical value, reject H0 if t-stat larger</span></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="fu">qt</span>(<span class="fl">0.975</span>, <span class="at">df =</span> <span class="fu">nrow</span>(conf.mat) <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="do">## [1] 1.962341</span></span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>t_statistic <span class="sc">&gt;</span> <span class="fu">qt</span>(<span class="fl">0.975</span>, <span class="at">df =</span> <span class="fu">nrow</span>(conf.mat) <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="do">##      diff_loss</span></span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="do">## [1,]      TRUE</span></span></code></pre></div>
 <!-- We reject the null. This means the difference in model performance is significant. -->
+</div>
 </div>
 <div id="mcnemar-test" class="section level2">
 <h2>1.5 McNemar test</h2>
@@ -373,53 +395,51 @@ correctly by <code>ranger</code> only. The value of the quantile
 function of the chi-sqaured-distribution can be computed with
 <code>qchisq()</code>.</p>
 </details>
-<!--
-
-### Solution:
+<div id="solution-4" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-conf.mat = conf.mat %>%
-  rowwise() %>%
-  mutate(
-    rpart_correct = case_when(
-      truth == "good" & rpart == "good" |
-        truth == "bad" & rpart == "bad"
-      ~ 1,
-      .default = 0)) %>% 
-  mutate(
-    ranger_correct = case_when(
-      truth == "good" & ranger == "good" |
-        truth == "bad" & ranger == "bad"
-      ~ 1,
-      .default = 0)) %>%
-  mutate(
-    only_rpart_correct = case_when(
-      rpart_correct == 1 & ranger_correct == 0
-      ~ 1,
-      .default = 0)) %>% 
-  mutate(
-    only_ranger_correct = case_when(
-      rpart_correct == 0 & ranger_correct == 1
-      ~ 1,
-      .default = 0))
-
-n_only_rpart_correct = sum(conf.mat$only_rpart_correct)
-n_only_ranger_correct = sum(conf.mat$only_ranger_correct)
-
-mcnemar_stat = (abs(n_only_rpart_correct - n_only_ranger_correct) - 1)^2 / (n_only_rpart_correct + n_only_ranger_correct)
-mcnemar_stat
-
-# critical value for alpha = 5%, reject H0 if mcnemar_stat larger
-crit = qchisq(0.95, df = 1)
-
-mcnemar_stat > crit
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>conf.mat <span class="ot">=</span> conf.mat <span class="sc">%&gt;%</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>    <span class="at">rpart_correct =</span> <span class="fu">case_when</span>(</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>      truth <span class="sc">==</span> <span class="st">&quot;good&quot;</span> <span class="sc">&amp;</span> rpart <span class="sc">==</span> <span class="st">&quot;good&quot;</span> <span class="sc">|</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>        truth <span class="sc">==</span> <span class="st">&quot;bad&quot;</span> <span class="sc">&amp;</span> rpart <span class="sc">==</span> <span class="st">&quot;bad&quot;</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>      <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>      <span class="at">.default =</span> <span class="dv">0</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>    <span class="at">ranger_correct =</span> <span class="fu">case_when</span>(</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>      truth <span class="sc">==</span> <span class="st">&quot;good&quot;</span> <span class="sc">&amp;</span> ranger <span class="sc">==</span> <span class="st">&quot;good&quot;</span> <span class="sc">|</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>        truth <span class="sc">==</span> <span class="st">&quot;bad&quot;</span> <span class="sc">&amp;</span> ranger <span class="sc">==</span> <span class="st">&quot;bad&quot;</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>      <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>      <span class="at">.default =</span> <span class="dv">0</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>    <span class="at">only_rpart_correct =</span> <span class="fu">case_when</span>(</span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>      rpart_correct <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> ranger_correct <span class="sc">==</span> <span class="dv">0</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>      <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a>      <span class="at">.default =</span> <span class="dv">0</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a>    <span class="at">only_ranger_correct =</span> <span class="fu">case_when</span>(</span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a>      rpart_correct <span class="sc">==</span> <span class="dv">0</span> <span class="sc">&amp;</span> ranger_correct <span class="sc">==</span> <span class="dv">1</span></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a>      <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a>      <span class="at">.default =</span> <span class="dv">0</span>))</span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a></span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a>n_only_rpart_correct <span class="ot">=</span> <span class="fu">sum</span>(conf.mat<span class="sc">$</span>only_rpart_correct)</span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a>n_only_ranger_correct <span class="ot">=</span> <span class="fu">sum</span>(conf.mat<span class="sc">$</span>only_ranger_correct)</span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a></span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a>mcnemar_stat <span class="ot">=</span> (<span class="fu">abs</span>(n_only_rpart_correct <span class="sc">-</span> n_only_ranger_correct) <span class="sc">-</span> <span class="dv">1</span>)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (n_only_rpart_correct <span class="sc">+</span> n_only_ranger_correct)</span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a>mcnemar_stat</span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="do">## [1] 161.0539</span></span>
+<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a></span>
+<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a><span class="co"># critical value for alpha = 5%, reject H0 if mcnemar_stat larger</span></span>
+<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a>crit <span class="ot">=</span> <span class="fu">qchisq</span>(<span class="fl">0.95</span>, <span class="at">df =</span> <span class="dv">1</span>)</span>
+<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a></span>
+<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a>mcnemar_stat <span class="sc">&gt;</span> crit</span>
+<span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a><span class="do">## [1] TRUE</span></span></code></pre></div>
 <!-- We reject the null. This means that also for the McNemar test, the difference in performance is statistically significant. -->
+</div>
 </div>
 </div>
 <div id="two-algorithms-on-multiple-data-sets" class="section level1">
@@ -437,24 +457,21 @@ the following characteristics:</p>
 <li>number of instances between 500 and 10000</li>
 <li>no missing values</li>
 </ul>
-<!--
-
-### Solution:
+<div id="solution-5" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-otasks = list_oml_tasks(
-  type = "classif",
-  number_features = c(5, 10),
-  number_instances = c(500, 10000),
-  number_classes = 2,
-  number_missing_values = 0
-)
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>otasks <span class="ot">=</span> <span class="fu">list_oml_tasks</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">&quot;classif&quot;</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="at">number_features =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">10</span>),</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="at">number_instances =</span> <span class="fu">c</span>(<span class="dv">500</span>, <span class="dv">10000</span>),</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="at">number_classes =</span> <span class="dv">2</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  <span class="at">number_missing_values =</span> <span class="dv">0</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>)</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="do">## INFO  [16:16:18.429] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/list/number_instances/500..10000/number_features/5..10/number_classes/2/number_missing_values/0/type/1/limit/1000`, authenticated: `FALSE`}</span></span></code></pre></div>
+</div>
 </div>
 <div id="filter-tasks" class="section level2">
 <h2>2.2 Filter tasks</h2>
@@ -463,26 +480,23 @@ with balanced data sets where the ratio between the majority and
 minority class is smaller than 1.2. Also, remove tasks with a
 <code>data_id</code> of 720. You should receive a total number of 20
 tasks.</p>
-<!--
-
-### Solution:
+<div id="solution-6" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-otasks = otasks %>%
-  filter(data_id != 720) %>%
-  filter(MajorityClassSize / MinorityClassSize < 1.2) %>%
-  group_by(name) %>%
-  filter(row_number(data_id) == 1) %>%
-  group_by(data_id) %>%
-  filter(row_number(data_id) == 1)
-
-nrow(otasks)
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>otasks <span class="ot">=</span> otasks <span class="sc">%&gt;%</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  <span class="fu">filter</span>(data_id <span class="sc">!=</span> <span class="dv">720</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="fu">filter</span>(MajorityClassSize <span class="sc">/</span> MinorityClassSize <span class="sc">&lt;</span> <span class="fl">1.2</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="fu">group_by</span>(name) <span class="sc">%&gt;%</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">row_number</span>(data_id) <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  <span class="fu">group_by</span>(data_id) <span class="sc">%&gt;%</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">row_number</span>(data_id) <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="fu">nrow</span>(otasks)</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="do">## [1] 20</span></span></code></pre></div>
+</div>
 </div>
 <div id="benchmark-tasks" class="section level2">
 <h2>2.3 Benchmark tasks</h2>
@@ -503,58 +517,158 @@ cross-validation.</p>
 <code>design = benchmark_grid(tasklist, learners, resampling)</code> and
 evaluated with <code>benchmark(design)</code>.</p>
 </details>
-<!--
-
-### Solution:
+<div id="solution-7" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-tasklist = lapply(otasks$task_id, FUN = otsk)
-unlist(lapply(tasklist, FUN = function(x) x[["data_name"]]))
-
-learners = lrns(c("classif.rpart", "classif.ranger"))
-poe = po("encode", method = "one-hot")
-learners = lapply(learners, FUN = function(x) {po("encode") %>>% x})
-
-resampling = rsmp("cv", folds = 3)
-design = benchmark_grid(tasklist, learners, resampling)
-
-bmr = benchmark(design)
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>tasklist <span class="ot">=</span> <span class="fu">lapply</span>(otasks<span class="sc">$</span>task_id, <span class="at">FUN =</span> otsk)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">unlist</span>(<span class="fu">lapply</span>(tasklist, <span class="at">FUN =</span> <span class="cf">function</span>(x) x[[<span class="st">&quot;data_name&quot;</span>]]))</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="do">## INFO  [16:16:36.817] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3053`, authenticated: `FALSE`}</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="do">## INFO  [16:16:36.903] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3055`, authenticated: `FALSE`}</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="do">## INFO  [16:16:36.974] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3603`, authenticated: `FALSE`}</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="do">## INFO  [16:16:37.074] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3609`, authenticated: `FALSE`}</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="do">## INFO  [16:16:37.166] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3615`, authenticated: `FALSE`}</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="do">## INFO  [16:16:37.271] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3616`, authenticated: `FALSE`}</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="do">## INFO  [16:16:37.338] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3636`, authenticated: `FALSE`}</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="do">## INFO  [16:16:37.407] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3664`, authenticated: `FALSE`}</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="do">## INFO  [16:16:37.472] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3668`, authenticated: `FALSE`}</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="do">## INFO  [16:16:37.540] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3672`, authenticated: `FALSE`}</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="do">## INFO  [16:16:37.623] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3681`, authenticated: `FALSE`}</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="do">## INFO  [16:16:37.711] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3684`, authenticated: `FALSE`}</span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="do">## INFO  [16:16:37.812] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3706`, authenticated: `FALSE`}</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="do">## INFO  [16:16:37.904] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3734`, authenticated: `FALSE`}</span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="do">## INFO  [16:16:37.978] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3735`, authenticated: `FALSE`}</span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="do">## INFO  [16:16:38.067] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3747`, authenticated: `FALSE`}</span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="do">## INFO  [16:16:38.139] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3749`, authenticated: `FALSE`}</span></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="do">## INFO  [16:16:38.226] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/3860`, authenticated: `FALSE`}</span></span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a><span class="do">## INFO  [16:16:38.323] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/146216`, authenticated: `FALSE`}</span></span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a><span class="do">## INFO  [16:16:38.414] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/361038`, authenticated: `FALSE`}</span></span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a><span class="do">##  [1] &quot;monks-problems-1&quot; &quot;monks-problems-3&quot; &quot;space_ga&quot;         &quot;fri_c1_1000_5&quot;    &quot;fri_c3_500_5&quot;     &quot;pm10&quot;            </span></span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="do">##  [7] &quot;strikes&quot;          &quot;fri_c0_1000_5&quot;    &quot;delta_ailerons&quot;   &quot;kin8nm&quot;           &quot;puma8NH&quot;          &quot;delta_elevators&quot; </span></span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="do">## [13] &quot;stock&quot;            &quot;fri_c1_500_5&quot;     &quot;pollen&quot;           &quot;fri_c0_500_5&quot;     &quot;no2&quot;              &quot;balance-scale&quot;   </span></span>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="do">## [19] &quot;threeOf9&quot;         &quot;phoneme&quot;</span></span>
+<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a></span>
+<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a>learners <span class="ot">=</span> <span class="fu">lrns</span>(<span class="fu">c</span>(<span class="st">&quot;classif.rpart&quot;</span>, <span class="st">&quot;classif.ranger&quot;</span>))</span>
+<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a>poe <span class="ot">=</span> <span class="fu">po</span>(<span class="st">&quot;encode&quot;</span>, <span class="at">method =</span> <span class="st">&quot;one-hot&quot;</span>)</span>
+<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a>learners <span class="ot">=</span> <span class="fu">lapply</span>(learners, <span class="at">FUN =</span> <span class="cf">function</span>(x) {<span class="fu">po</span>(<span class="st">&quot;encode&quot;</span>) <span class="sc">%&gt;&gt;%</span> x})</span>
+<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a></span>
+<span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a>resampling <span class="ot">=</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> <span class="dv">3</span>)</span>
+<span id="cb9-33"><a href="#cb9-33" tabindex="-1"></a>design <span class="ot">=</span> <span class="fu">benchmark_grid</span>(tasklist, learners, resampling)</span>
+<span id="cb9-34"><a href="#cb9-34" tabindex="-1"></a><span class="do">## INFO  [16:16:38.799] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/333`, authenticated: `FALSE`}</span></span>
+<span id="cb9-35"><a href="#cb9-35" tabindex="-1"></a><span class="do">## INFO  [16:16:38.887] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/333`, authenticated: `FALSE`}</span></span>
+<span id="cb9-36"><a href="#cb9-36" tabindex="-1"></a><span class="do">## INFO  [16:16:38.975] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/52236/monks-problems-1.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb9-37"><a href="#cb9-37" tabindex="-1"></a><span class="do">## INFO  [16:16:43.343] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/335`, authenticated: `FALSE`}</span></span>
+<span id="cb9-38"><a href="#cb9-38" tabindex="-1"></a><span class="do">## INFO  [16:16:43.407] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/335`, authenticated: `FALSE`}</span></span>
+<span id="cb9-39"><a href="#cb9-39" tabindex="-1"></a><span class="do">## INFO  [16:16:43.467] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/52238/monks-problems-3.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb9-40"><a href="#cb9-40" tabindex="-1"></a><span class="do">## INFO  [16:16:43.603] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/737`, authenticated: `FALSE`}</span></span>
+<span id="cb9-41"><a href="#cb9-41" tabindex="-1"></a><span class="do">## INFO  [16:16:43.666] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/737`, authenticated: `FALSE`}</span></span>
+<span id="cb9-42"><a href="#cb9-42" tabindex="-1"></a><span class="do">## INFO  [16:16:43.740] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53271/space_ga.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb9-43"><a href="#cb9-43" tabindex="-1"></a><span class="do">## INFO  [16:16:44.026] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/743`, authenticated: `FALSE`}</span></span>
+<span id="cb9-44"><a href="#cb9-44" tabindex="-1"></a><span class="do">## INFO  [16:16:44.084] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/743`, authenticated: `FALSE`}</span></span>
+<span id="cb9-45"><a href="#cb9-45" tabindex="-1"></a><span class="do">## INFO  [16:16:44.147] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53277/fri_c1_1000_5.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb9-46"><a href="#cb9-46" tabindex="-1"></a><span class="do">## INFO  [16:16:44.282] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/749`, authenticated: `FALSE`}</span></span>
+<span id="cb9-47"><a href="#cb9-47" tabindex="-1"></a><span class="do">## INFO  [16:16:44.373] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/749`, authenticated: `FALSE`}</span></span>
+<span id="cb9-48"><a href="#cb9-48" tabindex="-1"></a><span class="do">## INFO  [16:16:44.448] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53283/fri_c3_500_5.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb9-49"><a href="#cb9-49" tabindex="-1"></a><span class="do">## INFO  [16:16:44.550] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/750`, authenticated: `FALSE`}</span></span>
+<span id="cb9-50"><a href="#cb9-50" tabindex="-1"></a><span class="do">## INFO  [16:16:44.614] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/750`, authenticated: `FALSE`}</span></span>
+<span id="cb9-51"><a href="#cb9-51" tabindex="-1"></a><span class="do">## INFO  [16:16:44.693] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53284/pm10.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb9-52"><a href="#cb9-52" tabindex="-1"></a><span class="do">## INFO  [16:16:44.816] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/770`, authenticated: `FALSE`}</span></span>
+<span id="cb9-53"><a href="#cb9-53" tabindex="-1"></a><span class="do">## INFO  [16:16:44.882] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/770`, authenticated: `FALSE`}</span></span>
+<span id="cb9-54"><a href="#cb9-54" tabindex="-1"></a><span class="do">## INFO  [16:16:44.966] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53304/strikes.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb9-55"><a href="#cb9-55" tabindex="-1"></a><span class="do">## INFO  [16:16:45.055] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/799`, authenticated: `FALSE`}</span></span>
+<span id="cb9-56"><a href="#cb9-56" tabindex="-1"></a><span class="do">## INFO  [16:16:45.119] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/799`, authenticated: `FALSE`}</span></span>
+<span id="cb9-57"><a href="#cb9-57" tabindex="-1"></a><span class="do">## INFO  [16:16:45.170] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53333/fri_c0_1000_5.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb9-58"><a href="#cb9-58" tabindex="-1"></a><span class="do">## INFO  [16:16:45.303] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/803`, authenticated: `FALSE`}</span></span>
+<span id="cb9-59"><a href="#cb9-59" tabindex="-1"></a><span class="do">## INFO  [16:16:45.367] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/803`, authenticated: `FALSE`}</span></span>
+<span id="cb9-60"><a href="#cb9-60" tabindex="-1"></a><span class="do">## INFO  [16:16:45.438] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53337/delta_ailerons.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb9-61"><a href="#cb9-61" tabindex="-1"></a><span class="do">## INFO  [16:16:45.691] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/807`, authenticated: `FALSE`}</span></span>
+<span id="cb9-62"><a href="#cb9-62" tabindex="-1"></a><span class="do">## INFO  [16:16:45.757] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/807`, authenticated: `FALSE`}</span></span>
+<span id="cb9-63"><a href="#cb9-63" tabindex="-1"></a><span class="do">## INFO  [16:16:45.831] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53341/kin8nm.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb9-64"><a href="#cb9-64" tabindex="-1"></a><span class="do">## INFO  [16:16:46.170] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/816`, authenticated: `FALSE`}</span></span>
+<span id="cb9-65"><a href="#cb9-65" tabindex="-1"></a><span class="do">## INFO  [16:16:46.243] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/816`, authenticated: `FALSE`}</span></span>
+<span id="cb9-66"><a href="#cb9-66" tabindex="-1"></a><span class="do">## INFO  [16:16:46.347] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53350/puma8NH.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb9-67"><a href="#cb9-67" tabindex="-1"></a><span class="do">## INFO  [16:16:46.723] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/819`, authenticated: `FALSE`}</span></span>
+<span id="cb9-68"><a href="#cb9-68" tabindex="-1"></a><span class="do">## INFO  [16:16:46.789] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/819`, authenticated: `FALSE`}</span></span>
+<span id="cb9-69"><a href="#cb9-69" tabindex="-1"></a><span class="do">## INFO  [16:16:46.922] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53353/delta_elevators.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb9-70"><a href="#cb9-70" tabindex="-1"></a><span class="do">## INFO  [16:16:47.180] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/841`, authenticated: `FALSE`}</span></span>
+<span id="cb9-71"><a href="#cb9-71" tabindex="-1"></a><span class="do">## INFO  [16:16:47.269] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/841`, authenticated: `FALSE`}</span></span>
+<span id="cb9-72"><a href="#cb9-72" tabindex="-1"></a><span class="do">## INFO  [16:16:47.358] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53375/stock.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb9-73"><a href="#cb9-73" tabindex="-1"></a><span class="do">## INFO  [16:16:47.615] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/870`, authenticated: `FALSE`}</span></span>
+<span id="cb9-74"><a href="#cb9-74" tabindex="-1"></a><span class="do">## INFO  [16:16:47.691] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/870`, authenticated: `FALSE`}</span></span>
+<span id="cb9-75"><a href="#cb9-75" tabindex="-1"></a><span class="do">## INFO  [16:16:47.763] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53404/fri_c1_500_5.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb9-76"><a href="#cb9-76" tabindex="-1"></a><span class="do">## INFO  [16:16:47.920] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/871`, authenticated: `FALSE`}</span></span>
+<span id="cb9-77"><a href="#cb9-77" tabindex="-1"></a><span class="do">## INFO  [16:16:47.995] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/871`, authenticated: `FALSE`}</span></span>
+<span id="cb9-78"><a href="#cb9-78" tabindex="-1"></a><span class="do">## INFO  [16:16:48.093] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53405/pollen.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb9-79"><a href="#cb9-79" tabindex="-1"></a><span class="do">## INFO  [16:16:48.374] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/884`, authenticated: `FALSE`}</span></span>
+<span id="cb9-80"><a href="#cb9-80" tabindex="-1"></a><span class="do">## INFO  [16:16:48.456] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/884`, authenticated: `FALSE`}</span></span>
+<span id="cb9-81"><a href="#cb9-81" tabindex="-1"></a><span class="do">## INFO  [16:16:48.540] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53418/fri_c0_500_5.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb9-82"><a href="#cb9-82" tabindex="-1"></a><span class="do">## INFO  [16:16:48.674] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/886`, authenticated: `FALSE`}</span></span>
+<span id="cb9-83"><a href="#cb9-83" tabindex="-1"></a><span class="do">## INFO  [16:16:48.762] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/886`, authenticated: `FALSE`}</span></span>
+<span id="cb9-84"><a href="#cb9-84" tabindex="-1"></a><span class="do">## INFO  [16:16:48.864] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53420/no2.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb9-85"><a href="#cb9-85" tabindex="-1"></a><span class="do">## INFO  [16:16:49.115] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/997`, authenticated: `FALSE`}</span></span>
+<span id="cb9-86"><a href="#cb9-86" tabindex="-1"></a><span class="do">## INFO  [16:16:49.197] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/997`, authenticated: `FALSE`}</span></span>
+<span id="cb9-87"><a href="#cb9-87" tabindex="-1"></a><span class="do">## INFO  [16:16:49.294] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/53531/balance-scale.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb9-88"><a href="#cb9-88" tabindex="-1"></a><span class="do">## INFO  [16:16:49.519] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/40690`, authenticated: `FALSE`}</span></span>
+<span id="cb9-89"><a href="#cb9-89" tabindex="-1"></a><span class="do">## INFO  [16:16:49.604] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/40690`, authenticated: `FALSE`}</span></span>
+<span id="cb9-90"><a href="#cb9-90" tabindex="-1"></a><span class="do">## INFO  [16:16:49.691] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/4965267/threeOf9.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb9-91"><a href="#cb9-91" tabindex="-1"></a><span class="do">## INFO  [16:16:49.890] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/44075`, authenticated: `FALSE`}</span></span>
+<span id="cb9-92"><a href="#cb9-92" tabindex="-1"></a><span class="do">## INFO  [16:16:49.973] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/44075`, authenticated: `FALSE`}</span></span>
+<span id="cb9-93"><a href="#cb9-93" tabindex="-1"></a><span class="do">## INFO  [16:16:50.069] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/22103171/phoneme.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb9-94"><a href="#cb9-94" tabindex="-1"></a></span>
+<span id="cb9-95"><a href="#cb9-95" tabindex="-1"></a>bmr <span class="ot">=</span> <span class="fu">benchmark</span>(design)</span></code></pre></div>
+</div>
 </div>
 <div id="compare-learners" class="section level2">
 <h2>2.4 Compare Learners</h2>
 <p>Apply the <code>$aggregate()</code> function to the <code>mlr3</code>
 benchmark object and compare the ranks of both algorithms on all
 tasks.</p>
-<!--
-
-### Solution:
+<div id="solution-8" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-aggr = bmr$aggregate()
-aggr = aggr %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.ranger", "ranger")) %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.rpart", "rpart"))
-
-ranktable_wide_rpart_ranger = aggr %>%
-  group_by(task_id) %>%
-  mutate(rank_on_task = rank(classif.ce)) %>%
-  mutate(ce_rank = rank_on_task) %>%
-  select(c(task_id, learner_id, ce_rank)) %>%
-  pivot_wider(names_from = learner_id, values_from = ce_rank)
-
-ranktable_wide_rpart_ranger
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>aggr <span class="ot">=</span> bmr<span class="sc">$</span><span class="fu">aggregate</span>()</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>aggr <span class="ot">=</span> aggr <span class="sc">%&gt;%</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">learner_id =</span> <span class="fu">replace</span>(learner_id, learner_id <span class="sc">==</span> <span class="st">&quot;encode.classif.ranger&quot;</span>, <span class="st">&quot;ranger&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">learner_id =</span> <span class="fu">replace</span>(learner_id, learner_id <span class="sc">==</span> <span class="st">&quot;encode.classif.rpart&quot;</span>, <span class="st">&quot;rpart&quot;</span>))</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>ranktable_wide_rpart_ranger <span class="ot">=</span> aggr <span class="sc">%&gt;%</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  <span class="fu">group_by</span>(task_id) <span class="sc">%&gt;%</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">rank_on_task =</span> <span class="fu">rank</span>(classif.ce)) <span class="sc">%&gt;%</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ce_rank =</span> rank_on_task) <span class="sc">%&gt;%</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">c</span>(task_id, learner_id, ce_rank)) <span class="sc">%&gt;%</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> learner_id, <span class="at">values_from =</span> ce_rank)</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>ranktable_wide_rpart_ranger</span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="do">## # A tibble: 20 × 3</span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="do">## # Groups:   task_id [20]</span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="do">##    task_id          rpart ranger</span></span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="do">##    &lt;chr&gt;            &lt;dbl&gt;  &lt;dbl&gt;</span></span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="do">##  1 monks-problems-1     2      1</span></span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="do">##  2 monks-problems-3     1      2</span></span>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a><span class="do">##  3 space_ga             2      1</span></span>
+<span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a><span class="do">##  4 fri_c1_1000_5        2      1</span></span>
+<span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a><span class="do">##  5 fri_c3_500_5         2      1</span></span>
+<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a><span class="do">##  6 pm10                 2      1</span></span>
+<span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a><span class="do">##  7 strikes              2      1</span></span>
+<span id="cb10-25"><a href="#cb10-25" tabindex="-1"></a><span class="do">##  8 fri_c0_1000_5        2      1</span></span>
+<span id="cb10-26"><a href="#cb10-26" tabindex="-1"></a><span class="do">##  9 delta_ailerons       2      1</span></span>
+<span id="cb10-27"><a href="#cb10-27" tabindex="-1"></a><span class="do">## 10 kin8nm               2      1</span></span>
+<span id="cb10-28"><a href="#cb10-28" tabindex="-1"></a><span class="do">## 11 puma8NH              2      1</span></span>
+<span id="cb10-29"><a href="#cb10-29" tabindex="-1"></a><span class="do">## 12 delta_elevators      2      1</span></span>
+<span id="cb10-30"><a href="#cb10-30" tabindex="-1"></a><span class="do">## 13 stock                2      1</span></span>
+<span id="cb10-31"><a href="#cb10-31" tabindex="-1"></a><span class="do">## 14 fri_c1_500_5         2      1</span></span>
+<span id="cb10-32"><a href="#cb10-32" tabindex="-1"></a><span class="do">## 15 pollen               1      2</span></span>
+<span id="cb10-33"><a href="#cb10-33" tabindex="-1"></a><span class="do">## 16 fri_c0_500_5         2      1</span></span>
+<span id="cb10-34"><a href="#cb10-34" tabindex="-1"></a><span class="do">## 17 no2                  2      1</span></span>
+<span id="cb10-35"><a href="#cb10-35" tabindex="-1"></a><span class="do">## 18 balance-scale        2      1</span></span>
+<span id="cb10-36"><a href="#cb10-36" tabindex="-1"></a><span class="do">## 19 threeOf9             2      1</span></span>
+<span id="cb10-37"><a href="#cb10-37" tabindex="-1"></a><span class="do">## 20 phoneme              2      1</span></span></code></pre></div>
+</div>
 </div>
 <div id="wilcoxon-test" class="section level2">
 <h2>2.5 Wilcoxon test</h2>
@@ -562,27 +676,24 @@ ranktable_wide_rpart_ranger
 can use <code>qsignrank(p = 0.05 / 2, n = M)</code> to compute the
 critical value for the lower tail of the two-sided test for a 5%
 significance level.</p>
-<!--
-
-### Solution:
+<div id="solution-9" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-# Test Statistic
-r_plus = sum(as.numeric(ranktable_wide_rpart_ranger$rpart == 1))
-r_minus = sum(as.numeric(ranktable_wide_rpart_ranger$rpart == 2))
-M = nrow(ranktable_wide_rpart_ranger)
-wilcoxon = (min(r_plus, r_minus) - ((1 / 4) * M * (M + 1))) / sqrt((1 / 24) * M * (M + 1) * (2 * M + 1)) 
-# Critical value for the lower tail
-lower_crit <- qsignrank(p = 0.05 / 2, n = M)
-# Perform test
-wilcoxon < lower_crit
-# We reject H0
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># Test Statistic</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>r_plus <span class="ot">=</span> <span class="fu">sum</span>(<span class="fu">as.numeric</span>(ranktable_wide_rpart_ranger<span class="sc">$</span>rpart <span class="sc">==</span> <span class="dv">1</span>))</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>r_minus <span class="ot">=</span> <span class="fu">sum</span>(<span class="fu">as.numeric</span>(ranktable_wide_rpart_ranger<span class="sc">$</span>rpart <span class="sc">==</span> <span class="dv">2</span>))</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>M <span class="ot">=</span> <span class="fu">nrow</span>(ranktable_wide_rpart_ranger)</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>wilcoxon <span class="ot">=</span> (<span class="fu">min</span>(r_plus, r_minus) <span class="sc">-</span> ((<span class="dv">1</span> <span class="sc">/</span> <span class="dv">4</span>) <span class="sc">*</span> M <span class="sc">*</span> (M <span class="sc">+</span> <span class="dv">1</span>))) <span class="sc">/</span> <span class="fu">sqrt</span>((<span class="dv">1</span> <span class="sc">/</span> <span class="dv">24</span>) <span class="sc">*</span> M <span class="sc">*</span> (M <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">*</span> (<span class="dv">2</span> <span class="sc">*</span> M <span class="sc">+</span> <span class="dv">1</span>)) </span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co"># Critical value for the lower tail</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>lower_crit <span class="ot">&lt;-</span> <span class="fu">qsignrank</span>(<span class="at">p =</span> <span class="fl">0.05</span> <span class="sc">/</span> <span class="dv">2</span>, <span class="at">n =</span> M)</span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co"># Perform test</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>wilcoxon <span class="sc">&lt;</span> lower_crit</span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="do">## [1] TRUE</span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="co"># We reject H0</span></span></code></pre></div>
+</div>
 </div>
 </div>
 <div id="multiple-algorithms-on-multiple-data-sets" class="section level1">
@@ -593,34 +704,30 @@ wilcoxon < lower_crit
 with the learners “classif.featureless”, “classif.cv_glmnet”,
 “classif.rpart”, “classif.ranger”, “classif.kknn”, and “classif.svm”. As
 before, use one-hot encodings.</p>
-<!--
-
-### Solution:
+<div id="solution-10" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-learners = lapply(c("classif.featureless",  "classif.cv_glmnet", "classif.rpart", "classif.ranger", "classif.kknn", "classif.svm"), lrn)
-poe = po("encode", method = "one-hot")
-learners = lapply(learners, FUN = function(x) {po("encode") %>>% x})
-
-resampling = rsmp("cv", folds = 3)
-design = benchmark_grid(tasklist, learners, resampling)
-
-bmr = benchmark(design)
-
-aggr = bmr$aggregate()
-aggr = aggr %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.featureless", "featureless")) %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.ranger", "ranger")) %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.kknn", "kknn")) %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.rpart", "rpart")) %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.svm", "svm")) %>%
-  mutate(learner_id = replace(learner_id, learner_id == "encode.classif.cv_glmnet", "cv_glmnet"))
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>learners <span class="ot">=</span> <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="st">&quot;classif.featureless&quot;</span>,  <span class="st">&quot;classif.cv_glmnet&quot;</span>, <span class="st">&quot;classif.rpart&quot;</span>, <span class="st">&quot;classif.ranger&quot;</span>, <span class="st">&quot;classif.kknn&quot;</span>, <span class="st">&quot;classif.svm&quot;</span>), lrn)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>poe <span class="ot">=</span> <span class="fu">po</span>(<span class="st">&quot;encode&quot;</span>, <span class="at">method =</span> <span class="st">&quot;one-hot&quot;</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>learners <span class="ot">=</span> <span class="fu">lapply</span>(learners, <span class="at">FUN =</span> <span class="cf">function</span>(x) {<span class="fu">po</span>(<span class="st">&quot;encode&quot;</span>) <span class="sc">%&gt;&gt;%</span> x})</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>resampling <span class="ot">=</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> <span class="dv">3</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>design <span class="ot">=</span> <span class="fu">benchmark_grid</span>(tasklist, learners, resampling)</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>bmr <span class="ot">=</span> <span class="fu">benchmark</span>(design)</span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>aggr <span class="ot">=</span> bmr<span class="sc">$</span><span class="fu">aggregate</span>()</span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>aggr <span class="ot">=</span> aggr <span class="sc">%&gt;%</span></span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">learner_id =</span> <span class="fu">replace</span>(learner_id, learner_id <span class="sc">==</span> <span class="st">&quot;encode.classif.featureless&quot;</span>, <span class="st">&quot;featureless&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">learner_id =</span> <span class="fu">replace</span>(learner_id, learner_id <span class="sc">==</span> <span class="st">&quot;encode.classif.ranger&quot;</span>, <span class="st">&quot;ranger&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">learner_id =</span> <span class="fu">replace</span>(learner_id, learner_id <span class="sc">==</span> <span class="st">&quot;encode.classif.kknn&quot;</span>, <span class="st">&quot;kknn&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">learner_id =</span> <span class="fu">replace</span>(learner_id, learner_id <span class="sc">==</span> <span class="st">&quot;encode.classif.rpart&quot;</span>, <span class="st">&quot;rpart&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">learner_id =</span> <span class="fu">replace</span>(learner_id, learner_id <span class="sc">==</span> <span class="st">&quot;encode.classif.svm&quot;</span>, <span class="st">&quot;svm&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">learner_id =</span> <span class="fu">replace</span>(learner_id, learner_id <span class="sc">==</span> <span class="st">&quot;encode.classif.cv_glmnet&quot;</span>, <span class="st">&quot;cv_glmnet&quot;</span>))</span></code></pre></div>
+</div>
 </div>
 <div id="friedman-test" class="section level2">
 <h2>3.2 Friedman test</h2>
@@ -629,60 +736,79 @@ omnibus test such as the Friedman test. Compute a rank table that tells
 you the rank of each algorithm for each task. Then, compute the average
 rank of each algorithm and proceed with the computation of the Friedman
 statistic.</p>
-<!--
-
-### Solution:
+<div id="solution-11" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-ranktable = aggr %>%
-  group_by(task_id) %>%
-  mutate(rank_on_task = rank(classif.ce)) %>%
-  mutate(ce_rank = paste(round(classif.ce, 4), " (", rank_on_task, ")", sep =  ""))
-
-averageranks = ranktable %>%
-  group_by(learner_id) %>%
-  summarize(average_rank_on_task = mean(rank_on_task))
-
-meanrank = (1 / nrow(ranktable)) * sum(ranktable$rank_on_task)
-
-sstotal = length(tasklist) *
-  sum((averageranks$average_rank_on_task- meanrank)^2)
-
-sserror = (1 / (length(tasklist) * (length(learners) - 1))) * sum((ranktable$rank_on_task - meanrank)^2)
-
-friedmanstat = sstotal / sserror
-friedmanstat
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>ranktable <span class="ot">=</span> aggr <span class="sc">%&gt;%</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>  <span class="fu">group_by</span>(task_id) <span class="sc">%&gt;%</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">rank_on_task =</span> <span class="fu">rank</span>(classif.ce)) <span class="sc">%&gt;%</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ce_rank =</span> <span class="fu">paste</span>(<span class="fu">round</span>(classif.ce, <span class="dv">4</span>), <span class="st">&quot; (&quot;</span>, rank_on_task, <span class="st">&quot;)&quot;</span>, <span class="at">sep =</span>  <span class="st">&quot;&quot;</span>))</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>averageranks <span class="ot">=</span> ranktable <span class="sc">%&gt;%</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>  <span class="fu">group_by</span>(learner_id) <span class="sc">%&gt;%</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">average_rank_on_task =</span> <span class="fu">mean</span>(rank_on_task))</span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>meanrank <span class="ot">=</span> (<span class="dv">1</span> <span class="sc">/</span> <span class="fu">nrow</span>(ranktable)) <span class="sc">*</span> <span class="fu">sum</span>(ranktable<span class="sc">$</span>rank_on_task)</span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>sstotal <span class="ot">=</span> <span class="fu">length</span>(tasklist) <span class="sc">*</span></span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a>  <span class="fu">sum</span>((averageranks<span class="sc">$</span>average_rank_on_task<span class="sc">-</span> meanrank)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a></span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a>sserror <span class="ot">=</span> (<span class="dv">1</span> <span class="sc">/</span> (<span class="fu">length</span>(tasklist) <span class="sc">*</span> (<span class="fu">length</span>(learners) <span class="sc">-</span> <span class="dv">1</span>))) <span class="sc">*</span> <span class="fu">sum</span>((ranktable<span class="sc">$</span>rank_on_task <span class="sc">-</span> meanrank)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a>friedmanstat <span class="ot">=</span> sstotal <span class="sc">/</span> sserror</span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a>friedmanstat</span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a><span class="do">## [1] 67.83046</span></span></code></pre></div>
+</div>
 </div>
 <div id="friedman-test-stats" class="section level2">
 <h2>3.3 Friedman test (stats)</h2>
 <p>Run a sanity check with the <code>friedman.test</code> function
 implemented in the <code>stats</code> package.</p>
-<!--
-
-### Solution:
+<div id="solution-12" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-ce_table_wide = ranktable %>%
-  select(c(task_id, learner_id, classif.ce)) %>%
-  pivot_wider(names_from = learner_id, values_from = classif.ce) %>%
-  ungroup() %>%
-  select(-task_id) %>%
-  as.matrix()
-ce_table_wide
-
-friedman.test(ce_table_wide)
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>ce_table_wide <span class="ot">=</span> ranktable <span class="sc">%&gt;%</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">c</span>(task_id, learner_id, classif.ce)) <span class="sc">%&gt;%</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> learner_id, <span class="at">values_from =</span> classif.ce) <span class="sc">%&gt;%</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>task_id) <span class="sc">%&gt;%</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>  <span class="fu">as.matrix</span>()</span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>ce_table_wide</span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="do">##       featureless  cv_glmnet      rpart      ranger       kknn         svm</span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="do">##  [1,]   0.5413639 0.25354064 0.12405309 0.005376344 0.01980045 0.000000000</span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="do">##  [2,]   0.4801312 0.03611438 0.01083040 0.010830396 0.01444379 0.014453584</span></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="do">##  [3,]   0.5059476 0.16253365 0.21950460 0.164786215 0.18989238 0.150948464</span></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="do">##  [4,]   0.4570169 0.37303171 0.14500429 0.082001163 0.10801520 0.089011167</span></span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="do">##  [5,]   0.4740519 0.37603107 0.16798932 0.116032994 0.13198903 0.123992978</span></span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a><span class="do">##  [6,]   0.5280523 0.52805233 0.41791117 0.355998846 0.43202751 0.431967391</span></span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a><span class="do">##  [7,]   0.5375797 0.39843271 0.08641578 0.041574653 0.15679058 0.260865231</span></span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a><span class="do">##  [8,]   0.5229841 0.15499931 0.18901536 0.119985255 0.13398428 0.111000222</span></span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a><span class="do">##  [9,]   0.4693501 0.06003645 0.06312234 0.055267063 0.06228112 0.058633712</span></span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a><span class="do">## [10,]   0.4912109 0.26892058 0.27783031 0.161375945 0.15771509 0.109618771</span></span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a><span class="do">## [11,]   0.5023189 0.17431605 0.19323612 0.173094918 0.22314417 0.172240218</span></span>
+<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a><span class="do">## [12,]   0.4972157 0.11926072 0.12997904 0.119470855 0.14132643 0.117369462</span></span>
+<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a><span class="do">## [13,]   0.4863102 0.17789402 0.07578964 0.037894821 0.03789482 0.063151380</span></span>
+<span id="cb14-22"><a href="#cb14-22" tabindex="-1"></a><span class="do">## [14,]   0.4660679 0.35001082 0.15399322 0.110008898 0.15797321 0.133997066</span></span>
+<span id="cb14-23"><a href="#cb14-23" tabindex="-1"></a><span class="do">## [15,]   0.5109162 0.51039616 0.51377609 0.509099959 0.51636931 0.503903196</span></span>
+<span id="cb14-24"><a href="#cb14-24" tabindex="-1"></a><span class="do">## [16,]   0.5200082 0.18398143 0.18402953 0.155941130 0.20592550 0.147945074</span></span>
+<span id="cb14-25"><a href="#cb14-25" tabindex="-1"></a><span class="do">## [17,]   0.5079961 0.47206791 0.37997499 0.362010918 0.40193108 0.379974990</span></span>
+<span id="cb14-26"><a href="#cb14-26" tabindex="-1"></a><span class="do">## [18,]   0.4608177 0.04801558 0.16155993 0.084813213 0.09283370 0.033615507</span></span>
+<span id="cb14-27"><a href="#cb14-27" tabindex="-1"></a><span class="do">## [19,]   0.4647976 0.18950808 0.14263273 0.017601193 0.13281734 0.007820204</span></span>
+<span id="cb14-28"><a href="#cb14-28" tabindex="-1"></a><span class="do">## [20,]   0.5271080 0.26009280 0.20618686 0.125479073 0.14502351 0.165198374</span></span>
+<span id="cb14-29"><a href="#cb14-29" tabindex="-1"></a></span>
+<span id="cb14-30"><a href="#cb14-30" tabindex="-1"></a><span class="fu">friedman.test</span>(ce_table_wide)</span>
+<span id="cb14-31"><a href="#cb14-31" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb14-32"><a href="#cb14-32" tabindex="-1"></a><span class="do">##  Friedman rank sum test</span></span>
+<span id="cb14-33"><a href="#cb14-33" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb14-34"><a href="#cb14-34" tabindex="-1"></a><span class="do">## data:  ce_table_wide</span></span>
+<span id="cb14-35"><a href="#cb14-35" tabindex="-1"></a><span class="do">## Friedman chi-squared = 67.83, df = 5, p-value = 0.0000000000002896</span></span></code></pre></div>
+</div>
 </div>
 <div id="nemenyi-test" class="section level2">
 <h2>3.4 Nemenyi test</h2>
@@ -691,21 +817,29 @@ differently, we can run pairwise comparisons with post-hoc tests such as
 the Nemenyi or Bonferroni-Dunn test.</p>
 <p>Use the function <code>frdAllPairsNemenyiTest</code> from the
 <code>PMCMRplus</code> package to run all pairwise Nemenyi tests.</p>
-<!--
-
-### Solution:
+<div id="solution-13" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-rownames(ce_table_wide) = LETTERS[1:nrow(ce_table_wide)]
-nemenyi_test = frdAllPairsNemenyiTest(y = ce_table_wide)
-nemenyi_test$statistic
-nemenyi_test$p.value
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">rownames</span>(ce_table_wide) <span class="ot">=</span> LETTERS[<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(ce_table_wide)]</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>nemenyi_test <span class="ot">=</span> <span class="fu">frdAllPairsNemenyiTest</span>(<span class="at">y =</span> ce_table_wide)</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>nemenyi_test<span class="sc">$</span>statistic</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="do">##           featureless cv_glmnet     rpart    ranger     kknn</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="do">## cv_glmnet    4.302823        NA        NA        NA       NA</span></span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="do">## rpart        4.840676 0.5378529        NA        NA       NA</span></span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="do">## ranger       9.860636 5.5578130 5.0199602        NA       NA</span></span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="do">## kknn         5.498052 1.1952286 0.6573757 4.3625844       NA</span></span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="do">## svm          9.561829 5.2590059 4.7211530 0.2988072 4.063777</span></span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a>nemenyi_test<span class="sc">$</span>p.value</span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a><span class="do">##                   featureless   cv_glmnet       rpart     ranger       kknn</span></span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a><span class="do">## cv_glmnet 0.02837197129588753          NA          NA         NA         NA</span></span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a><span class="do">## rpart     0.00814557617108247 0.998971463          NA         NA         NA</span></span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a><span class="do">## ranger    0.00000000004673151 0.001194554 0.005177601         NA         NA</span></span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a><span class="do">## kknn      0.00141696717571715 0.958997390 0.997302554 0.02490802         NA</span></span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a><span class="do">## svm       0.00000000020521607 0.002751490 0.010906812 0.99994248 0.04673625</span></span></code></pre></div>
+</div>
 </div>
 <div id="compute-critical-difference" class="section level2">
 <h2>3.5 Compute critical difference</h2>
@@ -716,23 +850,21 @@ nemenyi_test$p.value
 </summary>
 <p>Use the <code>qtukey</code> function.</p>
 </details>
-<!--
-
-### Solution:
+<div id="solution-14" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-mean_diff_rpart_ranger = averageranks[averageranks$learner_id == "rpart", 2] - averageranks[averageranks$learner_id == "ranger", 2]
-# # critical mean rank difference
-crit_value_mean_rank_diff = (qtukey(p = 0.05, df = Inf, nmeans = 6, lower.tail = FALSE) / sqrt(2)) * (sqrt((6 * (6 + 1)) / (6 * 16)))
-
-mean_diff_rpart_ranger > crit_value_mean_rank_diff
-# reject H_0!
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>mean_diff_rpart_ranger <span class="ot">=</span> averageranks[averageranks<span class="sc">$</span>learner_id <span class="sc">==</span> <span class="st">&quot;rpart&quot;</span>, <span class="dv">2</span>] <span class="sc">-</span> averageranks[averageranks<span class="sc">$</span>learner_id <span class="sc">==</span> <span class="st">&quot;ranger&quot;</span>, <span class="dv">2</span>]</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="co"># # critical mean rank difference</span></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>crit_value_mean_rank_diff <span class="ot">=</span> (<span class="fu">qtukey</span>(<span class="at">p =</span> <span class="fl">0.05</span>, <span class="at">df =</span> <span class="cn">Inf</span>, <span class="at">nmeans =</span> <span class="dv">6</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>) <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="dv">2</span>)) <span class="sc">*</span> (<span class="fu">sqrt</span>((<span class="dv">6</span> <span class="sc">*</span> (<span class="dv">6</span> <span class="sc">+</span> <span class="dv">1</span>)) <span class="sc">/</span> (<span class="dv">6</span> <span class="sc">*</span> <span class="dv">16</span>)))</span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>mean_diff_rpart_ranger <span class="sc">&gt;</span> crit_value_mean_rank_diff</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="do">##      average_rank_on_task</span></span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="do">## [1,]                 TRUE</span></span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="co"># reject H_0!</span></span></code></pre></div>
+</div>
 </div>
 <div id="bonferroni-dunn-test" class="section level2">
 <h2>3.6 Bonferroni-Dunn test</h2>
@@ -746,22 +878,19 @@ Bonferroni-Dunn test.</p>
 hypothesis is given by
 <code>pnorm(..., 0, 1, lower.tail = FALSE)</code>.</p>
 </details>
-<!--
-
-### Solution:
+<div id="solution-15" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-# bonferroni dunn test
-dunn_stat = (abs(mean_diff_rpart_ranger$average_rank_on_task) / sqrt((6 * 7) / 6 * 16))
-# prob of observing dunn statistic under h0:
-pnorm(dunn_stat, 0, 1, lower.tail = FALSE)
-# do not reject H_0
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="co"># bonferroni dunn test</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>dunn_stat <span class="ot">=</span> (<span class="fu">abs</span>(mean_diff_rpart_ranger<span class="sc">$</span>average_rank_on_task) <span class="sc">/</span> <span class="fu">sqrt</span>((<span class="dv">6</span> <span class="sc">*</span> <span class="dv">7</span>) <span class="sc">/</span> <span class="dv">6</span> <span class="sc">*</span> <span class="dv">16</span>))</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="co"># prob of observing dunn statistic under h0:</span></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="fu">pnorm</span>(dunn_stat, <span class="dv">0</span>, <span class="dv">1</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="do">## [1] 0.4213538</span></span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a><span class="co"># do not reject H_0</span></span></code></pre></div>
+</div>
 </div>
 <div id="criticial-difference-plot" class="section level2">
 <h2>3.7 Criticial difference plot</h2>
@@ -769,22 +898,24 @@ pnorm(dunn_stat, 0, 1, lower.tail = FALSE)
 us reject the null, while the Bonferroni-Dunn test does not let us
 reject the null. Next, compute a critical difference plot with
 <code>mlr3</code>.</p>
-<!--
-
-### Solution:
+<div id="solution-16" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>**Click me:**</summary>
-
-
-```r
-# Sanity check with mlr3
-benchmark_aggr = as_benchmark_aggr(bmr, measures = msr("classif.ce"))
-benchmark_aggr$friedman_test()
-cd_plot = autoplot(benchmark_aggr, type = "cd", meas = "ce", minimize = TRUE)
-cd_plot
-```
-
--->
+<summary>
+<strong>Click me:</strong>
+</summary>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="co"># Sanity check with mlr3</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>benchmark_aggr <span class="ot">=</span> <span class="fu">as_benchmark_aggr</span>(bmr, <span class="at">measures =</span> <span class="fu">msr</span>(<span class="st">&quot;classif.ce&quot;</span>))</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>benchmark_aggr<span class="sc">$</span><span class="fu">friedman_test</span>()</span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="do">##  Friedman rank sum test</span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a><span class="do">## data:  ce and learner_id and task_id</span></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a><span class="do">## Friedman chi-squared = 67.83, df = 5, p-value = 0.0000000000002896</span></span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a>cd_plot <span class="ot">=</span> <span class="fu">autoplot</span>(benchmark_aggr, <span class="at">type =</span> <span class="st">&quot;cd&quot;</span>, <span class="at">meas =</span> <span class="st">&quot;ce&quot;</span>, <span class="at">minimize =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a>cd_plot</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
 </div>
 </div>
 </div><!-- /.entry-content -->

@@ -146,7 +146,7 @@ pointer-events: auto;
 <header class="header-title">
 <div class="header-title-wrap">
 <h1 class="title toc-ignore entry-title">Applied Machine Learning</h1>
-<h2 class="subtitle">In-class exercise 07-2</h2>
+<h2 class="subtitle">In-class exercise 07-1</h2>
 </div><!-- /.header-title-wrap -->
 </header>
 
@@ -154,47 +154,26 @@ pointer-events: auto;
 <div class="entry-content">
 <div id="TOC" class="toc">
 <ul>
-<li><a href="#similar-resources" id="toc-similar-resources">Similar
-resources</a></li>
-<li><a href="#german-credit-dataset" id="toc-german-credit-dataset">German Credit Dataset</a></li>
 <li><a href="#goal" id="toc-goal">Goal</a></li>
-<li><a href="#exercises" id="toc-exercises">Exercises</a>
-<ul>
-<li><a href="#training-a-classification-tree-on-the-german-credit-task" id="toc-training-a-classification-tree-on-the-german-credit-task">Training
-a classification tree on the german credit task</a></li>
-<li><a href="#confusion-matrices-and-classification-thresholds" id="toc-confusion-matrices-and-classification-thresholds">Confusion
+<li><a href="#training-a-classification-tree-on-the-german-credit-task" id="toc-training-a-classification-tree-on-the-german-credit-task">1
+Training a classification tree on the german credit task</a></li>
+<li><a href="#confusion-matrices-and-classification-thresholds" id="toc-confusion-matrices-and-classification-thresholds">2 Confusion
 matrices and classification thresholds</a></li>
-<li><a href="#asymmetric-costs" id="toc-asymmetric-costs">Asymmetric
+<li><a href="#asymmetric-costs" id="toc-asymmetric-costs">3 Asymmetric
 costs</a></li>
-<li><a href="#roc-curve" id="toc-roc-curve">ROC curve</a></li>
-<li><a href="#threshold-tuning" id="toc-threshold-tuning">Threshold
+<li><a href="#roc-curve" id="toc-roc-curve">4 ROC curve</a></li>
+<li><a href="#threshold-tuning" id="toc-threshold-tuning">5 Threshold
 tuning</a></li>
-<li><a href="#roc-comparison" id="toc-roc-comparison">ROC
+<li><a href="#roc-comparison" id="toc-roc-comparison">6 ROC
 Comparison</a></li>
-<li><a href="#area-under-the-curve" id="toc-area-under-the-curve">Area
+<li><a href="#area-under-the-curve" id="toc-area-under-the-curve">7 Area
 under the curve</a></li>
 <li><a href="#bonus-exercise-unbiased-performance-estimation" id="toc-bonus-exercise-unbiased-performance-estimation">Bonus exercise:
 Unbiased performance estimation</a></li>
-</ul></li>
 <li><a href="#summary" id="toc-summary">Summary</a></li>
 </ul>
 </div>
 
-<div id="similar-resources" class="section level1">
-<h1>Similar resources</h1>
-<ul>
-<li><a href="https://mlr3book.mlr-org.com/03-perf-binary.html" class="uri">https://mlr3book.mlr-org.com/03-perf-binary.html</a></li>
-</ul>
-</div>
-<div id="german-credit-dataset" class="section level1">
-<h1>German Credit Dataset</h1>
-<p>As in previous exercises, we use the German credit data of
-Prof. Dr. Hans Hoffman of the University of Hamburg in 1994. By using
-XGBoost, we want to classify people as a good or bad credit risk based
-on 20 personal, demographic and financial features. The dataset is
-available at the UCI repository as <a href="https://archive.ics.uci.edu/ml/datasets/Statlog+%28German+Credit+Data%29">Statlog
-(German Credit Data) Data Set</a>.</p>
-</div>
 <div id="goal" class="section level1">
 <h1>Goal</h1>
 <p>In this exercise, we will create a machine learning model that
@@ -212,11 +191,9 @@ a probabilistic model by modifying the threshold. We will inspect this
 relationship via the ROC curve and tune the threshold for a given
 classifier to optimize our response predictions.</p>
 </div>
-<div id="exercises" class="section level1">
-<h1>Exercises</h1>
-<div id="training-a-classification-tree-on-the-german-credit-task" class="section level2">
-<h2>Training a classification tree on the german credit task</h2>
-<p>First load the pre-defined german credit task and set the positive
+<div id="training-a-classification-tree-on-the-german-credit-task" class="section level1">
+<h1>1 Training a classification tree on the german credit task</h1>
+<p>First load the pre-defined German credit task and set the positive
 class to <code>&quot;good&quot;</code>. Train a random forest on 2/3 of the data
 (training data) and make probabilistic predictions on the remaining 1/3
 (test data).</p>
@@ -225,7 +202,7 @@ class to <code>&quot;good&quot;</code>. Train a random forest on 2/3 of the data
 <strong>Hint 1:</strong>
 </summary>
 <ul>
-<li>Create the german credit task using <code>tsk()</code> and set the
+<li>Create the German credit task using <code>tsk()</code> and set the
 positive class by modifying e.g. <code>task$positive</code>.</li>
 <li>Create a learner using <code>lrn()</code> and make sure to specify
 the <code>predict_type</code> so that the learner will predict
@@ -251,38 +228,31 @@ the train and test data.</li>
 <span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>learner<span class="sc">$</span><span class="fu">train</span>(..., <span class="at">row_ids =</span> ...)</span>
 <span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>pred <span class="ot">=</span> learner<span class="sc">$</span><span class="fu">predict</span>(..., <span class="at">row_ids =</span> ...)</span></code></pre></div>
 </details>
-<div id="solution" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
+
+
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(mlr3verse)</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>task <span class="ot">=</span> <span class="fu">tsk</span>(<span class="st">&quot;german_credit&quot;</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>task<span class="sc">$</span>positive <span class="ot">=</span> <span class="st">&quot;good&quot;</span></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>learner <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;classif.ranger&quot;</span>, <span class="at">predict_type =</span> <span class="st">&quot;prob&quot;</span>)</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>ids <span class="ot">=</span> <span class="fu">partition</span>(task)</span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">str</span>(ids)</span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="do">## List of 2</span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="do">##  $ train: int [1:670] 7 8 13 17 18 20 21 22 24 27 ...</span></span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="do">##  $ test : int [1:330] 1 3 4 6 9 15 23 25 26 31 ...</span></span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>learner<span class="sc">$</span><span class="fu">train</span>(task, <span class="at">row_ids =</span> ids<span class="sc">$</span>train)</span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>pred <span class="ot">=</span> learner<span class="sc">$</span><span class="fu">predict</span>(task, <span class="at">row_ids =</span> ids<span class="sc">$</span>test)</span>
-<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>pred</span>
-<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="do">## &lt;PredictionClassif&gt; for 330 observations:</span></span>
-<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="do">##     row_ids truth response prob.good  prob.bad</span></span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="do">##           1  good     good 0.8230016 0.1769984</span></span>
-<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="do">##           3  good     good 0.8919516 0.1080484</span></span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="do">##           4  good      bad 0.4713484 0.5286516</span></span>
-<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="do">## ---                                           </span></span>
-<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="do">##         953   bad     good 0.6843794 0.3156206</span></span>
-<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="do">##         982   bad     good 0.5343651 0.4656349</span></span>
-<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="do">##         999   bad      bad 0.3224706 0.6775294</span></span></code></pre></div>
+  <summary>**Click me:**</summary>
+
+```r
+library(mlr3verse)
+task = tsk("german_credit")
+task$positive = "good"
+learner = lrn("classif.ranger", predict_type = "prob")
+ids = partition(task)
+str(ids)
+learner$train(task, row_ids = ids$train)
+pred = learner$predict(task, row_ids = ids$test)
+pred
+```
 </details>
+
+-->
 </div>
-</div>
-<div id="confusion-matrices-and-classification-thresholds" class="section level2">
-<h2>Confusion matrices and classification thresholds</h2>
+<div id="confusion-matrices-and-classification-thresholds" class="section level1">
+<h1>2 Confusion matrices and classification thresholds</h1>
 <p>Inspect and save the confusion matrix of the predictions made in the
 previous exercise. Manually calculate the FPR and TPR using the values
 from the confusion matrix. Can you think of another way to compute the
@@ -324,41 +294,44 @@ appropriate columns and rows, e.g., <code>confusion1[1, 1]</code> is the
 element in the first row and first column of the confusion matrix and
 tells you how many observations with ground truth <span class="math inline">\(Y = good\)</span> were classified into the class
 <span class="math inline">\(\hat{Y} = good\)</span> by the learner.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>confusion1 <span class="ot">=</span> pred<span class="sc">$</span>confusion</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>TPR1 <span class="ot">=</span>  confusion1[...] <span class="sc">/</span> <span class="fu">sum</span>(confusion1[...])</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>TPR1</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>FPR1 <span class="ot">=</span> confusion1[...] <span class="sc">/</span> <span class="fu">sum</span>(confusion1[...])</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>FPR1</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>confusion1 <span class="ot">=</span> pred<span class="sc">$</span>confusion</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>TPR1 <span class="ot">=</span>  confusion1[...] <span class="sc">/</span> <span class="fu">sum</span>(confusion1[...])</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>TPR1</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>FPR1 <span class="ot">=</span> confusion1[...] <span class="sc">/</span> <span class="fu">sum</span>(confusion1[...])</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>FPR1</span></code></pre></div>
 <p>The names of the TPR and FPR performance measures implemented in
 <code>mlr3</code> can be found by looking at
 <code>as.data.table(mlr_measures)</code>. You can use the code below and
 pass the names of the <code>mlr3</code> measures in a vector to compute
 both the TPR and FPR:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>pred<span class="sc">$</span><span class="fu">score</span>(<span class="fu">msrs</span>(...))</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>pred<span class="sc">$</span><span class="fu">score</span>(<span class="fu">msrs</span>(...))</span></code></pre></div>
 </details>
-<div id="solution-1" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
+
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>confusion1 <span class="ot">=</span> pred<span class="sc">$</span>confusion</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>TPR1 <span class="ot">=</span> confusion1[<span class="dv">1</span>, <span class="dv">1</span>] <span class="sc">/</span> <span class="fu">sum</span>(confusion1[, <span class="dv">1</span>])</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>TPR1</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="do">## [1] 0.9177489</span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>FPR1 <span class="ot">=</span> confusion1[<span class="dv">1</span>, <span class="dv">2</span>] <span class="sc">/</span> <span class="fu">sum</span>(confusion1[, <span class="dv">2</span>])</span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>FPR1</span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="do">## [1] 0.5959596</span></span></code></pre></div>
-<p>Instead of manually computing the TPR and FPR, you could also just
-use</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>pred<span class="sc">$</span><span class="fu">score</span>(<span class="fu">msrs</span>(<span class="fu">c</span>(<span class="st">&quot;classif.tpr&quot;</span>, <span class="st">&quot;classif.fpr&quot;</span>)))</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="do">## classif.tpr classif.fpr </span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="do">##   0.9177489   0.5959596</span></span></code></pre></div>
+  <summary>**Click me:**</summary>
+
+```r
+confusion1 = pred$confusion
+TPR1 = confusion1[1, 1] / sum(confusion1[, 1])
+TPR1
+FPR1 = confusion1[1, 2] / sum(confusion1[, 2])
+FPR1
+```
+
+Instead of manually computing the TPR and FPR, you could also just use 
+
+```r
+pred$score(msrs(c("classif.tpr", "classif.fpr")))
+```
 </details>
+
+-->
 </div>
-</div>
-<div id="asymmetric-costs" class="section level2">
-<h2>Asymmetric costs</h2>
+<div id="asymmetric-costs" class="section level1">
+<h1>3 Asymmetric costs</h1>
 <p>Think about which type of error is worse for the given task and
 obtain new predictions (without retraining the model) that takes this
 into account.</p>
@@ -376,59 +349,55 @@ predicted classes according to the selected threshold value.
 <summary>
 <strong>Hint 2:</strong>
 </summary>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>pred<span class="sc">$</span><span class="fu">set_threshold</span>(...)</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>confusion2 <span class="ot">=</span> pred<span class="sc">$</span>confusion</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>TPR2 <span class="ot">=</span>  confusion2[...] <span class="sc">/</span> <span class="fu">sum</span>(...)</span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>FPR2 <span class="ot">=</span> confusion2[...] <span class="sc">/</span> <span class="fu">sum</span>(...)</span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a></span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>TPR2 <span class="sc">-</span> TPR1</span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>FPR2 <span class="sc">-</span> FPR1</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>pred<span class="sc">$</span><span class="fu">set_threshold</span>(...)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>confusion2 <span class="ot">=</span> pred<span class="sc">$</span>confusion</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>TPR2 <span class="ot">=</span>  confusion2[...] <span class="sc">/</span> <span class="fu">sum</span>(...)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>FPR2 <span class="ot">=</span> confusion2[...] <span class="sc">/</span> <span class="fu">sum</span>(...)</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>TPR2 <span class="sc">-</span> TPR1</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>FPR2 <span class="sc">-</span> FPR1</span></code></pre></div>
 </details>
-<div id="solution-2" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
+
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<p>The error of making a false positive - in this case classifying
-someone who is not creditworthy (<span class="math inline">\(Y =
-bad\)</span>) as creditworthy (<span class="math inline">\(\hat Y =
-good\)</span>) - is likely considerably higher than classifying someone
-who is creditworthy as not creditworthy. In the first scenario, the
-company may lose all the money that was not paid back duly. In the
-letter case, it only misses out on the profit.</p>
-<p>We can take this fact into account by using a higher threshold to
-predict the positive class (<code>good</code>), i.e., being more
-conservative in classifying a good credit risk. For illustration
-purposes, we will use the threshold <span class="math inline">\(0.7\)</span> which is higher than the default
-threshold <span class="math inline">\(0.5\)</span>.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>pred<span class="sc">$</span><span class="fu">set_threshold</span>(<span class="fl">0.7</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>pred</span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="do">## &lt;PredictionClassif&gt; for 330 observations:</span></span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="do">##     row_ids truth response prob.good  prob.bad</span></span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="do">##           1  good     good 0.8230016 0.1769984</span></span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="do">##           3  good     good 0.8919516 0.1080484</span></span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="do">##           4  good      bad 0.4713484 0.5286516</span></span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="do">## ---                                           </span></span>
-<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="do">##         953   bad      bad 0.6843794 0.3156206</span></span>
-<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="do">##         982   bad      bad 0.5343651 0.4656349</span></span>
-<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="do">##         999   bad      bad 0.3224706 0.6775294</span></span></code></pre></div>
-<p>We can then access the updated confusion matrix and calculate the new
-FPR and TPR as before.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>confusion2 <span class="ot">=</span> pred<span class="sc">$</span>confusion</span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>TPR2 <span class="ot">=</span>  confusion2[<span class="dv">1</span>, <span class="dv">1</span>] <span class="sc">/</span> <span class="fu">sum</span>(confusion2[, <span class="dv">1</span>])</span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>FPR2 <span class="ot">=</span> confusion2[<span class="dv">1</span>, <span class="dv">2</span>] <span class="sc">/</span> <span class="fu">sum</span>(confusion2[, <span class="dv">2</span>])</span></code></pre></div>
-<p>When comparing it with the previous values, we observe a lower TPR
-and FPR.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>TPR2 <span class="sc">-</span> TPR1</span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="do">## [1] -0.2640693</span></span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>FPR2 <span class="sc">-</span> FPR1</span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="do">## [1] -0.3030303</span></span></code></pre></div>
+<summary>**Click me:**</summary>
+
+The error of making a false positive - in this case classifying someone who is not creditworthy ($Y = bad$)
+as creditworthy ($\hat Y = good$) - is likely considerably higher than classifying someone who is creditworthy as not creditworthy. 
+In the first scenario, the company may lose all the money that was not paid back duly. In the letter case, it only misses out on the profit.
+
+We can take this fact into account by using a higher threshold to predict the positive class (`good`), i.e., being more conservative in classifying a good credit risk.
+For illustration purposes, we will use the threshold $0.7$ which is higher than the default threshold $0.5$.
+
+
+```r
+pred$set_threshold(0.7)
+pred
+```
+We can then access the updated confusion matrix and calculate the new FPR and TPR as before.
+
+
+```r
+confusion2 = pred$confusion
+TPR2 =  confusion2[1, 1] / sum(confusion2[, 1])
+FPR2 = confusion2[1, 2] / sum(confusion2[, 2])
+```
+
+When comparing it with the previous values, we observe a lower TPR and FPR.
+
+
+```r
+TPR2 - TPR1
+FPR2 - FPR1
+```
 </details>
+
+-->
 </div>
-</div>
-<div id="roc-curve" class="section level2">
-<h2>ROC curve</h2>
+<div id="roc-curve" class="section level1">
+<h1>4 ROC curve</h1>
 <p>In the previous two exercises, we have calculated the FPR and TPR for
 two thresholds. Now visualize the FPR and TPR for all possible
 thresholds, i.e. the ROC curve.</p>
@@ -452,21 +421,24 @@ page of <code>autoplot</code> for a prediction object using
 <summary>
 <strong>Hint 2:</strong>
 </summary>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">autoplot</span>(pred, <span class="at">type =</span> ...)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">autoplot</span>(pred, <span class="at">type =</span> ...)</span></code></pre></div>
 </details>
-<div id="solution-3" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
+
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">autoplot</span>(pred, <span class="at">type =</span> <span class="st">&quot;roc&quot;</span>)</span></code></pre></div>
-<img src="data:image/png;base64,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" /><!-- -->
+<summary>**Click me:**</summary>
+
+```r
+autoplot(pred, type = "roc")
+```
 </details>
+
+-->
 </div>
-</div>
-<div id="threshold-tuning" class="section level2">
-<h2>Threshold tuning</h2>
+<div id="threshold-tuning" class="section level1">
+<h1>5 Threshold tuning</h1>
 <p>In this exercise, we assume that predicting a false positive is 4
 times worse than a false negative. Use a measure that considers
 classification costs (e.g., misclassification costs
@@ -476,25 +448,25 @@ do so, create predictions for all thresholds 0, 0.01, 0.02, …, 1 and
 find the threshold that minimizes this measure. Summarize the evaluated
 scores for these thresholds in a plot.</p>
 <p>You can use the following code as a starting point.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Define the sequence of threshold values</span></span>
-<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>thresholds <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">by =</span> <span class="fl">0.01</span>)</span>
-<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="co"># The function below takes a:</span></span>
-<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="co">#   * prediction object</span></span>
-<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="co">#   * threshold value (scalar value between 0 and 1)</span></span>
-<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co">#   * measure object</span></span>
-<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="co">#   * task object</span></span>
-<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co"># It then gets new predictions for the given threshold and calculates the score of the specified measure.</span></span>
-<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co"># Note that it modifies the prediction in place.</span></span>
-<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>eval_threshold <span class="ot">=</span> <span class="cf">function</span>(pred, threshold, measure, task) {</span>
-<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>  pred<span class="sc">$</span><span class="fu">set_threshold</span>(threshold)</span>
-<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a>  score <span class="ot">=</span> pred<span class="sc">$</span><span class="fu">score</span>(measure, <span class="at">task =</span> task)</span>
-<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a>  <span class="fu">return</span>(score)</span>
-<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a>}</span>
-<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a></span>
-<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a><span class="co"># Example of the usage of `eval_threshold` with the FPR measure</span></span>
-<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a><span class="fu">eval_threshold</span>(pred, <span class="at">threshold =</span> <span class="fl">0.5</span>, <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">&quot;classif.fpr&quot;</span>), <span class="at">task =</span> task)</span>
-<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a><span class="fu">eval_threshold</span>(pred, <span class="at">threshold =</span> <span class="fl">0.7</span>, <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">&quot;classif.fpr&quot;</span>), <span class="at">task =</span> task)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># Define the sequence of threshold values</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>thresholds <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">by =</span> <span class="fl">0.01</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co"># The function below takes a:</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#   * prediction object</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#   * threshold value (scalar value between 0 and 1)</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#   * measure object</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#   * task object</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co"># It then gets new predictions for the given threshold and calculates the score of the specified measure.</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co"># Note that it modifies the prediction in place.</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>eval_threshold <span class="ot">=</span> <span class="cf">function</span>(pred, threshold, measure, task) {</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>  pred<span class="sc">$</span><span class="fu">set_threshold</span>(threshold)</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>  score <span class="ot">=</span> pred<span class="sc">$</span><span class="fu">score</span>(measure, <span class="at">task =</span> task)</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>  <span class="fu">return</span>(score)</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>}</span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co"># Example of the usage of `eval_threshold` with the FPR measure</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="fu">eval_threshold</span>(pred, <span class="at">threshold =</span> <span class="fl">0.5</span>, <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">&quot;classif.fpr&quot;</span>), <span class="at">task =</span> task)</span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="fu">eval_threshold</span>(pred, <span class="at">threshold =</span> <span class="fl">0.7</span>, <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">&quot;classif.fpr&quot;</span>), <span class="at">task =</span> task)</span></code></pre></div>
 <details>
 <summary>
 <strong>Hint 1:</strong>
@@ -510,49 +482,60 @@ of a vector with the minimum value.
 <summary>
 <strong>Hint 2:</strong>
 </summary>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>costs <span class="ot">=</span> <span class="fu">matrix</span>(<span class="fu">c</span>(...), <span class="at">nrow =</span> <span class="dv">2</span>)</span>
-<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="fu">dimnames</span>(costs) <span class="ot">=</span> <span class="fu">list</span>(<span class="at">truth =</span> ..., <span class="at">response =</span> ...)</span>
-<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>measure <span class="ot">=</span> <span class="fu">msr</span>(...)</span>
-<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>scores <span class="ot">=</span> <span class="fu">sapply</span>(thresholds, <span class="cf">function</span>(threshold) <span class="fu">eval_threshold</span>(...))</span>
-<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a></span>
-<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>thresholds[<span class="fu">which.min</span>(...)]</span>
-<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="fu">min</span>(...)</span>
-<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="fu">qplot</span>(<span class="at">x =</span> ..., <span class="at">y =</span> ...)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>costs <span class="ot">=</span> <span class="fu">matrix</span>(<span class="fu">c</span>(...), <span class="at">nrow =</span> <span class="dv">2</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="fu">dimnames</span>(costs) <span class="ot">=</span> <span class="fu">list</span>(<span class="at">truth =</span> ..., <span class="at">response =</span> ...)</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>measure <span class="ot">=</span> <span class="fu">msr</span>(...)</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>scores <span class="ot">=</span> <span class="fu">sapply</span>(thresholds, <span class="cf">function</span>(threshold) <span class="fu">eval_threshold</span>(...))</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>thresholds[<span class="fu">which.min</span>(...)]</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="fu">min</span>(...)</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="fu">qplot</span>(<span class="at">x =</span> ..., <span class="at">y =</span> ...)</span></code></pre></div>
 </details>
-<div id="solution-4" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
+
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<p>We start with defining the thresholds we want to evaluate and the
-function that returns the metric for each threshold.</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>thresholds <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">by =</span> <span class="fl">0.01</span>)</span>
-<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>eval_threshold <span class="ot">=</span> <span class="cf">function</span>(pred, threshold, measure, task) {</span>
-<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>  pred<span class="sc">$</span><span class="fu">set_threshold</span>(threshold)</span>
-<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>  score <span class="ot">=</span> pred<span class="sc">$</span><span class="fu">score</span>(measure, <span class="at">task =</span> task)</span>
-<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>  <span class="fu">return</span>(score)</span>
-<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>}</span></code></pre></div>
-<p>We then define the cost matrix and from it the cost function.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>costs <span class="ot">=</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">0</span>), <span class="at">nrow =</span> <span class="dv">2</span>)</span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">dimnames</span>(costs) <span class="ot">=</span> <span class="fu">list</span>(<span class="at">truth =</span> task<span class="sc">$</span>class_names, <span class="at">response =</span> task<span class="sc">$</span>class_names)</span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>measure <span class="ot">=</span> <span class="fu">msr</span>(<span class="st">&quot;classif.costs&quot;</span>, <span class="at">costs =</span> costs)</span></code></pre></div>
-<p>Finally we evaluate each threshold, find the minimum and plot the
-results.</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>scores <span class="ot">=</span> <span class="fu">sapply</span>(thresholds, <span class="cf">function</span>(threshold) <span class="fu">eval_threshold</span>(pred, threshold, measure, task))</span>
-<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>thresholds[<span class="fu">which.min</span>(scores)]</span>
-<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="do">## [1] 0.77</span></span>
-<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="fu">min</span>(scores)</span>
-<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="do">## [1] 0.4969697</span></span>
-<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a><span class="fu">qplot</span>(<span class="at">x =</span> thresholds, <span class="at">y =</span> scores) <span class="sc">+</span> <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> thresholds[<span class="fu">which.min</span>(scores)])</span></code></pre></div>
-<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAqAAAAHgCAMAAABNUi8GAAAArlBMVEUAAAAAADoAAGYAOpAAZrYzMzM6AAA6ADo6AGY6kNtNTU1NTW5NTY5NbqtNjshmAABmtv9uTU1uTW5uTY5ubqtuq+SOTU2OTW6OTY6ObquOyP+QOgCQkDqQkGaQ2/+rbk2rbm6rbo6rjk2ryKur5P+2ZgC22/+2///Ijk3I///bkDrb/7bb///kq27k///r6+v/tmb/yI7/25D/27b/5Kv//7b//8j//9v//+T////+hsztAAAACXBIWXMAAA7DAAAOwwHHb6hkAAATn0lEQVR4nO2dC1vbRgJF3YSkjfMiTUiyZFu6W7IBtqGBJQT9/z+2kizbsvWwNHNH89C53xcQlnN8ZQ6jkSzMIiMk4Cx8FyCkLwhKgg6CkqCDoCToICgJOghKgs54Qf/uSe/KwYHikFKHLCQU8/RREHSmFAR12xuKEIKg+t5QhBAE1feGIoQgqL43FCEEQfW9oQghCKrvDUUIQVB9byhCCILqe0MRQhBU3xuKEIKg+t5QhBAE1feGIoQgqL43FCEEQfW9oQghCKrvDUUIiV7Qu7eXq89vlstTBE2CkpKgN8sXpaD3H86zu1/PDwu6WCzWH9sXh63Leu+m2PoZUxIS9OL5n6sR9OZV8dV6CO1mLoqsPrYvDlyX9d1NsvUzpiQk6HYXX42iWfYkT/fd9+1qLJquq9+N6BLDszlQ0Iezk/WN3dKPGSUZQT1R0hxB799v/GQOGjclSUHv3pxub/TbG4oQkoqgO34iaNyU5ATN/31dFjl8FD/NN6J99++nS4SUpARtjd/eHcdZfrrESEFQt70RVAhBUH1vBBVCEFTfmzmoEIKg+t5QhBAE1feGIoQgqL53V5qvNQUkRUgUBHXbuyMtr9YHJEVIFAR127sjCGoCQVB9744gqAkEQfW9u8Ic1ACCoPreUIQQBNX3HhCTi0dddQmPgqBuex+O0eX3jroESEFQt70PB0EHQxBU3/twEHQwBEH1vQeEOehQCILqe0MRQhBU3xuKEIKg+t7jKPb7+dC2SApBUH3vURTBkVJgW6SFIKi+9ygKgvZDEFTfexQFQfshCKrvPY7CHLQXgqD63lCEEATV94YihCCovrcJxWZHH+YWiSAhPy0zEtTqUCnILVJBEFTf24CCoF0QBNX3NqAgaBcEQfW9TSjMQTsgIT8tcxJ0FTNNQ94iawiC6nsbUwx39AFvkT0EQfW9jSkI2oQgqL63MQVBmxAE1fc2pzAHbUAQVN8bihCCoPreUIQQBNX3hiKEIKi+NxQhBEH1vaEIIQiq7w1FCEFQfW8oQgiC6ntDEUIQVN8bihCCoPreUIQQBNX3hiKEIKi+NxQhBEH1vaEIIQiq7w1FCElTUJJMYvjmM4LOjJL+COq3NxQhBEH1vaEIIQiq7w1FCEFQfW8oQgiC6ntDEUIQVN8bihCCoPrelpTRv3sc/BbZQBBU39uOMv7dG0LfIisIgup721EQFEEd97ajICiCOu5tSWEOiqBue0MRQhBU31tCGTGORrJFZhAE1fdWUMbMROPYIkMIgup7KygIWgVB9b0VFAStgqD63hIKc9BVEFTfG4oQgqD63lCEEATV99ZRhu3nY9qi0RAE1feWUQYeKUW0ReMhCKrvLaMgKIK66C2jICiCuuitozAHRVAHvaEIIQiq7w1FCEFQfW815dCOPr4tGgFBUH1vMeXgoVJ0WzQGgqD63mIKgtpTzIOgB4Og9hTzIOjhMAe1ppgHQaH0QhBU3xuKEIKg+t5uKN07+li3aBAEQfW9nVB6DpUi3aJhEATV93ZCQVAbinkQdGAQ1IZiHgQdGuagFhTzICiUXgiC6ntDEUIQVN8bihCCoPreUIQQBNX3hiKEIKi+t3PK3gF9AlvUDUFQfW+HlFLN/VOiUW/RIQiC6nu7o6zURNDRFPMg6JggqCHFPAg6JpWazEHHUsyDoKNSU3O1WHzM/m7T1nkXdxQEddt7Ekptb58tNvHTRU1JStC7t5fl5/v3y5fXCOqli5qSkqA3yxeloA9np9nXVwjqpYuakpCgF8//XI2g9x8vN4PpLARlDjqGYh7VLv7u3XV2/+E8X3qSp+8/kKgy/gBk+gwR9OblWtAifn+woAgh6Y2gCBo9JUVB5zcHTZiSoqAPZyfzOopPmZKcoMW/uZ0HTZmSlKCt8dsbihCCoPreUIQQBNX3hiKEIKi+NxQhBEH1vaEIIQiq7w1FCEFQfW8oQgiC6nt7pRhf0xTQFiGo294+KeZXhQa0RQjqtrdPCoK2UsyDoFoKgrZSzIOgYgpz0DaKeRDUBcXE0oC2CEHd9vZOMdrPB7RFCOq2t3cKgu5TzIOgDijt75Djp4stBEH1vf1TWt+l0VMXSwiC6nsHQkFQRRDUGQVBFUFQdxTmoIIgKJReCILqe0MRQhBU3xuKEIKg+t5QhBAE1feGIoQgqL43FCEEQfW9g6IMPtcU0BYhqNveIVGGn60PaIsQ1G3vkCgIahkEdUtBUMsgqGMKc1C7IOgklAGaBrRFCOq2d3iUITv6gLYIQd32Do+CoE4oCKqiIKgTCoLKKMxBXVAQdKYUBHXbG4oQgqD63lCEEATV94YihCCovjcUIQRB9b2DpfQeywe0RQjqtneolP6zoQFtEYK67R0qBUHFFATVUhBUTEFQMYU5qJaCoDOlIKjb3lCEEATV94YihKQpKEkmMXzzGUFnRkl/BPXbG4oQgqD63lCEEATV94YihCCovjcUIQRB9b2hCCEIqu8NRQiJTtDvr4+/v148+oKg6VKiFvTzUXb16MvVEYKmS4lZ0HwA/fHpKPvWP4T67Q1FCIlQ0O+vnyFo0pSYBf3x6dm3n34vdvQIakbpuig0oC2KWdDs9uniKPv8+C8ENaN0XlYf0BZFLeig+O0dNAVBdRQEdUBBUB2lXdCrxeL4il28MYU5qIzSKujnx/9dnWlC0GQpMQtanmY65jRT0hQEddsbihASm6DZVbGLL87VI2iylKgFzb4Vh6H9fiJo3JS4BR0Sv72hCCGxCfrj0zGCpk6JWdDiCAlBE6fELGh26Bw9gsZPiVnQ76/L1+oOXFLvtzcUISQ2QYfFb28oQgiC6ntDEULiE/SK86CpU6IW9KqYffJKki2leU1TQFsUs6DVaSZei7ejtFwVGtAWIajb3hFQEFRBaROUXbyEgqAKSqugHCRJKMxBBZR2QYfEb28oQgiC6ntDEUKiE/THp2fZoV9JQtC4KVELWr6nCL80lzQlZkE5zSSk7BwpBbRFCOq2dyyU3XNNAW1RzIJyHlRHQVBLSqug/NKcjIKglpR2QYfEb+9oKMxB7SgIOlNK1ILyRxTSp0QtKH9EIX1KzILyRxRmQIlcUP6IQuqUmAXljyjMgBKzoPwRhRlQohZ0UPz2hiKEIKi+NxQhJHJB798vX16XS3dvli8uETQJSjqCPpydZl9flaZ+OM++Vq4iaOSUdAS9/3iZ3b0tBs67d9flVwiaACUdQUst87GzPoI+ydP5H0hsGX8AMn26O968XAtam41mjKCRU1IcQe9+Pc9uXrCLT4KSjqDbOWhtLEXQ2CnpCPpwdlIdxTOCJkRJR9Bq5lkMojfL5fP1AIqgcVMSErQjfntDEUIQVN8bihCCoPrekVGqX50LoksTgqD63nFR1r98HEKXFgiC6nvHRUFQYwqCTkFBUGMKgk5CYQ5qSkHQCSmlps03BvfSBUHd9o6RstjEfxcEddw7RkpdUBtLERRBnVBqglqNowiKoG4o27ETQYdSENQLBUGHUhDUD4U56EAKgnqkGFqKoAg6CWXngH6ErAiKoJNQ6gf0YyalCIqgk1AQdAAFQT1SamecELRrHYL6pjAHRVAovRAE1feGIoQgqL43FCEEQfW9oQghCKrvDUUIQVB9byhCCILqe0MRQhBU3xuKEIKg+t5QhBAE1feGIoQgqL43FCEEQfW9oQghCKrvnSZl2BUjCIqgfigDr7lDUAT1Q0HQlnUIGg5l4LuOICiCeqIMe1MHBEVQnxQE3VmHoKFREHRnHYIGR2EOWl+HoPOkIKjb3lCEEATV94YihCCovjcUIQRB9b2hCCEIqu8NRQhBUH1vKEIIgup7J0/pORmamqC9530RNExK38tJiQna/8qZuaDEZcrv2mQPNtUDNR8538hhm8oIGhal78q7JEbQ7YVbrkZQN72hVOm58i4FQffeXbrnERA0YMo8BOUoPlpK6oJWgyeCRktJcQ7afMtzBIXSC5lU0Ja9AoJC6YUgqFmgOKQgqH2gOKT4noMOpSDoTCm+T9QPpSDoTCkI6rb3rCh7O8V4Be14zQhB46bsH1ZEK2jXq+4IGjcFQRE0aAqCImjYFOagCDo7ysSC9l9S1/cICDpPyrSCHrgoue8REHSeFAS1DxSHFAS1DxSHFOag9oHikMJLnW57QxFCEFTfG4oQgqD63lCEEATV94YihCCovjcUIcStoIf/eh6CpkDZfp/jEnTA33dE0AQote8zgiJoeBQERdCgKdEKyhx0JpRY56CWFASdKQVB3faGIoQgqL73XCnFjh5BETRUyur93NVVEFTfe6YUBEXQoCkrQQ+fuBlXBUH1vedKqb2zu64Kgup7z5mCoAgaNAVBETRsCnNQBE2eMoWgQ3+QEBRKL8SRoIOnIggKpReCoGaB4pCCoPaB4pDCHNQ+UMZRRh3ccxTvtjeURsadHkVQt72hNBKSoOPO1CLoLCgBCTrytS5LQe/fL19el0sPZ8vn5wgaKiWcOeikgj6cnWZfX5WLF6fZTeUqgnqn2L3gmY6g9x8vs7u3l9USu/hQKJaXjKQzB717d53dfzgvl/5d7eKf5On8D2SSrK5d3iw3Vo5BqTo5THfHYqdeCfrmtNR1FdMfCc0PFpTaCNoYTEe+m0fcp5nqI+h6CUEDoGwdrPtYLq1uGPy+8HELWpuD/gNBg6Q0BtPFJoMgcQv6cHZSO4pnFx8ipTGYHv7VpXQErc6DFoNovvRicyDvtzeU9vTNTDshUkENzi3wStKMKDU/vMxBTc5+IWi6FONzoQhqHygHKeZn6xHUPlAOUsITlDkolHGCdtwhoaN4BA2YMsTP1rsgqNveUAYGQf30hjIwCOqnN5ShYQ7qpTcUIQRB9b2hCCEIqu8NRQhBUH1vKEIIgup7QxFCRIJKrgtorEPQeVL0gmpedm2sQ9B5UhDUPlAcUhDUPlAcUpiD2geKQwpH8W57QxFCEFTfG4oQgqD63lCEkFZBB80oERSKI8ohQYcdkyMoFEcUBHXbG8q4NGxDULe9oYxKUzfmoG57QxmVxvvfcRTvuDeUUWm+ZROCuu0NZVwa73/XI+iIlywRFIqQUntz2x5Bx1z0kVU2G78MX1F61iHobCi19w6VCVp7w1zDVn8jKJRVmkdK6y8673ZoaERQKDpK55vbds9BD5mHoFCElMaR0vqrvv/RZt7mRuagUJxQ7ATd3spRPBQ3lJ45aPf9ajciKBS3lDEn6vcPmranAxAUiiPKCEGbB1d1TcVdGusQdJ4UK0Eby7oujXUIOk9Ku6AHppwICmUqSqugh84q7RrMHBSKO8oYQR1XQVAo/RAE1feGIoQcmIP2rENQKI4o+4IeHDpbR1cEheKIsifo4Z07gkKZklJCKuUQVN8bigCydm7Yy0LMQaFMSNkT1PCCOQSF4oiyL6jHKo4EJfGneC1o/THwMILOjLKF2LymHvII6rc3FBkEQV30hiKDIKiL3lB0EIur5hAUiiNK+2vxNhTzICiUXgiC6ntDEUIQVN8bihCCoPreUIQQBNX3hiKEIKi+NxQhBEH1vaEIIQiq7w1FCEFQfW8oQgiC6ntDEUIQVN8bihCCoPreUIQQBNX3hiKEIKi+NxQhBEH1vaEIIWkK2pcnUppd6NKagKoM6oKgUySgLgFVQdBgElCXgKogaDAJqEtAVTwISog4CEqCDoKSoIOgJOggKAk6AkHv3y9fXteXtjdMnu1D371ZLk+z7OtyuXxx6blLVcLf87J55KJJ8bx4fFryb83by3qr/qfFXtCHs3x7X9WWtjdMnu1D3384z+5+Pc8uTr0U2elSlfD3vOw+8k2ug7+nJX/86kdjmC72gt5/vKx+Jqql7Q2TZ/vQN8UmX5w+/HHuo8dul6qEv+dl55GLH12PT0t28fzPVZVhutgLevfuutzozdL2hsmz+9D5Ur77KPf0XrtUJfw9LzuPXIxWHp+WbLOLH6aLvaDFHmP1ANXS9obJs/PQD2cn5V7e03Cx7VKV8Pe81B+5/Ozxack2gg7TJd0R9P79SXWrnwnX3tNwcRrGCHqzOSDxNg+deAQNcw6aH8Vvnn8/34m9p+HiNIw56MX6x9a7oFPNQYs96foo/mR1WHbi7yh+/dCVn8V48fAvLz8s2y5VCX/PS+2RVzt2j09LthF0mC6y86DFo4ZyHjTvUjvh99zTXGv7vFQlfJ8HLb9Fq52px6dlJehgXXgliQQdBCVBB0FJ0EFQEnQQlAQdBCVBB0EF+d9/stuff+9ev79y/fW3R19c1koiCGqfwjcEdRQEtQ+COgyCWuf26WLx7Pbn3xaLxXF2+8s/F4++/Pi0WBTyFauKG6uVWXH70UrQ768XP/2W36e6C+kIgtqnHEGfPv4ru3r05fbpUeFh/uHq8V/lSHn79Hi9sri9+Jff/v31s9zR/P7VXXxvQ7BBUPusBD0uF8rP5a77++vj219Wu/D1yvL2b6WV5WIh9C/s5XuDoPbZzEELQYvPV+WfYl88yz6Xe/TNym/5QFrd6apczO2s7kI6gqD2aQpa2LdKPtVc78fbBa3u4rF+2EFQ+zQE/fZT7ai92NWvBS1ur+3i10fx+V08VQ8/CGqfwq8dQX98ysfH3MZSwPWN+Yedg6Sj8iBpfRff2xBsEFSQz4ujHUHL00nlaLkoP69Xtp1mqu5COoKgJOggKAk6CEqCDoKSoIOgJOggKAk6CEqCDoKSoIOgJOggKAk6/wdsmTLMB+9vqwAAAABJRU5ErkJggg==" /><!-- -->
+<summary>**Click me:**</summary>
+
+We start with defining the thresholds we want to evaluate and the function that
+returns the metric for each threshold.
+
+
+```r
+library(ggplot2)
+thresholds = seq(0, 1, by = 0.01)
+eval_threshold = function(pred, threshold, measure, task) {
+  pred$set_threshold(threshold)
+  score = pred$score(measure, task = task)
+  return(score)
+}
+```
+
+We then define the cost matrix and from it the cost function.
+
+
+```r
+costs = matrix(c(0, 1, 4, 0), nrow = 2)
+dimnames(costs) = list(truth = task$class_names, response = task$class_names)
+measure = msr("classif.costs", costs = costs)
+```
+Finally we evaluate each threshold, find the minimum and plot the results.
+
+
+```r
+scores = sapply(thresholds, function(threshold) eval_threshold(pred, threshold, measure, task))
+thresholds[which.min(scores)]
+min(scores)
+qplot(x = thresholds, y = scores) + geom_vline(xintercept = thresholds[which.min(scores)])
+```
 </details>
+
+-->
 </div>
-</div>
-<div id="roc-comparison" class="section level2">
-<h2>ROC Comparison</h2>
+<div id="roc-comparison" class="section level1">
+<h1>6 ROC Comparison</h1>
 <p>In this exercise, we will explore how to compare to learners by
 looking at their ROC curve.</p>
 <p>The basis for this exercise will be a benchmark experiment that
@@ -575,38 +558,48 @@ function <code>autoplot()</code> to benchmark results.
 <summary>
 <strong>Hint 2:</strong>
 </summary>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>resampling <span class="ot">=</span> <span class="fu">rsmp</span>(..)</span>
-<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>learners <span class="ot">=</span> <span class="fu">lrns</span>(...)</span>
-<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>design <span class="ot">=</span> <span class="fu">benchmark_grid</span>(...)</span>
-<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>bmr <span class="ot">=</span> <span class="fu">benchmark</span>(...)</span>
-<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="fu">autoplot</span>(...)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>resampling <span class="ot">=</span> <span class="fu">rsmp</span>(..)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>learners <span class="ot">=</span> <span class="fu">lrns</span>(...)</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>design <span class="ot">=</span> <span class="fu">benchmark_grid</span>(...)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>bmr <span class="ot">=</span> <span class="fu">benchmark</span>(...)</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="fu">autoplot</span>(...)</span></code></pre></div>
 </details>
-<div id="solution-5" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
+
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<p>We create and execute the benchmark experiment in the usual
-fashion.</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>resampling <span class="ot">=</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> <span class="dv">10</span>)</span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>learners <span class="ot">=</span> <span class="fu">list</span>(</span>
-<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>  <span class="fu">lrn</span>(<span class="st">&quot;classif.rpart&quot;</span>, <span class="at">predict_type =</span> <span class="st">&quot;prob&quot;</span>),</span>
-<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>  <span class="fu">lrn</span>(<span class="st">&quot;classif.ranger&quot;</span>, <span class="at">predict_type =</span> <span class="st">&quot;prob&quot;</span>)</span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>)</span>
-<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>design <span class="ot">=</span> <span class="fu">benchmark_grid</span>(task, learners, resampling)</span>
-<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a>bmr <span class="ot">=</span> <span class="fu">benchmark</span>(design)</span></code></pre></div>
-<p>Now we proceed with showing the ROC curve. The grey area indicated
-the uncertainty, as we obtain a different ROC curve for each fold.</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="fu">autoplot</span>(bmr, <span class="at">type =</span> <span class="st">&quot;roc&quot;</span>)</span></code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
-<p>The random forest is clearly better, as for virtually every
-specificity it has a higher sensitivity.</p>
+<summary>**Click me:**</summary>
+We create and execute the benchmark experiment in the usual fashion.
+
+
+```r
+resampling = rsmp("cv", folds = 10)
+learners = list(
+  lrn("classif.rpart", predict_type = "prob"),
+  lrn("classif.ranger", predict_type = "prob")
+)
+design = benchmark_grid(task, learners, resampling)
+bmr = benchmark(design)
+```
+
+Now we proceed with showing the ROC curve. The grey area indicated the uncertainty, as we
+obtain a different ROC curve for each fold.
+
+
+```r
+autoplot(bmr, type = "roc")
+```
+
+The random forest is clearly better, as for virtually every specificity it has a higher
+sensitivity.
+
 </details>
+
+-->
 </div>
-</div>
-<div id="area-under-the-curve" class="section level2">
-<h2>Area under the curve</h2>
+<div id="area-under-the-curve" class="section level1">
+<h1>7 Area under the curve</h1>
 <p>In the previous exercise we have learned how to compare to learners
 using the ROC curve. Although the random forest was dominating the
 classification tree in this specific case, the more common case is that
@@ -627,23 +620,26 @@ performance measure in the <code>measure</code> argument.
 <summary>
 <strong>Hint 2:</strong>
 </summary>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fu">autoplot</span>(bmr, <span class="at">measure =</span> <span class="fu">msr</span>(...))</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">autoplot</span>(bmr, <span class="at">measure =</span> <span class="fu">msr</span>(...))</span></code></pre></div>
 </details>
-<div id="solution-6" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
+
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="fu">autoplot</span>(bmr, <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">&quot;classif.auc&quot;</span>))</span></code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
-As expected, the AUC for the random forest is higher than the AUC for
-the classification tree.
+<summary>**Click me:**</summary>
+
+```r
+autoplot(bmr, measure = msr("classif.auc"))
+```
+
+As expected, the AUC for the random forest is higher than the AUC for the classification tree.
 </details>
+
+-->
 </div>
-</div>
-<div id="bonus-exercise-unbiased-performance-estimation" class="section level2">
-<h2>Bonus exercise: Unbiased performance estimation</h2>
+<div id="bonus-exercise-unbiased-performance-estimation" class="section level1">
+<h1>Bonus exercise: Unbiased performance estimation</h1>
 <p>Revisit the exercise where we tuned the threshold. Is the performance
 estimate for the best threshold unbiased? If no, does this mean that our
 tuning strategy was invalid?</p>
@@ -659,20 +655,22 @@ Did we use an independent test set?
 </summary>
 Think of the uncertainty when estimating the ROC curve.
 </details>
-<div id="solution-7" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
+
+
 <details>
-<summary>
-<strong>Click me:</strong>
-</summary>
-<p>No, although our method is valid with respect to determining our
-“best guess” for the optimal threshold, the obtained performance
-estimate suffers from optimization bias. We would need an independent
-test set to evaluate our method, i.e. nested holdout or
-cross-validation.</p>
+<summary>**Click me:**</summary>
+
+No, although our method is valid with respect to determining our "best guess"
+for the optimal threshold, the obtained performance estimate suffers from
+optimization bias. We would need an independent test set to evaluate our
+method, i.e. nested holdout or cross-validation.
+
 </details>
-</div>
-</div>
+
+-->
 </div>
 <div id="summary" class="section level1">
 <h1>Summary</h1>
