@@ -20,7 +20,7 @@
 \lecture{Applied Machine Learning}
 
 \begin{vbframe}{Stacking}
-Stacking (also stacked generalization or meta-ensemble) is an ensemble technique that involves training multiple base models (level 0) on the same data and using their predictions as input features for a level 1 model that makes the final ensemble prediction $\rightarrow$ heterogeneous ensembling
+Also stacked generalization (\href{https://www.sciencedirect.com/science/article/abs/pii/S0893608005800231}{\beamergotobutton{REF}}): train multiple base models (level 0) on the same data and use their predictions as input features for a level 1 model that makes the final ensemble prediction $\rightarrow$ heterogeneous ensembling
 \vspace{1em}
 \begin{columns}
     \begin{column}{0.5\textwidth}
@@ -145,12 +145,20 @@ NB: In principle we can repeat this training of multiple models at the $k$-th le
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Higher Level Models}
+\vfill
 Popular choices of level 1 or level 2 models in stacking include:
 \begin{itemize}
     \item linear / logistic regression 
     \item random forest (especially in the case of multilevel stacking)
     \item GES (average the predictions of the models at the previous level)
 \end{itemize}
+\vfill
+Higher-level training data:
+\begin{itemize}
+    \item Probabilities instead of class labels
+    \item Include original dataset $\Xmat$ or not?
+\end{itemize}
+\vfill
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
@@ -174,9 +182,9 @@ Popular choices of level 1 or level 2 models in stacking include:
     \end{column}
     \begin{column}{0.6\textwidth}
         \begin{itemize}
-            \item The de-facto currently most popular and successful AutoML system
+            \item The de-facto most popular and successful AutoML system
             \item Developed and maintained by Amazon
-            \item Cannot only do tabular but also multimodal and time-series data
+            \item Can also work with multimodal and time-series data
             \item Does not use HPO to find well performing models
             \begin{itemize}
                 \item Instead, uses a set of default configurations for different learners
@@ -190,9 +198,9 @@ Popular choices of level 1 or level 2 models in stacking include:
 
 % ------------------------------------------------------------------------------
 
-\begin{vbframe}{Further Reading}
-
-\end{vbframe}
+%\begin{vbframe}{Further Reading}
+%
+%\end{vbframe}
 
 % ------------------------------------------------------------------------------
 
