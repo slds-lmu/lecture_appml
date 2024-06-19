@@ -84,11 +84,11 @@ train = df[-ids,]
 test = df[ids,]
 
 # Fit neural network:
-task_train <- as_task_regr(x = train, target = "y")
-nnet <- lrn("regr.nnet", size = 10, maxit = 1000, trace = FALSE)$train(task_train)
+task_train = as_task_regr(x = train, target = "y")
+nnet = lrn("regr.nnet", size = 10, maxit = 1000, trace = FALSE)$train(task_train)
 
 # Visualize prediction surface:
-task_test <- as_task_regr(x = test, target = "y")
+task_test = as_task_regr(x = test, target = "y")
 plot_learner_prediction(nnet, task_test)
 ```
 
@@ -114,21 +114,21 @@ cat("<!--")
 pred = Predictor$new(nnet, data = test, y = "y")
 
 # Compute PDP plots:
-pdp_x1 <- arrangeGrob(plot(FeatureEffect$new(predictor = pred,
+pdp_x1 = arrangeGrob(plot(FeatureEffect$new(predictor = pred,
                             feature = "x1",
                             method = "pdp",
                             grid.size = 30)), top = "PDP x1")
-pdp_x2 <- arrangeGrob(plot(FeatureEffect$new(predictor = pred,
+pdp_x2 = arrangeGrob(plot(FeatureEffect$new(predictor = pred,
                             feature = "x2",
                             method = "pdp",
                             grid.size = 30)), top = "PDP x2")
 
 # Compute ALE plots:
-ale_x1 <- arrangeGrob(plot(FeatureEffect$new(predictor = pred,
+ale_x1 = arrangeGrob(plot(FeatureEffect$new(predictor = pred,
                             feature = "x1",
                             method = "ale",
                             grid.size = 30)), top = "ALE x1")
-ale_x2 <- arrangeGrob(plot(FeatureEffect$new(predictor = pred,
+ale_x2 = arrangeGrob(plot(FeatureEffect$new(predictor = pred,
                             feature = "x2",
                             method = "ale",
                             grid.size = 30)), top = "ALE x2")
@@ -158,7 +158,7 @@ cat("<!--")
 <summary>Click me:</summary>
 
 ```{r, eval = show.solution}
-task_wines <- as_task_regr(x = wine, target = "quality")
+task_wines = as_task_regr(x = wine, target = "quality")
 split = partition(task_wines)
 lrn_rf = lrn("regr.ranger")
 lrn_rf$train(task_wines, row_ids = split$train)
@@ -209,29 +209,6 @@ cat("-->")
 ## Exercise 5: LOCO
 
 Let's consider another method to compute feature importance values: LOCO. Here, the general idea is to remove the feature from the dataset, refit the model on the reduced dataset, and measure the loss in performance compared to the model fitted on the complete dataset. 
-
-#### Some toy data
-
-Let's create some toy data to assess similarities and differences between LOCO and PFI. We shall use the following DGP: $y = x_1 + \epsilon, \; \epsilon \sim N(0, 0.1)$. We add some other features to the data:
-
-* $x_2$, which has no influence on $y$.
-* $x_3$, which has no influence on $y$.
-* $x_4$, which has no influence on $y$ and is highly correlated with $x_3$:
-
-```{r}
-n = 3000
-# True GDP:
-x1 = rnorm(n)
-y = x1 + rnorm(n, sd = 0.1)
-# Other features:
-x2 = rnorm(n)
-x3 = rnorm(n)
-x4 = x3 + rnorm(n, sd = 0.01)
-# Data frame:
-data = data.frame(x1, x2, x3, x4, y)
-```
-
-#### Custom LOCO function
 
 We will now implement a function that calculates LOCO values for a given `task`, `learner`, `resampling` object and performance `measure`. 
 It shall return a vector containing a LOCO value for each feature, i.e., the loss in performance compared to the model fitted on the complete dataset.
@@ -291,7 +268,26 @@ cat("-->")
 
 ## Exercise 6: LOCO vs. PFI - Calculation
 
-Using the custom `loco()` function, we can compute and compare differences in insights gained from PFI and LOCO. For this purpose, we shall use the toy data from exercise 5. We fit a linear model on some training data:
+Using the custom `loco()` function, we can compute and compare differences in insights gained from PFI and LOCO. For this purpose, we create some toy data to assess similarities and differences between LOCO and PFI. We use the following DGP: $y = x_1 + \epsilon, \; \epsilon \sim N(0, 0.1)$ and add some other (noisy) features to the data:
+
+* $x_2$, which has no influence on $y$.
+* $x_3$, which has no influence on $y$.
+* $x_4$, which has no influence on $y$ and is highly correlated with $x_3$:
+
+```{r}
+n = 3000
+# True GDP:
+x1 = rnorm(n)
+y = x1 + rnorm(n, sd = 0.1)
+# Other features:
+x2 = rnorm(n)
+x3 = rnorm(n)
+x4 = x3 + rnorm(n, sd = 0.01)
+# Data frame:
+data = data.frame(x1, x2, x3, x4, y)
+```
+
+We fit a linear model on some training data:
 
 ```{r}
 # Linear Model via mlr3:

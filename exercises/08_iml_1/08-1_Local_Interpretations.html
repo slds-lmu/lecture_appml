@@ -229,7 +229,7 @@ physiochemical properties:</p>
 <div id="fit-a-random-forest" class="section level1">
 <h1>Fit a Random Forest</h1>
 <p>We fit a random forest to predict the quality and use a train-test
-split, reserving 5,000 observations for testing:</p>
+split, reserving 500 observations for testing:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">124</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>ids <span class="ot">=</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(wine), <span class="at">size =</span> <span class="dv">500</span>, <span class="at">replace =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>train <span class="ot">=</span> wine[<span class="sc">-</span>ids,]</span>

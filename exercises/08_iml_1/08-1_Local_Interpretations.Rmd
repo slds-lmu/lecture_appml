@@ -54,7 +54,7 @@ str(wine)
 
 # Fit a Random Forest
 
-We fit a random forest to predict the quality and use a train-test split, reserving 5,000 observations for testing:
+We fit a random forest to predict the quality and use a train-test split, reserving 500 observations for testing:
 
 ```{r}
 set.seed(124)

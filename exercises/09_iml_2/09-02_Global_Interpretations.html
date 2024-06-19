@@ -12,7 +12,7 @@
 
 
 
-<title>Counterfactuals - WhatIf</title>
+<title>Global Interpretation Methods</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -145,8 +145,9 @@ pointer-events: auto;
 <article class="hentry">
 <header class="header-title">
 <div class="header-title-wrap">
-<h1 class="title toc-ignore entry-title">Counterfactuals - WhatIf</h1>
-<h2 class="subtitle">In-class exercise 08-2</h2>
+<h1 class="title toc-ignore entry-title">Global Interpretation
+Methods</h1>
+<h2 class="subtitle">In-class exercise 09-2</h2>
 </div><!-- /.header-title-wrap -->
 </header>
 
@@ -156,219 +157,253 @@ pointer-events: auto;
 <ul>
 <li><a href="#goal" id="toc-goal">Goal</a></li>
 <li><a href="#prerequisites" id="toc-prerequisites">Prerequisites</a></li>
-<li><a href="#whatif-counterfactuals" id="toc-whatif-counterfactuals">1
-WhatIf Counterfactuals</a></li>
-<li><a href="#analysis-of-attributes" id="toc-analysis-of-attributes">2
-Analysis of attributes</a></li>
-<li><a href="#evaluation" id="toc-evaluation">3 Evaluation</a></li>
+<li><a href="#data" id="toc-data">Data</a></li>
+<li><a href="#categorical-ale" id="toc-categorical-ale">1 Categorical
+ALE</a>
+<ul>
+<li><a href="#fit-a-random-forest" id="toc-fit-a-random-forest">1.1 Fit
+a Random Forest</a></li>
+<li><a href="#compute-pdp-of-personal_status_sex" id="toc-compute-pdp-of-personal_status_sex">1.2 Compute PDP of
+personal_status_sex</a></li>
+<li><a href="#analyse-the-corresponding-ale-plot" id="toc-analyse-the-corresponding-ale-plot">1.3 Analyse the
+corresponding ALE plot</a></li>
+</ul></li>
+<li><a href="#pfi" id="toc-pfi">2 PFI</a>
+<ul>
+<li><a href="#a-synthetic-example" id="toc-a-synthetic-example">2.1 A
+synthetic example</a></li>
+<li><a href="#calculate-and-interpret-pfi-values" id="toc-calculate-and-interpret-pfi-values">2.2 Calculate and interpret
+PFI values</a></li>
+<li><a href="#exploratory-analysis" id="toc-exploratory-analysis">2.3
+Exploratory analysis</a></li>
+</ul></li>
 <li><a href="#summary" id="toc-summary">Summary</a></li>
 </ul>
 </div>
 
 <div id="goal" class="section level1">
 <h1>Goal</h1>
-<p>Deepening your understanding of counterfactuals by inspecting another
-counterfactuals algorithm.</p>
+<p>Apply what you have learned about global interpretation methods.</p>
 </div>
 <div id="prerequisites" class="section level1">
 <h1>Prerequisites</h1>
 <p>We need the following libraries:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(docstring)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(StatMatch)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&#39;mlr3verse&#39;</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&#39;iml&#39;</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&#39;gridExtra&#39;</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&#39;ggpubr&#39;</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">100</span>)</span></code></pre></div>
 </div>
-<div id="whatif-counterfactuals" class="section level1">
-<h1>1 WhatIf Counterfactuals</h1>
-<p>Counterfactual explanations are a valuable tool to explain
-predictions of machine learning models. They tell the user how features
-need to be changed in order to predict a desired outcome. One of the
-simplest approaches to generate counterfactuals is to determine for a
-given observation <code>x</code> (<code>x_interest</code>) the closest
-data point which has a prediction equal to the desired outcome.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></p>
-<p>In the following, an implementation of this so called <em>WhatIf</em>
-approach for a binary classifier is given:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>generate_whatif <span class="ot">=</span> <span class="cf">function</span>(x_interest, model, dataset) {</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="co">#&#39; Computes whatif counterfactuals for binary classification models, </span></span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  <span class="co">#&#39; i.e., the closest data point with a different prediction.</span></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="co">#</span></span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="co">#&#39; @param x_interest (data.frame): Datapoint of interest, a single row data set. </span></span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  <span class="co">#&#39; @param model: Binary classifier which can call a predict method.</span></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  <span class="co">#&#39; @param dataset (data.frame): Input data</span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>  <span class="co">#&#39;</span></span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>  <span class="co">#&#39; @return counterfactual (data.frame): data.frame with one row presenting the counterfactuals</span></span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>  <span class="co">#&#39;    closest to  `x_interest` with a different prediction.</span></span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a></span>
-<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>  <span class="co"># subset dataset to the observations having a prediction different to x_interest</span></span>
-<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>  pred <span class="ot">=</span> <span class="fu">predict</span>(model, <span class="at">newdata =</span> x_interest)</span>
-<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>  preddata <span class="ot">=</span> <span class="fu">predict</span>(model, dataset)</span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>  idx <span class="ot">=</span> <span class="fu">which</span>(preddata <span class="sc">!=</span> pred)</span>
-<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>  dataset <span class="ot">=</span> dataset[idx,]</span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>  </span>
-<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>  <span class="co"># Pairwise Gower distances </span></span>
-<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>  dists <span class="ot">=</span> StatMatch<span class="sc">::</span><span class="fu">gower.dist</span>(<span class="at">data.x =</span> x_interest, <span class="at">data.y =</span> dataset)</span>
-<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>  minid <span class="ot">=</span> <span class="fu">order</span>(dists)[<span class="dv">1</span>]</span>
-<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>  </span>
-<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a>  <span class="co"># Return nearest datapoint</span></span>
-<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>  <span class="fu">return</span>(dataset[minid,]) </span>
-<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>}</span></code></pre></div>
-<p>In this exercise we consider the wheat seeds dataset
-(<code>wheat_seeds.csv</code>). It consists of seven features to
-distinct three types of wheat kernels (0-Canadian, 1-Kama, 2-Rosa).
-Converge the target <code>Type</code> into a binary classification
-problem to predict whether the wheat kernel belongs to the type
-<em>Rosa</em>. Fit a random forest on the data set and compute a
-WhatIf-counterfactual for the first observation.</p>
+<div id="data" class="section level1">
+<h1>Data</h1>
+<div id="german-credit" class="section level3">
+<h3>German Credit</h3>
+<p>The data set contains 1000 observations with 21 features and the
+binary target variable <code>credit_risk</code>. For illustrative
+purposes, we only consider 8 of the 21 features in the following:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>task <span class="ot">=</span> <span class="fu">tsk</span>(<span class="st">&quot;german_credit&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>task<span class="sc">$</span><span class="fu">select</span>(<span class="at">cols =</span> <span class="fu">c</span>(<span class="st">&quot;age&quot;</span>, <span class="st">&quot;amount&quot;</span>, <span class="st">&quot;duration&quot;</span>, <span class="st">&quot;credit_history&quot;</span>, <span class="st">&quot;employment_duration&quot;</span>, <span class="st">&quot;personal_status_sex&quot;</span>, <span class="st">&quot;purpose&quot;</span>))</span></code></pre></div>
+</div>
+</div>
+<div id="categorical-ale" class="section level1">
+<h1>1 Categorical ALE</h1>
+<div id="fit-a-random-forest" class="section level2">
+<h2>1.1 Fit a Random Forest</h2>
+<p>Fit a random forest with <code>mlr3</code> on some training data to
+predict the risk.</p>
+<!--
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+
+```r
+split = partition(task)
+learner = lrn("classif.ranger", predict_type = "prob")$train(task, row_ids = split$train)
+```
+
+-->
+</div>
+<div id="compute-pdp-of-personal_status_sex" class="section level2">
+<h2>1.2 Compute PDP of personal_status_sex</h2>
+<p>Since the decision of whether a person gets a loan can have serious
+implications on the person’s life, banks are subordinate to regulations
+and must disclose the underlying mechanism of their used model to
+authorities. Since looking on the single trees is not feasible to
+uncover the internals of a random forest, (model-agnostic)
+interpretation methods should help to unfold the underlying mechanisms
+and to explain specific decisions. Since the regulations require that
+the model does not discriminate against certain groups, you want to
+evaluate the feature effect of <code>personal_status_sex</code> of the
+fitted forest model. Compute and visualize the PDP of
+<code>personal_status_sex</code> using test data and interpret the
+results.</p>
 <details>
 <summary>
 <strong>Hint 1:</strong>
 </summary>
-<p>The binary target should be converted into a factor variable. With
-this, the values receive new meanings: 1-notRosa, 2-Rosa.</p>
+<p>To make the x-axis labels more legible, you can append the following
+code to the <code>plot()</code> function:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">plot</span> (...) <span class="sc">+</span> </span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">50</span>, <span class="at">hjust=</span><span class="dv">1</span>))</span></code></pre></div>
 </details>
-<div id="solution" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
+
 <details>
-<summary>
-Click me:
-</summary>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>df <span class="ot">=</span> <span class="fu">read.csv</span>(<span class="at">file =</span> <span class="st">&quot;../data/wheat_seeds.csv&quot;</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">table</span>(df<span class="sc">$</span>Type)</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="do">##  0  1  2 </span></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="do">## 65 66 68</span></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co"># Create a binary classification task</span></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co"># all observations of Type Canadian are set to Type = 1</span></span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co"># so Type = 1 now contains obs of Type != Rosa</span></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>df<span class="sc">$</span>Type <span class="ot">=</span> <span class="fu">as.factor</span>(<span class="fu">ifelse</span>(df<span class="sc">$</span>Type <span class="sc">==</span> <span class="st">&quot;0&quot;</span>, <span class="dv">1</span>, df<span class="sc">$</span>Type))</span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="fu">table</span>(df<span class="sc">$</span>Type)</span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="do">##   1   2 </span></span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="do">## 131  68</span></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a></span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co"># Fit a random forest to the data</span></span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>mod <span class="ot">=</span> randomForest<span class="sc">::</span><span class="fu">randomForest</span>(Type <span class="sc">~</span> ., <span class="at">data =</span> df)</span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a></span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co"># Compute counterfactual for first observation</span></span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>x_interest <span class="ot">=</span> df[<span class="dv">1</span>,]</span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>x_interest</span>
-<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="do">##    Area Perimeter Compactness Kernel.Length Kernel.Width Asymmetry.Coeff Kernel.Groove Type</span></span>
-<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="do">## 1 15.26     14.84       0.871         5.763        3.312           2.221          5.22    1</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>cf <span class="ot">=</span> <span class="fu">generate_whatif</span>(<span class="at">x_interest =</span> x_interest, <span class="at">model =</span> mod, <span class="at">dataset =</span> df)</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>cf</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="do">##     Area Perimeter Compactness Kernel.Length Kernel.Width Asymmetry.Coeff Kernel.Groove Type</span></span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="do">## 133 15.6     15.11       0.858         5.832        3.286           2.725         5.752    2</span></span></code></pre></div>
+<summary>Click me:</summary>
+
+
+```r
+# Predictor:
+pred = Predictor$new(learner, data = task$data(rows = split$test), y = "credit_risk")
+
+# Compute PDP:
+plot(FeatureEffect$new(predictor = pred, 
+                       feature = "personal_status_sex", 
+                       method = "pdp")) +
+  theme(axis.text.x = element_text(angle = 50, hjust=1))
+```
+
+All customers, regardless of their personal status and gender, have on 
+average a high probability of being a low (good) risk for the bank. 
+The average marginal prediction for divorced or separated male customers
+reveals a slightly higher risk for this group. 
+
+-->
+</div>
+<div id="analyse-the-corresponding-ale-plot" class="section level2">
+<h2>1.3 Analyse the corresponding ALE plot</h2>
+<p>Because the ALE models accumulated effects in a specific direction,
+the feature values must have an order by definition. However, there is
+no natural order to categorical/nominal features like
+<code>personal_status_sex</code>. In order to derive an artificial
+order, Molnar 2022 (Chapter 8.2)<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> proposes to order the categories of the
+features of interest <span class="math inline">\(x_s\)</span> according
+to their similarity based on other/remaining features <span class="math inline">\(x_{-S}\)</span>. Take a look at the corresponding
+ALE plot and compare the results to the PDP.</p>
+<!--
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+
+```r
+plot(FeatureEffect$new(predictor = pred, 
+                       feature = "personal_status_sex", 
+                       method = "ale")) +
+  theme(axis.text.x = element_text(angle = 50, hjust=1))
+```
+
+In comparison to the PDP, we now see that there are clear gender-specific differences, e.g., that divorced or separated male customers show a much higher risk.
+
+-->
 </div>
 </div>
-<div id="analysis-of-attributes" class="section level1">
-<h1>2 Analysis of attributes</h1>
-<p>Which attributes from the lecture (<em>validity</em>,
-<em>sparsity</em>, …) does this approach fulfill. Based on this, derive
-the advantages and disadvantages of the approach.</p>
-<div id="solution-1" class="section level3">
-<h3>Solution:</h3>
+<div id="pfi" class="section level1">
+<h1>2 PFI</h1>
+<div id="a-synthetic-example" class="section level2">
+<h2>2.1 A synthetic example</h2>
+<p>Download the <code>extrapolation.csv</code> dataset and remove the
+column that only contains the row indices (<code>X</code>). Fit a linear
+regression model with <code>mLr3</code> to some training data. Do not
+look at the model’s coefficients or perform an exploratory analysis of
+the data yet. Assess the MSE of the model on test data.</p>
+<!--
+
+### Solution:
+
 <details>
-<summary>
-Click me:
-</summary>
-<p>Counterfactuals generated with WhatIf are valid and proximal, since
-they reflect the closest training datapoint with the desired/different
-prediction. The counterfactuals are also plausible since by definition
-they adhere to the data manifold. The counterfactuals are not sparse and
-might propose changes to many features - this is a clear disadvantage of
-this method.</p>
+<summary>Click me:</summary>
+
+
+```r
+# load data and remove column "X"
+df = read.csv("../data/extrapolation.csv")
+df <- df[ , -which(names(df) == "X")]
+
+# create task and split in into train and test data
+task = as_task_regr(x = df, target = "y")
+split = partition(task)
+
+#learn and predict
+lm = lrn("regr.lm")
+lm$train(task, row_ids = split$train)
+pred_lm = Predictor$new(lm, data = task$data(rows = split$test), y = "y")
+preds = pred_lm$predict(task$data(rows = split$test))
+
+# MSE
+mse <- mean((task$data(rows = split$test)$y - preds$predict.model..newdata...newdata.) ^ 2)
+print(paste("MSE:", round(mse,4)))
+```
+
+-->
 </div>
+<div id="calculate-and-interpret-pfi-values" class="section level2">
+<h2>2.2 Calculate and interpret PFI values</h2>
+<p>Apply Permutation Feature Importance to the model (on test data) and
+plot the results.</p>
+<!--
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+
+```r
+importance = FeatureImp$new(pred_lm, loss = "mse", n.repetitions = 10)
+plot(importance)
+```
+
+$X_3$ is the most important feature, with $X_1$ and $X_2$ sharing the second place. PFI considers $X_4$ to be irrelevant.
+
+-->
 </div>
-<div id="evaluation" class="section level1">
-<h1>3 Evaluation</h1>
-<p>In order to evaluate the sparseness of the counterfactual produced by
-WhatIf, we could use the following approach: For each feature of the
-counterfactual instance assess whether setting its value to the one of
-<code>x_interest</code> still leads to a different prediction than
-<code>x_interest</code>.</p>
-<p>Create a function <code>evaluate_counterfactual()</code> using the
-following steps:</p>
-<ul>
-<li>Create an empty vector <code>feature_nams</code>.</li>
-<li>For each feature do the following:
-<ol style="list-style-type: decimal">
-<li>Create a copy of the counterfactual.</li>
-<li>Replace the feature value of this copy with the value of
-<code>x_interest</code>.</li>
-<li>Evaluate if the prediction for this copy still differs to the one of
-<code>x_interest</code>.</li>
-<li>If it still differs, add the name of this feature to
-<code>feature_nams</code>.</li>
-</ol></li>
-<li>End for - return <code>feature_nams</code>.</li>
-</ul>
-<p>Evaluate the counterfactual derived in the previous exercise.</p>
+<div id="exploratory-analysis" class="section level2">
+<h2>2.3 Exploratory analysis</h2>
+<p>Perform an exploratory analysis of the data (correlation structure
+between features and with <span class="math inline">\(y\)</span>) and
+print the model’s coefficients and intercept. What additional insight
+into the relationship of the features with <span class="math inline">\(y\)</span> do we gain by looking at the
+correlation structure of the covariates in addition to the PFI (assuming
+that all dependencies are linear)?</p>
+<!--
+
+### Solution:
+
 <details>
-<summary>
-<strong>Hint 1:</strong>
-</summary>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>evaluate_counterfactual <span class="ot">=</span> <span class="cf">function</span>(counterfactual, x_interest, model) {</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="co">#&#39; Evaluates if counterfactuals are minimal, i.e., if setting one feature to </span></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="co">#&#39; the value of x_interest still results in a different prediction than for x_interest.</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="co">#&#39; </span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="co">#&#39; @param counterfactual (data.frame): Counterfactual of `x_interest`, a single row data set. </span></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="co">#&#39; @param x_interest (data.frame): Datapoint of interest, a single row data set. </span></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="co">#&#39; @param model: Binary classifier which can call a predict method.</span></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="co">#&#39;</span></span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>  <span class="co">#&#39; @return (list): List with names of features that if set for the counterfactual to the value of </span></span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>  <span class="co">#&#39; `x_interest`, still leads to a different prediction than for x_interest. </span></span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a> </span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>  ...</span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>}</span></code></pre></div>
-</details>
-<div id="solution-2" class="section level3">
-<h3>Solution:</h3>
-<details>
-<summary>
-Click me:
-</summary>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>evaluate_counterfactual <span class="ot">=</span> <span class="cf">function</span>(counterfactual, x_interest, model) {</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="co">#&#39; Evaluates if counterfactuals are minimal, i.e., if setting one feature to </span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="co">#&#39; the value of x_interest still results in a different prediction than for x_interest.</span></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="co">#&#39; </span></span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="co">#&#39; @param counterfactual (data.frame): Counterfactual of `x_interest`, a single row data set. </span></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="co">#&#39; @param x_interest (data.frame): Datapoint of interest, a single row data set. </span></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  <span class="co">#&#39; @param model: Binary classifier which can call a predict method.</span></span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>  <span class="co">#&#39;</span></span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  <span class="co">#&#39; @return (list): List with names of features that if set for the counterfactual to the value of </span></span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>  <span class="co">#&#39; `x_interest`, still leads to a different prediction than for x_interest. </span></span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>  pred <span class="ot">=</span> <span class="fu">predict</span>(model, <span class="at">newdata =</span> x_interest)</span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>  feature_nams <span class="ot">=</span> <span class="fu">c</span>()</span>
-<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>  <span class="cf">for</span> (feature <span class="cf">in</span> <span class="fu">names</span>(counterfactual)) {</span>
-<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>    <span class="cf">if</span> (counterfactual[feature] <span class="sc">==</span> x_interest[feature]) {</span>
-<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>      <span class="cf">next</span></span>
-<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>    }</span>
-<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>    newcf <span class="ot">=</span> counterfactual</span>
-<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>    newcf[, feature] <span class="ot">=</span> x_interest[, feature]</span>
-<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a>    newpred <span class="ot">=</span> <span class="fu">predict</span>(model, newcf)</span>
-<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>    <span class="cf">if</span> (newpred <span class="sc">!=</span> pred) {</span>
-<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a>      feature_nams <span class="ot">=</span> <span class="fu">c</span>(feature_nams, feature)</span>
-<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a>    }</span>
-<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a>  }</span>
-<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a>  <span class="fu">return</span>(feature_nams)</span>
-<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a>}</span></code></pre></div>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>df<span class="sc">$</span>Type <span class="ot">=</span> <span class="cn">NULL</span></span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>x_interest<span class="sc">$</span>Type <span class="ot">=</span> <span class="cn">NULL</span></span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>cf<span class="sc">$</span>Type <span class="ot">=</span> <span class="cn">NULL</span></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="fu">evaluate_counterfactual</span>(<span class="at">counterfactual =</span> cf, <span class="at">x_interest =</span> x_interest, <span class="at">model =</span> mod)</span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="do">## [1] &quot;Area&quot;            &quot;Perimeter&quot;       &quot;Compactness&quot;     &quot;Kernel.Length&quot;   &quot;Kernel.Width&quot;    &quot;Asymmetry.Coeff&quot;</span></span></code></pre></div>
+<summary>Click me:</summary>
+
+
+```r
+cor(task$data(rows = split$test))
+```
+
+
+```r
+lm$model$coefficients
+```
+
+If we know the dependency structure of the covariates we can infer whether or not the PFI value is nonzero due to a dependency with the covariates or not. In our example we now know that $x_3$ is independent of its covariates, so we hypothesize that $x_3$ is actually dependent with $y$. Since $x_1, x_2$ are dependent, for those variables we cannot infer anything about the dependency with $y$ with the covariates dependency structure and PFI alone.
+
+-->
 </div>
 </div>
 <div id="summary" class="section level1">
 <h1>Summary</h1>
-<p>We discovered and became familiar with the WhatIf algorithm and its
-advantages and disadvantages.</p>
+<p>In this exercise, we analyzed an example of ALE on a categorical
+target and deepened our understanding of PFI.</p>
 </div>
 <div class="footnotes footnotes-end-of-document">
 <hr />
 <ol>
-<li id="fn1"><p>Wexler et al. (2019): “The What-If Tool: Interactive
-Probing of Machine Learning Models”<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn1"><p><a href="https://christophm.github.io/interpretable-ml-book/ale.html" class="uri">https://christophm.github.io/interpretable-ml-book/ale.html</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
 </div><!-- /.entry-content -->

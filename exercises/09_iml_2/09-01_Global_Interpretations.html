@@ -12,7 +12,7 @@
 
 
 
-<title>Counterfactuals - WhatIf</title>
+<title>Global Interpretation Methods</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -145,8 +145,9 @@ pointer-events: auto;
 <article class="hentry">
 <header class="header-title">
 <div class="header-title-wrap">
-<h1 class="title toc-ignore entry-title">Counterfactuals - WhatIf</h1>
-<h2 class="subtitle">In-class exercise 08-2</h2>
+<h1 class="title toc-ignore entry-title">Global Interpretation
+Methods</h1>
+<h2 class="subtitle">In-class exercise 09-1</h2>
 </div><!-- /.header-title-wrap -->
 </header>
 
@@ -156,220 +157,416 @@ pointer-events: auto;
 <ul>
 <li><a href="#goal" id="toc-goal">Goal</a></li>
 <li><a href="#prerequisites" id="toc-prerequisites">Prerequisites</a></li>
-<li><a href="#whatif-counterfactuals" id="toc-whatif-counterfactuals">1
-WhatIf Counterfactuals</a></li>
-<li><a href="#analysis-of-attributes" id="toc-analysis-of-attributes">2
-Analysis of attributes</a></li>
-<li><a href="#evaluation" id="toc-evaluation">3 Evaluation</a></li>
+<li><a href="#data" id="toc-data">Data</a></li>
+<li><a href="#exercises" id="toc-exercises">Exercises</a>
+<ul>
+<li><a href="#exercise-1-fit-a-neural-network" id="toc-exercise-1-fit-a-neural-network">Exercise 1: Fit a Neural
+Network</a></li>
+<li><a href="#exercise-2-compute-pdp-and-ale" id="toc-exercise-2-compute-pdp-and-ale">Exercise 2: Compute PDP and
+ALE</a></li>
+<li><a href="#exercise-3-fit-a-random-forest-on-the-wine-data" id="toc-exercise-3-fit-a-random-forest-on-the-wine-data">Exercise 3: Fit
+a Random Forest on the wine data</a></li>
+<li><a href="#exercise-4-pfi" id="toc-exercise-4-pfi">Exercise 4:
+PFI</a></li>
+<li><a href="#exercise-5-loco" id="toc-exercise-5-loco">Exercise 5:
+LOCO</a></li>
+<li><a href="#exercise-6-loco-vs.-pfi---calculation" id="toc-exercise-6-loco-vs.-pfi---calculation">Exercise 6: LOCO vs. PFI
+- Calculation</a></li>
+<li><a href="#exercise-7-loco-vs.-pfi---visualization" id="toc-exercise-7-loco-vs.-pfi---visualization">Exercise 7: LOCO
+vs. PFI - Visualization</a></li>
+</ul></li>
 <li><a href="#summary" id="toc-summary">Summary</a></li>
 </ul>
 </div>
 
 <div id="goal" class="section level1">
 <h1>Goal</h1>
-<p>Deepening your understanding of counterfactuals by inspecting another
-counterfactuals algorithm.</p>
+<p>Apply what you have learned about global interpretation methods to
+real data.</p>
 </div>
 <div id="prerequisites" class="section level1">
 <h1>Prerequisites</h1>
 <p>We need the following libraries:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(docstring)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(StatMatch)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&#39;mlr3verse&#39;</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&#39;iml&#39;</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&#39;gridExtra&#39;</span>)</span></code></pre></div>
 </div>
-<div id="whatif-counterfactuals" class="section level1">
-<h1>1 WhatIf Counterfactuals</h1>
-<p>Counterfactual explanations are a valuable tool to explain
-predictions of machine learning models. They tell the user how features
-need to be changed in order to predict a desired outcome. One of the
-simplest approaches to generate counterfactuals is to determine for a
-given observation <code>x</code> (<code>x_interest</code>) the closest
-data point which has a prediction equal to the desired outcome.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></p>
-<p>In the following, an implementation of this so called <em>WhatIf</em>
-approach for a binary classifier is given:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>generate_whatif <span class="ot">=</span> <span class="cf">function</span>(x_interest, model, dataset) {</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="co">#&#39; Computes whatif counterfactuals for binary classification models, </span></span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  <span class="co">#&#39; i.e., the closest data point with a different prediction.</span></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="co">#</span></span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="co">#&#39; @param x_interest (data.frame): Datapoint of interest, a single row data set. </span></span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  <span class="co">#&#39; @param model: Binary classifier which can call a predict method.</span></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  <span class="co">#&#39; @param dataset (data.frame): Input data</span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>  <span class="co">#&#39;</span></span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>  <span class="co">#&#39; @return counterfactual (data.frame): data.frame with one row presenting the counterfactuals</span></span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>  <span class="co">#&#39;    closest to  `x_interest` with a different prediction.</span></span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a></span>
-<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>  <span class="co"># subset dataset to the observations having a prediction different to x_interest</span></span>
-<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>  pred <span class="ot">=</span> <span class="fu">predict</span>(model, <span class="at">newdata =</span> x_interest)</span>
-<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>  preddata <span class="ot">=</span> <span class="fu">predict</span>(model, dataset)</span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>  idx <span class="ot">=</span> <span class="fu">which</span>(preddata <span class="sc">!=</span> pred)</span>
-<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>  dataset <span class="ot">=</span> dataset[idx,]</span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>  </span>
-<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>  <span class="co"># Pairwise Gower distances </span></span>
-<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>  dists <span class="ot">=</span> StatMatch<span class="sc">::</span><span class="fu">gower.dist</span>(<span class="at">data.x =</span> x_interest, <span class="at">data.y =</span> dataset)</span>
-<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>  minid <span class="ot">=</span> <span class="fu">order</span>(dists)[<span class="dv">1</span>]</span>
-<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>  </span>
-<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a>  <span class="co"># Return nearest datapoint</span></span>
-<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>  <span class="fu">return</span>(dataset[minid,]) </span>
-<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>}</span></code></pre></div>
-<p>In this exercise we consider the wheat seeds dataset
-(<code>wheat_seeds.csv</code>). It consists of seven features to
-distinct three types of wheat kernels (0-Canadian, 1-Kama, 2-Rosa).
-Converge the target <code>Type</code> into a binary classification
-problem to predict whether the wheat kernel belongs to the type
-<em>Rosa</em>. Fit a random forest on the data set and compute a
-WhatIf-counterfactual for the first observation.</p>
+<div id="data" class="section level1">
+<h1>Data</h1>
+<div id="wines" class="section level3">
+<h3>Wines</h3>
+<p>For a later example, we will use the wine data set, which includes
+quality ratings (assessed by blind tasting, on a scale from 0 to 10) for
+roughly 6500 red and white wines with given physiochemical
+properties:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>wine <span class="ot">=</span> <span class="fu">read.csv</span>(<span class="st">&quot;wine.csv&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>wine <span class="ot">=</span> <span class="fu">na.omit</span>(wine)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>wine<span class="sc">$</span>type <span class="ot">=</span> <span class="fu">ifelse</span>(wine<span class="sc">$</span>type <span class="sc">==</span> <span class="st">&quot;red&quot;</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span></code></pre></div>
+</div>
+<div id="custom-data" class="section level3">
+<h3>Custom data</h3>
+<p>First, we will consider a toy example to understand how PDP and ALE,
+two global interpretation methods, handle correlated features. Imagine a
+simple data generating process (DGP) with two features, <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span>, that are highly correlated:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>x1 <span class="ot">=</span> <span class="fu">runif</span>(<span class="at">n =</span> <span class="dv">3000</span>, <span class="at">min =</span> <span class="dv">0</span>, <span class="at">max =</span> <span class="dv">1</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>x2 <span class="ot">=</span> x1 <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="dv">3000</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fl">0.08</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co"># Pearson correlation between x1 and x2:</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="fu">cor</span>(x1, x2)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="do">## [1] 0.9630857</span></span></code></pre></div>
+<p>Further, we assume that the outcome <span class="math inline">\(y\)</span> is created via the following DGP: <span class="math inline">\(y = x_1 + x_2^2 + \epsilon, \; \epsilon \sim N(0,
+0.05)\)</span>.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>eps <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="dv">3000</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fl">0.05</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>y <span class="ot">=</span> x1 <span class="sc">+</span> x2<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> eps</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>df <span class="ot">=</span> <span class="fu">data.frame</span>(x1, x2, y)</span></code></pre></div>
+<p>Obviously, we can infer the true feature effects directly from the
+DGP: Both <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> have positive effects on the outcome.
+Whereas <span class="math inline">\(y\)</span> increases linearly with
+<span class="math inline">\(x_1\)</span>, <span class="math inline">\(x_2\)</span> has a quadratic effect. Leveraging
+this knowledge about the true DGP, we can test and compare to what
+extent PDP and ALE recover these effects for a given machine learning
+model.</p>
+</div>
+</div>
+<div id="exercises" class="section level1">
+<h1>Exercises</h1>
+<div id="exercise-1-fit-a-neural-network" class="section level2">
+<h2>Exercise 1: Fit a Neural Network</h2>
+<p>Fit a neural network using a simple train-test split, reserving 1,500
+observations for testing. Find a suitable learner with <code>mlr3</code>
+and set <code>size = 10</code> and <code>maxit = 1000</code> as
+arguments for training. Then, visualize the prediction surface for the
+test data with the <code>plot_learner_prediction()</code> function from
+<code>mlr3viz</code>.</p>
+<!--
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+
+```r
+# Train-test split:
+ids = sample(1:nrow(df), size = 1500, replace = FALSE)
+train = df[-ids,]
+test = df[ids,]
+
+# Fit neural network:
+task_train = as_task_regr(x = train, target = "y")
+nnet = lrn("regr.nnet", size = 10, maxit = 1000, trace = FALSE)$train(task_train)
+
+# Visualize prediction surface:
+task_test = as_task_regr(x = test, target = "y")
+plot_learner_prediction(nnet, task_test)
+```
+
+-->
+</div>
+<div id="exercise-2-compute-pdp-and-ale" class="section level2">
+<h2>Exercise 2: Compute PDP and ALE</h2>
+<p>To compute and visualize PDP and ALE, we can use the <code>iml</code>
+package. Last week, you have learned how to leverage
+<code>Predictor</code> objects within <code>iml</code> to store models
+and compute feature effects via the <code>FeatureEffect</code> class.
+This applies straightforwardly to PDP and ALE. Create 4 effect plots,
+one for each feature (<span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span>), using both PDP and ALE,
+respectively. Use test data. Interpret this plot. To what extent do PDP
+and ALE recover information about the true DGP?</p>
+<!--
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+
+```r
+# Predictor:
+pred = Predictor$new(nnet, data = test, y = "y")
+
+# Compute PDP plots:
+pdp_x1 = arrangeGrob(plot(FeatureEffect$new(predictor = pred,
+                            feature = "x1",
+                            method = "pdp",
+                            grid.size = 30)), top = "PDP x1")
+pdp_x2 = arrangeGrob(plot(FeatureEffect$new(predictor = pred,
+                            feature = "x2",
+                            method = "pdp",
+                            grid.size = 30)), top = "PDP x2")
+
+# Compute ALE plots:
+ale_x1 = arrangeGrob(plot(FeatureEffect$new(predictor = pred,
+                            feature = "x1",
+                            method = "ale",
+                            grid.size = 30)), top = "ALE x1")
+ale_x2 = arrangeGrob(plot(FeatureEffect$new(predictor = pred,
+                            feature = "x2",
+                            method = "ale",
+                            grid.size = 30)), top = "ALE x2")
+
+# Plot together:
+grid.arrange(pdp_x1, ale_x1, pdp_x2, ale_x2, nrow=2, ncol=2)
+```
+
+ALE seems to reflect the ground truth: both the linear effect of $x_1$ and the quadratic effect of $x_2$ are recovered. 
+The PDP, on the other hand, does not reflect the DGP. As discussed in the lecture, there is an extrapolation problem here.
+
+-->
+</div>
+<div id="exercise-3-fit-a-random-forest-on-the-wine-data" class="section level2">
+<h2>Exercise 3: Fit a Random Forest on the wine data</h2>
+<p>Let’s fit a Random Forest on the <code>wine</code> data, predicting
+the outcome of interest (<code>quality</code>) with <code>mlr3</code>.
+As always, please use a train-test split with
+<code>partition()</code>.</p>
+<!--
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+
+```r
+task_wines = as_task_regr(x = wine, target = "quality")
+split = partition(task_wines)
+lrn_rf = lrn("regr.ranger")
+lrn_rf$train(task_wines, row_ids = split$train)
+```
+
+-->
+</div>
+<div id="exercise-4-pfi" class="section level2">
+<h2>Exercise 4: PFI</h2>
+<p>Feature permutation is the process of randomly shuffling observed
+values for a single feature in a data set. This removes the original
+dependency structure of the feature with the target variable and with
+all other features while maintaining the marginal distribution of the
+feature. The PFI measures the change in the model performance before and
+after permuting a feature. In the <code>iml</code> package, PFI
+summaries can be generated with the <code>FeatureImp</code> class. As
+before, this requires a <code>Predictor</code> object. Use the
+documentation of <code>FeatureImp</code> to construct and plot the PFI
+values based on the L2 loss for the RF model, evaluated on test
+data.</p>
 <details>
 <summary>
 <strong>Hint 1:</strong>
 </summary>
-<p>The binary target should be converted into a factor variable. With
-this, the values receive new meanings: 1-notRosa, 2-Rosa.</p>
+<p>As permutations are generated by a random process, PFI analysis
+usually works by repeating the permutation a few times, producing error
+bars of the PFI measure as a consequence. Play around with the relevant
+argument in <code>FeatureImp</code> to find a good trade-off between
+computational cost and obtaining useful error bars.</p>
 </details>
-<div id="solution" class="section level3">
-<h3>Solution:</h3>
+<!--
+
+### Solution:
+
 <details>
-<summary>
-Click me:
-</summary>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>df <span class="ot">=</span> <span class="fu">read.csv</span>(<span class="at">file =</span> <span class="st">&quot;../data/wheat_seeds.csv&quot;</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">table</span>(df<span class="sc">$</span>Type)</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="do">##  0  1  2 </span></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="do">## 65 66 68</span></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co"># Create a binary classification task</span></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co"># all observations of Type Canadian are set to Type = 1</span></span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co"># so Type = 1 now contains obs of Type != Rosa</span></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>df<span class="sc">$</span>Type <span class="ot">=</span> <span class="fu">as.factor</span>(<span class="fu">ifelse</span>(df<span class="sc">$</span>Type <span class="sc">==</span> <span class="st">&quot;0&quot;</span>, <span class="dv">1</span>, df<span class="sc">$</span>Type))</span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="fu">table</span>(df<span class="sc">$</span>Type)</span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="do">##   1   2 </span></span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="do">## 131  68</span></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a></span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co"># Fit a random forest to the data</span></span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>mod <span class="ot">=</span> randomForest<span class="sc">::</span><span class="fu">randomForest</span>(Type <span class="sc">~</span> ., <span class="at">data =</span> df)</span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a></span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co"># Compute counterfactual for first observation</span></span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>x_interest <span class="ot">=</span> df[<span class="dv">1</span>,]</span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>x_interest</span>
-<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="do">##    Area Perimeter Compactness Kernel.Length Kernel.Width Asymmetry.Coeff Kernel.Groove Type</span></span>
-<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="do">## 1 15.26     14.84       0.871         5.763        3.312           2.221          5.22    1</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>cf <span class="ot">=</span> <span class="fu">generate_whatif</span>(<span class="at">x_interest =</span> x_interest, <span class="at">model =</span> mod, <span class="at">dataset =</span> df)</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>cf</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="do">##     Area Perimeter Compactness Kernel.Length Kernel.Width Asymmetry.Coeff Kernel.Groove Type</span></span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="do">## 133 15.6     15.11       0.858         5.832        3.286           2.725         5.752    2</span></span></code></pre></div>
+<summary>Click me:</summary>
+
+
+```r
+# Features in test data:
+wines_x = task_wines$data(rows = split$test,
+  cols = task_wines$feature_names)
+# Target in test data:
+wines_y = task_wines$data(rows = split$test,
+  cols = task_wines$target_names)
+# Predictor:
+pred_wines = Predictor$new(lrn_rf, data = wines_x, y = wines_y)
+# PFI:
+importance = FeatureImp$new(pred_wines, loss = "mse", n.repetitions = 10)
+plot(importance)
+```
+
+-->
 </div>
-</div>
-<div id="analysis-of-attributes" class="section level1">
-<h1>2 Analysis of attributes</h1>
-<p>Which attributes from the lecture (<em>validity</em>,
-<em>sparsity</em>, …) does this approach fulfill. Based on this, derive
-the advantages and disadvantages of the approach.</p>
-<div id="solution-1" class="section level3">
-<h3>Solution:</h3>
+<div id="exercise-5-loco" class="section level2">
+<h2>Exercise 5: LOCO</h2>
+<p>Let’s consider another method to compute feature importance values:
+LOCO. Here, the general idea is to remove the feature from the dataset,
+refit the model on the reduced dataset, and measure the loss in
+performance compared to the model fitted on the complete dataset.</p>
+<p>We will now implement a function that calculates LOCO values for a
+given <code>task</code>, <code>learner</code>, <code>resampling</code>
+object and performance <code>measure</code>. It shall return a vector
+containing a LOCO value for each feature, i.e., the loss in performance
+compared to the model fitted on the complete dataset. As in PFI we
+approximate our importance values. Here, this can be done by aggregating
+measures from two resampling objects (using the full dataset and the
+reduced dataset, respectively). Below, you find an incomplete
+implementation of the LOCO function. Fill in the two gaps.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>loco <span class="ot">=</span> <span class="cf">function</span>(task, learner, resampling, measure) {</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span>resampling<span class="sc">$</span>is_instantiated) {</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="fu">paste</span>(<span class="st">&quot;Resampling is not instantiated.&quot;</span>))</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  }</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  features <span class="ot">=</span> task<span class="sc">$</span>feature_names</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  res <span class="ot">=</span> <span class="fu">numeric</span>(); <span class="fu">names</span>(res) <span class="ot">=</span> features</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  rr0 <span class="ot">=</span> <span class="fu">resample</span>(<span class="at">task =</span> task, <span class="at">learner =</span> learner, <span class="at">resampling =</span> resampling)</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  v0 <span class="ot">=</span> rr0<span class="sc">$</span><span class="fu">aggregate</span>(measure)</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">length</span>(features))) {</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>    features2 <span class="ot">=</span> features[<span class="sc">-</span>j]</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>    task2 <span class="ot">=</span> task<span class="sc">$</span><span class="fu">clone</span>()<span class="sc">$</span><span class="fu">select</span>(features2)</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>    rr <span class="ot">=</span> ... <span class="co"># (one line)</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>    res[j] ... <span class="co"># (one line)</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>  }</span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>  <span class="fu">return</span>(res)</span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>}</span></code></pre></div>
+<!--
+
+### Solution:
+
 <details>
-<summary>
-Click me:
-</summary>
-<p>Counterfactuals generated with WhatIf are valid and proximal, since
-they reflect the closest training datapoint with the desired/different
-prediction. The counterfactuals are also plausible since by definition
-they adhere to the data manifold. The counterfactuals are not sparse and
-might propose changes to many features - this is a clear disadvantage of
-this method.</p>
+<summary>Click me:</summary>
+
+
+```r
+loco = function(task, learner, resampling, measure) {
+  if (!resampling$is_instantiated) {
+    stop(paste("Resampling is not instantiated."))
+  }
+  features = task$feature_names
+  res = numeric(length(features)); names(res) = features
+  rr0 = resample(task = task, learner = learner, resampling = resampling)
+  v0 = rr0$aggregate(measure)
+  for (j in seq_len(length(features))) {
+    features2 = features[-j]
+    task2 = task$clone()$select(features2)
+    rr = resample(task = task2, learner = learner, resampling = resampling)
+    res[j] = rr$aggregate(measure) - v0
+  }
+  return(res)
+}
+```
+
+-->
 </div>
-</div>
-<div id="evaluation" class="section level1">
-<h1>3 Evaluation</h1>
-<p>In order to evaluate the sparseness of the counterfactual produced by
-WhatIf, we could use the following approach: For each feature of the
-counterfactual instance assess whether setting its value to the one of
-<code>x_interest</code> still leads to a different prediction than
-<code>x_interest</code>.</p>
-<p>Create a function <code>evaluate_counterfactual()</code> using the
-following steps:</p>
+<div id="exercise-6-loco-vs.-pfi---calculation" class="section level2">
+<h2>Exercise 6: LOCO vs. PFI - Calculation</h2>
+<p>Using the custom <code>loco()</code> function, we can compute and
+compare differences in insights gained from PFI and LOCO. For this
+purpose, we create some toy data to assess similarities and differences
+between LOCO and PFI. We use the following DGP: <span class="math inline">\(y = x_1 + \epsilon, \; \epsilon \sim N(0,
+0.1)\)</span> and add some other (noisy) features to the data:</p>
 <ul>
-<li>Create an empty vector <code>feature_nams</code>.</li>
-<li>For each feature do the following:
-<ol style="list-style-type: decimal">
-<li>Create a copy of the counterfactual.</li>
-<li>Replace the feature value of this copy with the value of
-<code>x_interest</code>.</li>
-<li>Evaluate if the prediction for this copy still differs to the one of
-<code>x_interest</code>.</li>
-<li>If it still differs, add the name of this feature to
-<code>feature_nams</code>.</li>
-</ol></li>
-<li>End for - return <code>feature_nams</code>.</li>
+<li><span class="math inline">\(x_2\)</span>, which has no influence on
+<span class="math inline">\(y\)</span>.</li>
+<li><span class="math inline">\(x_3\)</span>, which has no influence on
+<span class="math inline">\(y\)</span>.</li>
+<li><span class="math inline">\(x_4\)</span>, which has no influence on
+<span class="math inline">\(y\)</span> and is highly correlated with
+<span class="math inline">\(x_3\)</span>:</li>
 </ul>
-<p>Evaluate the counterfactual derived in the previous exercise.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>n <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co"># True GDP:</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>x1 <span class="ot">=</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>y <span class="ot">=</span> x1 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="at">sd =</span> <span class="fl">0.1</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co"># Other features:</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>x2 <span class="ot">=</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>x3 <span class="ot">=</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>x4 <span class="ot">=</span> x3 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="at">sd =</span> <span class="fl">0.01</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co"># Data frame:</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>data <span class="ot">=</span> <span class="fu">data.frame</span>(x1, x2, x3, x4, y)</span></code></pre></div>
+<p>We fit a linear model on some training data:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Linear Model via mlr3:</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>lrn_lm <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;regr.lm&quot;</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>task_lm <span class="ot">=</span> <span class="fu">as_task_regr</span>(data, <span class="at">target =</span> <span class="st">&quot;y&quot;</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co"># Train-test split:</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>split <span class="ot">=</span> <span class="fu">partition</span>(task_lm)</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co"># Fit model:</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>lrn_lm<span class="sc">$</span><span class="fu">train</span>(task_lm, <span class="at">row_ids =</span> split<span class="sc">$</span>train)</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>lrn_lm<span class="sc">$</span>model</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="do">## Call:</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="do">## stats::lm(formula = task$formula(), data = task$data())</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="do">## Coefficients:</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="do">## (Intercept)           x1           x2           x3           x4  </span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="do">##   0.0001324    0.9998511    0.0024954   -0.0937054    0.0939911</span></span></code></pre></div>
+<p>Now, compute PFI and LOCO estimates for each of the four features. We
+want to use mean absolute error (MAE) as performance measure and the
+custom train-test split from above for resampling. The resampling object
+for LOCO is given here:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>rsmp_loco <span class="ot">=</span> <span class="fu">rsmp</span>(<span class="st">&quot;custom&quot;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>rsmp_loco<span class="sc">$</span><span class="fu">instantiate</span>(task_lm, <span class="fu">list</span>(split<span class="sc">$</span>train), <span class="fu">list</span>(split<span class="sc">$</span>test))</span></code></pre></div>
+<p>For this task, you will need to implement the following steps:</p>
+<ol style="list-style-type: decimal">
+<li>Use the <code>loco()</code> function to compute LOCO estimates for
+each feature.</li>
+<li>For PFI, create a <code>Predictor</code> object using the test
+data.</li>
+<li>Compute PFI, but make sure that the performance measure is correctly
+specified.</li>
+<li>Store all results in a data.frame <code>imp</code> with three
+columns: <code>feature</code> (name), <code>importance</code> (the
+value), <code>method</code> (PFI or LOCO).</li>
+</ol>
+<!--
+
+### Solution:
+
 <details>
-<summary>
-<strong>Hint 1:</strong>
-</summary>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>evaluate_counterfactual <span class="ot">=</span> <span class="cf">function</span>(counterfactual, x_interest, model) {</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="co">#&#39; Evaluates if counterfactuals are minimal, i.e., if setting one feature to </span></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="co">#&#39; the value of x_interest still results in a different prediction than for x_interest.</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="co">#&#39; </span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="co">#&#39; @param counterfactual (data.frame): Counterfactual of `x_interest`, a single row data set. </span></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="co">#&#39; @param x_interest (data.frame): Datapoint of interest, a single row data set. </span></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="co">#&#39; @param model: Binary classifier which can call a predict method.</span></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="co">#&#39;</span></span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>  <span class="co">#&#39; @return (list): List with names of features that if set for the counterfactual to the value of </span></span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>  <span class="co">#&#39; `x_interest`, still leads to a different prediction than for x_interest. </span></span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a> </span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>  ...</span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>}</span></code></pre></div>
-</details>
-<div id="solution-2" class="section level3">
-<h3>Solution:</h3>
+<summary>Click me:</summary>
+
+
+```r
+# Define performance measure:
+measure = msr("regr.mae")
+# Instantiate resampling:
+rsmp_loco$instantiate(task_lm, list(split$train), list(split$test))
+# Compute LOCO:
+imp_loco = loco(task_lm, lrn_lm, rsmp_loco, measure)
+# Compute PFI:
+pred_test = Predictor$new(lrn_lm, data[split$test, ], y = "y")
+imp_pfi = FeatureImp$new(pred_test, loss = "mae", n.repetitions = 10, compare = 'difference')
+
+# Aggregate results in data.frame:
+imp_loco = data.frame(feature = names(imp_loco), importance = imp_loco)
+
+imp = rbind(cbind(imp_pfi$results[, c("feature", "importance")], method = "PFI"),
+            cbind(imp_loco, method = "LOCO"))
+```
+
+-->
+</div>
+<div id="exercise-7-loco-vs.-pfi---visualization" class="section level2">
+<h2>Exercise 7: LOCO vs. PFI - Visualization</h2>
+<p>Visualize and interpret the results with the following function:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">ggplot</span>(imp, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(feature, importance),</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>                         <span class="at">y =</span> importance, <span class="at">fill =</span> <span class="fu">reorder</span>(method, importance))) <span class="sc">+</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">&#39;identity&#39;</span>, <span class="at">position =</span> <span class="fu">position_dodge</span>()) <span class="sc">+</span> </span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span> </span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="fu">scale_x_discrete</span>(<span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">&#39;x1&#39;</span>, <span class="st">&#39;x2&#39;</span>, <span class="st">&#39;x3&#39;</span>, <span class="st">&#39;x4&#39;</span>),</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="fu">expression</span>(X[<span class="dv">1</span>]), <span class="fu">expression</span>(X[<span class="dv">2</span>]), <span class="fu">expression</span>(X[<span class="dv">3</span>]), <span class="fu">expression</span>(X[<span class="dv">4</span>]))) <span class="sc">+</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_d</span>() <span class="sc">+</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&#39;Feature&#39;</span>, <span class="at">y =</span> <span class="st">&#39;Importance&#39;</span>, <span class="at">fill =</span> <span class="st">&#39;FI Method&#39;</span>)</span></code></pre></div>
+<!--
+
+### Solution:
+
 <details>
-<summary>
-Click me:
-</summary>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>evaluate_counterfactual <span class="ot">=</span> <span class="cf">function</span>(counterfactual, x_interest, model) {</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="co">#&#39; Evaluates if counterfactuals are minimal, i.e., if setting one feature to </span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="co">#&#39; the value of x_interest still results in a different prediction than for x_interest.</span></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="co">#&#39; </span></span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="co">#&#39; @param counterfactual (data.frame): Counterfactual of `x_interest`, a single row data set. </span></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="co">#&#39; @param x_interest (data.frame): Datapoint of interest, a single row data set. </span></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  <span class="co">#&#39; @param model: Binary classifier which can call a predict method.</span></span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>  <span class="co">#&#39;</span></span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  <span class="co">#&#39; @return (list): List with names of features that if set for the counterfactual to the value of </span></span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>  <span class="co">#&#39; `x_interest`, still leads to a different prediction than for x_interest. </span></span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>  pred <span class="ot">=</span> <span class="fu">predict</span>(model, <span class="at">newdata =</span> x_interest)</span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>  feature_nams <span class="ot">=</span> <span class="fu">c</span>()</span>
-<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>  <span class="cf">for</span> (feature <span class="cf">in</span> <span class="fu">names</span>(counterfactual)) {</span>
-<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>    <span class="cf">if</span> (counterfactual[feature] <span class="sc">==</span> x_interest[feature]) {</span>
-<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>      <span class="cf">next</span></span>
-<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>    }</span>
-<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>    newcf <span class="ot">=</span> counterfactual</span>
-<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>    newcf[, feature] <span class="ot">=</span> x_interest[, feature]</span>
-<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a>    newpred <span class="ot">=</span> <span class="fu">predict</span>(model, newcf)</span>
-<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>    <span class="cf">if</span> (newpred <span class="sc">!=</span> pred) {</span>
-<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a>      feature_nams <span class="ot">=</span> <span class="fu">c</span>(feature_nams, feature)</span>
-<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a>    }</span>
-<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a>  }</span>
-<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a>  <span class="fu">return</span>(feature_nams)</span>
-<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a>}</span></code></pre></div>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>df<span class="sc">$</span>Type <span class="ot">=</span> <span class="cn">NULL</span></span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>x_interest<span class="sc">$</span>Type <span class="ot">=</span> <span class="cn">NULL</span></span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>cf<span class="sc">$</span>Type <span class="ot">=</span> <span class="cn">NULL</span></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="fu">evaluate_counterfactual</span>(<span class="at">counterfactual =</span> cf, <span class="at">x_interest =</span> x_interest, <span class="at">model =</span> mod)</span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="do">## [1] &quot;Area&quot;            &quot;Perimeter&quot;       &quot;Compactness&quot;     &quot;Kernel.Length&quot;   &quot;Kernel.Width&quot;    &quot;Asymmetry.Coeff&quot;</span></span></code></pre></div>
+<summary>Click me:</summary>
+
+
+
+Note that the feature importance values differ between methods. Here, LOCO correctly identifies $x_1$ as the only relevant feature in the DGP while PFI assigns non-zero values to $x_3$ and $x_4$ since these are highly correlated. Let's look again at the coefficients of our linear model:
+
+
+
+We see that the two coefficients of $x_3$ and $x_4$ cancel each other out as long as the dependence structure between these two features is preserved. As described above, permuting one of the two features destroys their correlation and thus also the described effect.
+
+-->
 </div>
 </div>
 <div id="summary" class="section level1">
 <h1>Summary</h1>
-<p>We discovered and became familiar with the WhatIf algorithm and its
-advantages and disadvantages.</p>
-</div>
-<div class="footnotes footnotes-end-of-document">
-<hr />
-<ol>
-<li id="fn1"><p>Wexler et al. (2019): “The What-If Tool: Interactive
-Probing of Machine Learning Models”<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
-</ol>
+<p>We learned how to use the global interpretation methods PDP, ALE, PFI
+and LOCO.</p>
 </div>
 </div><!-- /.entry-content -->
 </article>

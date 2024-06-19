@@ -94,6 +94,8 @@ df = read.csv(file = "../data/wheat_seeds.csv")
 table(df$Type)
 
 # Create a binary classification task
+# all observations of Type Canadian are set to Type = 1
+# so Type = 1 now contains obs of Type != Rosa
 df$Type = as.factor(ifelse(df$Type == "0", 1, df$Type))
 table(df$Type)
 
