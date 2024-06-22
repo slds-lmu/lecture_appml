@@ -244,23 +244,24 @@ NB: Model averaging with equal weights will not result in better performance out
 \vfill
 \end{vbframe}
 
-\begin{vbframe}{Weighted Model Averaging Continued}
-Find the optimal weight vector $\mathbf{w}^{*}$ s.t. the estimated generalization error (based on a performance metric $\rho$ or loss function $L$) of the ensemble is optimal:\\
-$$\wstar \coloneqq \argoptlim_{\w \in \R^{M}} \GEh\left(\fMw, \mathcal{J}, \rho\right)$$.
-%$\argoptlim_{\mathbf{w} \in \R^{M}} \frac{1}{n} \sum_{i = 1}^{n} L(y^{(i)}, \fMwxi)$\\
+\begin{frame}{Weighted Model Averaging Continued}
+Find the optimal weight vector $\wstar$ such that the estimated generalization error (based on a performance metric $\rho$ or loss function $L$) of the ensemble is optimal:
+$$\wstar \coloneqq \operatorname*{arg\,min}_{\w \in \mathbb{R}^{M}} \hat{\text{GE}}\left(\hat{f}_{\mathbf{w}}, \mathcal{J}, \rho\right)$$
 \vfill
-Performance metric/loss function unknown a priori (e.g. as in AutoML) $\rightarrow$ black box optimization problem.\\
+Performance metric/loss function unknown a priori (e.g., as in AutoML) $\rightarrow$ black box optimization problem.
 \vfill
 Difficulty of the optimization problem depends on the metric/loss function:
 \begin{itemize}
-    \item MSE (regression) $L_{\mathrm{MSE}}(y^{(i)}, \fMwxi) = (y^{(i)} - \fMwxi)^{2}$;\\
+    \item MSE (regression) $L_{\mathrm{MSE}}(y^{(i)}, \hat{f}_{\mathbf{w}}(\mathbf{x}^{(i)})) = (y^{(i)} - \hat{f}_{\mathbf{w}}(\mathbf{x}^{(i)}))^{2}$;\\
           Constraints of the form $0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$;\\
-        $\argminlim_{\w \in \R^{M}} \GEh(\fMw, \mathcal{J}, L_{\mathrm{MSE}})$ s.t. $0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$ can be written as a quadratic program
-    \item 0-1 loss (binary classification); the optimization problem is np-hard
+          $$\operatorname*{arg\,min}_{\w \in \mathbb{R}^{M}} \hat{\text{GE}}(\hat{f}_{\mathbf{w}}, \mathcal{J}, L_{\mathrm{MSE}}) \text{ s.t. } 0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$$ 
+          can be written as a quadratic program.
+    \item 0-1 loss (binary classification); the optimization problem is NP-hard.
 \end{itemize}
 \vfill
 In practice, we use black box optimization, greedy ensemble selection, or a linear model (stacking).
-\end{vbframe}
+\end{frame}
+
 
 % ------------------------------------------------------------------------------
 
@@ -268,7 +269,7 @@ In practice, we use black box optimization, greedy ensemble selection, or a line
 Assume a set of $M$ different models obtained from data $\D$ using a resampling $\mathcal{J}$.\\
 We now want to optimize the weights used in weighted model averaging.\\
 \vfill
-Greedy ensemble selection (GES, see\href{https://www.cs.cornell.edu/~alexn/papers/shotgun.icml04.revised.rev2.pdf}{\beamergotobutton{Caruana et al., 2004}}) is one of the most popular methods to do so:\\\
+Greedy ensemble selection (GES, see \href{https://www.cs.cornell.edu/~alexn/papers/shotgun.icml04.revised.rev2.pdf}{\beamergotobutton{Caruana et al., 2004}}) is one of the most popular methods to do so:\\\
 \begin{enumerate}
     \item Start with the empty ensemble
     \item Add the base model that maximizes the ensembles' performance metric on a hillclimb (validation) set
@@ -326,7 +327,7 @@ Model Averaging ($\w = (0.75, 0.05, 0.20)^\intercal)$ & 0.875 & 0.810 \\
 Model Averaging (GES: $\wstar = (\frac{4}{6}, \frac{1}{6}, \frac{1}{6})^\intercal$) & 0.917 & 0.864\\
 \hline
 \end{tabular}
-\label{table:learners_valid_test}
+\label{table:learners_valid_test_final}
 \end{table}
 \vfill
 NB: Optimizing weights can (and often does) overfit to the validation data; especially if standard black box optimizers are used\\
@@ -336,7 +337,7 @@ NB: Optimizing weights can (and often does) overfit to the validation data; espe
 
 \begin{vbframe}{Closing}
 \vfill
-Why does ensembling work? \href{https://link.springer.com/content/pdf/10.1007/3-540-45014-9_1.pdf?pdf}{\beamergotobutton{REF}}
+Why does ensembling work? \href{https://link.springer.com/content/pdf/10.1007/3-540-45014-9_1.pdf?pdf}{\beamergotobutton{Dietterich (2000)}}
 \begin{itemize}
     \item Statistical Problem
     \item Computational Problem
@@ -351,12 +352,6 @@ Requirements to build an ensemble:
 \vfill
 Practical Suggestion: Greedy Ensemble Selection works really well in practice.
 \vfill
-%\begin{itemize}
-%    \item Stacking books from Lennart P.
-%    \item Maybe reference the whole diversity is good in ensembling debate etc.
-%    \item GES paper Caruana 2004
-%    \item Lennart P. 2 papers
-%\end{itemize}
 \end{vbframe}
 
 % ------------------------------------------------------------------------------

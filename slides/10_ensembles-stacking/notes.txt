@@ -1,9 +1,2 @@
 Todos:
-fix math bold, math and notation
-re-generate figures from raschka in google pres
-averaging:
-    Further reading
-stacking:
-    Maybe include an example for single and multi layer
-    Further reading
-
+re-generate figures from raschka in google pres --> hiwi job for next iteration of slides

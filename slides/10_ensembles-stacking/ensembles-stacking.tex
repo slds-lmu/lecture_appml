@@ -20,7 +20,7 @@
 \lecture{Applied Machine Learning}
 
 \begin{vbframe}{Stacking}
-Also stacked generalization (\href{https://www.sciencedirect.com/science/article/abs/pii/S0893608005800231}{\beamergotobutton{REF}}): train multiple base models (level 0) on the same data and use their predictions as input features for a level 1 model that makes the final ensemble prediction $\rightarrow$ heterogeneous ensembling
+Also called stacked generalization (\href{https://www.sciencedirect.com/science/article/abs/pii/S0893608005800231}{\beamergotobutton{Wolpert (1992)}}): train multiple base models (level 0) on the same data and use their predictions as input features for a level 1 model that makes the final ensemble prediction $\rightarrow$ heterogeneous ensembling
 \vspace{1em}
 \begin{columns}
     \begin{column}{0.5\textwidth}
@@ -44,7 +44,7 @@ Also stacked generalization (\href{https://www.sciencedirect.com/science/article
 \end{columns}
 \vspace{1em}
 
-In contrast to other methods, stacking already combines predictions during training.
+In contrast to model averaging, stacking already combines predictions during training.
 
 \end{vbframe}
 
@@ -74,7 +74,8 @@ In contrast to other methods, stacking already combines predictions during train
     }
     
     \BlankLine
-    \textbf{Step 3: Fit level 1 model $\fM$ on $\D^\prime$}\;\\
+    \textbf{Step 3: Fit level 1 model $\fM$ on $\D^\prime$}\;
+    
     \KwRet $\fM$\;
 \end{algorithm}
 NB: We can either drop the original features or keep them when learning the level 1 model.
@@ -112,34 +113,74 @@ NB: We can either drop the original features or keep them when learning the leve
 
 % ------------------------------------------------------------------------------
 
+\begin{vbframe}{Stacking Cross-validated}
+\footnotesize
+\begin{algorithm}[H]
+    \SetAlgoLined
+    \caption{Single Layer Stacking with Cross-Validation}
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+
+    \Input{Training data $\D = \Dset$, number of folds $K$}
+    \Output{Stacked Ensemble $\fM$}
+    
+    \For{$k \leftarrow 1$ \KwTo $K$}{
+        \textbf{Step 1: Learn level 0 base models}\;
+        \For{$m \leftarrow 1$ \KwTo $M$}{
+            Fit base model $\bl[m]$ on $\D_{\mathrm{train}}^{(k)}$\;
+        }
+        \BlankLine
+        \textbf{Step 2: Add out-of-fold predictions to new dataset $\D^\prime$}\;\\
+        \ForEach{$(\mathbf{x}^{(i)}, y^{(i)}) \in \D_{\mathrm{test}}^{(k)}$}{
+            Add $(\mathbf{x}^{\prime(i)}, y^{(i)})$ to new dataset, where $\mathbf{x}^{\prime(i)} = (\blxi[1], \ldots, \blxi[M])$\;
+        }
+    }
+
+    \BlankLine
+    \textbf{Step 3: Fit level 1 model $\fM$ on $\D^\prime$}\;
+    
+    \KwRet $\fM$\;
+\end{algorithm}
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
 \begin{vbframe}{Multilevel Stacking}
 So far: train level 0 base models, use predictions to train the level 1 model.\\
 Now: Also train multiple models at level 1, use predictions to train final level 2 model 
 \vspace{1em}
-\begin{columns}
-    \begin{column}{0.5\textwidth}
-        \vspace{-1em}
-        \begin{figure}
-            \centering
-            \includegraphics[width=0.9\textwidth]{slides/10_ensembles-stacking/figure/stacking.png}
-            %\caption{Caption}
-            % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
-            \label{fig:stacking_multi}
-        \end{figure}
-    \end{column}
-    \begin{column}{0.5\textwidth}
-        Steps:
-        \begin{enumerate}
-            \item level 0 base model training
-            \item Collect predictions of level 0 base models
-            \item level 1 model training 
-            \item Collect predictions of level 1 models
-            \item level 2 final model training
-        \end{enumerate}
-    \end{column}
-\end{columns}
+%\begin{columns}
+%    \begin{column}{0.5\textwidth}
+%        \vspace{-1em}
+%        \begin{figure}
+%            \centering
+%            \includegraphics[width=0.9\textwidth]{slides/10_ensembles-stacking/figure/stacking.png}
+%            %\caption{Caption}
+%            % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
+%            \label{fig:stacking_multi}
+%        \end{figure}
+%    \end{column}
+%    \begin{column}{0.5\textwidth}
+%        Steps:
+%        \begin{enumerate}
+%            \item level 0 base model training
+%            \item Collect predictions of level 0 base models
+%            \item level 1 model training 
+%            \item Collect predictions of level 1 models
+%            \item level 2 final model training
+%        \end{enumerate}
+%    \end{column}
+%\end{columns}
+\begin{enumerate}
+    \item level 0 base model training
+    \item Collect predictions of level 0 base models
+    \item level 1 model training 
+    \item Collect predictions of level 1 models
+    \item level 2 final model training
+\end{enumerate}
 \vspace{1em}
-NB: In principle we can repeat this training of multiple models at the $k$-th level indefinitely creating infinitely deep stacked ensembles
+NB: In principle we can repeat this training of multiple models at the $l$-th level indefinitely creating infinitely deep stacked ensembles
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
@@ -163,16 +204,17 @@ Higher-level training data:
 
 % ------------------------------------------------------------------------------
 
-\begin{vbframe}{AutoGluon -- \url{https://auto.gluon.ai/}}
+\begin{vbframe}{AutoGluon}
 \begin{columns}
     \begin{column}{0.4\textwidth}
         \vspace{-1em}
         \begin{figure}
             \centering
             \includegraphics[width=\textwidth]{slides/10_ensembles-stacking/figure/AG.png}
-            %\caption{Caption}
+            \caption*{\url{https://auto.gluon.ai/}}
             \label{fig:auto_gluon}
         \end{figure}
+        \vspace{1em}
         \begin{figure}
             \centering
             \includegraphics[width=\textwidth]{slides/10_ensembles-stacking/figure/ALMB.png}
@@ -189,7 +231,7 @@ Higher-level training data:
             \begin{itemize}
                 \item Instead, uses a set of default configurations for different learners
             \end{itemize}
-            \item Employs multi layer stacking using the same set of default models in higher layers as for the base layer
+            \item Employs multi-layer stacking using the same set of default models in higher layers as for the base layer
             \item Uses greedy ensemble selection to combine the predictions of the last layer
         \end{itemize}
     \end{column}
