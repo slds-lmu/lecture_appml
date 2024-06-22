@@ -1,0 +1,335 @@
+---
+title: "Applied Machine Learning"
+subtitle: "Unused exercises 10"
+output:
+  prettydoc::html_pretty:
+    theme: hpstr
+    toc: yes
+    toc_depth: 2
+    css: ../_template/prettydoc-hpstr.css
+    self_contained: yes
+---
+
+```{r, include=FALSE}
+sys.source("setup.R", envir = knitr::knit_global())
+```
+
+# Goal
+
+Compare weighted model averaging (soft voting) to weighted majority voting (hard voting).
+Tune a stacked ensemble.
+
+# German Credit Data
+
+## Description
+
+- Data from 1973 to 1975 from a large regional bank in southern Germany classifying credits described by a set of attributes to good or bad credit risks.
+- Stratified sample of 1000 credits (300 bad ones and 700 good ones).
+- Customers with good credit risks perfectly complied with the conditions of the contract while customers with bad credit risks did not comply with the contract as required.
+- Available in `tsk("german_credit")`.
+
+## Data Dictionary
+
+n = 1,000 observations of credits
+
+- `credit_risk`: Has the credit contract been complied with (good) or not (bad)?
+- `age`: Age of debtor in years
+- `amount`: Credit amount in DM
+- `credit_history`: History of compliance with previous or concurrent credit contracts
+- `duration`: Credit duration in months
+- `employment_duration`: Duration of debtor's employment with current employer
+- `foreign_worker`: Whether the debtor is a foreign worker
+- `housing`: Type of housing the debtor lives in
+- `installment_rate`: Credit installments as a percentage of debtor's disposable income
+- `job`: Quality of debtor's job
+- `number_credits`: Number of credits including the current one the debtor has (or had) at this bank
+- `other_debtors`: Whether there is another debtor or a guarantor for the credit
+- `other_installment_plans`: Installment plans from providers other than the credit-giving bank
+- `people_liable`: Number of persons who financially depend on the debtor
+- `personal_status_sex`: Combined information on sex and marital status
+- `present_residence`: Length of time (in years) the debtor lives in the present residence
+- `property`: The debtor's most valuable property
+- `purpose`: Purpose for which the credit is needed
+- `savings`: Debtor's saving
+- `status`: Status of the debtor's checking account with the bank
+- `telephone`: Whether there is a telephone landline registered on the debtor's name
+
+# Exercises
+
+## Exercise 1: Compare Weighted Model Averaging to Weighted Majority Voting (Hard Voting)
+
+So far, we always performed weighted model averaging to build our ensemble.
+More precisely, we required probability predictions of each learner and weighted these probabilities and summed these weighted probabilities over all learners.
+To obtain a hard label response for each input, we took the class label that has the highest average weighted probability.
+
+Now, we also want to take a look at (weighted) majority voting (also known as hard voting).
+Note that the classifavg `PipeOp` can actually be used to perform both model averaging and majority voting.
+Its behavior simply depends on the `$predict_type` of the learners.
+If the learners return probability predictions, model averaging is performed.
+If the learners return responses (hard labels), majority voting is performed.
+
+Perform weighted majority voting (equal weights) of a decision tree, a k-NN (k = 7) and a logistic regression
+and compare this to weighted model averaging (equal weights) of the same learners.
+
+Use the outer test split from above as a resampling and evaluate models with respect to accuracy.
+
+What happens if we now want to evaluate with respect to ROC AUC?
+How can the weighted majority voting ensemble still be benchmarked with respect to ROC AUC?
+(We would expect it to simple return a hard label response, right?)
+Check the probability predictions of the ensemble.
+
+<details>
+  <summary>**Hint 1:**</summary>
+  To understand how model averaging vs. majority voting is implemented, see https://github.com/mlr-org/mlr3pipelines/blob/HEAD/R/PipeOpClassifAvg.R and the helper code in
+  https://github.com/mlr-org/mlr3pipelines/blob/20486ca70d975e1a5a03472a1d5eb843256aa05e/R/PipeOpEnsemble.R#L174 (`weighted_matrix_sum` and `weighted_factor_mean`).
+ 
+</details>
+
+<details>
+  <summary>**Hint 2:**</summary>
+ 
+```{r, eval = FALSE}
+dt_resp = lrn(...)
+kknn_resp = lrn(...)
+log_reg_resp = lrn(...)
+
+gr_resp = gunion(list(...)) %>>% po(...)
+grl_resp = as_learner(gr_resp)
+grl_resp$id = "Majority Voting"
+
+dt_prob = lrn(...)
+dt_prob$predict_type = "prob"
+.
+.
+.
+
+gr_prob = gunion(list(...)) %>>% po(...)
+grl_prob = as_learner(gr_prob)
+grl_prob$id = "Model Averaging"
+
+bg = benchmark_grid(task, list(grl_resp, grl_prob), outer_split)
+b = benchmark(bg)
+b$aggregate(msr("classif.acc"))
+b$aggregate(msr("classif.auc"))
+
+.
+.
+.
+```
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = show.solution}
+dt_resp = lrn("classif.rpart")
+kknn_resp = lrn("classif.kknn", k = 7L)
+log_reg_resp = lrn("classif.log_reg")
+
+gr_resp = gunion(list(dt_resp, kknn_resp, log_reg_resp)) %>>% po("classifavg")
+grl_resp = as_learner(gr_resp)
+grl_resp$id = "Majority Voting"
+
+dt_prob = lrn("classif.rpart")
+dt_prob$predict_type = "prob"
+kknn_prob = lrn("classif.kknn", k = 7L)
+kknn_prob$predict_type = "prob"
+log_reg_prob = lrn("classif.log_reg")
+log_reg_prob$predict_type = "prob"
+
+gr_prob = gunion(list(dt_prob, kknn_prob, log_reg_prob)) %>>% po("classifavg")
+grl_prob = as_learner(gr_prob)
+grl_prob$id = "Model Averaging"
+
+bg = benchmark_grid(task, list(grl_resp, grl_prob), outer_split)
+b = benchmark(bg)
+b$aggregate(msr("classif.acc"))
+b$aggregate(msr("classif.auc"))  # interestingly, this works but we get a warning
+
+# although we did not properly set the predict type of the ensemble, it still returns probability predictions
+grl_resp$train(task)
+grl_resp$predict(task)
+# but the probabilities are just 0 or 1
+
+# be careful when using a hard voting ensemble and its probabilities predictions
+
+# also note that if you change
+grl_resp$predict_type = "prob"
+# the ensemble will just behave as a model averaging ensemble
+bg = benchmark_grid(task, list(grl_resp, grl_prob), outer_split)
+b = benchmark(bg)
+b$aggregate(msr("classif.auc")) 
+# because this also changed the predict type of each learner
+grl$graph$pipeops$classif.rpart$predict_type
+grl$graph$pipeops$classif.kknn$predict_type
+grl$graph$pipeops$classif.log_reg$predict_type
+```
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+## Exercise 2: Tuning a Stacked Ensemble
+
+We now want to tune one of our stacked ensembles from above.
+Use six learners on level 0: A decision tree, k-NN, an elastic net (alpha = 0.5) with categorical features target encoded, naive bayes with categorical features target encoded, xgboost (nrounds = 100) with categorical features target encoded and a random forest.
+Use 3-fold CV to cross-validate the level 0 predictions and pass them into a logistic regression on level 1.
+Tune the following hyperparameters of the following learners on level 0:
+
+* Decision tree: `cp` from 1e-3 to 0.1 on log scale
+* k-NN: `k` from 1 to 10
+* Elastic net: `s` from 1e-5 to 1000 on log scale
+* XGBoost: `eta` from 1e-5 to 1 on log scale
+* random forest: `mtry.ratio` from 0.1 to 1
+
+Construct a `TuningInstance` that terminates after 20 evaluations and inspect the search space.
+First, use the same resampling as used in the previous exercise and optimize ROC AUC via Bayesian Optimization.
+Use an initial design size of 10.
+Optimize the instance and inspect the results.
+
+Finally, wrap everything in an `AutoTuner`.
+Use 3-fold CV as a resampling within the `AutoTuner` and optimize ROC AUC.
+
+Benchmark this automatically tuned stacked ensemble against the untuned stacked ensemble and the random forest from above.
+This can take a while.
+Proper parallelization can be helpful.
+
+<details>
+  <summary>**Hint 1:**</summary>
+  Defining a search space automatically is possible by setting hyperparameters to a tune token via `to_tune`.
+  If you are not familiar with BO, the following might be helpful: https://mlr3book.mlr-org.com/chapters/chapter5/advanced_tuning_methods_and_black_box_optimization.html#sec-bayesian-optimization
+  Regarding parallelization, you may want to look at: https://mlr3book.mlr-org.com/chapters/chapter10/advanced_technical_aspects_of_mlr3.html#sec-nested-resampling-parallelization
+</details>
+
+<details>
+  <summary>**Hint 2:**</summary>
+ 
+```{r, eval = FALSE}
+library(mlr3tuning)
+library(mlr3mbo)
+
+dt = lrn("classif.rpart", cp = ...)
+dt$predict_type = "prob"
+kknn = lrn(..., k = ...)
+kknn$predict_type = "prob"
+elnet = lrn(..., alpha = ..., s = ...)
+elnet$predict_type = "prob"
+elnet = as_learner(po(...) %>>% ...)
+naive_bayes = lrn(...)
+naive_bayes$predict_type = "prob"
+naive_bayes = as_learner(po(...) %>>% ...)
+xgboost = lrn(..., nrounds = ..., eta = ...)
+xgboost = as_learner(po(...) %>>% ...)
+xgboost$predict_type = "prob"
+rf = lrn(..., num.trees = ..., mtry.ratio = ...)
+rf$predict_type = "prob"
+
+level0 = gunion(
+  list(
+    ...
+  )
+) %>>% po(...)
+ensemble_tuned_cv = as_learner(level0 %>>% lrn(..., id = "log_reg_out", predict_type = "prob"))
+ensemble_tuned_cv$id = "Simple Tuned Stacked Ensemble 3-fold CV + Orig Features"
+
+instance = ti(
+  ...
+)
+instance$search_space
+
+tuner = tnr("mbo")
+tuner$args = list(...)
+tuner$optimize(...)
+
+instance$archive$data
+
+at = AutoTuner$new(
+  ...
+)
+
+bg = benchmark_grid(..., list(...), ...)
+b = benchmark(...)
+autoplot(..., measure = ...)
+```
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = show.solution}
+library(mlr3tuning)
+library(mlr3mbo)
+
+dt = lrn("classif.rpart", cp = to_tune(p_dbl(lower = 1e-3, upper = 1, logscale = TRUE)))
+dt$predict_type = "prob"
+kknn = lrn("classif.kknn", k = to_tune(p_int(lower = 1L, upper = 10L)))
+kknn$predict_type = "prob"
+elnet = lrn("classif.glmnet", alpha = 0.5, s = to_tune(p_dbl(lower = 1e-5, upper = 1000, logscale = TRUE)))
+elnet$predict_type = "prob"
+elnet = as_learner(po("encodeimpact") %>>% elnet)
+naive_bayes = lrn("classif.naive_bayes")
+naive_bayes$predict_type = "prob"
+naive_bayes = as_learner(po("encodeimpact") %>>% naive_bayes)
+xgboost = lrn("classif.xgboost", nrounds = 100L, eta = to_tune(p_dbl(lower = 1e-5, upper = 1, logscale = TRUE)))
+xgboost = as_learner(po("encodeimpact") %>>% xgboost)
+xgboost$predict_type = "prob"
+rf = lrn("classif.ranger", num.trees = 100L, mtry.ratio = to_tune(p_dbl(lower = 0.1, upper = 1)))
+rf$predict_type = "prob"
+
+level0 = gunion(
+  list(
+    po("learner_cv", learner = dt, resampling.method = "cv", resampling.folds = 3L),
+    po("learner_cv", learner = kknn, resampling.method = "cv", resampling.folds = 3L),
+    po("learner_cv", learner = elnet, resampling.method = "cv", resampling.folds = 3L),
+    po("learner_cv", learner = naive_bayes, resampling.method = "cv", resampling.folds = 3L),
+    po("learner_cv", learner = xgboost, resampling.method = "cv", resampling.folds = 3L),
+    po("learner_cv", learner = rf, resampling.method = "cv", resampling.folds = 3L)
+  )
+) %>>% po("featureunion")
+ensemble_tuned_cv = as_learner(level0 %>>% lrn("classif.log_reg", id = "log_reg_out", predict_type = "prob"))
+ensemble_tuned_cv$id = "Simple Tuned Stacked Ensemble 3-fold CV + Orig Features"
+
+instance = ti(
+  task = task,
+  learner = ensemble_tuned_cv,
+  resampling = resampling,
+  measures = msr("classif.auc"),
+  terminator = trm("evals", n_evals = 20L)
+)
+instance$search_space
+
+tuner = tnr("mbo")
+tuner$args = list(init_design_size = 10L)
+tuner$optimize(instance)
+
+at = AutoTuner$new(
+  tuner = tuner,
+  learner = ensemble_tuned_cv,
+  resampling = rsmp("cv", folds = 3L),
+  measure = msr("classif.auc"),
+  terminator = trm("evals", n_evals = 20L)
+)
+
+bg = benchmark_grid(task, list(ensemble_cv, at, lrn("classif.ranger", predict_type = "prob")), resampling)
+b = benchmark(bg)
+autoplot(b, measure = msr("classif.auc"))
+# Sometimes beating a random forest baseline can be really, really difficult
+# Try to play around with the structure of the stacked ensemble and see if you can beat the random forest
+# Maybe try different learners, maybe use weighted model averaging in level 1 instead of the random forest (as in previous exercises)
+# You could also try different preprocessing steps in front of each learner, e.g., dimensionality reduction or feature engineering
+```
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+# Summary
+We compared model averaging to majority voting and have seen how to tune a stacked ensemble.
+

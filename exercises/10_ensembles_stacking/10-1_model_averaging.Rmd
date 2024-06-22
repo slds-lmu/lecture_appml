@@ -55,7 +55,21 @@ n = 1,000 observations of credits
 
 # Exercises
 
-## Exercise 1: Build a "Random Forest" From Scratch
+```{r}
+library(mlr3)
+library(mlr3learners)
+library(mlr3pipelines)
+library(rpart.plot)
+library(mlr3viz)
+library(bbotk)
+library(mlr3misc)
+
+task = tsk("german_credit")
+
+set.seed(2409)
+```
+
+## Exercise 1A: Build a "Random Forest" From Scratch
 
 Use the classifavg `PipeOP` to combine predictions of decision trees trained on different subsamples of the `german_credit` task similarly as in a Random Forest.
 Use 3 decision trees with a maximum depth of 3.
@@ -64,33 +78,20 @@ Plot the graph learner representing your ensemble.
 Plot each of the 3 decision trees of the ensemble after training on all data.
 Compare this to a single decision tree with a maximum depth of 3 trained on all data.
 What is missing to actually mimic a Random Forest?
-Now reset the maximum depth hyperparameter values for each tree of your ensemble and the decision tree.
-Proceed to benchmark the ensemble of three trees against the decision tree and an actual ranger Random Forest with 3, 10 and 100 trees.
-Use 10-fold CV evaluate the ROC AUC of the models.
-As a follow up question, would it make sense to change the weights used by the classifavg `PipeOp` to combine the predictions?
 
 <details>
   <summary>**Hint 1:**</summary>
   Subsample with the subsample `PipeOp` and pass the output into the decision tree.
   This is one pipeline part.
-  You can then greplicate this part three times to create an actual graph and combine the output of the decision trees via the classifavg `PipeOp`.
+  You can then `greplicate` (creates disjoint graph union of copies of a graph) this part three times to create an actual graph and combine the output of the decision trees via the classifavg `PipeOp`.
   To plot the trees, the `rpart.plot` package is helpful.
-  Regarding benchmarking, prior lectures should be helpful.
+  If you are unsure how the different parts fit together, maybe plot the intermediate graphs you construct via `graph$plot()`.
 </details>
 
 <details>
   <summary>**Hint 2:**</summary>
  
 ```{r, eval = FALSE}
-library(mlr3)
-library(mlr3learners)
-library(mlr3pipelines)
-library(rpart.plot)
-library(mlr3viz)
-
-task = tsk("german_credit")
-
-set.seed(2409)
 resampling = rsmp("cv", folds  = 10L)$instantiate(task)
 pl = po("...") %>>% po("...", learner = ...)
 gr = ppl("greplicate", ...)
@@ -106,7 +107,58 @@ dt$train(task)
 
 rpart.plot(grl$...)
 ...
+```
+</details>
 
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = show.solution}
+resampling = rsmp("cv", folds  = 10L)$instantiate(task)
+pl = po("subsample") %>>% po("learner", learner = lrn("classif.rpart", maxdepth = 3L))
+gr = ppl("greplicate", graph = pl, n = 3L)
+gr = gr %>>% po("classifavg")
+grl = as_learner(gr)
+grl$id = "bagged_trees"
+grl$graph$plot()
+grl$train(task)
+
+dt = lrn("classif.rpart", maxdepth = 3L)
+dt$id = "tree"
+dt$train(task)
+
+rpart.plot(grl$state$model$classif.rpart_1$model)
+rpart.plot(grl$state$model$classif.rpart_2$model)
+rpart.plot(grl$state$model$classif.rpart_3$model)
+rpart.plot(dt$state$model)
+# Although each of the 3 trees sees different data during training, the first split is the same as if we had trained on all data
+# In an actual Random Forest, feature variables are randomly selected as potential splitting candidates which makes trees more heterogeneous
+```
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Exercise 1B: Build a "Random Forest" From Scratch -- Continued
+
+Reset the maximum depth hyperparameter values for each tree of your ensemble and the decision tree.
+Proceed to benchmark the ensemble of three trees against the decision tree and an actual ranger Random Forest with 3, 10 and 100 trees.
+Use 10-fold CV to evaluate the ROC AUC of the models.
+As a follow up question, would it make sense to change the weights used by the classifavg `PipeOp` to combine the predictions?
+
+<details>
+  <summary>**Hint 1:**</summary>
+  Prior lectures should be helpful where you already benchmarked different learners.
+</details>
+
+<details>
+  <summary>**Hint 2:**</summary>
+ 
+```{r, eval = FALSE}
 dt$param_set$set_values(.values = list(maxdepth = NULL))
 grl$...
 ...
@@ -136,35 +188,6 @@ cat("<!--")
 <summary>Click me:</summary>
 
 ```{r, eval = show.solution}
-library(mlr3)
-library(mlr3learners)
-library(mlr3pipelines)
-library(rpart.plot)
-library(mlr3viz)
-
-task = tsk("german_credit")
-
-set.seed(2409)
-resampling = rsmp("cv", folds  = 10L)$instantiate(task)
-pl = po("subsample") %>>% po("learner", learner = lrn("classif.rpart", maxdepth = 3L))
-gr = ppl("greplicate", graph = pl, n = 3L)
-gr = gr %>>% po("classifavg")
-grl = as_learner(gr)
-grl$id = "bagged_trees"
-grl$graph$plot()
-grl$train(task)
-
-dt = lrn("classif.rpart", maxdepth = 3L)
-dt$id = "tree"
-dt$train(task)
-
-rpart.plot(grl$state$model$classif.rpart_1$model)
-rpart.plot(grl$state$model$classif.rpart_2$model)
-rpart.plot(grl$state$model$classif.rpart_3$model)
-rpart.plot(dt$state$model)
-# Although each of the 3 trees sees different data during training, the first split is the same as if we had trained on all data
-# In an actual Random Forest, feature variables are randomly selected as potential splitting candidates which makes trees more heterogeneous
-
 dt$param_set$set_values(.values = list(maxdepth = NULL))
 grl$param_set$set_values(.values = list(classif.rpart_1.maxdepth = NULL, classif.rpart_2.maxdepth = NULL, classif.rpart_3.maxdepth = NULL))
 
@@ -202,6 +225,7 @@ Can you manually find a weighting scheme that results in better performance than
 
 <details>
   <summary>**Hint 1:**</summary>
+  If you are not familiar with a k-NN learner, you may catch up here: https://slds-lmu.github.io/i2ml/chapters/05_knn/
   You can largely reuse parts of the graph learner you previously constructed (excluding the subsampling part).
   To manually set a weight vector as a hyperparameter of the graph learner, inspect its `$param_set` and make use of the `$set_values()` function.
 </details>
@@ -210,7 +234,6 @@ Can you manually find a weighting scheme that results in better performance than
   <summary>**Hint 2:**</summary>
  
 ```{r, eval = FALSE}
-set.seed(2409)
 dt = lrn(...)
 dt$predict_type = "prob"
 kknn = lrn(...)
@@ -246,7 +269,6 @@ cat("<!--")
 <summary>Click me:</summary>
 
 ```{r, eval = show.solution}
-set.seed(2409)
 dt = lrn("classif.rpart")
 dt$predict_type = "prob"
 kknn = lrn("classif.kknn", k = 7L)
@@ -278,11 +300,26 @@ cat("-->")
 ## Exercise 3: Optimizing Weights
 
 Building upon the previous exercise, we now want to numerically optimize the weights of the ensemble via `bbotk`.
-To do so, we will have to construct an `OptimInstance` in which we pass a domain, a search space, a codomain and the actual objective function that is optimized.
+To do so, we will have to construct an `OptimInstanceSingleCrit` in which we pass a domain, a search space, a codomain and the actual objective function that is optimized.
 First, we will implement a naive solution, by changing the weighting scheme in the objective function and evaluating the ensemble based on a resampling.
 Note that when we are optimizing three weights (one for each model), this is in essence a constrained optimization problem with only two degrees of freedom:
 Given the first weight and the second weight and the constraint that all three weights must sum to 1, we can always calculate the third weight.
 We will ignore this in the following and simply optimize each weight on a scale from 0 to 1 and will normalize all weights to sum to 1 within the objective.
+
+To construct the `OptimInstanceSingleCrit` do the following:
+
+* create the `objective_function` (a standard R function) accepting `xs` (a list) as input:
+  - `xs` will be the weights in the form of a list
+  - extract the weights and use them within the ensemble (e.g., clone the graph learner from the previous exercise and set the `classifavg.weights`)
+  - use `resample` on  this weighted ensemble
+  - extract the ROC AUC and return it in a list
+* create the `domain` (the space we optimize over):
+  - we optimize over the three numeric weight parameters with values from 0 to 1 (have a look at `?p_dbl`) 
+* create the codomain (describing the output space):
+  - we maximize the numeric ROC AUC value
+  - to make sure that we maximize instead of minimize (the `bbotk` default) set `tags = "maximize"`of this `p_dbl`
+* collect everything in an `OptimInstanceSingleCrit`
+ 
 Use random search as an optimizer and terminate after 10 function evaluations.
 Why is our approach (i.e., how we constructed the objective function) ineffective?
 
@@ -296,9 +333,6 @@ Why is our approach (i.e., how we constructed the objective function) ineffectiv
   <summary>**Hint 2:**</summary>
  
 ```{r, eval = FALSE}
-library(bbotk)
-
-set.seed(2409)
 grl_weights_optimized = grl$clone(deep = TRUE)
 grl_weights_optimized$id = paste0(grl_weights_optimized$id, ".weights_optimized_naive")
 
@@ -312,7 +346,7 @@ objective_function = function(xs) {
 }
 
 domain = ps(w_dt = ..., w_kknn = ..., w_log_reg = ...)
-codomain = ps(classif.auc = ..., tags = "maximize"))
+codomain = ps(classif.auc = ...) # make sure to specify `tags = "maximize"`
 
 objective = ObjectiveRFun$new(
   fun = ...,
@@ -340,9 +374,6 @@ cat("<!--")
 <summary>Click me:</summary>
 
 ```{r, eval = show.solution}
-library(bbotk)
-
-set.seed(2409)
 grl_weights_optimized = grl$clone(deep = TRUE)
 grl_weights_optimized$id = paste0(grl_weights_optimized$id, ".weights_optimized_naive")
 
@@ -383,7 +414,9 @@ cat("-->")
 In the previous exercise, we optimized the weights of our ensemble - but very inefficiently.
 In this exercise we want to do better.
 Rewrite the objective function to directly operate on the cross-validated predictions and combine the predicted probabilities directly as in model averaging.
-Construct an `OptimInstance` and optimize it via CMA-ES and terminate after 100 function evaluations.
+Construct an `OptimInstanceSingleCrit` and optimize it via CMA-ES and terminate after 100 function evaluations.
+
+Note that you can reuse most logic from the previous exercise and the only interesting part is how to rewrite the objective function.
 
 <details>
   <summary>**Hint 1:**</summary>
@@ -397,8 +430,6 @@ Construct an `OptimInstance` and optimize it via CMA-ES and terminate after 100 
   <summary>**Hint 2:**</summary>
  
 ```{r, eval = FALSE}
-library(mlr3misc)
-set.seed(2409)
 k = resampling$param_set$get_values()[["folds"]]
 
 dt_pred = resample(...)
@@ -452,8 +483,6 @@ cat("<!--")
 <summary>Click me:</summary>
 
 ```{r, eval = show.solution}
-library(mlr3misc)
-set.seed(2409)
 k = resampling$param_set$get_values()[["folds"]]
 
 dt_pred = resample(task, dt, resampling)
