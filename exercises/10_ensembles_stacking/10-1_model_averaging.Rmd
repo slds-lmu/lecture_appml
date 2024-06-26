@@ -53,7 +53,7 @@ n = 1,000 observations of credits
 - `status`: Status of the debtor's checking account with the bank
 - `telephone`: Whether there is a telephone landline registered on the debtor's name
 
-# Exercises
+# Prerequisites
 
 ```{r}
 library(mlr3)
@@ -69,7 +69,9 @@ task = tsk("german_credit")
 set.seed(2409)
 ```
 
-## Exercise 1A: Build a "Random Forest" From Scratch
+# 1 Build a "Random Forest" From Scratch
+
+## 1.1 Create three Bagged Trees
 
 Use the classifavg `PipeOP` to combine predictions of decision trees trained on different subsamples of the `german_credit` task similarly as in a Random Forest.
 Use 3 decision trees with a maximum depth of 3.
@@ -143,7 +145,7 @@ rpart.plot(dt$state$model)
 cat("-->")
 ```
 
-## Exercise 1B: Build a "Random Forest" From Scratch -- Continued
+## 1.2 Reset Maximum Depth and compare to Random Forest
 
 Reset the maximum depth hyperparameter values for each tree of your ensemble and the decision tree.
 Proceed to benchmark the ensemble of three trees against the decision tree and an actual ranger Random Forest with 3, 10 and 100 trees.
@@ -215,7 +217,7 @@ autoplot(b, measure = msr("classif.auc"))
 cat("-->")
 ```
 
-## Exercise 2: Model Averaging
+# 2 Model Averaging
 
 Use the classifavg `PipeOP` to combine the predictions of a decision tree, a k-NN (with k = 7) and a logistic regression.
 Benchmark the ensemble against each learner and a featureless learner.
@@ -297,7 +299,7 @@ b$aggregate(msr("classif.auc"))
 cat("-->")
 ```
 
-## Exercise 3: Optimizing Weights
+# 3 Optimizing Weights
 
 Building upon the previous exercise, we now want to numerically optimize the weights of the ensemble via `bbotk`.
 To do so, we will have to construct an `OptimInstanceSingleCrit` in which we pass a domain, a search space, a codomain and the actual objective function that is optimized.
@@ -410,7 +412,7 @@ optimizer$optimize(instance)
 cat("-->")
 ```
 
-## Exercise 4: Optimizing Weights Efficiently
+# 4 Optimizing Weights Efficiently
 In the previous exercise, we optimized the weights of our ensemble - but very inefficiently.
 In this exercise we want to do better.
 Rewrite the objective function to directly operate on the cross-validated predictions and combine the predicted probabilities directly as in model averaging.

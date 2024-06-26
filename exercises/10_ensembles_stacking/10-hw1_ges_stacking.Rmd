@@ -54,7 +54,7 @@ n = 1,000 observations of credits
 - `status`: Status of the debtor's checking account with the bank
 - `telephone`: Whether there is a telephone landline registered on the debtor's name
 
-# Exercises
+# Prerequisites
 
 ```{r}
 library(mlr3)
@@ -69,7 +69,7 @@ task = tsk("german_credit")
 set.seed(2409)
 ```
 
-## Exercise 1: Implement Greedy Ensemble Selection
+# 1 Implement Greedy Ensemble Selection
 
 In previous exercises we have seen how to do weighted model averaging and how to optimize weights numerically.
 We now want to implement a popular method for optimizing the weights when performing model averaging: Greedy ensemble selection (GES)
@@ -401,7 +401,9 @@ grl_weights_optimized_ges$param_set$get_values()[["classifavg.weights"]]
 cat("-->")
 ```
 
-## Exercise 2A: Single- and Multilayer Stacking
+# 2 Single- and Multilayer Stacking
+
+## 2.1 Level 0
 
 We now want to do stacking.
 Use six learners on level 0: A decision tree, k-NN (with k = 7), an elastic net (alpha = 0.5 and s = 0.1) with categorical features target encoded, naive bayes with categorical features target encoded, XGBoost (nrounds = 100) with categorical features target encoded and a random forest (num.trees = 100).
@@ -524,7 +526,7 @@ autoplot(b, measure = msr("classif.auc"))
 cat("-->")
 ```
 
-## Exercise 2B: Single- and Multilayer Stacking -- Continued
+## 2.2 Cross Validation
 
 So far, we have not cross-validated the level 0 predictions.
 Create another stacked ensemble where you use 3-fold CV to cross-validate the level 0 predictions.
@@ -592,7 +594,7 @@ autoplot(b, measure = msr("classif.auc"))
 cat("-->")
 ```
 
-## Exercise 2C: Single- and Multilayer Stacking -- Continued
+## 2.3 Add the Original Features of the Task
 
 So far we have dropped the original features of the task.
 Create another stacked ensemble where you additionally keep the original features of the task.
@@ -668,7 +670,7 @@ autoplot(b, measure = msr("classif.auc"))
 cat("-->")
 ```
 
-## Exercise 2D: Single- and Multilayer Stacking -- Continued
+## 2.4 Multilayer Stacking Ensemple
 Finally, create a multi-layer stacking ensemble by passing the output of the current level 0 into a level 1 that is built similar as level 1.
 Similarly to before, keep the original features of the task and cross-validate the level 0 and level 1 predictions.
 Then use a logistic regression on the final level 2.

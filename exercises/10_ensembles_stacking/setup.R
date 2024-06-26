@@ -1,5 +1,5 @@
 if (!exists("show.solution")) {
-  show.solution = T
+  show.solution = F
 }
 
 knitr::knit_hooks$set(optipng = knitr::hook_optipng)
