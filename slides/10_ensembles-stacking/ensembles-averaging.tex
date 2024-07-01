@@ -11,7 +11,7 @@
 \date{}
 
 \begin{document}
-\newcommand{\titlefigure}{slides/10_ensembles-stacking/figure/bagging.png}
+\newcommand{\titlefigure}{slides/10_ensembles-stacking/figure/bagging_better.png}
 \newcommand{\learninggoals}{
 \item What is Ensembling?
 \item Bagging and Boosting Recap
@@ -61,8 +61,11 @@
         \vspace{-1em}
         \begin{figure}
             \centering
-            \includegraphics{slides/10_ensembles-stacking/figure/bagging.png}
+            % New version from 
+            % https://docs.google.com/presentation/d/1gaeW1LefW3vQi3aoEiZEoSUaEyXfmQ9-U_1WoGKfGNM/edit#slide=id.g2e833da9e7c_0_143
+            \includegraphics{slides/10_ensembles-stacking/figure/bagging_better.png}
             %\caption{Caption}
+            % Old version from
             % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07_ensembles__notes.pdf
             \label{fig:bagging}
         \end{figure}
@@ -139,40 +142,36 @@ Examples:
     \item Model Based Boosting
 \end{itemize}
 \vfill
-Ensemble is built sequentially
-%Steps:
-%begin{itemize}
-%\item Initial model training:
-%\item Weight update
-%\item Base model training using updated weights
-%\item Repeat weight update
-%\item ...
-%\item Combine predictions
-%\end{itemize}
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{General Notation for Ensembling}
+\vfill
 \begin{itemize}
-    \item $\{\bl[1], \ldots, \bl[M]\} \subseteq \mathcal{H}_{1} \times \ldots \times \mathcal{H}_{M}$ set of $M$ models trained on training data $\mathcal{D}$
-    \item $\sbl[m]: \mathcal{X} \rightarrow [0, 1]^{g}$ probability predictions under the $m$-th model when doing classification (w.l.o.g. we assume $g = 1$ in the following and $\sbl[m]$ returning the probabilities of the positive class)
-    \item $\hbl[m]: \mathcal{X} \rightarrow \mathcal{Y}$ hard label predictions under the $m$-th model when doing classification or regression
+    \item $\{\bl[1], \ldots, \bl[M]\} \subseteq \mathcal{H}_{1} \times \ldots \times \mathcal{H}_{M}$ set of $M$ models trained on training data $\D$
+    \item $\sbl[m]: \Xspace \rightarrow [0, 1]^{g}$ probability predictions under the $m$-th model when doing classification (w.l.o.g. we assume $g = 1$ in the following and $\sbl[m]$ returning the probabilities of the positive class)
+    \item $\hbl[m]: \Xspace \rightarrow \Yspace$ hard label predictions under the $m$-th model when doing classification or regression
     \item $\fMx = G(\blx[1], \ldots, \blx[M])$ prediction of an ensemble model obtained via aggregating function $G$
 \end{itemize}
+\vfill
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
 \begin{vbframe}{Model Averaging}
-
+\vfill
 Combine predictions of multiple (different) models to make a final prediction $\rightarrow$ heterogeneous
+\vfill
 \begin{columns}
     \begin{column}{0.6\textwidth}
         \vspace{-1em}
         \begin{figure}
             \centering
-            \includegraphics[width=0.7\textwidth]{slides/10_ensembles-stacking/figure/voting.png}
+            % New version from
+            % https://docs.google.com/presentation/d/1gaeW1LefW3vQi3aoEiZEoSUaEyXfmQ9-U_1WoGKfGNM/edit#slide=id.g2e833da9e7c_0_143
+            \includegraphics[width=0.7\textwidth]{slides/10_ensembles-stacking/figure/voting_better.png}
             %\caption{Caption}
+            % Old version from
             % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07_ensembles__notes.pdf
             \label{fig:voting}
         \end{figure}
@@ -185,6 +184,7 @@ Combine predictions of multiple (different) models to make a final prediction $\
         \end{enumerate}
     \end{column}
 \end{columns}
+\vfill
 Classification: majority voting (hard voting) / model averaging (soft voting)
 \begin{itemize}
     \item $\fMx = \text{mode}(\{\hblx[1], \ldots, \hblx[M]\})$ assuming hard label predictions
@@ -201,9 +201,9 @@ Regression: model averaging
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Weighted Model Averaging}
-Assume a set of $M$ different models obtained from data $\D$ using a resampling $\mathcal{J}$.\\
+Assume a set of $M$ different models obtained from data $\D$ using a resampling $\JJ$.\\
 \vfill
-Assign weights $\mathbf{w} = (w_{1}, \ldots, w_{M}), \text{usually: } 0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$ to the models\\
+Assign weights $\w = (w_{1}, \ldots, w_{M}), \text{usually: } 0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$ to the models\\
 \vfill
 $\fMwx = \frac{1}{M} \sum_{m = 1}^{M} w_{m} \cdot \sblx[m]$\\
 \begin{figure}
@@ -246,7 +246,7 @@ NB: Model averaging with equal weights will not result in better performance out
 
 \begin{frame}{Weighted Model Averaging Continued}
 Find the optimal weight vector $\wstar$ such that the estimated generalization error (based on a performance metric $\rho$ or loss function $L$) of the ensemble is optimal:
-$$\wstar \coloneqq \operatorname*{arg\,min}_{\w \in \mathbb{R}^{M}} \hat{\text{GE}}\left(\hat{f}_{\mathbf{w}}, \mathcal{J}, \rho\right)$$
+$$\wstar \coloneqq \operatorname*{arg\,min}_{\w \in \mathbb{R}^{M}} \hat{\text{GE}}\left(\hat{f}_{\mathbf{w}}, \JJ, \rho\right)$$
 \vfill
 Performance metric/loss function unknown a priori (e.g., as in AutoML) $\rightarrow$ black box optimization problem.
 \vfill
@@ -254,7 +254,7 @@ Difficulty of the optimization problem depends on the metric/loss function:
 \begin{itemize}
     \item MSE (regression) $L_{\mathrm{MSE}}(y^{(i)}, \hat{f}_{\mathbf{w}}(\mathbf{x}^{(i)})) = (y^{(i)} - \hat{f}_{\mathbf{w}}(\mathbf{x}^{(i)}))^{2}$;\\
           Constraints of the form $0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$;\\
-          $$\operatorname*{arg\,min}_{\w \in \mathbb{R}^{M}} \hat{\text{GE}}(\hat{f}_{\mathbf{w}}, \mathcal{J}, L_{\mathrm{MSE}}) \text{ s.t. } 0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$$ 
+          $$\operatorname*{arg\,min}_{\w \in \mathbb{R}^{M}} \hat{\text{GE}}(\hat{f}_{\mathbf{w}}, \JJ, L_{\mathrm{MSE}}) \text{ s.t. } 0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$$ 
           can be written as a quadratic program.
     \item 0-1 loss (binary classification); the optimization problem is NP-hard.
 \end{itemize}
@@ -266,7 +266,7 @@ In practice, we use black box optimization, greedy ensemble selection, or a line
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Greedy Ensemble Selection}
-Assume a set of $M$ different models obtained from data $\D$ using a resampling $\mathcal{J}$.\\
+Assume a set of $M$ different models obtained from data $\D$ using a resampling $\JJ$.\\
 We now want to optimize the weights used in weighted model averaging.\\
 \vfill
 Greedy ensemble selection (GES, see \href{https://www.cs.cornell.edu/~alexn/papers/shotgun.icml04.revised.rev2.pdf}{\beamergotobutton{Caruana et al., 2004}}) is one of the most popular methods to do so:\\\
@@ -347,7 +347,7 @@ Why does ensembling work? \href{https://link.springer.com/content/pdf/10.1007/3-
 Requirements to build an ensemble:
 \begin{itemize}
     \item Diverse Models
-    \item String Models
+    \item Strong Models
 \end{itemize}
 \vfill
 Practical Suggestion: Greedy Ensemble Selection works really well in practice.

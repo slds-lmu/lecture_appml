@@ -11,7 +11,7 @@
 \date{}
 
 \begin{document}
-\newcommand{\titlefigure}{slides/10_ensembles-stacking/figure/stacking.png}
+\newcommand{\titlefigure}{slides/10_ensembles-stacking/figure/stacking_better.png}
 \newcommand{\learninggoals}{
 \item What is Stacking?
 \item How can we stack multiple layers?}
@@ -27,8 +27,11 @@ Also called stacked generalization (\href{https://www.sciencedirect.com/science/
         \vspace{-1em}
         \begin{figure}
             \centering
-            \includegraphics[width=0.9\textwidth]{slides/10_ensembles-stacking/figure/stacking.png}
+            % New version from
+            % https://docs.google.com/presentation/d/1gaeW1LefW3vQi3aoEiZEoSUaEyXfmQ9-U_1WoGKfGNM/edit#slide=id.g2e833da9e7c_0_143
+            \includegraphics[width=0.9\textwidth]{slides/10_ensembles-stacking/figure/stacking_better.png}
             %\caption{Caption}
+            % Old version from 
             % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
             \label{fig:stacking}
         \end{figure}
@@ -91,7 +94,10 @@ NB: We can either drop the original features or keep them when learning the leve
         \vspace{-1em}
         \begin{figure}
             \centering
-            \includegraphics[width=0.9\textwidth]{slides/10_ensembles-stacking/figure/stacking_cv.png}
+            % New version from 
+            % https://docs.google.com/presentation/d/1gaeW1LefW3vQi3aoEiZEoSUaEyXfmQ9-U_1WoGKfGNM/edit#slide=id.g2e833da9e7c_0_143
+            \includegraphics[width=0.7\textwidth]{slides/10_ensembles-stacking/figure/stacking_cv_better.png}
+            % Old version from
             %\caption{Caption}
             % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
             \label{fig:stacking_cv}
@@ -106,7 +112,7 @@ NB: We can either drop the original features or keep them when learning the leve
             \item minimizes information leakage
         \end{itemize}
         \vspace{1em}
-        NB: Stacking with a simple hold-out split instead of cross-validation is also known as \emph{blending}
+        NB: Stacking with a simple hold-out split instead of cross-validation is known as \emph{blending}.
     \end{column}
 \end{columns}
 \end{vbframe}
@@ -131,8 +137,8 @@ NB: We can either drop the original features or keep them when learning the leve
         }
         \BlankLine
         \textbf{Step 2: Add out-of-fold predictions to new dataset $\D^\prime$}\;\\
-        \ForEach{$(\mathbf{x}^{(i)}, y^{(i)}) \in \D_{\mathrm{test}}^{(k)}$}{
-            Add $(\mathbf{x}^{\prime(i)}, y^{(i)})$ to new dataset, where $\mathbf{x}^{\prime(i)} = (\blxi[1], \ldots, \blxi[M])$\;
+        \ForEach{$(\xv^{(i)}, y^{(i)}) \in \D_{\mathrm{test}}^{(k)}$}{
+            Add $(\xv^{\prime(i)}, y^{(i)})$ to new dataset, where $\xv^{\prime(i)} = (\blxi[1], \ldots, \blxi[M])$\;
         }
     }
 
@@ -147,9 +153,10 @@ NB: We can either drop the original features or keep them when learning the leve
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Multilevel Stacking}
+\vfill
 So far: train level 0 base models, use predictions to train the level 1 model.\\
 Now: Also train multiple models at level 1, use predictions to train final level 2 model 
-\vspace{1em}
+\vfill
 %\begin{columns}
 %    \begin{column}{0.5\textwidth}
 %        \vspace{-1em}
@@ -179,8 +186,9 @@ Now: Also train multiple models at level 1, use predictions to train final level
     \item Collect predictions of level 1 models
     \item level 2 final model training
 \end{enumerate}
-\vspace{1em}
-NB: In principle we can repeat this training of multiple models at the $l$-th level indefinitely creating deep stacked ensembles
+\vfill
+NB: In principle we can repeat this training of multiple models at the $l$-th level indefinitely creating deep stacked ensembles.
+\vfill
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
@@ -190,16 +198,70 @@ NB: In principle we can repeat this training of multiple models at the $l$-th le
 Popular choices of level 1 or level 2 models in stacking include:
 \begin{itemize}
     \item linear / logistic regression 
-    \item random forest (especially in the case of multilevel stacking)
+    %\item random forest (especially in the case of multilevel stacking)
     \item GES (average the predictions of the models at the previous level)
 \end{itemize}
 \vfill
 Higher-level training data:
 \begin{itemize}
-    \item Probabilities instead of class labels
+    \item Probabilities instead of class labels (see \href{https://dl.acm.org/doi/10.5555/1622859.1622868}{\beamergotobutton{Ting and Witten, 1999}})
     \item Include original dataset $\Xmat$ or not?
 \end{itemize}
 \vfill
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Forward Pass / Prediction}
+\vspace{-1.5em}
+\begin{algorithm}[H]
+    \SetAlgoLined
+    \caption{Prediction Using Single Layer Stacking}
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+
+    \BlankLine
+    \Input{Training data $\D = \Dset$, Test data $\Xmat$}
+    \Output{Predictions $\yv$}
+
+    \textbf{Step 1: Fit level-0 on the whole training data set}\;\\
+    \For{$m \leftarrow 1$ \KwTo $M$}{
+        Fit level-0 model $\bl[m]$ on $\D$\;
+    }
+    
+    \BlankLine
+    \textbf{Step 2: Make predictions with every level-0 model}\;\\
+    \For{$m \leftarrow 1$ \KwTo $M$}{
+        Predict with base model: $\yv^m = \sbl[m](\Xmat)$;
+    }
+    
+    \BlankLine
+    \textbf{Step 3: Construct new dataset $\Xmat^\prime$}\;\\
+    \For{$i \leftarrow 1$ \KwTo $n$}{
+        $\Xmat^{\prime{i}} = [\xi[i]_1, \dots, \xi[i]_d, \xv^{\prime{(i)}}_1, \dots, \xv^{\prime{(i)}}_M] $\;
+    }
+    
+    \BlankLine
+    \textbf{Step 4: Make predictions with level 1 model $\fM$ on $\Xmat^\prime$}\;
+    
+    \KwRet $\fM(\Xmat)$\;
+\end{algorithm}
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Two questions}
+
+\vfill
+What other methods do the following level-1 classifiers recover?
+\vfill
+\begin{itemize}
+    \item Fit the level-1 training data with a linear model that only depends on one feature, and that feature is chosen such that $\rho$, our metrics of interest, is optimized.
+    \item The level-1 model is a linear model that assign equal weight $w_{m} = \frac{1}{M}$ to every input feature.
+\end{itemize}
+\vfill
+    
 \end{vbframe}
 
 % ------------------------------------------------------------------------------

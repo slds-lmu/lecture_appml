@@ -1,0 +1,162 @@
+\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+
+\usepackage{../../style/lmu-lecture}
+% Defines macros and environments
+\input{../../style/common.tex}
+
+\title{Applied Machine Learning}
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\begin{document}
+
+\newcommand{\titlefigure}{figure/empty}
+\newcommand{\learninggoals}{
+\item old material
+\item also check \textbf{imbalanced-learning} slides in \textbf{lecture\_advml} repo}
+
+\lecturechapter{Applied Performance Evaluation}
+\lecture{Applied Machine Learning}
+
+\begin{frame}
+\frametitle{What is Parallelization?}
+\begin{itemize}
+    \item Parallelization allows a computer to perform many calculations simultaneously.
+    \item It distributes tasks across multiple processing units (cores), speeding up the computation.
+    \item Theoretical speedup is proportional to the number of cores used.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Challenges of Parallelization}
+\begin{itemize}
+    \item Writing parallel code can be complex and requires careful coding to avoid errors.
+    \item Debugging parallel code can be more difficult than sequential code.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Suitable Tasks for Parallelization}
+\begin{itemize}
+    \item Tasks that can be performed independently:
+    \begin{itemize}
+        \item Multiple simulations with different parameters.
+        \item Statistical resampling or cross-validation.
+        \item Model averaging.
+    \end{itemize}
+    \item Ideal for tasks that can be expressed as independent loops (like R's apply functions).
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Parallel Performance Expectations}
+\begin{itemize}
+    \item Ideal: Using \( p \) processors should make the computation \( p \) times faster.
+    \item Reality: Performance gains are often less due to overhead and limits in parallelization (see Amdahl's and Gustafson's laws).
+\end{itemize}
+\includegraphics[width=\textwidth]{example_scale.png}
+\end{frame}
+
+\begin{frame}
+\frametitle{Performance Example}
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Single Processor} & \textbf{30 Processors} \\
+\hline
+1 minute & 2 seconds \\
+1 hour & 2 minutes \\
+1 day & 1 hour \\
+1 month & 1 day \\
+1 year & 2 weeks \\
+\hline
+\end{tabular}
+\end{frame}
+
+\begin{frame}
+\frametitle{Programming for Parallel Computing}
+\begin{itemize}
+    \item Easy to use for simple problems.
+    \item Utilize existing high-level code (e.g., R).
+    \item Test and debug in a sequential (non-parallel) setting.
+    \item Ensure code can scale up with minimal changes.
+    \item Maintain reproducibility across different computing environments.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Conclusion}
+\begin{itemize}
+    \item Parallel computing can significantly speed up data processing.
+    \item Requires thoughtful implementation to achieve the best performance.
+    \item Provides a powerful tool for handling large datasets and complex computations.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{What is Naive Batch Computing?}
+\begin{itemize}
+    \item Use simple scripts to run jobs on a single computer with multiple cores.
+    \item Start jobs manually using commands like \texttt{R CMD BATCH}.
+    \item Monitor and manage jobs yourself – no automation.
+    \item Not suitable for large-scale projects due to lack of scalability and efficiency.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{What are High Performance Computing (HPC) Clusters?}
+\includegraphics[width=\textwidth,height=0.5\textheight,keepaspectratio]{hpc.png} % Update path accordingly
+\begin{itemize}
+    \item Networks of computers (nodes) managed by scheduling software.
+    \item Users submit jobs, and the scheduler distributes resources fairly.
+    \item Shared file systems across nodes.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Working Manually on a Batch System}
+\begin{itemize}
+    \item Specify job requirements (CPU, memory, runtime).
+    \item Submit jobs via command line or scripts.
+    \item Manually check job statuses and collect results.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Common Workflow on a Batch System}
+\begin{itemize}
+    \item Prepare individual scripts for each part of your computation.
+    \item Automate job submission and results collection with scripts.
+    \item Monitor jobs and adjust parameters as needed.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Handling Issues}
+\begin{itemize}
+    \item If a bug is found: Stop all jobs, fix the bug, and resubmit.
+    \item If jobs exceed time limits: Identify and resubmit them with adjusted settings.
+    \item For new experiments: May need to start from scratch depending on the changes.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Conclusions}
+\begin{itemize}
+    \item Clusters can handle large tasks quickly due to their parallel nature.
+    \item However, managing batch jobs involves:
+    \begin{itemize}
+        \item Creating multiple scripts for setup and management.
+        \item Dealing with potential delays and lack of job interaction.
+        \item Complex result collection and error handling.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+
+
+
+
+\endlecture
+\end{document}
