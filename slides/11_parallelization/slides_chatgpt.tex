@@ -1,0 +1,137 @@
+\documentclass{beamer}
+
+\title{Large-Scale Benchmarking in R with MLR3}
+\author{Applied Machine Learning Course}
+\date{\today}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+\frametitle{Overview}
+\tableofcontents
+\end{frame}
+
+\section{Introduction to HPC Clusters}
+\begin{frame}
+\frametitle{Benchmarking on HPC Clusters}
+\begin{itemize}
+    \item HPC clusters: Interconnected computers or servers.
+    \item Provide computational power beyond single computers.
+    \item Nodes have multiple CPU/GPU cores, memory, and local storage.
+    \item Scheduling systems like Slurm manage job execution.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{HPC Architecture}
+\begin{figure}
+    \includegraphics[width=0.8\textwidth]{hpc-architecture.png}
+    \caption{Illustration of an HPC cluster architecture.}
+\end{figure}
+\end{frame}
+
+\section{Experiment Registry Setup}
+\begin{frame}
+\frametitle{Setting Up Experiment Registry}
+\begin{itemize}
+    \item Use \texttt{batchtools} to define experiments as jobs.
+    \item One job: Applying an algorithm to a problem.
+    \item Create or load registry with \texttt{makeExperimentRegistry()} or \texttt{loadRegistry()}.
+    \item Stores algorithms, problems, job definitions, logs, statuses, results.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Creating a Registry}
+\begin{verbatim}
+library(batchtools)
+reg = makeExperimentRegistry(
+  file.dir = "./experiments",
+  seed = 1,
+  packages = "mlr3verse"
+)
+\end{verbatim}
+\end{frame}
+
+\section{Job Submission}
+\begin{frame}[fragile]
+\frametitle{Job Submission}
+\begin{itemize}
+    \item Define jobs using \texttt{mlr3batchmark}.
+    \item Test jobs with \texttt{testJob()} before submission.
+    \item Submit jobs with \texttt{submitJobs()}.
+\end{itemize}
+\begin{verbatim}
+submitJobs(ids = chunks, resources = resources, reg = reg)
+\end{verbatim}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Job Submission with Slurm}
+\begin{verbatim}
+cf = makeClusterFunctionsSlurm(template = "slurm-simple")
+reg$cluster.functions = cf
+saveRegistry(reg = reg)
+\end{verbatim}
+\end{frame}
+
+\section{Monitoring and Error Handling}
+\begin{frame}[fragile]
+\frametitle{Job Monitoring and Error Handling}
+\begin{itemize}
+    \item Query job status with \texttt{getStatus()}.
+    \item Investigate errors with \texttt{findErrors()}.
+    \item Resubmit failed jobs as necessary.
+\end{itemize}
+\begin{verbatim}
+getStatus(reg = reg)
+error_ids = findErrors(reg = reg)
+submitJobs(error_ids, reg = reg)
+\end{verbatim}
+\end{frame}
+
+\section{Custom Experiments}
+\begin{frame}[fragile]
+\frametitle{Custom Experiments with \texttt{batchtools}}
+\begin{itemize}
+    \item Manual control over experiment definition.
+    \item Register problems with \texttt{addProblem()}.
+    \item Define algorithms with \texttt{addAlgorithm()}.
+    \item Add experiments with \texttt{addExperiments()}.
+\end{itemize}
+\begin{verbatim}
+addProblem("task_name", data, fun, reg = reg)
+addAlgorithm("algo_name", fun, reg = reg)
+addExperiments(prob.designs, algo.designs, reg = reg)
+\end{verbatim}
+\end{frame}
+
+\section{Statistical Analysis}
+\begin{frame}[fragile]
+\frametitle{Statistical Analysis}
+\begin{itemize}
+    \item Use \texttt{mlr3benchmark} for statistical tests.
+    \item Perform pairwise comparisons using Friedman-Nemenyi tests.
+    \item Visualize results with critical difference plots.
+\end{itemize}
+\begin{verbatim}
+library(mlr3benchmark)
+bma = as_benchmark_aggr(bmr, measures = msr("classif.ce"))
+bma$friedman_posthoc()
+autoplot(bma, type = "cd", ratio = 1/5)
+\end{verbatim}
+\end{frame}
+
+\section{Conclusion}
+\begin{frame}
+\frametitle{Conclusion}
+\begin{itemize}
+    \item Conduct large-scale machine learning experiments using \texttt{mlr3}.
+    \item Utilize \texttt{batchtools} and \texttt{mlr3batchmark} for HPC cluster execution.
+    \item Analyze and visualize benchmark results with \texttt{mlr3benchmark}.
+\end{itemize}
+\end{frame}
+
+\end{document}
