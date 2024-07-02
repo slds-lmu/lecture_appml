@@ -34,48 +34,199 @@ Often hard to evaluate methods using theoretical and mathematical analysis alone
 \end{vbframe}
 
 \begin{vbframe}{The steps of Benchmarking}
-    
+\vfill
+\begin{enumerate}
+    \item Create a hypothesis
+    \item Decide on a performance metric (if not part of the hypothesis)
+    \item Collect datasets to evaluate the hypothesis
+    \item Set up resampling strategy
+    \item Set up hyperparameter search space and tuning strategy
+    \item Run cross-product
+    \item Analyze results
+\end{enumerate}
+\vfill
+\pause
+$\rightarrow$ OpenML helps with datasets (and partially the resampling strategy)
+\end{vbframe}
+
+\begin{vbframe}{The Problem with Datasets}
+\pause
+\vfill
+\begin{itemize}
+    \item No universally adopted standard dataset format
+    \item No universally adopted dataset sharing platform
+    \item No platform with easy API to access data
+\end{itemize}
+\vfill
+\pause
+\begin{itemize}
+    \item Data scattered across multiple repositories
+    \begin{itemize}
+        \item UCI
+        \item Kaggle
+        \item Multiple small (mostly academic) platforms
+    \end{itemize}
+    \item Which datasets to use for a study?
+\end{itemize}
+\end{vbframe}
+
+\begin{vbframe}{The ideal world - Frictionless machine learning}
+\vfill
+Datasets
+\begin{itemize}
+    \item Unified access to all datasets via unified API
+    \item Possibility to share own data (mostly relevant in academic context)
+    \item Discover and search datasets via their meta-data
+\end{itemize}
+\vfill
+\begin{itemize}
+    \item Tasks: Shared train-test splits
+    \item Runs: Shared results
+\end{itemize}
+\pause
+In this lecture we'll cover datasets and tasks
 \end{vbframe}
 
 \begin{vbframe}{OpenML}
-    
+Networked Science for Machine Learning
+\vfill
+Move data out of our labs and minds into online tools that help us organize the information, and reuse it in unexpected ways. \href{https://www.amazon.com/Reinventing-Discovery-New-Networked-Science/dp/0691148902}{\beamergotobutton{M. Nielsen}}
+\vfill
+Share artifacts of machine learning research to allow others to re-use your results (and also use theirs):
+\begin{itemize}
+    \item Datasets
+    \item Tasks
+    \item Flows
+    \item Runs
+    \item Collection
+\end{itemize}
+
 \end{vbframe}
 
 \begin{vbframe}{Datasets}
-    
+\begin{itemize}
+    \item Store raw data (.arff or .pq)
+    \item Contain meta-data:
+    \begin{itemize}
+        \item description
+        \item feature names
+        \item feature types
+        \item features to ignore
+    \end{itemize}
+    \item Contain calculated information
+    \begin{itemize}
+        \item Meta-features (no. datapoints, no. features, etc.)
+        \item Contains basic performance evaluation
+    \end{itemize}
+\end{itemize}
 \end{vbframe}
 
 \begin{vbframe}{Tasks}
-    
+\begin{itemize}
+    \item Combination of \emph{data} + target feature + resampling technique
+    \item Allows the exact definition of machine learning tasks
+    \item \emph{Flows} are executed on \emph{tasks} and produce \emph{runs}
+\end{itemize}
 \end{vbframe}
 
-\begin{vbframe}{Task Collection}
-    
+\begin{vbframe}{Open question: what datasets/tasks to use?}
+\begin{itemize}
+    \item Hard to compare results across papers
+    \item Benchmarking is often done on small set of datasets
+    \begin{itemize}
+        \item Question about generalization to other datasets
+        \item Cherry picking or arbitrary selection
+        \item Different versions, different train-test setups
+    \end{itemize}
+    \item Publication bias
+    \begin{itemize}
+        \item Published papers report good results
+        \item Interesting to know WHEN an algorithm works (and when it doesn’t)
+    \end{itemize}
+\end{itemize}
+\end{vbframe}
+
+\begin{vbframe}{OpenML Benchmarking Suites}
+\begin{itemize}
+    \item Collection of tasks
+    \item Allow sharing task description in a unified format
+    \item Can be accessed from R, Python and Java
+    \item Work against a common goal
+\end{itemize}
 \end{vbframe}
 
 \begin{vbframe}{Example I: OpenML-CC18}
-    
-\end{vbframe}
-
-\begin{vbframe}{Example II: AMLB}
+\beamergotobutton{\href{https://datasets-benchmarks-proceedings.neurips.cc/paper/2021/hash/c7e1249ffc03eb9ded908c236bd1996d-Abstract-round2.html}{Bischl et al. (2021)}}
+Provide a set of benchmark problems for standard machine learning algorithms.
+\begin{itemize}
+    \item Classification only
+    \item 72 datasets
+    \item Contain missing values and categorical features
+    \item Medium-sized (500-100000 observations, <5000 features after one-hot-encoding)
+    \item Not unbalanced
+    \item No groups/block/time dependencies
+    \item No sparse data
+    \item Some more subjective criteria (see paper)
+\end{itemize}
     
 \end{vbframe}
 
 \begin{vbframe}{Example III: OpenML-CTR23}
-    
+\beamergotobutton{\href{https://openreview.net/forum?id=HebAOoMm94}{Fischer et al. (2023)}}
+Extends the CC18 to regression.
+\begin{itemize}
+    \item Same criteria as the CC18
+    \item There is a numeric target with at least 5 different values
+    \item The dataset is not trivially solvable by a linear model
+    \item The dataset does not have ethical concerns
+    \item The use of the dataset for benchmarking is not forbidden
+\end{itemize}
+\end{vbframe}
+
+\begin{vbframe}{Example II: AMLB}
+\beamergotobutton{\href{https://www.jmlr.org/papers/v25/22-0493.html}{Gijsbers et al. (2024)}}
+\begin{itemize}
+    \item Classification: 71 datasets
+    \item Regression: 33 datasets
+\end{itemize}
+Focus on harder and more raw datasets:
+\begin{itemize}
+    \item Similar criteria as the CC18
+    \item Difficulty
+    \item Representative of real-world
+    \item No free form text features
+    \item Diversity in the problem domain
+\end{itemize}
 \end{vbframe}
 
 \begin{vbframe}{The need for parallelism}
-    
+\vfill
+Example Workload: AutoML benchmark
+\vfill
+\begin{itemize}
+    \item 71 datasets
+    \item 10 fold cross-validation (outer CV)
+    \item 9 AutoML systems (algorithms)
+    \item 1 hour per AutoML system/dataset/fold
+\end{itemize}
+\vfill
+Total: 6390 hours = 266.25 days
+\vfill
+Impossible in a sequential setting!
 \end{vbframe}
 
 \begin{vbframe}{Differences in the real world}
-    
+\vfill
+\begin{itemize}
+    \item Often: one dataset + domain knowledge
+    \item Parallelism still helpful for 
+    \begin{itemize}
+        \item hyperparameter optimization
+        \item large models
+    \end{itemize}
+\end{itemize}
 \end{vbframe}
-
-\begin{vbframe}{Conclusion}
-    
-\end{vbframe}
+\vfill
 
 \endlecture
 \end{document}
