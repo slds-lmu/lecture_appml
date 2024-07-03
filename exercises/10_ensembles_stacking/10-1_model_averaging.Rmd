@@ -138,9 +138,9 @@ rpart.plot(grl$state$model$classif.rpart_1$model)
 rpart.plot(grl$state$model$classif.rpart_2$model)
 rpart.plot(grl$state$model$classif.rpart_3$model)
 rpart.plot(dt$state$model)
-# Although each of the 3 trees sees different data during training, the first split is the same as if we had trained on all data
-# In an actual Random Forest, feature variables are randomly selected as potential splitting candidates which makes trees more heterogeneous
 ```
+Although each of the 3 trees sees different data during training, the first split is the same as if we had trained on all data.
+In an actual Random Forest, feature variables are randomly selected as potential splitting candidates which makes trees more heterogeneous.
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("-->")
 ```
@@ -209,10 +209,10 @@ ranger100$predict_type = "prob"
 bg = benchmark_grid(task, list(grl, dt, ranger3, ranger10, ranger100), resampling)
 b = benchmark(bg)
 autoplot(b, measure = msr("classif.auc"))
-# Ensemble of 3 trees maybe slightly better than a single tree
-# Real random forests with many trees much better
-# If you have the time, maybe set the number of our tree ensemble higher and see how that compares
 ```
+Ensemble of 3 trees maybe slightly better than a single tree.\\
+Real random forests with many trees much better.\\
+If you have the time, maybe set the number of our tree ensemble higher and see how that compares.
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("-->")
 ```
@@ -375,7 +375,7 @@ cat("<!--")
 <details>
 <summary>Click me:</summary>
 
-```{r, eval = show.solution}
+```{r, eval = show.solution, results = "hide"}
 grl_weights_optimized = grl$clone(deep = TRUE)
 grl_weights_optimized$id = paste0(grl_weights_optimized$id, ".weights_optimized_naive")
 
@@ -405,9 +405,12 @@ instance = OptimInstanceSingleCrit$new(
 
 optimizer = opt("random_search")
 optimizer$optimize(instance)
-# This approach is inefficient because we use resampling in the objective function
-# There is no need to always retrain and evaluate the learners because we only weight predictions differently and average them
 ```
+```{r, eval = show.solution}
+instance$result
+```
+This approach is inefficient because we use resampling in the objective function.
+There is no need to always retrain and evaluate the learners because we only weight predictions differently and average them.
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("-->")
 ```
@@ -484,7 +487,7 @@ cat("<!--")
 <details>
 <summary>Click me:</summary>
 
-```{r, eval = show.solution}
+```{r, eval = show.solution, results = "hide"}
 k = resampling$param_set$get_values()[["folds"]]
 
 dt_pred = resample(task, dt, resampling)
@@ -526,6 +529,9 @@ instance = OptimInstanceSingleCrit$new(
 
 optimizer = opt("cmaes")
 optimizer$optimize(instance)
+```
+```{r, eval = show.solution}
+instance$result
 ```
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("-->")
