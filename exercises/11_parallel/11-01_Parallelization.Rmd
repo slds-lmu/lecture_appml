@@ -27,6 +27,7 @@ library('mlr3verse')
 library('mlr3oml')
 library('data.table')
 library('batchtools')
+library('ggplot2')
 ```
 
 # Exercise 1: Getting Data from OpenML
@@ -94,7 +95,7 @@ cat("-->")
 
 ## Exercise 3.1: OpenML Task and Learners
 
-For this task, look at the iris data set. 
+For this task, look at the german credit data set. 
 Download it from OpenML (task id: 31) and create a task.
 Define a tree, an SVM and a Random Forest as they shall be benchmarked later.
 
@@ -108,12 +109,11 @@ cat("<!--")
 <summary>Click me:</summary>
 
 ```{r, eval = show.solution}
-oml_task = OMLTask$new(31)  # Task ID for OpenML dataset (iris dataset)
+oml_task = OMLTask$new(31)
 oml_data = as_data_backend(oml_task$data)
 task = as_task_classif(oml_data, target = "class")
 learners = list(
   lrn("classif.rpart"),
-  lrn("classif.svm"),
   lrn("classif.ranger")
 )
 ```
@@ -168,12 +168,34 @@ cat("<!--")
 <summary>Click me:</summary>
 
 ```{r, eval = show.solution}
-addAlgorithm(name = "mlr3", fun = function(job, data, instance, learner) {
+# Adding more learners
+learners2 = list(
+  lrn("classif.rpart"),
+  lrn("classif.ranger"),
+  lrn("classif.kknn"),       # Added k-Nearest Neighbors
+  lrn("classif.naive_bayes") # Added Naive Bayes
+)
+
+# Define the algorithm with resampling
+addAlgorithm(name = "mlr3res", fun = function(job, data, instance, learner) {
   learner = lrn(learner)
   task = as_task(data)
   resampling = rsmp("cv", folds = 10)$instantiate(task)
   rr = resample(task, learner, resampling, store_models = TRUE)
+  list(measure = rr$aggregate(msr("classif.acc")))
 })
+
+# Define the design of experiments
+prob_design2 = list(task = data.table())
+algo_design2 = list(mlr3res = data.frame(learner = sapply(learners2, 
+                                                          function(x) {x$id}), 
+                                         stringsAsFactors = FALSE))
+addExperiments(prob.designs = prob_design2, algo.designs = algo_design2)
+summarizeExperiments()
+```
+```{r, eval = show.solution}
+# Test a single job to ensure it works correctly
+testJob(1)
 ```
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
@@ -183,13 +205,13 @@ cat("-->")
 ## Exercise 3.3: Benchmark
 
 Submit jobs to be executed in parallel:   
-```{r, eval = show.solution}
+```{r, eval = FALSE}
 submitJobs()
-waitForJobs()
+waitForJobs() # Wait for the jobs to finish
 ```
 
 Collect and analyze the results:
-```{r, eval = show.solution}
+```{r, eval = FALSE}
 res = reduceResultsList()
 print(res)
 ```
@@ -207,7 +229,23 @@ cat("<!--")
 <summary>Click me:</summary>
 
 ```{r, eval = show.solution}
-###
+submitJobs()
+waitForJobs() # Wait for the jobs to finish
+res = reduceResultsList()
+print(res)
+```
+
+```{r, eval = show.solution}
+# Collect results into a data.table
+results = rbindlist(lapply(res, function(x) data.table(acc = x$measure)))
+results$learner = algo_design2$mlr3res$learner
+
+# Plot the performance metrics using ggplot2
+ggplot(results, aes(x = learner, y = acc)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Performance of Different Learners",
+       x = "Learner",
+       y = "Classification Accuracy")
 ```
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
@@ -217,4 +255,4 @@ cat("-->")
 
 # Summary
 
-We downloaded various data sets from OpenML and used batch tools to parallelize the processes.
+We downloaded various data sets from OpenML and used batch tools to parallelize a benchmark study.

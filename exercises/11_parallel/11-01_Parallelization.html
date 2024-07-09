@@ -185,7 +185,8 @@ parallelized benchmark experiment on your laptop.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&#39;mlr3verse&#39;</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&#39;mlr3oml&#39;</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&#39;data.table&#39;</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&#39;batchtools&#39;</span>)</span></code></pre></div>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&#39;batchtools&#39;</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&#39;ggplot2&#39;</span>)</span></code></pre></div>
 </div>
 <div id="exercise-1-getting-data-from-openml" class="section level1">
 <h1>Exercise 1: Getting Data from OpenML</h1>
@@ -205,34 +206,52 @@ this by removing instances where the first 3 letters of the name column
 match those of other instances. Further, exclude instances where the
 minority class is less than 10% of the overall number of
 observations.</p>
-<!--
-
-### Solution:
-
+<div id="solution" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>Click me:</summary>
-
-
-```r
-# Get data
-odata = list_oml_tasks(
-  number_features = c(10, 20),
-  number_instances = c(500, 1000),
-  number_classes = 2
-)
-
-# Remove duplicates
-odata <- odata[!duplicated(substr(odata$name, 1, 3)), ]
-
-# Remove imbalanced data sets
-odata <- odata[9 * odata$MinorityClassSize >= odata$MajorityClassSize, ]
-
-# View result
-nrow(odata)
-head(odata)
-```
-
--->
+<summary>
+Click me:
+</summary>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Get data</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>odata <span class="ot">=</span> <span class="fu">list_oml_tasks</span>(</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  <span class="at">number_features =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>),</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="at">number_instances =</span> <span class="fu">c</span>(<span class="dv">500</span>, <span class="dv">1000</span>),</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="at">number_classes =</span> <span class="dv">2</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="do">## INFO  [15:28:49.558] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/list/number_instances/500..1000/number_features/10..20/number_classes/2/limit/1000`, authenticated: `FALSE`}</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co"># Remove duplicates</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>odata <span class="ot">&lt;-</span> odata[<span class="sc">!</span><span class="fu">duplicated</span>(<span class="fu">substr</span>(odata<span class="sc">$</span>name, <span class="dv">1</span>, <span class="dv">3</span>)), ]</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co"># Remove imbalanced data sets</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>odata <span class="ot">&lt;-</span> odata[<span class="dv">9</span> <span class="sc">*</span> odata<span class="sc">$</span>MinorityClassSize <span class="sc">&gt;=</span> odata<span class="sc">$</span>MajorityClassSize, ]</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co"># View result</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="fu">nrow</span>(odata)</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="do">## [1] 18</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">head</span>(odata)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="do">##    task_id                 task_type data_id            name status MajorityClassSize MaxNominalAttDistinctValues</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="do">## 1:      15 Supervised Classification      15        breast-w active               458                           2</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="do">## 2:      29 Supervised Classification      29 credit-approval active               383                          14</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="do">## 3:      49 Supervised Classification      50     tic-tac-toe active               626                           3</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="do">## 4:    3561 Supervised Classification     470           profb active               448                          28</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="do">## 5:    3583 Supervised Classification     717   rmftsa_ladata active               286                           2</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="do">## 6:    3606 Supervised Classification     740  fri_c3_1000_10 active               560                           2</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="do">##    MinorityClassSize NumberOfClasses NumberOfFeatures NumberOfInstances NumberOfInstancesWithMissingValues</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="do">## 1:               241               2               10               699                                 16</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="do">## 2:               307               2               16               690                                 37</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="do">## 3:               332               2               10               958                                  0</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="do">## 4:               224               2               10               672                                666</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="do">## 5:               222               2               11               508                                  0</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="do">## 6:               440               2               11              1000                                  0</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="do">##    NumberOfMissingValues NumberOfNumericFeatures NumberOfSymbolicFeatures</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="do">## 1:                    16                       9                        1</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="do">## 2:                    67                       6                       10</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="do">## 3:                     0                       0                       10</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="do">## 4:                  1200                       5                        5</span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="do">## 5:                     0                      10                        1</span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="do">## 6:                     0                      10                        1</span></span></code></pre></div>
+</div>
 </div>
 <div id="exercise-2-working-with-openml-data" class="section level1">
 <h1>Exercise 2: Working with OpenML data</h1>
@@ -241,76 +260,100 @@ information about the tasks, and not the data itself. Convert this list
 of tasks by directly transforming it to <code>mlr3</code> tasks with
 applying <code>otsk()</code> to each <code>data_id</code>. Find out how
 you can load and inspect the data from a single task in the list.</p>
-<!--
-
-### Solution:
-
+<div id="solution-1" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>Click me:</summary>
-
-
-```r
-# List of tasks
-tasklist <- lapply(odata$task_id, otsk)
-
-# Example data of a single task
-tasklist[[17]]$data$data
-```
-
--->
+<summary>
+Click me:
+</summary>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># List of tasks</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>tasklist <span class="ot">&lt;-</span> <span class="fu">lapply</span>(odata<span class="sc">$</span>task_id, otsk)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co"># Example data of a single task</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>tasklist[[<span class="dv">17</span>]]<span class="sc">$</span>data<span class="sc">$</span>data</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="do">## INFO  [15:28:54.319] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/361983`, authenticated: `FALSE`}</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="do">## INFO  [15:28:54.385] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/45711`, authenticated: `FALSE`}</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="do">## INFO  [15:28:54.453] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/22117212/doa_bwin.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="do">## INFO  [15:28:54.713] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/45711`, authenticated: `FALSE`}</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="do">##      CountryID Gender ageRDATE p2sumstake p2sumbet p2sumday p2intvday    p2bpd     p2net    Zp2bpd1m Zp2stakeSD1m</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="do">##   1:       620      1       21  6202.5700      347       68       308 5.102941   57.9500  0.36724532   0.41029440</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="do">##   2:        40      1       19   665.8765       57       26       540 2.192308  116.0765 -0.23909197  -0.06947528</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="do">##   3:       616      1       20   843.2210      306      105       679 2.914286  -27.4005  0.00760946  -0.23189846</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="do">##   4:       616      1       38   355.1172       31       20       458 1.550000   76.5577 -0.43097086  -0.06199048</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="do">##   5:       724      1       26 13622.0703      613       76       733 8.065789 1860.0303  0.54441350   0.04268775</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="do">##  ---                                                                                                             </span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="do">## 526:       276      1       19   318.0900      141       22       373 6.409091   86.0800 -0.52691031  -0.26278703</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="do">## 527:       276      1       24    31.7000       20        9        71 2.222222   10.6000 -0.14315253  -0.23098926</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="do">## 528:       300      1       36   238.6500       37       19       461 1.947368  -51.6700 -0.18426943  -0.21703466</span></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="do">## 529:       380      1       19   180.2000       18        8       451 2.250000    6.0000 -0.43097086  -0.19515845</span></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="do">## 530:       380      1       27    42.5000        9        5       354 1.800000   25.8700 -0.43097086  -0.19204015</span></span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="do">##      Zp2totalactivedays1m Zp2stakeslope1m DV</span></span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a><span class="do">##   1:           3.45617824      0.15568296  1</span></span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a><span class="do">##   2:           1.34429259      0.27314822  0</span></span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="do">##   3:           0.28834976     -0.04884159  0</span></span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="do">##   4:           0.64033070      0.04042819  0</span></span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a><span class="do">##   5:           1.16830211     -0.09077256  0</span></span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a><span class="do">##  ---                                        </span></span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a><span class="do">## 526:          -0.23962165      0.39170911  0</span></span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a><span class="do">## 527:          -0.59160260      1.91135366  1</span></span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a><span class="do">## 528:           0.28834976     -0.18182620  0</span></span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a><span class="do">## 529:          -0.06363118      0.31159202  0</span></span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a><span class="do">## 530:          -0.59160260      1.60435360  0</span></span></code></pre></div>
+</div>
 </div>
 <div id="exercise-3-batch-tools" class="section level1">
 <h1>Exercise 3: Batch Tools</h1>
 <div id="exercise-3.1-openml-task-and-learners" class="section level2">
 <h2>Exercise 3.1: OpenML Task and Learners</h2>
-<p>For this task, look at the iris data set. Download it from OpenML
-(task id: 31) and create a task. Define a tree, an SVM and a Random
-Forest as they shall be benchmarked later.</p>
-<!--
-
-### Solution:
-
+<p>For this task, look at the german credit data set. Download it from
+OpenML (task id: 31) and create a task. Define a tree, an SVM and a
+Random Forest as they shall be benchmarked later.</p>
+<div id="solution-2" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>Click me:</summary>
-
-
-```r
-oml_task = OMLTask$new(31)  # Task ID for OpenML dataset (iris dataset)
-oml_data = as_data_backend(oml_task$data)
-task = as_task_classif(oml_data, target = "class")
-learners = list(
-  lrn("classif.rpart"),
-  lrn("classif.svm"),
-  lrn("classif.ranger")
-)
-```
-
--->
+<summary>
+Click me:
+</summary>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>oml_task <span class="ot">=</span> OMLTask<span class="sc">$</span><span class="fu">new</span>(<span class="dv">31</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>oml_data <span class="ot">=</span> <span class="fu">as_data_backend</span>(oml_task<span class="sc">$</span>data)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="do">## INFO  [15:28:54.847] Retrieving JSON {url: `https://www.openml.org/api/v1/json/task/31`, authenticated: `FALSE`}</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="do">## INFO  [15:28:54.910] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/31`, authenticated: `FALSE`}</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="do">## INFO  [15:28:54.976] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/31/credit-g.arff`, authenticated: `FALSE`}</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>task <span class="ot">=</span> <span class="fu">as_task_classif</span>(oml_data, <span class="at">target =</span> <span class="st">&quot;class&quot;</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>learners <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="fu">lrn</span>(<span class="st">&quot;classif.rpart&quot;</span>),</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="fu">lrn</span>(<span class="st">&quot;classif.ranger&quot;</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>)</span></code></pre></div>
+</div>
 </div>
 <div id="exercise-3.2-batchtools-experiment-registry" class="section level2">
 <h2>Exercise 3.2: Batchtools experiment registry</h2>
 <p>Create and configure a Batchtools experiment registry:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>reg <span class="ot">=</span> <span class="fu">makeExperimentRegistry</span>(</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="at">file.dir =</span> <span class="st">&quot;mlr3_experiments&quot;</span>,</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  <span class="at">packages =</span> <span class="fu">c</span>(<span class="st">&quot;mlr3&quot;</span>, <span class="st">&quot;mlr3verse&quot;</span>),</span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1</span></span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>reg <span class="ot">=</span> <span class="fu">makeExperimentRegistry</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  <span class="at">file.dir =</span> <span class="st">&quot;mlr3_experiments&quot;</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="at">packages =</span> <span class="fu">c</span>(<span class="st">&quot;mlr3&quot;</span>, <span class="st">&quot;mlr3verse&quot;</span>),</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>)</span></code></pre></div>
 <p>You can add problems and algorithms to the registry using the
 following code:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">addProblem</span>(<span class="st">&quot;task&quot;</span>, <span class="at">data =</span> task)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">addAlgorithm</span>(<span class="at">name =</span> <span class="st">&quot;mlr3&quot;</span>, <span class="at">fun =</span> <span class="cf">function</span>(job, data, instance, learner) {</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  learner <span class="ot">=</span> <span class="fu">lrn</span>(learner)</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  task <span class="ot">=</span> <span class="fu">as_task</span>(data)</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  learner<span class="sc">$</span><span class="fu">train</span>(task)</span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>})</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">addProblem</span>(<span class="st">&quot;task&quot;</span>, <span class="at">data =</span> task)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">addAlgorithm</span>(<span class="at">name =</span> <span class="st">&quot;mlr3&quot;</span>, <span class="at">fun =</span> <span class="cf">function</span>(job, data, instance, learner) {</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  learner <span class="ot">=</span> <span class="fu">lrn</span>(learner)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  task <span class="ot">=</span> <span class="fu">as_task</span>(data)</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  learner<span class="sc">$</span><span class="fu">train</span>(task)</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>})</span></code></pre></div>
 <p>Define the design of experiments:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>prob_design <span class="ot">=</span> <span class="fu">list</span>(<span class="at">task =</span> <span class="fu">data.table</span>())</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>algo_design <span class="ot">=</span> <span class="fu">list</span>(<span class="at">mlr3 =</span> <span class="fu">data.frame</span>(<span class="at">learner =</span> <span class="fu">sapply</span>(learners, <span class="cf">function</span>(x) {x<span class="sc">$</span>id}),</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>                                     <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>))</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="fu">addExperiments</span>(<span class="at">prob.designs =</span> prob_design, <span class="at">algo.designs =</span> algo_design)</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="fu">summarizeExperiments</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>prob_design <span class="ot">=</span> <span class="fu">list</span>(<span class="at">task =</span> <span class="fu">data.table</span>())</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>algo_design <span class="ot">=</span> <span class="fu">list</span>(<span class="at">mlr3 =</span> <span class="fu">data.frame</span>(<span class="at">learner =</span> <span class="fu">sapply</span>(learners, <span class="cf">function</span>(x) {x<span class="sc">$</span>id}),</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>                                     <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="fu">addExperiments</span>(<span class="at">prob.designs =</span> prob_design, <span class="at">algo.designs =</span> algo_design)</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="fu">summarizeExperiments</span>()</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="do">##    problem algorithm .count</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="do">## 1:    task      mlr3      2</span></span></code></pre></div>
 <p>Test a single job to ensure it works correctly:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">testJob</span>(<span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">testJob</span>(<span class="dv">1</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="do">## </span><span class="al">###</span><span class="do"> [bt]: Generating problem instance for problem &#39;task&#39; ...</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="do">## </span><span class="al">###</span><span class="do"> [bt]: Applying algorithm &#39;mlr3&#39; on problem &#39;task&#39; for job 1 (seed = 2) ...</span></span></code></pre></div>
 <ol style="list-style-type: decimal">
 <li>Add at least two more learners to the benchmark experiment. Choose
 any classification learners from the <code>mlr3learners</code>
@@ -319,54 +362,124 @@ package.</li>
 cross-validation) instead of using the whole dataset for training and
 testing.</li>
 </ol>
-<!--
-
-### Solution:
-
+<div id="solution-3" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>Click me:</summary>
-
-
-```r
-addAlgorithm(name = "mlr3", fun = function(job, data, instance, learner) {
-  learner = lrn(learner)
-  task = as_task(data)
-  resampling = rsmp("cv", folds = 10)$instantiate(task)
-  rr = resample(task, learner, resampling, store_models = TRUE)
-})
-```
-
--->
+<summary>
+Click me:
+</summary>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># Adding more learners</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>learners2 <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  <span class="fu">lrn</span>(<span class="st">&quot;classif.rpart&quot;</span>),</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>  <span class="fu">lrn</span>(<span class="st">&quot;classif.ranger&quot;</span>),</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>  <span class="fu">lrn</span>(<span class="st">&quot;classif.kknn&quot;</span>),       <span class="co"># Added k-Nearest Neighbors</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>  <span class="fu">lrn</span>(<span class="st">&quot;classif.naive_bayes&quot;</span>) <span class="co"># Added Naive Bayes</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>)</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co"># Define the algorithm with resampling</span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="fu">addAlgorithm</span>(<span class="at">name =</span> <span class="st">&quot;mlr3res&quot;</span>, <span class="at">fun =</span> <span class="cf">function</span>(job, data, instance, learner) {</span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>  learner <span class="ot">=</span> <span class="fu">lrn</span>(learner)</span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>  task <span class="ot">=</span> <span class="fu">as_task</span>(data)</span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a>  resampling <span class="ot">=</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> <span class="dv">10</span>)<span class="sc">$</span><span class="fu">instantiate</span>(task)</span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>  rr <span class="ot">=</span> <span class="fu">resample</span>(task, learner, resampling, <span class="at">store_models =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">measure =</span> rr<span class="sc">$</span><span class="fu">aggregate</span>(<span class="fu">msr</span>(<span class="st">&quot;classif.acc&quot;</span>)))</span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a>})</span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a></span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="co"># Define the design of experiments</span></span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a>prob_design2 <span class="ot">=</span> <span class="fu">list</span>(<span class="at">task =</span> <span class="fu">data.table</span>())</span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a>algo_design2 <span class="ot">=</span> <span class="fu">list</span>(<span class="at">mlr3res =</span> <span class="fu">data.frame</span>(<span class="at">learner =</span> <span class="fu">sapply</span>(learners2, </span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a>                                                          <span class="cf">function</span>(x) {x<span class="sc">$</span>id}), </span>
+<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a>                                         <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb12-23"><a href="#cb12-23" tabindex="-1"></a><span class="fu">addExperiments</span>(<span class="at">prob.designs =</span> prob_design2, <span class="at">algo.designs =</span> algo_design2)</span>
+<span id="cb12-24"><a href="#cb12-24" tabindex="-1"></a><span class="fu">summarizeExperiments</span>()</span>
+<span id="cb12-25"><a href="#cb12-25" tabindex="-1"></a><span class="do">##    problem algorithm .count</span></span>
+<span id="cb12-26"><a href="#cb12-26" tabindex="-1"></a><span class="do">## 1:    task      mlr3      2</span></span>
+<span id="cb12-27"><a href="#cb12-27" tabindex="-1"></a><span class="do">## 2:    task   mlr3res      4</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Test a single job to ensure it works correctly</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="fu">testJob</span>(<span class="dv">1</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="do">## </span><span class="al">###</span><span class="do"> [bt]: Generating problem instance for problem &#39;task&#39; ...</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="do">## </span><span class="al">###</span><span class="do"> [bt]: Applying algorithm &#39;mlr3&#39; on problem &#39;task&#39; for job 1 (seed = 2) ...</span></span></code></pre></div>
+</div>
 </div>
 <div id="exercise-3.3-benchmark" class="section level2">
 <h2>Exercise 3.3: Benchmark</h2>
 <p>Submit jobs to be executed in parallel:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">submitJobs</span>()</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">waitForJobs</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">submitJobs</span>()</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fu">waitForJobs</span>() <span class="co"># Wait for the jobs to finish</span></span></code></pre></div>
 <p>Collect and analyze the results:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>res <span class="ot">=</span> <span class="fu">reduceResultsList</span>()</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">print</span>(res)</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>res <span class="ot">=</span> <span class="fu">reduceResultsList</span>()</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">print</span>(res)</span></code></pre></div>
 <p>Plot the performance metrics of the different learners using the
 <code>ggplot2</code> package.</p>
-<!--
-
-### Solution:
-
+<div id="solution-4" class="section level3">
+<h3>Solution:</h3>
 <details>
-<summary>Click me:</summary>
-
-
-```r
-###
-```
-
--->
+<summary>
+Click me:
+</summary>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">submitJobs</span>()</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">waitForJobs</span>() <span class="co"># Wait for the jobs to finish</span></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="do">## [1] TRUE</span></span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>res <span class="ot">=</span> <span class="fu">reduceResultsList</span>()</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="fu">print</span>(res)</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="do">## [[1]]</span></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="do">## &lt;LearnerClassifRpart:classif.rpart&gt;: Classification Tree</span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="do">## * Model: rpart</span></span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a><span class="do">## * Parameters: xval=0</span></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a><span class="do">## * Packages: mlr3, rpart</span></span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a><span class="do">## * Predict Types:  [response], prob</span></span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a><span class="do">## * Feature Types: logical, integer, numeric, factor, ordered</span></span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a><span class="do">## * Properties: importance, missings, multiclass, selected_features, twoclass, weights</span></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a><span class="do">## [[2]]</span></span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a><span class="do">## &lt;LearnerClassifRanger:classif.ranger&gt;</span></span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a><span class="do">## * Model: ranger</span></span>
+<span id="cb17-15"><a href="#cb17-15" tabindex="-1"></a><span class="do">## * Parameters: num.threads=1</span></span>
+<span id="cb17-16"><a href="#cb17-16" tabindex="-1"></a><span class="do">## * Packages: mlr3, mlr3learners, ranger</span></span>
+<span id="cb17-17"><a href="#cb17-17" tabindex="-1"></a><span class="do">## * Predict Types:  [response], prob</span></span>
+<span id="cb17-18"><a href="#cb17-18" tabindex="-1"></a><span class="do">## * Feature Types: logical, integer, numeric, character, factor, ordered</span></span>
+<span id="cb17-19"><a href="#cb17-19" tabindex="-1"></a><span class="do">## * Properties: hotstart_backward, importance, multiclass, oob_error, twoclass, weights</span></span>
+<span id="cb17-20"><a href="#cb17-20" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb17-21"><a href="#cb17-21" tabindex="-1"></a><span class="do">## [[3]]</span></span>
+<span id="cb17-22"><a href="#cb17-22" tabindex="-1"></a><span class="do">## [[3]]$measure</span></span>
+<span id="cb17-23"><a href="#cb17-23" tabindex="-1"></a><span class="do">## classif.acc </span></span>
+<span id="cb17-24"><a href="#cb17-24" tabindex="-1"></a><span class="do">##       0.736 </span></span>
+<span id="cb17-25"><a href="#cb17-25" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb17-26"><a href="#cb17-26" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb17-27"><a href="#cb17-27" tabindex="-1"></a><span class="do">## [[4]]</span></span>
+<span id="cb17-28"><a href="#cb17-28" tabindex="-1"></a><span class="do">## [[4]]$measure</span></span>
+<span id="cb17-29"><a href="#cb17-29" tabindex="-1"></a><span class="do">## classif.acc </span></span>
+<span id="cb17-30"><a href="#cb17-30" tabindex="-1"></a><span class="do">##       0.763 </span></span>
+<span id="cb17-31"><a href="#cb17-31" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb17-32"><a href="#cb17-32" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb17-33"><a href="#cb17-33" tabindex="-1"></a><span class="do">## [[5]]</span></span>
+<span id="cb17-34"><a href="#cb17-34" tabindex="-1"></a><span class="do">## [[5]]$measure</span></span>
+<span id="cb17-35"><a href="#cb17-35" tabindex="-1"></a><span class="do">## classif.acc </span></span>
+<span id="cb17-36"><a href="#cb17-36" tabindex="-1"></a><span class="do">##       0.725 </span></span>
+<span id="cb17-37"><a href="#cb17-37" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb17-38"><a href="#cb17-38" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb17-39"><a href="#cb17-39" tabindex="-1"></a><span class="do">## [[6]]</span></span>
+<span id="cb17-40"><a href="#cb17-40" tabindex="-1"></a><span class="do">## [[6]]$measure</span></span>
+<span id="cb17-41"><a href="#cb17-41" tabindex="-1"></a><span class="do">## classif.acc </span></span>
+<span id="cb17-42"><a href="#cb17-42" tabindex="-1"></a><span class="do">##       0.756</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="co"># Collect results into a data.table</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>results <span class="ot">=</span> <span class="fu">rbindlist</span>(<span class="fu">lapply</span>(res, <span class="cf">function</span>(x) <span class="fu">data.table</span>(<span class="at">acc =</span> x<span class="sc">$</span>measure)))</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>results<span class="sc">$</span>learner <span class="ot">=</span> algo_design2<span class="sc">$</span>mlr3res<span class="sc">$</span>learner</span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="co"># Plot the performance metrics using ggplot2</span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="fu">ggplot</span>(results, <span class="fu">aes</span>(<span class="at">x =</span> learner, <span class="at">y =</span> acc)) <span class="sc">+</span></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">&quot;identity&quot;</span>) <span class="sc">+</span></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Performance of Different Learners&quot;</span>,</span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Learner&quot;</span>,</span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Classification Accuracy&quot;</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
 </div>
 </div>
 <div id="summary" class="section level1">
 <h1>Summary</h1>
 <p>We downloaded various data sets from OpenML and used batch tools to
-parallelize the processes.</p>
+parallelize a benchmark study.</p>
 </div>
 </div><!-- /.entry-content -->
 </article>
