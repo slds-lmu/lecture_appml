@@ -267,7 +267,7 @@ Generally: the more resources invested, the better we can select a model.
             T_{\text{t-test}} = \sqrt{n_{test}} \frac{\bar{d}}{\sigma_{d}} \sim t(n_{test} - 1), \text{ with }
             \sigma_{d} = \sqrt{\frac{1}{n_{\text{test}} - 1}\sum_{i=1}^{n_{test}} \left(d_i - \bar{d} \right)^2}
         $$
-        $$d_i = L(\yi, \fh_1 (\xi)) - L(\yi, \fh_2 (\xi))\qquad \bar{d} = \sum\limits_{i=1}^{n} d_i \qquad (\xi, \yi) \in \Dtest$$
+        $$d_i = L(\yi, \fh_1 (\xi)) - L(\yi, \fh_2 (\xi))\qquad \bar{d} = \frac{1}{n_{test}} \sum\limits_{i=1}^{n_{test}} d_i \qquad (\xi, \yi) \in \Dtest$$
         \item The two-matched samples t-test (or paired t-test) has multiple requirements:
         \begin{enumerate}
             \item \textbf{Loss values need to be iid samples} %Samples need to be iid samples from the underlying population 
@@ -327,7 +327,7 @@ Generally: the more resources invested, the better we can select a model.
     }
     \item The test statistic corresponds to:
     $$
-    T_{\text{t-test}} = \sqrt{8192 - 1} \; \frac{0.0016}{0.178} = 79.523
+    T_{\text{t-test}} = \sqrt{8192} \; \frac{0.0016}{0.178} = 79.523
     $$
     \item For $\alpha = 0.05$, the critical values to reject $H_0$ are -1.9637 and 1.9637.
     \item For the given significance level, there is enough evidence to reject $H_0$. We assume the is a difference in performance on this population of data.
