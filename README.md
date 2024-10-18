@@ -1,6 +1,5 @@
-# Interpretable Machine Learning (IML)
+# Applied Machine Learning
 
-This Project offers a free, open source introductory and an overview of interpretable machine learning methods. 
 
 Main course site: TBA
 
@@ -18,15 +17,15 @@ See also our [contributing guidelines](CONTRIBUTING.md)
 
 - Are you a lecturer and like the course, but have some feedback or consider 
   extending it? 
-  Open an [issue](https://github.com/slds-lmu/lecture_iml/issues) and we can discuss your proposal.
+  Open an [issue](https://github.com/slds-lmu/lecture_appml/issues) and we can discuss your proposal.
 - Are you a student taking the lecture and you spotted a typo, think we 
   should rephrase something be or even would like to 
   provide a new quiz question or coding example? Please consider providing a 
   pull request. Opening an 
-  [issue](https://github.com/slds-lmu/lecture_iml/issues) with suggested 
+  [issue](https://github.com/slds-lmu/lecture_appml/issues) with suggested 
   improvements is obviously very welcome as well!
 - You are none of the above but would like to contribute, get in touch / open
-  [issues](https://github.com/slds-lmu/lecture_iml/issues) / create pull
+  [issues](https://github.com/slds-lmu/lecture_appml/issues) / create pull
   requests! We are happy about any help.
 
 ## License
