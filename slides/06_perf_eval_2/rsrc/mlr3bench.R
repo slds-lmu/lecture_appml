@@ -70,10 +70,10 @@ learners = lapply(learners, FUN = function(x) {po("encode") %>>% x})
 resamplings = rsmp("cv", folds = 3)
 design = benchmark_grid(tasklist, learners, resamplings)
 
-# set.seed(123)
-# bmr = benchmark(design)
-# save(bmr, file = "slides/04-perf-eval/rsrc/friedman_example_benchmark.Rdata")
-load("slides/04-perf-eval/rsrc/friedman_example_benchmark.Rdata")
+set.seed(123)
+#bmr = benchmark(design)
+#save(bmr, file = "slides/06_perf_eval_2/rsrc/friedman_example_benchmark.Rdata")
+load("slides/06_perf_eval_2/rsrc/friedman_example_benchmark.Rdata")
 
 aggr = bmr$aggregate()
 aggr = aggr %>%
@@ -185,25 +185,26 @@ library(xtable)
 #   ),
 #   file = "slides/04-perf-eval/rsrc/friedman_benchmark_results_short.tex")
 
-
 ranktable_wide_rpart_ranger = aggr %>%
   filter(learner_id == "rpart" | learner_id == "ranger") %>%
   group_by(task_id) %>%
-  mutate(rank_on_task = rank(classif.ce)) %>%
-  mutate(ce_rank = paste(round(classif.ce, 4), " (", rank_on_task, ")", sep =  "")) %>%
+  mutate(ce_rank = round(classif.ce, 4)) %>%
   select(c(task_id, learner_id, ce_rank)) %>%
-  pivot_wider(names_from = learner_id, values_from = ce_rank)
+  pivot_wider(names_from = learner_id, values_from = ce_rank) %>%
+  mutate(
+    diff = rpart - ranger
+  )
 ranktable_wide_rpart_ranger = ranktable_wide_rpart_ranger[1:6, ]
-ranktable_wide_rpart_ranger
+ranktable_wide_rpart_ranger$rank = as.integer(rank(abs(ranktable_wide_rpart_ranger$diff)))
 
 library(xtable)
-# print(
-#   xtable(
-#     ranktable_wide_rpart_ranger,
-#     type = "latex",
-#     digits = 4
-#   ),
-#   file = "slides/04-perf-eval/rsrc/friedman_benchmark_results_rpart_ranger.tex")
+print(
+  xtable(
+    ranktable_wide_rpart_ranger,
+    type = "latex",
+    digits = 4
+  ),
+  file = "slides/06_perf_eval_2/rsrc/friedman_benchmark_results_rpart_ranger.tex")
 
 library(ggplot2)
 aggr.ggplot = aggr %>%
