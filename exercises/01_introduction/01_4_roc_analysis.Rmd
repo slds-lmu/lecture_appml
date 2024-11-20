@@ -395,7 +395,7 @@ cat("<!--")
 <summary>**Click me:**</summary>
 ```{r, eval = show.solution}
 # TPR:
-autoplot(bmr, type = "prc")
+autoplot(pred, type = "threshold", measure = msr("classif.tpr"))
 # FPR:
 autoplot(pred, type = "threshold", measure = msr("classif.fpr"))
 ```
@@ -410,7 +410,7 @@ cat("-->")
 
 # 8 Precision-Recall curves
 
-We can also interpret precision and recall together. Precision quantifies the proportion of predicted positives that are actually positives, and recall is just another name for TPR. A precision-recall curve of a model plots both values for all possible thresholds. Plot the precision-recall curves for the two learners we evaluated in the benchmark.
+We can also interpret precision and recall together. Precision quantifies the proportion of predicted positives that are actually positives, and recall is just another name for TPR. A precision-recall curve of a model plots both values for all possible thresholds. In situations with highly imbalanced class frequencies, the ROC curve can be misleading. Plot the precision-recall curves for the two learners we evaluated in the benchmark.
 
 <details>
 <summary>**Hint 1:**</summary>
