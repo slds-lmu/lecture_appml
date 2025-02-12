@@ -210,6 +210,45 @@ lrn_ranger$train(task)
 cat("-->")
 ```
 
+## ROC Analysis
+
+The bank wants to use a tree-based model to predict the credit risk. Conduct a simple benchmark to assess if a decision tree or a random forest works better for these purposes. Specifically, the bank wants that among credit applications the system predicts to be "good", it can expect at most 10% to be "bad". Simultaneously, the bank aims at correctly classifying 90% or more of all applications that are "good". Visualize the benchmark results in a way that helps answer this question. Can the bank expect the model to fulfil their requirements? Which model performs better?
+
+<details>
+<summary>**Hint 1:**</summary>
+A benchmark requires three arguments: a task, a list of learners, and a resampling object.
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution
+
+<details>
+<summary>**Click me**</summary>
+
+```{r, eval = show.solution}
+tree = lrn("classif.rpart", predict_type = "prob")
+forest = lrn("classif.ranger", predict_type = "prob")
+
+lrns = list(tree, forest)
+
+cv5 = rsmp("cv", folds = 5)
+cv5$instantiate(task)
+
+bmr = benchmark(benchmark_grid(task, lrns, cv5))
+
+mlr3viz::autoplot(bmr, type = "prc")
+```
+
+While the random forest dominates the decision tree, neither model can fulfil the bank's requirement of a precision and recall of >90%.
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
 
 ## Understand hyperparameters
 
@@ -333,12 +372,12 @@ cat("<!--")
 set.seed(31415L)
 
 lrns = list(
-  lrn("classif.rpart", id = "rpart_md1", maxdepth = 1),
-  lrn("classif.rpart", id = "rpart_md5", maxdepth = 5),
-  lrn("classif.rpart", id = "rpart_md20", maxdepth = 20),
-  lrn("classif.ranger", id = "rf_mtryr0.2", mtry.ratio = 0.2),
-  lrn("classif.ranger", id = "rf_mtryr0.5", mtry.ratio = 0.5),
-  lrn("classif.ranger", id = "rf_mtry0.8", mtry.ratio = 0.8))
+  lrn("classif.rpart", id = "rpart_md1", maxdepth = 1, predict_type = "prob"),
+  lrn("classif.rpart", id = "rpart_md5", maxdepth = 5, predict_type = "prob"),
+  lrn("classif.rpart", id = "rpart_md20", maxdepth = 20, predict_type = "prob"),
+  lrn("classif.ranger", id = "rf_mtryr0.2", mtry.ratio = 0.2, predict_type = "prob"),
+  lrn("classif.ranger", id = "rf_mtryr0.5", mtry.ratio = 0.5, predict_type = "prob"),
+  lrn("classif.ranger", id = "rf_mtry0.8", mtry.ratio = 0.8, predict_type = "prob"))
 
 cv5 = rsmp("cv", folds = 5)
 cv5$instantiate(task)
@@ -358,7 +397,6 @@ Looking at the boxplots reveals that the performance of the learners highly depe
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("-->")
 ```
-
 
 # Summary
 
