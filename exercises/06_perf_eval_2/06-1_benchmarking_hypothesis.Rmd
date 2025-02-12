@@ -554,7 +554,7 @@ cat("<!--")
 ```{r, eval = show.solution}
 mean_diff_rpart_ranger = averageranks[averageranks$learner_id == "rpart", 2] - averageranks[averageranks$learner_id == "ranger", 2]
 # # critical mean rank difference
-crit_value_mean_rank_diff = (qtukey(p = 0.05, df = Inf, nmeans = 6, lower.tail = FALSE) / sqrt(2)) * (sqrt((6 * (6 + 1)) / (6 * 16)))
+crit_value_mean_rank_diff = (qtukey(p = 0.05, df = Inf, nmeans = 6, lower.tail = FALSE) / sqrt(2)) * (sqrt((6 * (6 + 1)) / (6 * 20)))
 
 mean_diff_rpart_ranger > crit_value_mean_rank_diff
 # reject H_0!
@@ -585,7 +585,7 @@ cat("<!--")
 
 ```{r, eval = show.solution}
 # bonferroni dunn test
-dunn_stat = (abs(mean_diff_rpart_ranger$average_rank_on_task) / sqrt((6 * 7) / 6 * 16))
+dunn_stat = (abs(mean_diff_rpart_ranger$average_rank_on_task) / sqrt((6 * 7) / 6 * 20))
 # prob of observing dunn statistic under h0:
 pnorm(dunn_stat, 0, 1, lower.tail = FALSE)
 # do not reject H_0

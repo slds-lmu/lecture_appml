@@ -676,7 +676,7 @@ cat("-->")
 Finally, create a multi-layer stacking ensemble by passing the output of the current level 0 into a level 1 that is built similar as level 1.
 Similarly to before, keep the original features of the task and cross-validate the level 0 and level 1 predictions.
 Then use a logistic regression on the final level 2.
-Make sure that when you pass the original features of the task to the final level 2 that you do not also pass the cross-validated predictions from level 1.
+Make sure that when you pass the original features of the task to the final level 2 that you do not also pass the cross-validated predictions from level 0.
 
 Proceed to benchmark the this cross-validated multi-layer stacked ensemble with features passed through against the cross-validated stacked ensemble with features passed, the cross-validated stacked ensemble, stacked ensemble, and the random forest.
 Use 5-fold CV to evaluate the ROC AUC of the models.
