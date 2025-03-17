@@ -26,3 +26,8 @@
 .Rproj.user
 .Rproj
 *.Rproj
+.idea
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints

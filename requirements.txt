@@ -1,0 +1,7 @@
+# Dependencies of the exercise solutions in Python.
+numpy
+scipy
+pandas
+seaborn
+scikit-learn
+matplotlib
