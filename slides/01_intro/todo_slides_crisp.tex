@@ -1,0 +1,1838 @@
+\pdfminorversion=4
+\pdfobjcompresslevel=0
+\documentclass[ignorenonframetext,]{beamer}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{caption label separator}{:}
+\setbeamercolor{caption name}{fg=normal text.fg}
+\usepackage{amssymb,amsmath}
+\usepackage{colortbl}
+\usepackage{booktabs}
+\usepackage{pifont}
+\usepackage{graphicx}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\usepackage{lmodern}
+\usepackage{pdfpages}
+%\setbeamercolor{background canvas}{bg=}
+\makeatletter\beamer@ignorenonframefalse\makeatother
+% see https://tex.stackexchange.com/questions/96581/incorrect-frame-numbers-when-pages-included-using-pdfpages-in-beamer
+\def\getpdfpages#1#2{\begingroup
+	\setbeamercolor{background canvas}{bg=}
+	\includepdf[pages={#1}, trim=0mm 1mm 0mm 0mm,%
+	pagecommand={\global\setcounter{framenumber}{%
+			\the\numexpr\value{framenumber}+1\relax}%
+		\expandafter\def\expandafter\insertshorttitle\expandafter{%
+			\insertshorttitle\hfill\insertframenumber\,/\,\inserttotalframenumber}}%
+	]{#2}
+	\endgroup}
+
+\ifxetex
+  \usepackage{fontspec,xltxtra,xunicode}
+  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+\else
+  \ifluatex
+    \usepackage{fontspec}
+    \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+    \newcommand{\euro}{€}
+  \else
+    \usepackage[T1]{fontenc}
+    \usepackage[utf8]{inputenc}
+      \fi
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\usepackage{url}
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% Comment these out if you don't want a slide with just the
+% part/section/subsection/subsubsection title:
+\AtBeginPart{
+  \let\insertpartnumber\relax
+  \let\partname\relax
+  \frame{\partpage}
+}
+\AtBeginSection{
+  \let\insertsectionnumber\relax
+  \let\sectionname\relax
+  \frame{\sectionpage}
+}
+\AtBeginSubsection{
+  \let\insertsubsectionnumber\relax
+  \let\subsectionname\relax
+  \frame{\subsectionpage}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\setcounter{secnumdepth}{0}
+\usepackage[english]{babel}
+\usepackage{dsfont}
+\usepackage{verbatim}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{csquotes}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{enumerate}
+% \usepackage[absolute,overlay]{textpos}
+\usepackage{psfrag}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{eqnarray}
+\usepackage{arydshln}
+\usepackage{tabularx}
+\usepackage{placeins}
+\usepackage{tikz}
+% see https://tex.stackexchange.com/questions/32918/how-can-i-decrease-spaces-between-equations
+%\usepackage{setspace}
+\usepackage[nodisplayskipstretch]{setspace}
+\setstretch{1.0}
+\usetikzlibrary{shapes,arrows,automata,positioning,calc}
+\usepackage{subfig}
+% \usepackage{paralist}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{framed}
+\usepackage{excludeonly}
+\usepackage{fancyvrb}
+\usecolortheme{dove}
+% \usefonttheme{serif}
+\usepackage{xfrac}
+\usepackage{xcolor}
+\usepackage{mdframed}
+\usepackage{caption}
+\captionsetup[figure]{labelformat=empty}
+\usepackage{transparent}
+\usepackage{bm}
+
+% URL color:
+\definecolor{myorange}{RGB}{80,224,176}
+% Theme color of metropolis
+\definecolor{metropolis_theme_color}{RGB}{38,38,38}
+% Upper and lower rules of code chunks
+\definecolor{darkblue}{RGB}{38,38,38}
+% Font color of footer:
+\definecolor{mygrey}{RGB}{240,240,240}
+
+\definecolor{accents}{RGB}{80,224,176}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks = true,
+    linkcolor = {black},
+    urlcolor = {accents},
+    linkbordercolor = {white}
+}
+
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% METROPOLIS THEME + CUSTOMIZATIONS
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\usetheme{metropolis}
+%\usetheme{metropolis}
+%\useoutertheme{metropolis}
+%\useinnertheme{metropolis}
+\setbeamercolor{background canvas}{bg=white}
+\AtBeginSection{
+  \let\insertsectionnumber\relax
+  \let\sectionname\relax
+    \begin{frame}[c,plain,noframenumbering]
+    \sectionpage
+    \small{\tableofcontents[currentsection]}
+    \end{frame}
+}
+
+% remove space of center enviroment which often occurs around includegraphics produced from knitr plots
+% https://tex.stackexchange.com/questions/74212/how-can-i-change-the-whitespace-above-and-below-center
+\let\oldcenter\center
+\let\oldendcenter\endcenter
+\renewenvironment{center}{\setlength\topsep{0pt}\oldcenter}{\oldendcenter}
+
+% reduce margins / border
+% \setbeamersize{text margin left=10pt,text margin right=10pt}
+
+% Reduce space between code chunks and code output in rmarkdown beamer presentation: https://stackoverflow.com/questions/35734525/reduce-space-between-code-chunks-and-code-output-in-rmarkdown-beamer-presentatio
+%\setlength{\parskip}{0pt}
+%\setlength{\OuterFrameSep}{-20pt}
+\makeatletter
+\preto{\@verbatim}{\parskip=0pt \topsep=0pt \partopsep=0pt}
+\makeatother
+
+%% Add LMU template:
+%% ---------------------------------------------------------------
+%\usepackage{./../../_setup/lmu-lecture}
+\usefonttheme{structurebold}
+\RequirePackage[T1]{fontenc}
+\RequirePackage[scaled=0.92]{helvet}   %% Helvetica for sans serif
+\defbeamertemplate*{frametitle}{lecture}[1][left]
+{
+  \ifbeamercolorempty[bg]{frametitle}{}{\nointerlineskip}%
+  \@tempdima=\textwidth%
+  \advance\@tempdima by\beamer@leftmargin%
+  \advance\@tempdima by\beamer@rightmargin%
+  \begin{beamercolorbox}[sep=0.2cm,#1,wd=\the\@tempdima]{frametitle}
+    \if@tempswa\else\csname beamer@fte#1\endcsname\fi%
+    {\usebeamerfont{frametitle}\rule[-0.5ex]{0pt}{2.3ex}\insertframetitle\par}%
+    \if@tempswa\else\vskip-.2cm\fi% set inside beamercolorbox... evil here...
+  \end{beamercolorbox}%
+}
+\def\beamer@fteright{\vskip0.35cm\advance\leftskip by 1.7cm\advance\rightskip by1.7cm}
+\setbeamertemplate{frametitle continuation}[from second][{\small/~\insertcontinuationcount}]
+% ------------------------------------------------------------------------
+% Geometry
+\setbeamersize{text margin left=0.8cm,text margin right=0.8cm}
+\pgfdeclarehorizontalshading{footlineshade}{4mm}{%
+  color(0pt)=(black);%
+  color(1.0\paperwidth)=(structure!50!black)}
+% redefine \ref (it has been redefined somewhere by the beamerclass)
+\def\lectureref#1{\expandafter\@setref\csname r@#1\endcsname\@firstoftwo{#1}}
+% counter for framenumber for current lecture
+\newcounter{lectureframenumber}
+% adjust framenumbers for lecture (check whether reference is already defined)
+\def\addjustlectureframenumber#1{\ifx#1\relax\else%
+  \addtocounter{lectureframenumber}{-\lectureref{lect:@@\thelecture}}\fi}
+
+% \defbeamertemplate*{footline}{lecture theme}
+% {
+%   \usebeamerfont{footline} %author in head/foot}
+%   \setcounter{lectureframenumber}{\insertframenumber}%
+%   \ifnum\c@lecture<0\else \expandafter\addjustlectureframenumber\csname r@lect:@@\thelecture\endcsname\fi%
+%   \leavevmode%
+%   \hbox{%
+%     \setbox\beamer@linebox=\hbox to\paperwidth{%
+%       \hskip 1em%
+%       {\usebeamercolor[fg]{author in head/foot}%
+%       \insertshortauthor~~\copyright~~\insertshortdate}\hfill%
+%       {\usebeamercolor[fg]{title in head/foot}%
+%       \inserttitle~~--~~}%
+%       \ifnum\c@lecture>0%
+%         {\usebeamercolor[fg]{section in head/foot}%
+%           \arabic{lecture}~~--~~}%
+%       \fi%
+%       {\usebeamercolor[fg]{framenumber in head/foot}%
+%         \thelectureframenumber~/~%
+%         \ifnum\c@lecture<0 \inserttotalframenumber\else\lectureref{endlect:@@\thelecture}\fi%
+%       }%
+%       \hskip 1em}%
+%     \ht\beamer@linebox=2.5mm%
+%     \dp\beamer@linebox=0pt%
+%     \setbox\beamer@linebox=\vbox{\box\beamer@linebox\vskip1.125ex}%
+%     \rule[4.5mm]{\paperwidth}{0.5pt}%
+%     %%
+%     \hskip-\paperwidth%
+%     \hbox{\box\beamer@linebox\hfill}}
+% }
+% ------------------------------------------------------------------------
+% Navigation symbols
+\setbeamertemplate{navigation symbols}{}
+% ------------------------------------------------------------------------
+% No head lines
+\defbeamertemplate*{headline}{lecture theme}{}
+\setbeamertemplate{frametitle}{\expandafter\uppercase\expandafter\insertframetitle}
+
+
+
+
+
+
+
+
+%% Add footer:
+%% ---------------------------------------------------------------
+\setbeamertemplate{footline}[text line]{%
+    \noindent\hspace*{\dimexpr-\oddsidemargin-1in\relax}%
+     \colorbox{white}{
+     \makebox[\dimexpr\paperwidth-2\fboxsep\relax]{
+     \color{black}
+     \begin{minipage}[c][4.5ex][c]{0.5\linewidth}
+       \secname
+     \end{minipage}
+     \hfill\begin{minipage}[c][4.5ex][c]{0.5\linewidth}
+       \flushright
+       \insertframenumber{}~/~\inserttotalframenumber~~
+     \end{minipage}
+     }}%
+  \hspace*{-\paperwidth}
+}
+
+%% Add titlegraphic:
+%% ---------------------------------------------------------------
+% \titlegraphic{
+%   \transparent{0.7}
+%   \includegraphics[width=5cm]{./../../_setup/images/logos/eds_logo_black.png}
+% }
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% NICER CODE BACKGROUND
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Define Shaded if not defined already through knitr:
+%\definecolor{shadecolor}{RGB}{228,228,228}
+\makeatletter
+\@ifundefined{Shaded}{%
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}%
+}{}
+\makeatother
+
+\renewenvironment{Shaded}{
+  %\vspace{5pt}
+  \begin{mdframed}[backgroundcolor=black!8,
+                   linecolor=darkblue,
+                   rightline=false,
+				   leftline=false]}{
+  \end{mdframed}}
+
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% CHANGE URL COLOR
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\renewcommand\UrlFont{\color{accents}}
+% \hypersetup{
+%     colorlinks=true,
+%     linkcolor=myorange
+% }
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% INCLUDE LATEX MATH + OTHER CUSTOMIZATIONS
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Include latex-math
+\DeclareOldFontCommand{\sf}{\normalfont\sffamily}{\mathsf}
+
+% \input{./../../latex-math/basic-math.tex}
+% \input{./../../latex-math/basic-ml.tex}
+% \input{./../../latex-math/ml-bagging.tex}
+% \input{./../../latex-math/ml-boosting.tex}
+% \input{./../../latex-math/ml-gp.tex}
+% \input{./../../latex-math/ml-mbo.tex}
+% \input{./../../latex-math/ml-nn.tex}
+% \input{./../../latex-math/ml-svm.tex}
+% \input{./../../latex-math/ml-trees.tex}
+% \InputIfFileExists{./../../latex-math/ml-lm.tex}{}{}
+% \InputIfFileExists{./../../latex-math/ml-automl.tex}{}{}
+% Additional commands:
+\newcommand{\abs}[1]{\ensuremath{\left| #1 \right|}}
+%\renewcommand{\pikN}{\hat{\pi}^\Np} % This collides with z
+
+
+
+% basic latex stuff
+\newcommand{\pkg}[1]{{\fontseries{b}\selectfont #1}} %fontstyle for R packages
+\newcommand{\lz}{\vspace{0.5cm}} %vertical space
+
+\newcommand{\oneliner}[1] % Oneliner for important statements
+{\begin{block}{}\begin{center}\begin{Large}#1\end{Large}\end{center}\end{block}}
+
+\let\code=\texttt
+\let\proglang=\textsf
+
+\setkeys{Gin}{width=0.9\textwidth}
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% EXERCISE COUNTER
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Command for an automatic exercise counter for the exercise sheets:
+\newcounter{Exercise}
+\newcommand{\exercise}{
+  \stepcounter{Exercise}
+  \ifnum \theExercise = 1
+    \Large{\textbf{Exercise \theExercise}} \\
+  \else
+    \vspace{\baselineskip} \Large{\textbf{Exercise \theExercise}} \\
+  \fi
+}
+
+% Command for an automatic exercise counter for the courses:
+\newcounter{CourseExercise}
+\newcommand{\oneExercise}{
+  \stepcounter{CourseExercise}
+    \begin{center}
+      \huge{Exercise \Roman{CourseExercise}}
+    \end{center}
+}
+\newcommand{\twoExercises}{
+  \stepcounter{CourseExercise}
+    \begin{center}
+      \huge{Exercise \Roman{CourseExercise} \& \stepcounter{CourseExercise} \Roman{CourseExercise}}
+    \end{center}
+}
+\newcommand{\threeExercises}{
+  \stepcounter{CourseExercise}
+    \begin{center}
+      \huge{Exercise \Roman{CourseExercise}, \stepcounter{CourseExercise} \Roman{CourseExercise} \& \stepcounter{CourseExercise} \Roman{CourseExercise}}
+    \end{center}
+}
+
+\newcommand{\resetExercises}{\setcounter{CourseExercise}{0}}
+
+\usetikzlibrary{shapes,arrows,automata,positioning,calc,chains,trees, shadows}
+\tikzset{
+  %Define standard arrow tip
+  >=stealth',
+  %Define style for boxes
+  punkt/.style={
+    rectangle,
+    rounded corners,
+    draw=black, very thick,
+    text width=6.5em,
+    minimum height=2em,
+    text centered},
+  % Define arrow style
+  pil/.style={
+    ->,
+    thick,
+    shorten <=2pt,
+    shorten >=2pt,}
+}
+\usepackage{subfig}
+%\beamerdefaultoverlayspecification{<+->}
+
+\title{Data Science Lifecycle}
+\date{}
+
+\begin{document}
+\begin{frame}[plain]
+\titlepage
+\end{frame}
+
+
+\begin{frame}[plain]{}
+\phantomsection\label{section}
+\end{frame}
+
+\section{The Data Science Lifecycle}\label{the-data-science-lifecycle}
+
+\begin{frame}{Lifecycle Management}
+\phantomsection\label{lifecycle-management}
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Lifecycle Management (LM)}: Process of managing a product's
+  lifecycle, from its inception, through engineering, design and
+  manufacturing, all the way to its deployment and eventual disposal.
+\item
+  \textbf{Product LM}: Process applying to industrial products.
+  Lifecycle consists of 4 phases:\\
+  Conceive, Design, Realize, Service
+\item
+  \textbf{Application LM}: Product LM of computer programs.
+\item
+  In Data Science, a consensus for the Product LM of a Machine Learning
+  application is emerging, too.
+\end{itemize}
+\end{frame}
+
+%TODO add graphics for lifecycle? (Conceive, Design, Realize, Service)
+
+\begin{frame}{Further Reading}
+\phantomsection\label{further-reading}
+\begin{itemize}
+\tightlist
+\item
+  An introductory blog post is available here:
+  \url{https://mc.ai/the-data-science-life-cycle-for-deep-learning/}  %TODO leads nowhere
+\item
+  Microsoft has published an extensive documentation about what they
+  call the \emph{Team Data Science Process Lifecycle}:
+  \url{https://docs.microsoft.com/en-us/azure/machine-learning/team-data-science-process/lifecycle}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{The Data Science Lifecycle}
+\phantomsection\label{the-data-science-lifecycle-1}
+The Data Science Lifecycle consists of 4 main components:
+
+\begin{enumerate}
+\tightlist
+\item
+  Business Understanding
+\item
+  Data Acquisition and Understanding
+\item
+  Modeling
+\item
+  Model Governance
+\end{enumerate}
+
+%TODO graphics instead of item list: can show how iteration works (GPT feedback)
+%TODO add numbers to the steps, maybe give the overview even in the graphic
+
+\begin{itemize}
+\tightlist
+\item
+  The four stages are not purely sequential, but can be iterative
+\item
+  Each stage influences all others, and their feedback can lead to
+  revisiting previous or later steps
+\item
+  In each stage, there are common tasks, their quality needs to be
+  assessed, and common pitfalls can arise
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Business Understanding}
+\phantomsection\label{business-understanding}
+\begin{itemize}
+\tightlist
+%TODO \item identify stakeholders
+\item
+  Understand the key requirements of your solution
+\item
+  Determine a metric and set its target,
+
+  \begin{itemize}
+  \tightlist
+  \item
+    mathematical, e.g.~``\textgreater80\% precision''
+  \item
+    economic, e.g.~``15\% Return-on-Investment''
+  \end{itemize}
+\item
+  Gain domain knowledge and share it across the team
+\item
+  Identify and define constrains:\\
+  Latency, Legal/Ethical implications, Explainability, \ldots{}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Data Acquisition and Understanding}
+\phantomsection\label{data-acquisition-and-understanding}
+\begin{itemize}
+\tightlist
+\item
+  What data do you need?
+\item
+  What data are you actually able to obtain?
+\item
+  Build a pipeline for data streams, or obtain the data in case of a
+  one-time export
+\item
+  Verify your data for quality and correctness, clean it, prepare the
+  necessary features
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Modeling}
+\phantomsection\label{modeling}
+\begin{itemize}
+\tightlist
+\item
+  Modeling consists of a series of experiments: Different algorithms,
+  hyperparameters, feature engineering, \ldots{}
+\item
+  Select the model which optimizes the metric and fits to the
+  constraints defined in the Business Understanding stage
+\item
+  Meanwhile, pay attention to correct validation, avoid data leakage
+  etc.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Model Governance}
+\phantomsection\label{model-governance}
+\begin{itemize}
+\tightlist
+\item
+  \emph{Governance} comprises the process of \emph{governing} a finished
+  Machine Learning model
+\item
+  The two major components are \textbf{deployment} and
+  \textbf{monitoring}
+\item
+  How and where to deploy your model so it can be used
+\item
+  What if you get new data?
+\item
+  What if the distribution of your data changes?
+%TODO \item long term governance: security, versioning, legal aspects
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Goal of this Lecture}
+\phantomsection\label{goal-of-this-lecture}
+\begin{itemize}
+\tightlist
+\item
+  The goal here is not to become an expert in every subject, but to give
+  you a birds-eye overview of the whole landscape
+\item
+  If you are aware that a specific concept exists, you'll remember it
+  when the time comes and know what to look up
+%TODO: leave out example?
+  \begin{itemize}
+  \tightlist
+  \item
+    Example: If you're only responsible for modeling, knowing about the
+    deployment and governance stage still allows you to build better
+    models, e.g.~easier to hand over to DevOp team
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\section{Business Understanding}\label{business-understanding-1}
+
+%TODO structure: requirement analysis and communication is the overall tasks, the other paragraphs are steps/ questions to ask in the requirement analysis, maybe order them more top down (no ML first)?
+
+%TODO overview graphics of all stakeholders and steps
+
+\begin{frame}{Requirements Analysis}
+\phantomsection\label{requirements-analysis}
+\begin{itemize}
+\tightlist
+\item
+  Start at the end: What do you want to achieve?\\
+  Otherwise you may create something that is not needed
+\item
+  Define the goal clearly in coordination with the stakeholders
+\item
+  Translate the goal into a quantifiable target, e.g.~``Our prediction
+  model must have a precision of at least 85\%''
+\item
+  You should define the result of your work:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Simple report document?
+  \item
+    Web-app / dashboard?
+  \item
+    Machine Learning pipelines for internal/productive use?\\
+    How does the model need to scale?
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+%TODO add: communicate time frame and costs
+
+\begin{frame}{Communication}
+\phantomsection\label{communication}
+\begin{itemize}
+\tightlist
+\item
+  The business understanding stage depends on frequent and clear
+  communication with the project's stakeholders
+\item
+  Asking the right questions and translating the answers into clear
+  objectives are the central skills in this stage
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Constraints}
+\phantomsection\label{constraints}
+\begin{itemize}
+\tightlist
+\item
+  Identify all constraints under which you have to work.
+\item
+  These constraints will influence the data and/or types of algorithms
+  you can use, e.g.:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Ethical questions: We do not want to use the client's address
+  \item
+    Legal constraints: We are not allowed to use a job applicant's
+    gender as a feature to automatically reject the application
+  \item
+    Reproducibility: The analysis must be fully reproducible with one
+    click of the mouse
+  \item
+    Explainability: We must explain all decisions our model has reached
+    to the user
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Constraints}
+\phantomsection\label{constraints-1}
+Further examples for constraints:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Prediction latency}: If your model makes real-time
+  predictions, they might have to be ready in a specific amount of time
+  (e.g.~braking in a self-driving car)
+\item
+  \textbf{Model size}: In small, low-power computers, edge devices or
+  phones, the final model can only occupy a certain amount of disk space
+  and memory
+\item
+  \textbf{Service Level Agreements (SLA)}: These agreements can be very
+  broad and cover things like response times, sensitivity or
+  specificity, percentage of uptime, time windows for
+  maintenance/updates, etc.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Performance Measures}
+\phantomsection\label{performance-measures}
+
+%TODO give a list of possible performance measures, maybe include confusion matrix as a recap
+
+The performance measure you choose depends on the criticality of your
+solution.
+
+\begin{itemize}
+\tightlist
+\item
+  Spam detection:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \emph{Not} OK to misclassify a job application as spam (positive
+    class)
+  \item
+    A spam mail in your inbox once in a while is no problem\\
+    \(\rightarrow\) \emph{minimize the false positive rate},
+    i.e.~maximize precision
+  \end{itemize}
+\item
+  Airport security:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \emph{Not} OK to misclassify a weapon (positive class) as laptop
+  \item
+    A false alarm once in a while is no problem\\
+    \(\rightarrow\) \emph{minimize the false negative rate},
+    i.e.~maximize recall
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Performance Measures}
+\phantomsection\label{performance-measures-1}
+\begin{itemize}
+\tightlist
+\item
+  Often, you want a tradeoff between precision and recall
+\item
+  Measures like the F1-Score are helpful in those cases
+\item
+  The practicality of a performance measure also depends on the
+  distribution of your data.
+\item
+  For example, for highly imbalanced data, the \emph{accuracy}
+  (percentage of correct predictions) is not a good measure
+\item
+  In an HIV test, where 99.9\% of the population is healthy, a senseless
+  test that predicts ``healthy'' \emph{all the time}, automatically has
+  an accuracy of 99.9\%
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Translating KPIs into Performance Measures}
+\phantomsection\label{translating-kpis-into-performance-measures}
+
+%TODO KPI = Key Performance Indicator
+
+\begin{itemize}
+\tightlist
+\item
+  The business question is often in ``business speak'', and
+  mathematically imprecise
+\item
+  Translate it into a quantifiable measure, a clear goal
+
+  \begin{itemize}
+  \tightlist
+  \item
+    e.g.~use a standard measure like MSE or AUC
+  \item
+    alternatively, create a custom measure
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+%TODO give an example (i.e. spam detection example here)
+
+\begin{frame}{Multiple objectives}
+\phantomsection\label{multiple-objectives}
+\begin{itemize}
+\tightlist
+\item
+  Oftentimes you want to optimize more than one objective at the same
+  time, things get tricky
+\item
+  What if a choice increases objective 1, but decreases objective 2? Is
+  it better?
+  %TODO example: maximizing AUC leads to more model complexity and less explainability
+\item
+  There are two common ways to deal with multiple objectives:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Scalarization} in a \emph{compound measure}:
+    \(obj_1 * obj_2\)
+  \item
+    \textbf{Multi-objective Analysis} %TODO add link for further reading
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Validation Strategy}
+\phantomsection\label{validation-strategy}
+
+%TODO include graphics of train-test-tune-validate process
+%TODO integrate all other validation points from later in the slides here and don"t come back
+
+\begin{itemize}
+\tightlist
+\item
+  How to validate your model? Understand what you want to generalize to
+
+  \begin{itemize}
+  \tightlist
+  \item
+    blocking factors
+  \item
+    temporal effects
+  \item
+    spatial effects
+  \end{itemize}
+\item
+  Validate it just like you would use it in real life:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    A time series model: You'd build it in 2020 with data from
+    2016--2020, then use it in 2021
+  \item
+    Validate it with the same strategy: Train on 2016--2019, validate on
+    2020
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Choosing the Right Problem Frame}
+\phantomsection\label{choosing-the-right-problem-frame}
+\begin{itemize}
+\tightlist
+\item
+  Examples: Is it really classification?
+\item
+  A highly imbalanced problem: Frame it as classification, or anomaly
+  detection?
+\item
+  Predictive maintenance: Frame it as classification (probability of
+  failure), or regression (expected remaining lifetime)?
+\item
+  There answer is not clear, but depends on your application. It's
+  important to think about these problems!
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Non-ML Baseline}
+\phantomsection\label{non-ml-baseline}
+\begin{itemize}
+\tightlist
+\item
+  You don't have to use ML just because it's hyped.
+\item
+  Do you really want to use Machine Learning for this problem?
+\item
+  What does the current solution look like?
+\item
+  Are other solutions possible that don't need ML?
+\item
+  How would I solve this problem without ML?
+\end{itemize}
+\end{frame}
+
+\section{Data Acquisition and
+Understanding}\label{data-acquisition-and-understanding-1}
+
+\begin{frame}{Data Source}
+\phantomsection\label{data-source}
+\begin{itemize}
+\tightlist
+\item
+  In an ideal world, you would have only one data source, such as an
+  enterprise data warehouse
+\item
+  Realistically, most businesses combine multiple internal datasets as
+  well as a number of external sources
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Data Source - Internal vs.~external data sources}
+\phantomsection\label{data-source---internal-vs.-external-data-sources}
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Internal data sources} come from inside your organization and
+  often contain data relating to your company (operations, finance,
+  personnel).
+\item
+  \textbf{External data} refers to any type of data that has been
+  captured, processed, and provided from outside the company.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    External data includes data such as weather forecasts by an external
+    provider's API, or a HTML website you scrape periodically.
+  \end{itemize}
+\item
+  Internal data is often preferred because you own it and you are
+  responsible for the format and continuous availability of the data.
+\item
+  External data providers can change the format or discontinue their
+  service.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Data Source - Structured vs.~unstructured data}
+\phantomsection\label{data-source---structured-vs.-unstructured-data}
+\begin{itemize}
+\tightlist
+\item
+  Structured data means the traditional data set as you know it from an
+  Excel table: Dates, Names, numbers, and strings.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    It can easily be stored in a database, searched, and analyzed
+  \end{itemize}
+\item
+  Unstructured data includes things like text documents and images. They
+  are not straightforward to work with, but recent developments allowed
+  using them in more and more powerful ways.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Data Source - Database vs.~Files}
+\phantomsection\label{data-source---database-vs.-files}
+\begin{itemize}
+\tightlist
+\item
+  Your data may come from many sources, and in various formats
+  %TODO think of startegies to harmonize
+  %TODO think of possible changes and how your model could adapt
+\item
+  \textbf{Text files} are easy to share and can be read by a human
+
+  \begin{itemize}
+  \tightlist
+  \item
+    However, column types are not specified or enforced. Excel will just
+    assume your column is a date.
+  \end{itemize}
+\item
+  \textbf{Binary files} are usually smaller in size, and additional
+  information can be stored in them
+
+  \begin{itemize}
+  \tightlist
+  \item
+    However, they are often harder to transfer between applications or
+    colleagues
+  \end{itemize}
+\item
+  \textbf{Excel files} combine the disadvantages of text files and
+  binary files. Avoid them.
+\item
+  \textbf{Databases} combine most of the advantages discussed: The
+  schemas are clearly defined and most software can easily grab and
+  process data from them.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Data Source - On-premise vs.~cloud}
+\phantomsection\label{data-source---on-premise-vs.-cloud}
+\begin{itemize}
+\tightlist
+\item
+  Determine whether your data is best stored locally in your company's
+  own data center, or in a cloud environment such as Amazon Web Services
+\item
+  The decision will be influenced by data protection laws, costs
+  (upfront, maintenance/upgrading, and recurring), and experience of
+  your engineering team
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Data Access at Deployment Time}
+\phantomsection\label{data-access-at-deployment-time}
+\begin{itemize}
+\tightlist
+\item
+  How to feed the \emph{new} data to your model when it's in use?
+\item
+  This is often a separate workflow than your training data pipeline
+\item
+  Plan ahead: Think about these questions in the beginning
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Data Exploration}
+\phantomsection\label{data-exploration}
+\begin{itemize}
+\tightlist
+\item
+  First, understand your data in terms of their features
+\item
+  You should obtain or create a \emph{data dictionary}. For each
+  feature:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    What does the feature represent?
+  \item
+    In what unit is it measured? What's the possible range of values?
+  \item
+    For factors: What levels are possible?
+  \item
+    How are missing values encoded?
+  \end{itemize}
+\item
+  Compute summary statistics for each variable
+\item
+  Plot a few uni- and bivariate diagrams
+\item
+  This way, you can find outliers or implausible values, and get a first
+  feeling for imbalances, correlations, etc.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Data Quality}
+\phantomsection\label{data-quality}
+\begin{itemize}
+\tightlist
+\item
+  The quality of your data is crucial and will impact the model and your
+  solution.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \emph{Garbage in, garbage out}
+  \end{itemize}
+\item
+  How many missing values are in your columns?
+\item
+  Are there incorrect or implausible values? (You need domain knowledge
+  for this)
+\item
+  Parse date/time values into an appropriate format
+\item
+  Remove nearly constant features
+\item
+  Remove redundant and obsolete features
+\end{itemize}
+\end{frame}
+
+%TODO add these headlines for data quality (completeness, duplicates, consistency, accuracy, and conformity)
+
+\begin{frame}{Datasheets}
+\phantomsection\label{datasheets}
+\begin{itemize}
+\tightlist
+\item
+  In the electronics industry, every component comes with a
+  \emph{datasheet} that describes everything from key numbers to
+  recommended usage
+\item
+  Ideally, you document your dataset with an accompanying datasheet in a
+  similar manner
+\item
+  See also: \href{https://arxiv.org/pdf/1803.09010.pdf}{Datasheets for
+  Datasets}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Data/Label Leakage}
+\phantomsection\label{datalabel-leakage}
+%TODO include split strategies (graphics)
+%TODO harmonize with validation?
+\begin{itemize}
+\tightlist
+\item
+  Data Leakage (or Label Leakage) describes an unwanted situation where
+  you use data for training that you won't have available at prediction
+  time.
+\item
+  Simple example (which \emph{does} happen in reality):
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Your data has a feature \texttt{row\_number}, and the first 300 rows
+    have the target class 0, the last 100 rows have the target class 1.
+  \end{itemize}
+\item
+  Trickier examples:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Transforming your data (PCA, min/max, n-grams, etc.) with the
+    \emph{entire} data set instead of just the training data
+  \item
+    If your data contains duplicate rows, having one row in the training
+    data and one in the test data will lead to overconfidence even on
+    the test performance
+  \end{itemize}
+\item
+  It's tempting because data leakage usually improves the training
+  performance of your model
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Data Quality / Biased Data}
+\phantomsection\label{data-quality-biased-data}
+\begin{itemize}
+\tightlist
+\item
+  You need to ensure your data corresponds to the data generating
+  process
+\item
+  Simple example: A ``random'' political survey, if held in the city
+  center on a Tuesday at 10am, will overrepresent the opinion of senior
+  citizens and students, and underrepresent people currently at work
+\item
+  \textbf{Response bias} (or Activity bias): Reviews on Amazon, Twitter
+  tweets, Facebook comments etc. are more often written by people with
+  very strong (often negative) opinions, and usually do not reflect the
+  opinions of the population as a whole
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Hidden Features}
+\phantomsection\label{hidden-features}
+\begin{itemize}
+\tightlist
+\item
+  Also known as \emph{confounder variables} (or \emph{mediator
+  variables} in psychology)
+\item
+  These are variables that influence your target outcome, but that you
+  didn't measure
+\item
+  Simple example:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    A customer happiness survey done over 7 days concludes that
+    customers are very unhappy on Fridays and Saturdays
+  \item
+    Hidden feature: There was a rainstorm on these two days
+  \item
+    The hidden feature \texttt{weather}, not the weekday, was
+    responsible for the drop in happiness
+  \end{itemize}
+\item
+  As a more realistic example, data measured over multiple facilities
+  may contain a similar bias, when measurement devices have slight
+  differences in those locations
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Pipeline}
+\phantomsection\label{pipeline}
+
+%TODO put this closer to data soures, include graphics of an example
+\begin{itemize}
+\tightlist
+\item
+  You usually need to set up a pipeline to ingest new data and refresh
+  your existing data set regularly.
+\item
+  A pipeline can be
+
+  \begin{itemize}
+  \tightlist
+  \item
+    batch-based
+  \item
+    streaming or real-time
+  \item
+    a hybrid of these two
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Data Versioning}
+\phantomsection\label{data-versioning}
+\begin{itemize}
+\tightlist
+\item
+  Your data set may change over time
+\item
+  Like version control for code (e.g.~git or subversion), it can make
+  sense to have version control for your data sets
+\item
+  \emph{Pachyderm} and \emph{DVC} (Data Version Control) are two
+  versioning tools
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Data Governance and Security}
+\phantomsection\label{data-governance-and-security}
+%TODO legal aspects, privacy? How to anonymize data?
+\begin{itemize}
+\tightlist
+\item
+  Good data governance protects the integrity of your business's data
+\item
+  Ideally, you assign responsibilities and accountabilities to ensure
+  your data stays \textbf{secure, accurate, and usable}
+\item
+  Establish internal rules for data use
+\item
+  Ideally, all your data is collected into one location
+
+  \begin{itemize}
+  \tightlist
+  \item
+    This makes access control much easier
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Data Governance - Integrity}
+\phantomsection\label{data-governance---integrity}
+\begin{itemize}
+\tightlist
+\item
+  Corrupt data severely decreases its value
+\item
+  When your data gets updated, make sure that it stays intact
+\item
+  Wrong updates can add duplicates or contradictory data points, which
+  invalidate your model
+\item
+  You can e.g.~run tests and sanity checks each time your data is
+  updated
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Data Governance - Access}
+\phantomsection\label{data-governance---access}
+\begin{itemize}
+\tightlist
+\item
+  You have to be able to access your data at all times
+\item
+  Ensure your data pipeline is robust and stable and it can't easily
+  break
+\item
+  Minimize outage risks by creating a simple and robust infrastructure
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Wrangling, Exploration and Cleaning}
+\phantomsection\label{wrangling-exploration-and-cleaning}
+\begin{itemize}
+\tightlist
+\item
+  Once you successfully ingested the necessary data, you can begin to
+  prepare it for modeling
+\item
+  This preparation often takes up most of the time in a ML project
+\item
+  The necessary steps include exploratory data analysis (EDA), data
+  wrangling (e.g.~joins) and data cleaning
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Data Labeling}
+\phantomsection\label{data-labeling}
+\begin{itemize}
+\tightlist
+\item
+  Sometimes the data you obtain is not yet labeled
+\item
+  For example, downloading random images from the internet that you want
+  to classify or tag for a computer vision project
+\item
+  In these cases, you need humans to assign labels to your data points
+\item
+  It's tempting to use cheap and/or crowdsourced workers, but be careful
+  if you need domain knowledge for correct labeling!
+\end{itemize}
+\end{frame}
+
+\section{Modeling}\label{modeling-1}
+
+%TODO include overview over modelling steps (graphics?)
+%TODO give overview over train-test-tune process
+
+\begin{frame}{Feature Engineering}
+\phantomsection\label{feature-engineering}
+\begin{itemize}
+\tightlist
+\item
+  Feature Engineering involves the selection, aggregation and
+  transformation of your raw data to derive meaningful features
+\item
+  Successful feature engineering combines domain expertise with the
+  insights you gained during your data exploration
+\item
+  Don't overdo it: Including too many useless features introduces
+  unnecessary noise into your model\\
+  Remember: You have to generate all features for new data.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Model Training}
+\phantomsection\label{model-training}
+Consider your model training as a scientific experiment:
+
+\begin{itemize}
+\tightlist
+\item
+  Like in a lab experiment, you want to precisely keep track of all
+  input parameters
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Data version
+  \item
+    ML algorithm and hyperparameters
+  \item
+    Code version (e.g.~a git tag ID)
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Model Training}
+\phantomsection\label{model-training-1}
+It's usually best to proceed in an iterative manner:
+
+\begin{itemize}
+\tightlist
+\item
+  \emph{Start simple}: Quickly create a baseline model
+\item
+  Then increase the model complexity and verify that each iteration
+  improves your target measure
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Model Configuration}
+\phantomsection\label{model-configuration}
+\begin{itemize}
+\tightlist
+\item
+  How do you store a configuration setup you used for a specific
+  experiment (model)?\\
+  \(\rightarrow\) And how do you store \emph{small} changes to that
+  setup?
+\item
+  This configuration should be stored and clearly readable (i.e.~in
+  plain text or json)
+\item
+  Good tools can help, e.g.~\href{https://hydra.cc}{hydra}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Model Cards}
+\phantomsection\label{model-cards}
+\begin{itemize}
+\tightlist
+\item
+  Similar to the Datasheets discussed earlier, you ideally want to
+  document everything you can about your model
+\item
+  Create a \textbf{Model Card} that contains
+
+  \begin{itemize}
+  \tightlist
+  \item
+    performance characteristics
+  \item
+    the intended use cases
+  \item
+    usages that you don't recommend or support
+  \end{itemize}
+\item
+  See also: \href{https://arxiv.org/pdf/1810.03993.pdf}{Model Cards for
+  Model Reporting}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Model Evaluation}
+\phantomsection\label{model-evaluation}
+%TODO how to split in train, test
+\begin{itemize}
+\tightlist
+\item
+  To select the best model, you evaluate your experiments based on the
+  metrics you predefined in the business understanding phase
+\item
+  Besides this performance scoring, you may want to evaluate your
+  model's robustness: How sensitive is it to noise or other pertubations
+  and adverserial attacks?
+
+  \begin{itemize}
+  \tightlist
+  \item
+    You can add random noise to your dataset and investigate the impact
+    on your model's parameters and/or performance
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Interpretation}
+\phantomsection\label{interpretation}
+\begin{itemize}
+\tightlist
+\item
+  To understand your model better, you can use methods from
+  Interpretable Machine Learning (IML)
+
+  \begin{itemize}
+  \tightlist
+  \item
+    E.g. compute the \emph{feature importances} to see how much each of
+    your features contributes to a model's prediction
+  \end{itemize}
+\item
+  IML is also useful to uncover algorithmic bias, and prevent legal or
+  ethical trouble
+
+  \begin{itemize}
+  \tightlist
+  \item
+    E.g., in October 2018
+    \href{https://www.theguardian.com/technology/2018/oct/10/amazon-hiring-ai-gender-bias-recruiting-engine}{world
+    headlines reported} about an Amazon AI recruiting tool that favored
+    men. Amazon's model was trained on biased data that were skewed
+    towards male candidates. It has built rules that penalized resumes
+    that included the word ``women's''.
+  \end{itemize}
+\item
+  Algorithmic bias \url{https://en.wikipedia.org/wiki/Algorithmic_bias}
+\end{itemize}
+\end{frame}
+
+\section{Model Governance}\label{model-governance-1}
+
+\begin{frame}{Model Governance}
+\phantomsection\label{model-governance-2}
+\begin{quote}
+Developing and deploying ML systems is relatively fast and cheap, but
+maintaining them over time is difficult and expensive.
+~\href{https://papers.nips.cc/paper/5656-hidden-technical-debt-in-machine-learning-systems.pdf}{Hidden
+Technical Debt in ML Systems}
+\end{quote}
+\end{frame}
+
+\begin{frame}{Model Governance}
+\phantomsection\label{model-governance-3}
+\begin{itemize}
+\tightlist
+\item
+  Model Governance includes the \textbf{people, processes and
+  technologies} needed to manage and protect your ML model.
+\item
+  Two extremes have to be avoided:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Repression} by too many standards, rules, and controlling
+  \item
+    \textbf{Chaos} by too much speed, freedom, creativity and change
+  \end{itemize}
+\item
+  A good Governance ensures your application can be used for a long
+  time, and can easily be maintained and adapted in case some
+  requirements change
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Deployment}
+\phantomsection\label{deployment}
+%TODO include graphics on deployment strategies
+\begin{itemize}
+\tightlist
+\item
+  To make your model \emph{useful} and generate business value, you have
+  to \emph{deploy} it, i.e.~make it accessible to its users
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Users can be humans or automated systems (other programs)
+  \end{itemize}
+\item
+  This is where ML skills fade into the background, and software
+  engineering and \emph{DevOps} skills become important
+\item
+  You can deploy your model in different ways:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{One-off}: If you only need your model trained once (or very
+    rarely), train it by hand and push it to production
+  \item
+    \textbf{Batch}: With batch training, you constantly (e.g.~weekly)
+    update your model with a new batch of data (e.g.~this week's new
+    contracts)
+  \item
+    \textbf{Real-time}: Some models are very time-critical and need to
+    be updated continously on a stream of data.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Model Versioning}
+\phantomsection\label{model-versioning}
+\begin{itemize}
+\tightlist
+\item
+  If you retrain and update your model frequently, it makes sense to
+  keep a model registry
+\item
+  This is similar to ``classic'' version control for code
+\item
+  \href{https://mlflow.org/}{MLflow} is an open source platform for ML
+  lifecycle management that includes a model registry
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Monitoring}
+\phantomsection\label{monitoring}
+\begin{itemize}
+\tightlist
+\item
+  Our job is not finished when a model gets deployed
+\item
+  We need to \emph{monitor} the application to detect things like
+
+  \begin{itemize}
+  \tightlist
+  \item
+    problems/bugs in the pipeline
+  \item
+    shifts in the data distribution
+  \item
+    changes in the meaning of the data
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Monitoring - Data drift}
+\phantomsection\label{monitoring---data-drift}
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Data drift} happens when your data evolves over time
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Example: You train an image classifier on animal pictures taken in
+    summer, and then winter comes and images start containing snow.
+  \end{itemize}
+\item
+  Your model can exhibit undefined behavior in these regions
+
+  \begin{itemize}
+  \tightlist
+  \item
+    A linear model just extrapolates, which can make sense or not
+    depending on the data
+  \item
+    A random forest often just ``randomly'' guesses a label
+  \end{itemize}
+\item
+  Another possibility is that your \emph{target} evolves, and now
+  includes new categories or new value ranges in case of a continuous
+  target
+\item
+  Remedy: Enough of the new data needs to be labeled to introduce the
+  model to the new classes, and the model needs to be retrained
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Monitoring - Concept drift}
+\phantomsection\label{monitoring---concept-drift}
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Concept drift} means that our interpretation of the data
+  changes
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Example: A classification problem into ``high blood pressure'', and
+    the cutoff for ``high blood pressure'' changes from 140mmHg to
+    135mmHg.
+  \end{itemize}
+\item
+  The general distribution of the data may even stay the same
+\item
+  This means that your \emph{existing} data may become invalid
+\item
+  Remedy: Your affected old data needs to be relabeled and the model
+  retrained
+\end{itemize}
+\end{frame}
+
+\begin{frame}{User Feedback and Acceptance}
+\phantomsection\label{user-feedback-and-acceptance}
+\begin{itemize}
+\tightlist
+\item
+  Two main tasks are necessary for this final step:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{System Validation}: Ask for customer feedback if the model
+    and data pipeline meet their needs
+  \item
+    \textbf{Project handover}: Transfer the project to the team that
+    will run your system in production
+  \end{itemize}
+\item
+  You should generate a final report with all details that are useful
+  for learning about how to operate the system.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Feedback Loops / Self Reinforcing Behavior}
+\phantomsection\label{feedback-loops-self-reinforcing-behavior}
+%TODO include graphics for data flow here?
+\begin{itemize}
+\tightlist
+\item
+  A deployed ML model often influences its own behavior if it updates
+  over time. This can lead to unexpected behavior
+\item
+  \textbf{Direct feedback loops}: A model may influence the selection of
+  \emph{its own} future training data.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Example: Netflix influences which movies it recommends to certain
+    viewers, and it will then use (only) these movies as future training
+    data
+  \end{itemize}
+\item
+  \textbf{Hidden feedback loops}: Here, \emph{two systems} influence
+  each other \emph{indirectly} through the world.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Example: Flash crashes that occur because many trading algorithms
+    sell at the same time and augment each others fear
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\section{Best Practices for Competition Success}
+%TODO graphics with overview over steps
+\begin{frame}{Step 1: Understand the Problem Statement}
+\begin{itemize}
+  \item \textbf{Clarify Objectives \& Business Impact}: Determine whether it’s a classification or regression task, the domain context, and what “success” looks like.
+  \item \textbf{Target Variable}: Understand how the target is defined and distributed.
+  \item \textbf{Constraints \& Permissions}: Check for external data limits, privacy, or regulatory issues.
+  \item \textbf{Action Points}:
+    \begin{itemize}
+      \item Annotate key requirements and assumptions.
+      \item Research the domain for feature ideas.
+      \item Restate the problem in your own words to ensure clarity.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 2: Study the Evaluation Metric}
+\begin{itemize}
+  \item \textbf{Metric Matters}: Each competition or project has a specific metric (e.g., F1-score, AUC-ROC, RMSE), which guides how you tune and compare models.
+  \item \textbf{Classification vs. Regression Metrics}:
+    \begin{itemize}
+      \item Accuracy, F1-score, AUC-ROC, and Log Loss for classification.
+      \item RMSE, MAE, R\textsuperscript{2} for regression.
+    \end{itemize}
+  \item \textbf{Optimization Direction}: Decide if you must maximize or minimize the metric; some metrics (e.g., AUC-ROC) may need a proxy loss for training.
+  \item \textbf{Action Points}:
+    \begin{itemize}
+      \item Simulate prediction changes to see impact on the metric.
+      \item If allowed, implement custom losses aligned to the competition metric.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 3: Perform an Initial Data Analysis (EDA)}
+\begin{itemize}
+  \item \textbf{Data Profiling}: Summarize shape, basic statistics, and distribution of features and target.
+  \item \textbf{Quality Checks}: Identify missing values, outliers, or suspicious patterns; confirm no hidden data leakage.
+  \item \textbf{Train-Test Shift}: Check if training and test sets differ significantly in their feature distributions.
+  \item \textbf{Action Points}:
+    \begin{itemize}
+      \item Use tools like Pandas Profiling or Sweetviz for automated EDA.
+      \item Document anomalies or domain-specific oddities.
+      \item Examine correlations, scatter plots, and histograms.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 4: Develop a Baseline Model}
+\begin{itemize}
+  \item \textbf{Why a Baseline?} A simple model (e.g., Logistic Regression, Decision Tree) gives you a reference performance.
+  \item \textbf{Pipeline Check}: Ensures data loading, preprocessing, and validation splits are correct.
+  \item \textbf{Diagnostics}: Analyze misclassifications and residuals to spot improvement areas.
+  \item \textbf{Action Points}:
+    \begin{itemize}
+      \item Start with a naive or default-parameter model.
+      \item Use cross-validation to assess reliability.
+      \item Record baseline metrics to quantify future gains.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 5: Set Up a Robust Validation Strategy}
+\begin{itemize}
+  \item \textbf{Importance of Validation}: Avoid overfitting to the training set or a single random split.
+  \item \textbf{Common Methods}:
+    \begin{itemize}
+      \item K-Fold (balanced data).
+      \item Stratified K-Fold (imbalanced classes).
+      \item Time-Based or Group Splits (time series, repeated measures).
+    \end{itemize}
+  \item \textbf{Action Points}:
+    \begin{itemize}
+      \item Match validation approach to the final test scenario.
+      \item Keep a holdout set for final checks.
+      \item Use consistent folds across experiments to compare fairly.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 6: Feature Engineering and Data Preprocessing}
+\begin{itemize}
+  \item \textbf{Missing Data}: Mean/median imputation, advanced methods, or flags for “missingness.”
+  \item \textbf{Encoding Categorical Variables}: One-hot, target, or frequency encoding (watch for leakage).
+  \item \textbf{Scaling \& Transformations}: Normalize or log-transform skewed features, especially for sensitive models (SVMs, neural nets).
+  \item \textbf{New Features}: Time-based, domain knowledge, interactions (e.g., multiplications or ratios).
+  \item \textbf{Action Points}:
+    \begin{itemize}
+      \item Add features in small batches and track validation changes.
+      \item Use scikit-learn Pipelines to avoid leakage.
+      \item Consider dimensionality reduction if feature space is large.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 7: Select and Tune Models Strategically}
+\begin{itemize}
+  \item \textbf{Model Choices}:
+    \begin{itemize}
+      \item Tree-based ensembles (XGBoost, LightGBM, CatBoost) for tabular data.
+      \item Neural networks for large-scale or unstructured data.
+      \item Simple linear/logistic models can still compete with good feature engineering.
+    \end{itemize}
+  \item \textbf{Hyperparameter Tuning}:
+    \begin{itemize}
+      \item Grid Search, Random Search, Bayesian Optimization.
+      \item Early stopping and regularization (L1, L2) to avoid overfitting.
+    \end{itemize}
+  \item \textbf{Action Points}:
+    \begin{itemize}
+      \item Track experiments (MLflow, Weights \& Biases, or spreadsheets).
+      \item Start with defaults and refine gradually.
+      \item Use interpretability tools (SHAP, permutation importance) for feature insights.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 8: Track Experiments and Iterate}
+\begin{itemize}
+  \item \textbf{Experiment Logging}: Keep detailed records of data versions, hyperparams, code revisions.
+  \item \textbf{Error Analysis}: Study misclassified samples or large residuals to guide feature tweaks.
+  \item \textbf{Iterative Improvements}:
+    \begin{itemize}
+      \item Refine features, adjust validation, revisit transformations based on your findings.
+      \item Maintain a “changelog” for each iteration.
+    \end{itemize}
+  \item \textbf{Action Points}:
+    \begin{itemize}
+      \item Automate repeated tasks (submissions, data prep).
+      \item Prune ineffective ideas swiftly.
+      \item Ensure reproducibility (version control, environment snapshots).
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 9: Understand the Leaderboard and Avoid Overfitting}
+\begin{itemize}
+  \item \textbf{Public vs. Private Leaderboard}: Public boards use only part of the test set—overfitting leads to dramatic rank changes later.
+  \item \textbf{Submission Strategy}:
+    \begin{itemize}
+      \item Rely mainly on internal validation.
+      \item Keep a private holdout to confirm final performance.
+    \end{itemize}
+  \item \textbf{Leaderboard Shakeups}: Watch for big changes when private scores are revealed; it often indicates overfitting to the public set.
+  \item \textbf{Action Points}:
+    \begin{itemize}
+      \item Limit minor tweaks solely to improve a public rank.
+      \item If a jump seems suspicious, re-check data handling for leakage.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 10: Collaborate and Learn from Others}
+\begin{itemize}
+  \item \textbf{Study Top Solutions}: Many winning approaches are documented in blog posts or Kaggle discussions.
+  \item \textbf{Teamwork}:
+    \begin{itemize}
+      \item Collaboration brings diverse perspectives and model ensembling.
+      \item Share code and features for synergy.
+    \end{itemize}
+  \item \textbf{Community \& Networking}:
+    \begin{itemize}
+      \item Discussion forums reveal dataset quirks, best practices.
+      \item Local meetups or online communities keep you updated.
+    \end{itemize}
+  \item \textbf{Action Points}:
+    \begin{itemize}
+      \item Document and share your findings.
+      \item Adapt others’ ideas carefully—validate them on your own splits.
+      \item Engage with peers for new tools and techniques.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Final Advice}
+\begin{itemize}
+  \item \textbf{Start Simple, Then Iterate}: Don’t jump into complex models before a solid baseline.
+  \item \textbf{Prioritize Validation}: A robust validation strategy prevents nasty surprises.
+  \item \textbf{Log Everything}: Document all transformations, parameter settings, and model versions.
+  \item \textbf{Aim for Generalizable Solutions}: Don’t just chase leaderboard scores—focus on reproducibility and reliability.
+\end{itemize}
+\end{frame}
+
+
+
+\end{document}
