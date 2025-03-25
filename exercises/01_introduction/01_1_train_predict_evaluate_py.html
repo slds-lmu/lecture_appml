@@ -3,7 +3,7 @@
 <html lang="en">
 <head><meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>01_1_train_predict_evaluate</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>01_1_train_predict_evaluate_py</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <style type="text/css">
     pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -7528,11 +7528,8 @@ a.anchor-link {
 <div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">fetch_openml</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogisticRegression</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">roc_auc_score</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">"ignore"</span><span class="p">)</span>
@@ -7587,7 +7584,7 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Preprocessing">Preprocessing<a class="anchor-link" href="#Preprocessing">¶</a></h2><p>Load the German Credit dataset from OpenML, and print an overview.</p>
+<h2 id="Preprocessing">Preprocessing<a class="anchor-link" href="#Preprocessing">¶</a></h2><p>Load the German Credit dataset from OpenML, and print an overview. We will learn more about OpenML in the next sessions.</p>
 </div>
 </div>
 </div>
@@ -7600,6 +7597,7 @@ a.anchor-link {
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Load the German Credit dataset from OpenML</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">fetch_openml</span>
 <span class="n">german_data</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"credit-g"</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">german_data</span><span class="o">.</span><span class="n">frame</span>
 <span class="n">df</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
@@ -8019,23 +8017,12 @@ In practice, a 70% to 30% (~ 2:1) ratio is a good starting point.</p>
 <p>Use np.random.choice to sample 70% of the indices randomly.
 Then, use the remaining indices for the test set.
 Based on the ids, set up two datasets, one for training and one for testing/evaluating.</p>
-<p>Set a seed (e.g, <code>set.seed(100L)</code>) to make your results reproducible.</p>
+<p>Set a seed (e.g, <code>100</code>) to make your results reproducible.</p>
 </details>
 <details>
 <summary>Hint 2:</summary>
 The class label is stored in the column "class".
 </details>
-<div class="highlight"><pre><span></span><span class="n">train_ids</span> <span class="o">=</span> <span class="o">...</span>
-<span class="n">test_ids</span> <span class="o">=</span> <span class="o">...</span>
-
-<span class="n">train_set</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">...</span><span class="p">]</span>
-<span class="n">test_set</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">...</span><span class="p">]</span>
-
-<span class="n">X_train</span> <span class="o">=</span> <span class="o">...</span>
-<span class="n">y_train</span> <span class="o">=</span> <span class="o">...</span>
-<span class="n">X_test</span> <span class="o">=</span> <span class="o">...</span>
-<span class="n">y_test</span> <span class="o">=</span> <span class="o">...</span>
-</pre></div>
 <h3 id="Solution:">Solution:<a class="anchor-link" href="#Solution:">¶</a></h3>
 </div>
 </div>
@@ -8048,10 +8035,11 @@ The class label is stored in the column "class".
 <div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
-<span class="c1"># Split the dataset into training (70%) and test (30%) sets</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Split the dataset into training (70%) and test (30%) sets</span>
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
 <span class="n">indices</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-<span class="n">train_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.7</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
+<span class="n">train_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.7</span> <span class="o">*</span> <span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="n">train_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">train_size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">test_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">train_ids</span><span class="p">))</span>
 <span class="n">train_set</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train_ids</span><span class="p">]</span>
@@ -8133,7 +8121,9 @@ The class label is stored in the column "class".
 <div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Train a logistic regression model using sklearn</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogisticRegression</span>
+
+<span class="c1"># Train a logistic regression model using sklearn</span>
 <span class="n">logreg</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
 <span class="n">logreg</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_encoded</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 </pre></div>
@@ -8160,14 +8150,11 @@ The class label is stored in the column "class".
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Inspect-the-Model">Inspect the Model<a class="anchor-link" href="#Inspect-the-Model">¶</a></h2><p>We can now inspect the model by looking at the coefficients of the features.</p>
+<h2 id="Inspect-the-Model">Inspect the Model<a class="anchor-link" href="#Inspect-the-Model">¶</a></h2><p>We can now inspect the model by looking at the coefficients of the features. Name at least two features that have a significant effect on the outcome.</p>
 <details><summary>Hint 1: </summary>
  `logreg.coef_[0]` contains the coefficients of the model.
 
 </details>
-<div class="highlight"><pre><span></span><span class="n">coef</span> <span class="o">=</span> <span class="o">...</span>
-<span class="c1"># You can sort the coefficients according to their values, and meanwhile you check what features these coefficients correspond to.</span>
-</pre></div>
 <h3 id="Solution:">Solution:<a class="anchor-link" href="#Solution:">¶</a></h3>
 </div>
 </div>
@@ -8223,27 +8210,27 @@ The class label is stored in the column "class".
 <tr>
 <th>10</th>
 <td>checking_status_no checking</td>
-<td>1.079214</td>
+<td>0.851724</td>
 </tr>
 <tr>
 <th>12</th>
 <td>credit_history_critical/other existing credit</td>
-<td>0.788501</td>
+<td>0.806829</td>
 </tr>
 <tr>
 <th>25</th>
 <td>purpose_used car</td>
-<td>0.741762</td>
+<td>0.702586</td>
 </tr>
 <tr>
-<th>39</th>
-<td>personal_status_male single</td>
-<td>0.721233</td>
+<th>41</th>
+<td>other_parties_guarantor</td>
+<td>0.632587</td>
 </tr>
 <tr>
-<th>32</th>
-<td>employment_4&lt;=X&lt;7</td>
-<td>0.690585</td>
+<th>59</th>
+<td>foreign_worker_no</td>
+<td>0.597217</td>
 </tr>
 <tr>
 <th>...</th>
@@ -8251,29 +8238,29 @@ The class label is stored in the column "class".
 <td>...</td>
 </tr>
 <tr>
-<th>11</th>
-<td>credit_history_all paid</td>
-<td>-0.422934</td>
+<th>37</th>
+<td>personal_status_male div/sep</td>
+<td>-0.410687</td>
 </tr>
 <tr>
 <th>28</th>
 <td>savings_status_&lt;100</td>
-<td>-0.471947</td>
-</tr>
-<tr>
-<th>20</th>
-<td>purpose_new car</td>
-<td>-0.506325</td>
+<td>-0.428762</td>
 </tr>
 <tr>
 <th>15</th>
 <td>credit_history_no credits/all paid</td>
-<td>-0.514553</td>
+<td>-0.469233</td>
 </tr>
 <tr>
 <th>8</th>
 <td>checking_status_&lt;0</td>
-<td>-0.631969</td>
+<td>-0.614544</td>
+</tr>
+<tr>
+<th>20</th>
+<td>purpose_new car</td>
+<td>-0.783373</td>
 </tr>
 </tbody>
 </table>
@@ -8290,6 +8277,9 @@ The class label is stored in the column "class".
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<details> <summary>Discussion about the solution:</summary>
+    According to the table above, the features e.g. `check_status` and `credit_history` have a significant effect on the outcome. The positive sign of the coefficient indicates that the feature has a positive influence on being a creditworthy client (while a negative sign will have a negative influence).
+</details>
 <p>Check the positive class of the model.</p>
 <details><summary> Hint 1:</summary>
     `logreg.class_` stores the negative and postive classes.
@@ -8333,9 +8323,12 @@ The class label is stored in the column "class".
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>According to the summary, e.g., <code>credit_history</code> and <code>check_status</code> significantly influence the creditworthiness and the bank's risk assessment.
-By looking on <code>logreg.classes_[1]</code>, we see that the class <code>good</code> (creditworthy client) is the positive class.
-This means that a positive sign of the estimated coefficient of a feature means that the feature has a positive influence on being a creditworthy client (while a negative sign will have a negative influence).</p>
+<details>
+<summary>Discussion on the solution:</summary>
+According to the summary, e.g., `credit_history` and `check_status` significantly influence the creditworthiness and the bank's risk assessment.
+By looking on `logreg.classes_[1]`, we see that the class `good` (creditworthy client) is the positive class.
+This means that a positive sign of the estimated coefficient of a feature means that the feature has a positive influence on being a creditworthy client (while a negative sign will have a negative influence).
+</details>
 </div>
 </div>
 </div>
@@ -8374,9 +8367,14 @@ This means that a positive sign of the estimated coefficient of a feature means 
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="Evaluation">Evaluation<a class="anchor-link" href="#Evaluation">¶</a></h2><p>What is the classification error on the test data (200 observations)?</p>
-<div class="highlight"><pre><span></span><span class="n">accuracy</span> <span class="o">=</span> <span class="n">logreg</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-<span class="n">classification_error</span> <span class="o">=</span> <span class="o">...</span>
-</pre></div>
+<details>
+<summary>Hint 1:</summary>
+Use the `score` method of the logistic regression model to calculate the accuracy.
+</details>
+<details>
+<summary>Hint 2:</summary>
+The classification error is defined as $1 - \text{accuracy}$.
+</details>
 <h3 id="Solution:">Solution:<a class="anchor-link" href="#Solution:">¶</a></h3>
 </div>
 </div>
@@ -8404,7 +8402,7 @@ This means that a positive sign of the estimated coefficient of a feature means 
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Classification error: 0.2400
+<pre>Classification error: 0.2567
 </pre>
 </div>
 </div>
@@ -8418,15 +8416,18 @@ This means that a positive sign of the estimated coefficient of a feature means 
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="Predicting-probabilities-instead-of-labels">Predicting probabilities instead of labels<a class="anchor-link" href="#Predicting-probabilities-instead-of-labels">¶</a></h2><p>Similarly, we can assess the performance of our model using the AUC. However, this requires predicted probabilities instead of predicted labels. Evaluate the model using the AUC. To do so, retrain the model with a learner that returns probabilities.</p>
-<div class="highlight"><pre><span></span><span class="n">positive_index</span> <span class="o">=</span> <span class="o">...</span>
-<span class="n">pred_proba</span> <span class="o">=</span> <span class="n">logreg</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="o">...</span><span class="p">)[:,</span> <span class="n">positive_index</span><span class="p">]</span>
-
-<span class="c1"># Map true labels to binary: 1 if "good", else 0</span>
-<span class="n">y_test_bin</span> <span class="o">=</span> <span class="n">y_test</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-
-<span class="c1"># Evaluate performance using AUC</span>
-<span class="n">auc</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-</pre></div>
+<details>
+<summary>Hint 1:</summary>
+Use the `predict_proba` method of the logistic regression model to get the predicted probabilities.
+</details>
+<details>
+<summary>Hint 2:</summary>
+Map the true labels to binary: 1 if "good", else 0.
+</details>
+<details>
+<summary>Hint 3:</summary>
+Use the `roc_auc_score` function from `sklearn.metrics` to calculate the AUC.
+</details>
 <h3 id="Solution:">Solution:<a class="anchor-link" href="#Solution:">¶</a></h3>
 </div>
 </div>
@@ -8439,7 +8440,9 @@ This means that a positive sign of the estimated coefficient of a feature means 
 <div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Predict probabilities for the positive class ("good")</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">roc_auc_score</span>
+
+<span class="c1"># Predict probabilities for the positive class ("good")</span>
 <span class="n">positive_index</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">logreg</span><span class="o">.</span><span class="n">classes_</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">positive_class</span><span class="p">)</span>
 <span class="n">pred_proba</span> <span class="o">=</span> <span class="n">logreg</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test_encoded</span><span class="p">)[:,</span> <span class="n">positive_index</span><span class="p">]</span>
 
@@ -8461,7 +8464,7 @@ This means that a positive sign of the estimated coefficient of a feature means 
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>AUC: 0.7890
+<pre>AUC: 0.7788
 </pre>
 </div>
 </div>
