@@ -170,74 +170,45 @@
 %% Add LMU template:
 %% ---------------------------------------------------------------
 %\usepackage{./../../_setup/lmu-lecture}
-\usefonttheme{structurebold}
-\RequirePackage[T1]{fontenc}
-\RequirePackage[scaled=0.92]{helvet}   %% Helvetica for sans serif
-\defbeamertemplate*{frametitle}{lecture}[1][left]
-{
-  \ifbeamercolorempty[bg]{frametitle}{}{\nointerlineskip}%
-  \@tempdima=\textwidth%
-  \advance\@tempdima by\beamer@leftmargin%
-  \advance\@tempdima by\beamer@rightmargin%
-  \begin{beamercolorbox}[sep=0.2cm,#1,wd=\the\@tempdima]{frametitle}
-    \if@tempswa\else\csname beamer@fte#1\endcsname\fi%
-    {\usebeamerfont{frametitle}\rule[-0.5ex]{0pt}{2.3ex}\insertframetitle\par}%
-    \if@tempswa\else\vskip-.2cm\fi% set inside beamercolorbox... evil here...
-  \end{beamercolorbox}%
-}
-\def\beamer@fteright{\vskip0.35cm\advance\leftskip by 1.7cm\advance\rightskip by1.7cm}
-\setbeamertemplate{frametitle continuation}[from second][{\small/~\insertcontinuationcount}]
-% ------------------------------------------------------------------------
-% Geometry
-\setbeamersize{text margin left=0.8cm,text margin right=0.8cm}
-\pgfdeclarehorizontalshading{footlineshade}{4mm}{%
-  color(0pt)=(black);%
-  color(1.0\paperwidth)=(structure!50!black)}
-% redefine \ref (it has been redefined somewhere by the beamerclass)
-\def\lectureref#1{\expandafter\@setref\csname r@#1\endcsname\@firstoftwo{#1}}
-% counter for framenumber for current lecture
-\newcounter{lectureframenumber}
-% adjust framenumbers for lecture (check whether reference is already defined)
-\def\addjustlectureframenumber#1{\ifx#1\relax\else%
-  \addtocounter{lectureframenumber}{-\lectureref{lect:@@\thelecture}}\fi}
-
-% \defbeamertemplate*{footline}{lecture theme}
+\usepackage{../../style/lmu-lecture}
+% \usefonttheme{structurebold}
+% \RequirePackage[T1]{fontenc}
+% \RequirePackage[scaled=0.92]{helvet}   %% Helvetica for sans serif
+% \defbeamertemplate*{frametitle}{lecture}[1][left]
 % {
-%   \usebeamerfont{footline} %author in head/foot}
-%   \setcounter{lectureframenumber}{\insertframenumber}%
-%   \ifnum\c@lecture<0\else \expandafter\addjustlectureframenumber\csname r@lect:@@\thelecture\endcsname\fi%
-%   \leavevmode%
-%   \hbox{%
-%     \setbox\beamer@linebox=\hbox to\paperwidth{%
-%       \hskip 1em%
-%       {\usebeamercolor[fg]{author in head/foot}%
-%       \insertshortauthor~~\copyright~~\insertshortdate}\hfill%
-%       {\usebeamercolor[fg]{title in head/foot}%
-%       \inserttitle~~--~~}%
-%       \ifnum\c@lecture>0%
-%         {\usebeamercolor[fg]{section in head/foot}%
-%           \arabic{lecture}~~--~~}%
-%       \fi%
-%       {\usebeamercolor[fg]{framenumber in head/foot}%
-%         \thelectureframenumber~/~%
-%         \ifnum\c@lecture<0 \inserttotalframenumber\else\lectureref{endlect:@@\thelecture}\fi%
-%       }%
-%       \hskip 1em}%
-%     \ht\beamer@linebox=2.5mm%
-%     \dp\beamer@linebox=0pt%
-%     \setbox\beamer@linebox=\vbox{\box\beamer@linebox\vskip1.125ex}%
-%     \rule[4.5mm]{\paperwidth}{0.5pt}%
-%     %%
-%     \hskip-\paperwidth%
-%     \hbox{\box\beamer@linebox\hfill}}
+%   \ifbeamercolorempty[bg]{frametitle}{}{\nointerlineskip}%
+%   \@tempdima=\textwidth%
+%   \advance\@tempdima by\beamer@leftmargin%
+%   \advance\@tempdima by\beamer@rightmargin%
+%   \begin{beamercolorbox}[sep=0.2cm,#1,wd=\the\@tempdima]{frametitle}
+%     \if@tempswa\else\csname beamer@fte#1\endcsname\fi%
+%     {\usebeamerfont{frametitle}\rule[-0.5ex]{0pt}{2.3ex}\insertframetitle\par}%
+%     \if@tempswa\else\vskip-.2cm\fi% set inside beamercolorbox... evil here...
+%   \end{beamercolorbox}%
 % }
-% ------------------------------------------------------------------------
-% Navigation symbols
-\setbeamertemplate{navigation symbols}{}
-% ------------------------------------------------------------------------
-% No head lines
-\defbeamertemplate*{headline}{lecture theme}{}
-\setbeamertemplate{frametitle}{\expandafter\uppercase\expandafter\insertframetitle}
+% \def\beamer@fteright{\vskip0.35cm\advance\leftskip by 1.7cm\advance\rightskip by1.7cm}
+% \setbeamertemplate{frametitle continuation}[from second][{\small/~\insertcontinuationcount}]
+% % ------------------------------------------------------------------------
+% % Geometry
+% \setbeamersize{text margin left=0.8cm,text margin right=0.8cm}
+% \pgfdeclarehorizontalshading{footlineshade}{4mm}{%
+%   color(0pt)=(black);%
+%   color(1.0\paperwidth)=(structure!50!black)}
+% % redefine \ref (it has been redefined somewhere by the beamerclass)
+% \def\lectureref#1{\expandafter\@setref\csname r@#1\endcsname\@firstoftwo{#1}}
+% % counter for framenumber for current lecture
+% \newcounter{lectureframenumber}
+% % adjust framenumbers for lecture (check whether reference is already defined)
+% \def\addjustlectureframenumber#1{\ifx#1\relax\else%
+%   \addtocounter{lectureframenumber}{-\lectureref{lect:@@\thelecture}}\fi}
+
+% % ------------------------------------------------------------------------
+% % Navigation symbols
+% \setbeamertemplate{navigation symbols}{}
+% % ------------------------------------------------------------------------
+% % No head lines
+% \defbeamertemplate*{headline}{lecture theme}{}
+% \setbeamertemplate{frametitle}{\expandafter\uppercase\expandafter\insertframetitle}
 
 
 
@@ -414,194 +385,52 @@
 
 \section{The Data Science Lifecycle}\label{the-data-science-lifecycle}
 
-\begin{frame}{Lifecycle Management}
-\phantomsection\label{lifecycle-management}
-\begin{itemize}
-\tightlist
-\item
-  \textbf{Lifecycle Management (LM)}: Process of managing a product's
-  lifecycle, from its inception, through engineering, design and
-  manufacturing, all the way to its deployment and eventual disposal.
-\item
-  \textbf{Product LM}: Process applying to industrial products.
-  Lifecycle consists of 4 phases:\\
-  Conceive, Design, Realize, Service
-\item
-  \textbf{Application LM}: Product LM of computer programs.
-\item
-  In Data Science, a consensus for the Product LM of a Machine Learning
-  application is emerging, too.
-\end{itemize}
-\end{frame}
-
-%TODO add graphics for lifecycle? (Conceive, Design, Realize, Service)
-
-\begin{frame}{Further Reading}
-\phantomsection\label{further-reading}
-\begin{itemize}
-\tightlist
-\item
-  An introductory blog post is available here:
-  \url{https://mc.ai/the-data-science-life-cycle-for-deep-learning/}  %TODO leads nowhere
-\item
-  Microsoft has published an extensive documentation about what they
-  call the \emph{Team Data Science Process Lifecycle}:
-  \url{https://docs.microsoft.com/en-us/azure/machine-learning/team-data-science-process/lifecycle}
-\end{itemize}
+\begin{frame}{Learning Objective}
+    \begin{itemize}
+        \item overview over data science lifecycle
+        \item become familiar with concepts and know what to look up in case you need it
+        \item have some structure when it comes to completing a data science task
+    \end{itemize}
 \end{frame}
 
 \begin{frame}{The Data Science Lifecycle}
 \phantomsection\label{the-data-science-lifecycle-1}
-The Data Science Lifecycle consists of 4 main components:
+\textbf{Lifecycle Management}: Process of managing a product lifecycle from inception, through engineering, design and manufacturing to deployment and eventual disposal.
 
-\begin{enumerate}
-\tightlist
-\item
-  Business Understanding
-\item
-  Data Acquisition and Understanding
-\item
-  Modeling
-\item
-  Model Governance
-\end{enumerate}
+%https://docs.google.com/presentation/d/1qiK0ShkIEbLwAzhEME_Yu7hz3lhnZhl2/edit?slide=id.p5#slide=id.p5
+\begin{figure}[h]
+\includegraphics[width=8cm]{slides/01_intro/DSLifecycle1.png}
+\end{figure}
 
-%TODO graphics instead of item list: can show how iteration works (GPT feedback)
-%TODO add numbers to the steps, maybe give the overview even in the graphic
-
-\begin{itemize}
-\tightlist
-\item
-  The four stages are not purely sequential, but can be iterative
-\item
-  Each stage influences all others, and their feedback can lead to
-  revisiting previous or later steps
-\item
-  In each stage, there are common tasks, their quality needs to be
-  assessed, and common pitfalls can arise
-\end{itemize}
 \end{frame}
 
-\begin{frame}{Business Understanding}
-\phantomsection\label{business-understanding}
-\begin{itemize}
-\tightlist
-%TODO \item identify stakeholders
-\item
-  Understand the key requirements of your solution
-\item
-  Determine a metric and set its target,
+\begin{frame}{The Data Science Lifecycle}
+\phantomsection\label{the-data-science-lifecycle-1}
 
-  \begin{itemize}
-  \tightlist
-  \item
-    mathematical, e.g.~``\textgreater80\% precision''
-  \item
-    economic, e.g.~``15\% Return-on-Investment''
-  \end{itemize}
-\item
-  Gain domain knowledge and share it across the team
-\item
-  Identify and define constrains:\\
-  Latency, Legal/Ethical implications, Explainability, \ldots{}
-\end{itemize}
+%https://docs.google.com/presentation/d/1qiK0ShkIEbLwAzhEME_Yu7hz3lhnZhl2/edit?slide=id.p5#slide=id.p5
+\begin{figure}[h]
+\includegraphics[width=11cm]{slides/01_intro/DSLifecycle2.png}
+\end{figure}
+
 \end{frame}
 
-\begin{frame}{Data Acquisition and Understanding}
-\phantomsection\label{data-acquisition-and-understanding}
-\begin{itemize}
-\tightlist
-\item
-  What data do you need?
-\item
-  What data are you actually able to obtain?
-\item
-  Build a pipeline for data streams, or obtain the data in case of a
-  one-time export
-\item
-  Verify your data for quality and correctness, clean it, prepare the
-  necessary features
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Modeling}
-\phantomsection\label{modeling}
-\begin{itemize}
-\tightlist
-\item
-  Modeling consists of a series of experiments: Different algorithms,
-  hyperparameters, feature engineering, \ldots{}
-\item
-  Select the model which optimizes the metric and fits to the
-  constraints defined in the Business Understanding stage
-\item
-  Meanwhile, pay attention to correct validation, avoid data leakage
-  etc.
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Model Governance}
-\phantomsection\label{model-governance}
-\begin{itemize}
-\tightlist
-\item
-  \emph{Governance} comprises the process of \emph{governing} a finished
-  Machine Learning model
-\item
-  The two major components are \textbf{deployment} and
-  \textbf{monitoring}
-\item
-  How and where to deploy your model so it can be used
-\item
-  What if you get new data?
-\item
-  What if the distribution of your data changes?
-%TODO \item long term governance: security, versioning, legal aspects
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Goal of this Lecture}
-\phantomsection\label{goal-of-this-lecture}
-\begin{itemize}
-\tightlist
-\item
-  The goal here is not to become an expert in every subject, but to give
-  you a birds-eye overview of the whole landscape
-\item
-  If you are aware that a specific concept exists, you'll remember it
-  when the time comes and know what to look up
-%TODO: leave out example?
-  \begin{itemize}
-  \tightlist
-  \item
-    Example: If you're only responsible for modeling, knowing about the
-    deployment and governance stage still allows you to build better
-    models, e.g.~easier to hand over to DevOp team
-  \end{itemize}
-\end{itemize}
-\end{frame}
 
 \section{Business Understanding}\label{business-understanding-1}
 
-%TODO structure: requirement analysis and communication is the overall tasks, the other paragraphs are steps/ questions to ask in the requirement analysis, maybe order them more top down (no ML first)?
+\begin{frame}{Overview Business Understanding}
+%https://docs.google.com/presentation/d/1qiK0ShkIEbLwAzhEME_Yu7hz3lhnZhl2/edit?slide=id.p5#slide=id.p5
+\begin{figure}[h]
+\includegraphics[width=9cm]{slides/01_intro/BusinessUnderstandingOverview.png}
+\end{figure}
+\end{frame}
 
-%TODO overview graphics of all stakeholders and steps
-
-\begin{frame}{Requirements Analysis}
+\begin{frame}{Requirements Analysis and Constraints}
 \phantomsection\label{requirements-analysis}
+\textbf{Key question}: What do you want to achieve in the end?
 \begin{itemize}
 \tightlist
 \item
-  Start at the end: What do you want to achieve?\\
-  Otherwise you may create something that is not needed
-\item
-  Define the goal clearly in coordination with the stakeholders
-\item
-  Translate the goal into a quantifiable target, e.g.~``Our prediction
-  model must have a precision of at least 85\%''
-\item
-  You should define the result of your work:
-
+  Define the \textbf{result} of your work:
   \begin{itemize}
   \tightlist
   \item
@@ -612,87 +441,73 @@ The Data Science Lifecycle consists of 4 main components:
     Machine Learning pipelines for internal/productive use?\\
     How does the model need to scale?
   \end{itemize}
+\item Identify constraints (--> Summarized in \textbf{Service Level Agreements})
+    \begin{itemize}
+      \tightlist
+      \item
+        Ethical questions: We do not want to use the client's address
+      \item
+        Legal constraints: We are not allowed to use a job applicant's
+        gender as a feature to automatically reject the application
+      \item
+        Reproducibility: The analysis must be fully reproducible in one step
+      \item
+        Explainability: We must explain all model decisions to the user
+        \item Prediction Latency: We need a prediction in real-time
+        \item Model Size: The model may only occupy a certain memory space
+      \end{itemize}
 \end{itemize}
 \end{frame}
 
-%TODO add: communicate time frame and costs
-
-\begin{frame}{Communication}
-\phantomsection\label{communication}
+\begin{frame}{Non-ML Baseline}
+\phantomsection\label{non-ml-baseline}
+\textbf{Key question}: Do you really need ML?
 \begin{itemize}
 \tightlist
 \item
-  The business understanding stage depends on frequent and clear
-  communication with the project's stakeholders
+  You don't have to use ML just because it's hyped.
 \item
-  Asking the right questions and translating the answers into clear
-  objectives are the central skills in this stage
+  What does the current solution look like?
+\item
+  Are other solutions possible that don't need ML?
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Constraints}
-\phantomsection\label{constraints}
+\begin{frame}{Choosing the Right Problem Frame}
+\phantomsection\label{choosing-the-right-problem-frame}
+\textbf{Key question}: Is it classification, regression or something else?
 \begin{itemize}
 \tightlist
 \item
-  Identify all constraints under which you have to work.
+  A highly imbalanced problem: Frame it as classification, or anomaly
+  detection?
 \item
-  These constraints will influence the data and/or types of algorithms
-  you can use, e.g.:
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Ethical questions: We do not want to use the client's address
-  \item
-    Legal constraints: We are not allowed to use a job applicant's
-    gender as a feature to automatically reject the application
-  \item
-    Reproducibility: The analysis must be fully reproducible with one
-    click of the mouse
-  \item
-    Explainability: We must explain all decisions our model has reached
-    to the user
-  \end{itemize}
+  Predictive maintenance: Frame it as classification (probability of
+  failure), or regression (expected remaining lifetime)?
+\item
+  There answer is not clear, but depends on your application. It's
+  important to think about these problems!
 \end{itemize}
+ML-tasks you can select from:
+%https://docs.google.com/presentation/d/1qiK0ShkIEbLwAzhEME_Yu7hz3lhnZhl2/edit?slide=id.p5#slide=id.p5
+\begin{figure}[h]
+\includegraphics[width=7cm]{slides/01_intro/MLTasks.png}
+\end{figure}
 \end{frame}
 
-\begin{frame}{Constraints}
-\phantomsection\label{constraints-1}
-Further examples for constraints:
 
-\begin{itemize}
-\tightlist
-\item
-  \textbf{Prediction latency}: If your model makes real-time
-  predictions, they might have to be ready in a specific amount of time
-  (e.g.~braking in a self-driving car)
-\item
-  \textbf{Model size}: In small, low-power computers, edge devices or
-  phones, the final model can only occupy a certain amount of disk space
-  and memory
-\item
-  \textbf{Service Level Agreements (SLA)}: These agreements can be very
-  broad and cover things like response times, sensitivity or
-  specificity, percentage of uptime, time windows for
-  maintenance/updates, etc.
-\end{itemize}
-\end{frame}
+\begin{frame}{KPIs and Business Objectives}
+\phantomsection\label{translating-kpis-into-performance-measures}
+\textbf{KPI}: Key Performance Indicator
 
-\begin{frame}{Performance Measures}
-\phantomsection\label{performance-measures}
-
-%TODO give a list of possible performance measures, maybe include confusion matrix as a recap
-
-The performance measure you choose depends on the criticality of your
-solution.
+\textbf{Key question}: How does the business side measure success/ performance of the ML solution? How can we translate this to a ML performance measure?
 
 \begin{itemize}
 \tightlist
 \item
   Spam detection:
 
-  \begin{itemize}
+\begin{itemize}
   \tightlist
   \item
     \emph{Not} OK to misclassify a job application as spam (positive
@@ -715,65 +530,18 @@ solution.
     i.e.~maximize recall
   \end{itemize}
 \end{itemize}
+
 \end{frame}
-
-\begin{frame}{Performance Measures}
-\phantomsection\label{performance-measures-1}
-\begin{itemize}
-\tightlist
-\item
-  Often, you want a tradeoff between precision and recall
-\item
-  Measures like the F1-Score are helpful in those cases
-\item
-  The practicality of a performance measure also depends on the
-  distribution of your data.
-\item
-  For example, for highly imbalanced data, the \emph{accuracy}
-  (percentage of correct predictions) is not a good measure
-\item
-  In an HIV test, where 99.9\% of the population is healthy, a senseless
-  test that predicts ``healthy'' \emph{all the time}, automatically has
-  an accuracy of 99.9\%
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Translating KPIs into Performance Measures}
-\phantomsection\label{translating-kpis-into-performance-measures}
-
-%TODO KPI = Key Performance Indicator
-
-\begin{itemize}
-\tightlist
-\item
-  The business question is often in ``business speak'', and
-  mathematically imprecise
-\item
-  Translate it into a quantifiable measure, a clear goal
-
-  \begin{itemize}
-  \tightlist
-  \item
-    e.g.~use a standard measure like MSE or AUC
-  \item
-    alternatively, create a custom measure
-  \end{itemize}
-\end{itemize}
-\end{frame}
-
-%TODO give an example (i.e. spam detection example here)
 
 \begin{frame}{Multiple objectives}
 \phantomsection\label{multiple-objectives}
+\textbf{Key question}: How to optimize multiple objectives?
 \begin{itemize}
 \tightlist
 \item
-  Oftentimes you want to optimize more than one objective at the same
-  time, things get tricky
-\item
   What if a choice increases objective 1, but decreases objective 2? Is
   it better?
-  %TODO example: maximizing AUC leads to more model complexity and less explainability
+\item i.e. in some case maximizing AUC leads to more model complexity and less explainability
 \item
   There are two common ways to deal with multiple objectives:
 
@@ -787,6 +555,34 @@ solution.
   \end{itemize}
 \end{itemize}
 \end{frame}
+
+
+
+\begin{frame}{Performance Measures}
+\phantomsection\label{performance-measures}
+
+\textbf{Key question}: what performance measure suits best for your solution?
+
+\begin{itemize}
+\tightlist
+    \item \textbf{Precision and Recall}%: $Precision = \frac{TP}{TP+FP}$, $Recall = \frac{TP}{TP+FN}$
+    \item to capture the tradeoff \textbf{F1-score} $F1 = \frac{2*Recall*Precision}{Recall + Precision}$
+    \item \textbf{Accuracy}: %$Acc = \frac{TP+TN}{TP+TN+FP+FN}$
+    for highly imbalanced data, the accuracy
+  (percentage of correct predictions) is not a good measure
+  \item I.e. in an HIV test, where 99.9\% of the population is healthy, a senseless
+  test that predicts ``healthy'' \emph{all the time}, automatically has
+  an accuracy of 99.9\%
+\end{itemize}
+
+%https://docs.google.com/presentation/d/1qiK0ShkIEbLwAzhEME_Yu7hz3lhnZhl2/edit?slide=id.p5#slide=id.p5
+\begin{figure}[h]
+\includegraphics[width=10cm]{slides/01_intro/ConfusionMatrix.png}
+\end{figure}
+\end{frame}
+
+
+
 
 \begin{frame}{Validation Strategy}
 \phantomsection\label{validation-strategy}
@@ -823,40 +619,9 @@ solution.
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Choosing the Right Problem Frame}
-\phantomsection\label{choosing-the-right-problem-frame}
-\begin{itemize}
-\tightlist
-\item
-  Examples: Is it really classification?
-\item
-  A highly imbalanced problem: Frame it as classification, or anomaly
-  detection?
-\item
-  Predictive maintenance: Frame it as classification (probability of
-  failure), or regression (expected remaining lifetime)?
-\item
-  There answer is not clear, but depends on your application. It's
-  important to think about these problems!
-\end{itemize}
-\end{frame}
 
-\begin{frame}{Non-ML Baseline}
-\phantomsection\label{non-ml-baseline}
-\begin{itemize}
-\tightlist
-\item
-  You don't have to use ML just because it's hyped.
-\item
-  Do you really want to use Machine Learning for this problem?
-\item
-  What does the current solution look like?
-\item
-  Are other solutions possible that don't need ML?
-\item
-  How would I solve this problem without ML?
-\end{itemize}
-\end{frame}
+
+
 
 \section{Data Acquisition and
 Understanding}\label{data-acquisition-and-understanding-1}
