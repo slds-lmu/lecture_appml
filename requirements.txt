@@ -4,6 +4,7 @@ scipy
 pandas
 seaborn
 scikit-learn
+scikit-optimize
 matplotlib
 notebook
 nbconvert
