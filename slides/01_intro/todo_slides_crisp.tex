@@ -587,13 +587,25 @@ ML-tasks you can select from:
 \begin{frame}{Validation Strategy}
 \phantomsection\label{validation-strategy}
 
-%TODO include graphics of train-test-tune-validate process
-%TODO integrate all other validation points from later in the slides here and don"t come back
+\textbf{Key question}: How to validate the model?
+
+%from I2ML: https://drive.google.com/file/d/16O-rVIPJVpLIZ9-qb7BRIJxomCXcrNgL/edit
+\begin{figure}[h]
+\includegraphics[width=12cm]{slides/01_intro/Validation.png}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Validation Strategy}
+\phantomsection\label{validation-strategy}
+
+\textbf{Key question}: How to validate the model?
+
+Considerations when deciding for a validation strategy:
 
 \begin{itemize}
 \tightlist
 \item
-  How to validate your model? Understand what you want to generalize to
+  What to generalize to?
 
   \begin{itemize}
   \tightlist
@@ -606,7 +618,6 @@ ML-tasks you can select from:
   \end{itemize}
 \item
   Validate it just like you would use it in real life:
-
   \begin{itemize}
   \tightlist
   \item
@@ -617,132 +628,61 @@ ML-tasks you can select from:
     2020
   \end{itemize}
 \end{itemize}
+
 \end{frame}
 
+\begin{frame}{Validation Strategy}
+\phantomsection\label{validation-strategy}
 
+\textbf{Key question}: How to validate the model?
 
-
+be aware of \textbf{data leakage}
+\begin{itemize}
+\tightlist
+    \item Target Leakage: When features that won’t be available at prediction time contain information about the target variable.
+    \begin{itemize}
+    \tightlist
+        \item Example: Using "Total Sales in Next Month" as a predictor when trying to forecast sales.
+    \end{itemize} 
+    \item Train-Test Leakage: Example: Normalizing the dataset using the entire data before splitting into train and test sets.
+    \begin{itemize}
+    \tightlist
+        \item Example: Using "Total Sales in Next Month" as a predictor when trying to forecast sales.
+    \end{itemize}
+\end{itemize}
+\end{frame}
 
 \section{Data Acquisition and
 Understanding}\label{data-acquisition-and-understanding-1}
 
 \begin{frame}{Data Source}
 \phantomsection\label{data-source}
+\textbf{Key question}: Where does the data come from?
+
+In real world, there are multiple data sources
+
+\begin{minipage}{0.3\textwidth}
+\includegraphics[width=\linewidth]{slides/01_intro/DataSources.png}
+\end{minipage}
+\begin{minipage}{0.6\textwidth}\RaggedRight
 \begin{itemize}
 \tightlist
-\item
-  In an ideal world, you would have only one data source, such as an
-  enterprise data warehouse
-\item
-  Realistically, most businesses combine multiple internal datasets as
-  well as a number of external sources
+    \item \textbf{internal vs. external data sources}: external providers might change their data format or discontinue the servise
+    \item \textbf{structured vs. unstructured}: structured data can be stored in a database, unstructured one might include images and is not so straightforward to work with
+    \item \textbf{database vs. files}: databases are combine many advantages of other file types, most software can grab and process data from there.
+    \item \textbf{on-premise vs. cloud:} decision depends on data protection laws costs and team preferences
 \end{itemize}
+\end{minipage}
+
 \end{frame}
 
-\begin{frame}{Data Source - Internal vs.~external data sources}
-\phantomsection\label{data-source---internal-vs.-external-data-sources}
-\begin{itemize}
-\tightlist
-\item
-  \textbf{Internal data sources} come from inside your organization and
-  often contain data relating to your company (operations, finance,
-  personnel).
-\item
-  \textbf{External data} refers to any type of data that has been
-  captured, processed, and provided from outside the company.
 
-  \begin{itemize}
-  \tightlist
-  \item
-    External data includes data such as weather forecasts by an external
-    provider's API, or a HTML website you scrape periodically.
-  \end{itemize}
-\item
-  Internal data is often preferred because you own it and you are
-  responsible for the format and continuous availability of the data.
-\item
-  External data providers can change the format or discontinue their
-  service.
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Data Source - Structured vs.~unstructured data}
-\phantomsection\label{data-source---structured-vs.-unstructured-data}
-\begin{itemize}
-\tightlist
-\item
-  Structured data means the traditional data set as you know it from an
-  Excel table: Dates, Names, numbers, and strings.
-
-  \begin{itemize}
-  \tightlist
-  \item
-    It can easily be stored in a database, searched, and analyzed
-  \end{itemize}
-\item
-  Unstructured data includes things like text documents and images. They
-  are not straightforward to work with, but recent developments allowed
-  using them in more and more powerful ways.
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Data Source - Database vs.~Files}
-\phantomsection\label{data-source---database-vs.-files}
-\begin{itemize}
-\tightlist
-\item
-  Your data may come from many sources, and in various formats
-  %TODO think of startegies to harmonize
-  %TODO think of possible changes and how your model could adapt
-\item
-  \textbf{Text files} are easy to share and can be read by a human
-
-  \begin{itemize}
-  \tightlist
-  \item
-    However, column types are not specified or enforced. Excel will just
-    assume your column is a date.
-  \end{itemize}
-\item
-  \textbf{Binary files} are usually smaller in size, and additional
-  information can be stored in them
-
-  \begin{itemize}
-  \tightlist
-  \item
-    However, they are often harder to transfer between applications or
-    colleagues
-  \end{itemize}
-\item
-  \textbf{Excel files} combine the disadvantages of text files and
-  binary files. Avoid them.
-\item
-  \textbf{Databases} combine most of the advantages discussed: The
-  schemas are clearly defined and most software can easily grab and
-  process data from them.
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Data Source - On-premise vs.~cloud}
-\phantomsection\label{data-source---on-premise-vs.-cloud}
-\begin{itemize}
-\tightlist
-\item
-  Determine whether your data is best stored locally in your company's
-  own data center, or in a cloud environment such as Amazon Web Services
-\item
-  The decision will be influenced by data protection laws, costs
-  (upfront, maintenance/upgrading, and recurring), and experience of
-  your engineering team
-\end{itemize}
-\end{frame}
 
 \begin{frame}{Data Access at Deployment Time}
 \phantomsection\label{data-access-at-deployment-time}
+\textbf{Key question}: How to feed the \emph{new} data to your model when it's in use?
 \begin{itemize}
 \tightlist
-\item
-  How to feed the \emph{new} data to your model when it's in use?
 \item
   This is often a separate workflow than your training data pipeline
 \item
@@ -752,10 +692,9 @@ Understanding}\label{data-acquisition-and-understanding-1}
 
 \begin{frame}{Data Exploration}
 \phantomsection\label{data-exploration}
+\textbf{Key question}: What are the data features and how do they look like?
 \begin{itemize}
 \tightlist
-\item
-  First, understand your data in terms of their features
 \item
   You should obtain or create a \emph{data dictionary}. For each
   feature:
@@ -776,24 +715,16 @@ Understanding}\label{data-acquisition-and-understanding-1}
 \item
   Plot a few uni- and bivariate diagrams
 \item
-  This way, you can find outliers or implausible values, and get a first
+  Find outliers or implausible values, and get a first
   feeling for imbalances, correlations, etc.
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Data Quality}
 \phantomsection\label{data-quality}
+\textbf{Key question}: How good is the data? \emph{Garbage in, garbage out}
 \begin{itemize}
 \tightlist
-\item
-  The quality of your data is crucial and will impact the model and your
-  solution.
-
-  \begin{itemize}
-  \tightlist
-  \item
-    \emph{Garbage in, garbage out}
-  \end{itemize}
 \item
   How many missing values are in your columns?
 \item
@@ -806,72 +737,11 @@ Understanding}\label{data-acquisition-and-understanding-1}
 \item
   Remove redundant and obsolete features
 \end{itemize}
-\end{frame}
 
-%TODO add these headlines for data quality (completeness, duplicates, consistency, accuracy, and conformity)
+Be aware of \textbf{bias}:
 
-\begin{frame}{Datasheets}
-\phantomsection\label{datasheets}
 \begin{itemize}
 \tightlist
-\item
-  In the electronics industry, every component comes with a
-  \emph{datasheet} that describes everything from key numbers to
-  recommended usage
-\item
-  Ideally, you document your dataset with an accompanying datasheet in a
-  similar manner
-\item
-  See also: \href{https://arxiv.org/pdf/1803.09010.pdf}{Datasheets for
-  Datasets}
-\end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]{Data/Label Leakage}
-\phantomsection\label{datalabel-leakage}
-%TODO include split strategies (graphics)
-%TODO harmonize with validation?
-\begin{itemize}
-\tightlist
-\item
-  Data Leakage (or Label Leakage) describes an unwanted situation where
-  you use data for training that you won't have available at prediction
-  time.
-\item
-  Simple example (which \emph{does} happen in reality):
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Your data has a feature \texttt{row\_number}, and the first 300 rows
-    have the target class 0, the last 100 rows have the target class 1.
-  \end{itemize}
-\item
-  Trickier examples:
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Transforming your data (PCA, min/max, n-grams, etc.) with the
-    \emph{entire} data set instead of just the training data
-  \item
-    If your data contains duplicate rows, having one row in the training
-    data and one in the test data will lead to overconfidence even on
-    the test performance
-  \end{itemize}
-\item
-  It's tempting because data leakage usually improves the training
-  performance of your model
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Data Quality / Biased Data}
-\phantomsection\label{data-quality-biased-data}
-\begin{itemize}
-\tightlist
-\item
-  You need to ensure your data corresponds to the data generating
-  process
 \item
   Simple example: A ``random'' political survey, if held in the city
   center on a Tuesday at 10am, will overrepresent the opinion of senior
@@ -882,7 +752,22 @@ Understanding}\label{data-acquisition-and-understanding-1}
   very strong (often negative) opinions, and usually do not reflect the
   opinions of the population as a whole
 \end{itemize}
+
 \end{frame}
+
+
+\begin{frame}{Datasheets}
+\phantomsection\label{datasheets}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\linewidth]{slides/01_intro/DataSheet.png}
+\caption{https://www.kaggle.com/datasets/samithsachidanandan/netflix-stock-price-2002-2025}
+\end{figure}
+\end{frame}
+
+
+
+
 
 \begin{frame}[fragile]{Hidden Features}
 \phantomsection\label{hidden-features}
@@ -917,8 +802,7 @@ Understanding}\label{data-acquisition-and-understanding-1}
 
 \begin{frame}{Pipeline}
 \phantomsection\label{pipeline}
-
-%TODO put this closer to data soures, include graphics of an example
+\includegraphics[width = 0.5\linewidth]{slides/01_intro/pipeline.png}
 \begin{itemize}
 \tightlist
 \item
@@ -937,14 +821,9 @@ Understanding}\label{data-acquisition-and-understanding-1}
     a hybrid of these two
   \end{itemize}
 \end{itemize}
-\end{frame}
-
-\begin{frame}{Data Versioning}
-\phantomsection\label{data-versioning}
+\textbf{Data Versioning} can make sense, as data changes over time
 \begin{itemize}
 \tightlist
-\item
-  Your data set may change over time
 \item
   Like version control for code (e.g.~git or subversion), it can make
   sense to have version control for your data sets
@@ -954,57 +833,17 @@ Understanding}\label{data-acquisition-and-understanding-1}
 \end{itemize}
 \end{frame}
 
+
+
 \begin{frame}{Data Governance and Security}
 \phantomsection\label{data-governance-and-security}
-%TODO legal aspects, privacy? How to anonymize data?
+\textbf{Key question}: How to keep the data secure, accurate and usable?
 \begin{itemize}
 \tightlist
-\item
-  Good data governance protects the integrity of your business's data
-\item
-  Ideally, you assign responsibilities and accountabilities to ensure
-  your data stays \textbf{secure, accurate, and usable}
-\item
-  Establish internal rules for data use
-\item
-  Ideally, all your data is collected into one location
-
-  \begin{itemize}
-  \tightlist
-  \item
-    This makes access control much easier
-  \end{itemize}
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Data Governance - Integrity}
-\phantomsection\label{data-governance---integrity}
-\begin{itemize}
-\tightlist
-\item
-  Corrupt data severely decreases its value
-\item
-  When your data gets updated, make sure that it stays intact
-\item
-  Wrong updates can add duplicates or contradictory data points, which
-  invalidate your model
-\item
-  You can e.g.~run tests and sanity checks each time your data is
-  updated
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Data Governance - Access}
-\phantomsection\label{data-governance---access}
-\begin{itemize}
-\tightlist
-\item
-  You have to be able to access your data at all times
-\item
-  Ensure your data pipeline is robust and stable and it can't easily
-  break
-\item
-  Minimize outage risks by creating a simple and robust infrastructure
+    \item \textbf{Integrity}: encure data stays intact when being updated (no duplicates,...)
+    \item \textbf{Access}: ensure pipeline allows constant access
+    \item establish internal rules for data use
+    \item make sure to meet legal requirements such as privacy, anonymization
 \end{itemize}
 \end{frame}
 
@@ -1020,25 +859,11 @@ Understanding}\label{data-acquisition-and-understanding-1}
 \item
   The necessary steps include exploratory data analysis (EDA), data
   wrangling (e.g.~joins) and data cleaning
+  \item Sometimes the data you obtain is not yet labeled $\rightarrow$CRISP-DM slides  you need humans (with domain knowledge) to assign labels to your data points
+  
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Data Labeling}
-\phantomsection\label{data-labeling}
-\begin{itemize}
-\tightlist
-\item
-  Sometimes the data you obtain is not yet labeled
-\item
-  For example, downloading random images from the internet that you want
-  to classify or tag for a computer vision project
-\item
-  In these cases, you need humans to assign labels to your data points
-\item
-  It's tempting to use cheap and/or crowdsourced workers, but be careful
-  if you need domain knowledge for correct labeling!
-\end{itemize}
-\end{frame}
 
 \section{Modeling}\label{modeling-1}
 
