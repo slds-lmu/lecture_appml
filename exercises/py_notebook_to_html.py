@@ -13,7 +13,7 @@ def add_solution_tag(notebook_path, solution_marker, solution_tag='remove_cell')
 
     changed = False
     for cell in nb.cells:
-        if cell.cell_type == 'code' and solution_marker in cell.source:
+        if cell.cell_type == ('code', 'markdown') and solution_marker in cell.source:
             tags = cell.metadata.get('tags', [])
             if solution_tag not in tags:
                 tags.append(solution_tag)
