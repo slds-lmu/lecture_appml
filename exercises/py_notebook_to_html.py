@@ -5,15 +5,24 @@ import subprocess
 
 def add_solution_tag(notebook_path, solution_marker, solution_tag='remove_cell'):
     """
-    Open the notebook, and for every code cell that contains the solution_marker,
-    add the solution_tag to the cell's metadata.
+    Process the notebook:
+      - For code cells, look for '#' + solution_marker.
+      - For markdown cells, look for solution_marker.
+    If found, add the solution_tag to the cell's metadata.
     """
     with open(notebook_path, 'r', encoding='utf-8') as f:
         nb = nbformat.read(f, as_version=4)
 
     changed = False
     for cell in nb.cells:
-        if cell.cell_type == ('code', 'markdown') and solution_marker in cell.source:
+        if cell.cell_type == 'code':
+            marker_text = '#' + solution_marker
+        elif cell.cell_type == 'markdown':
+            marker_text = solution_marker
+        else:
+            continue
+
+        if marker_text in cell.source:
             tags = cell.metadata.get('tags', [])
             if solution_tag not in tags:
                 tags.append(solution_tag)
@@ -27,10 +36,9 @@ def add_solution_tag(notebook_path, solution_marker, solution_tag='remove_cell')
 
 def export_notebook(notebook_path, remove_solutions):
     """
-    Export the notebook to HTML. If remove_solutions is True, then the
-    TagRemovePreprocessor is enabled to remove cells tagged with 'remove_cell'.
+    Export the notebook to HTML. If remove_solutions is True,
+    enable the TagRemovePreprocessor to remove cells tagged with 'remove_cell'.
     """
-    # Build the nbconvert command
     cmd = ['jupyter', 'nbconvert', '--to', 'html', notebook_path]
     if remove_solutions:
         cmd.extend([
@@ -51,21 +59,23 @@ def main():
     )
     parser.add_argument(
         '--marker',
-        default='#===SOLUTION===',
-        help="The marker text to identify solution cells.')"
+        default='===SOLUTION===',
+        help=("Marker text to identify solution cells. For code cells, "
+              "the script looks for '#' + marker (e.g., '#===SOLUTION==='); "
+              "for markdown cells, it looks for the marker as is (e.g., '===SOLUTION===').")
     )
     parser.add_argument(
         '--remove',
         action='store_true',
-        help="Remove solution cells in the exported HTML (using nbconvert TagRemovePreprocessor)"
+        help="Remove solution cells in the exported HTML (using nbconvert TagRemovePreprocessor)."
     )
 
     args = parser.parse_args()
 
-    # Add metadata tags to solution cells (this edits the notebook file)
+    # Update notebook: add metadata tags to cells containing the solution marker.
     add_solution_tag(args.notebook, args.marker)
 
-    # Export the notebook to HTML
+    # Export the notebook to HTML.
     export_notebook(args.notebook, args.remove)
 
     print("Export completed successfully.")
