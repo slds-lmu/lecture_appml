@@ -867,28 +867,37 @@ Be aware of \textbf{bias}:
 
 \section{Modeling}\label{modeling-1}
 
-%TODO include overview over modelling steps (graphics?)
-%TODO give overview over train-test-tune process
+\begin{frame}{Modeling Steps Overview}
+\includegraphics[width = \linewidth]{slides/01_intro/Modelling1.png}
+    
+\end{frame}
 
 \begin{frame}{Feature Engineering}
 \phantomsection\label{feature-engineering}
+\includegraphics[width = \linewidth]{slides/01_intro/Modelling2.png}
+\textbf{Feature Engineering}: selection, aggregation and
+  transformation of your raw data to derive meaningful features
+
+Feature Engineering Techniques:
+
 \begin{itemize}
 \tightlist
-\item
-  Feature Engineering involves the selection, aggregation and
-  transformation of your raw data to derive meaningful features
-\item
-  Successful feature engineering combines domain expertise with the
-  insights you gained during your data exploration
-\item
-  Don't overdo it: Including too many useless features introduces
+    \item Feature Transformation: Scaling, Log-Transformation, One-hot-encoding
+    \item Feature Selection: Feature importance, filtering
+    \item Dimensionality Reduction: PCA, t-SNE
+    \item Feature Creation: Aggregation, binning, interaction terms
+\end{itemize}
+
+Don't overdo it: Including too many useless features introduces
   unnecessary noise into your model\\
   Remember: You have to generate all features for new data.
-\end{itemize}
+
+
 \end{frame}
 
 \begin{frame}{Model Training}
 \phantomsection\label{model-training}
+\includegraphics[width = \linewidth]{slides/01_intro/Modelling3.png}
 Consider your model training as a scientific experiment:
 
 \begin{itemize}
@@ -906,14 +915,8 @@ Consider your model training as a scientific experiment:
   \item
     Code version (e.g.~a git tag ID)
   \end{itemize}
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Model Training}
-\phantomsection\label{model-training-1}
-It's usually best to proceed in an iterative manner:
-
-\begin{itemize}
+  \item proceed iteratively:
+  \begin{itemize}
 \tightlist
 \item
   \emph{Start simple}: Quickly create a baseline model
@@ -921,10 +924,12 @@ It's usually best to proceed in an iterative manner:
   Then increase the model complexity and verify that each iteration
   improves your target measure
 \end{itemize}
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Model Configuration}
 \phantomsection\label{model-configuration}
+\includegraphics[width = \linewidth]{slides/01_intro/Modelling4.png}
 \begin{itemize}
 \tightlist
 \item
@@ -940,48 +945,24 @@ It's usually best to proceed in an iterative manner:
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Model Cards}
-\phantomsection\label{model-cards}
-\begin{itemize}
-\tightlist
-\item
-  Similar to the Datasheets discussed earlier, you ideally want to
-  document everything you can about your model
-\item
-  Create a \textbf{Model Card} that contains
-
-  \begin{itemize}
-  \tightlist
-  \item
-    performance characteristics
-  \item
-    the intended use cases
-  \item
-    usages that you don't recommend or support
-  \end{itemize}
-\item
-  See also: \href{https://arxiv.org/pdf/1810.03993.pdf}{Model Cards for
-  Model Reporting}
-\end{itemize}
-\end{frame}
-
 \begin{frame}{Model Evaluation}
 \phantomsection\label{model-evaluation}
-%TODO how to split in train, test
+\includegraphics[width = \linewidth]{slides/01_intro/Modelling5.png}
 \begin{itemize}
 \tightlist
 \item
-  To select the best model, you evaluate your experiments based on the
-  metrics you predefined in the business understanding phase
+  To select the best model, evaluate based on the
+  \textbf{metrics} you predefined
+\item Use the test or validation data set according to the validation method predefined
 \item
-  Besides this performance scoring, you may want to evaluate your
-  model's robustness: How sensitive is it to noise or other pertubations
+  Besides this performance scoring, you can evaluate your
+  model's \textbf{robustness}: How sensitive is it to noise or other pertubations
   and adverserial attacks?
 
   \begin{itemize}
   \tightlist
   \item
-    You can add random noise to your dataset and investigate the impact
+    Add random noise to your dataset and investigate the impact
     on your model's parameters and/or performance
   \end{itemize}
 \end{itemize}
@@ -989,35 +970,37 @@ It's usually best to proceed in an iterative manner:
 
 \begin{frame}{Interpretation}
 \phantomsection\label{interpretation}
+\includegraphics[width = \linewidth]{slides/01_intro/Modelling6.png}
+To understand your model better, you can use methods from
+  \textbf{Interpretable Machine Learning (IML)}
 \begin{itemize}
 \tightlist
-\item
-  To understand your model better, you can use methods from
-  Interpretable Machine Learning (IML)
-
-  \begin{itemize}
-  \tightlist
-  \item
-    E.g. compute the \emph{feature importances} to see how much each of
-    your features contributes to a model's prediction
-  \end{itemize}
-\item
-  IML is also useful to uncover algorithmic bias, and prevent legal or
-  ethical trouble
-
-  \begin{itemize}
-  \tightlist
-  \item
-    E.g., in October 2018
+    \item Feature importances: how much did each feature contribute to the prediction?
+    \item uncover potential algorithmic biases:
+    \begin{itemize}
+    \tightlist
+        \item E.g., in October 2018
     \href{https://www.theguardian.com/technology/2018/oct/10/amazon-hiring-ai-gender-bias-recruiting-engine}{world
     headlines reported} about an Amazon AI recruiting tool that favored
     men. Amazon's model was trained on biased data that were skewed
     towards male candidates. It has built rules that penalized resumes
     that included the word ``women's''.
-  \end{itemize}
-\item
-  Algorithmic bias \url{https://en.wikipedia.org/wiki/Algorithmic_bias}
+    \end{itemize}
 \end{itemize}
+\end{frame}
+
+\begin{frame}{Model Cards}
+\phantomsection\label{model-cards}
+\includegraphics[width = \linewidth]{slides/01_intro/Modelling7.png}
+\textbf{Model Card}: documentation for the model similar to Datasheet for data, includes:
+\begin{itemize}
+\tightlist
+    \item Performance characteristics
+    \item Intended use cases
+    \item Unrecommended usage
+\end{itemize}
+See also: \href{https://arxiv.org/pdf/1810.03993.pdf}{Model Cards for
+  Model Reporting}
 \end{frame}
 
 \section{Model Governance}\label{model-governance-1}
@@ -1039,6 +1022,7 @@ Technical Debt in ML Systems}
 \item
   Model Governance includes the \textbf{people, processes and
   technologies} needed to manage and protect your ML model.
+\item it ensures easy maintenance and possibilities for adaption
 \item
   Two extremes have to be avoided:
 
@@ -1049,30 +1033,20 @@ Technical Debt in ML Systems}
   \item
     \textbf{Chaos} by too much speed, freedom, creativity and change
   \end{itemize}
-\item
-  A good Governance ensures your application can be used for a long
-  time, and can easily be maintained and adapted in case some
-  requirements change
 \end{itemize}
+\end{frame}
+
+\begin{frame}{Model Governance}
+    Model Governance Steps are:
+    \includegraphics[width = \linewidth]{slides/01_intro/Model Governace.png}
 \end{frame}
 
 \begin{frame}{Deployment}
 \phantomsection\label{deployment}
 %TODO include graphics on deployment strategies
+\textbf{Deployment}: make model accessible to users (humans or other programs)
 \begin{itemize}
 \tightlist
-\item
-  To make your model \emph{useful} and generate business value, you have
-  to \emph{deploy} it, i.e.~make it accessible to its users
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Users can be humans or automated systems (other programs)
-  \end{itemize}
-\item
-  This is where ML skills fade into the background, and software
-  engineering and \emph{DevOps} skills become important
 \item
   You can deploy your model in different ways:
 
@@ -1089,134 +1063,66 @@ Technical Debt in ML Systems}
     \textbf{Real-time}: Some models are very time-critical and need to
     be updated continously on a stream of data.
   \end{itemize}
+\item If you retrain and update your model frequently, it makes sense to have some model \textbf{versioning}
+\begin{itemize}
+\tightlist
+    \item \href{https://mlflow.org/}{MLflow} is an open source platform for ML
+  lifecycle management that includes a model registry
+\end{itemize}
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Model Versioning}
-\phantomsection\label{model-versioning}
-\begin{itemize}
-\tightlist
-\item
-  If you retrain and update your model frequently, it makes sense to
-  keep a model registry
-\item
-  This is similar to ``classic'' version control for code
-\item
-  \href{https://mlflow.org/}{MLflow} is an open source platform for ML
-  lifecycle management that includes a model registry
-\end{itemize}
-\end{frame}
 
 \begin{frame}{Monitoring}
 \phantomsection\label{monitoring}
+\textbf{Monitoring}: detect possible problems in productive use and provide fixes:
+
 \begin{itemize}
 \tightlist
-\item
-  Our job is not finished when a model gets deployed
-\item
-  We need to \emph{monitor} the application to detect things like
-
-  \begin{itemize}
-  \tightlist
-  \item
-    problems/bugs in the pipeline
-  \item
-    shifts in the data distribution
-  \item
-    changes in the meaning of the data
-  \end{itemize}
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Monitoring - Data drift}
-\phantomsection\label{monitoring---data-drift}
-\begin{itemize}
-\tightlist
-\item
-  \textbf{Data drift} happens when your data evolves over time
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Example: You train an image classifier on animal pictures taken in
+    \item Pipeline bugs
+    \item \textbf{Data drift}: data distribution changes
+    \begin{itemize}
+    \tightlist
+        \item Example: You train an image classifier on animal pictures taken in
     summer, and then winter comes and images start containing snow.
-  \end{itemize}
-\item
-  Your model can exhibit undefined behavior in these regions
-
-  \begin{itemize}
-  \tightlist
-  \item
-    A linear model just extrapolates, which can make sense or not
-    depending on the data
-  \item
-    A random forest often just ``randomly'' guesses a label
-  \end{itemize}
-\item
-  Another possibility is that your \emph{target} evolves, and now
+    \item Another possibility is that your \emph{target} evolves, and now
   includes new categories or new value ranges in case of a continuous
   target
-\item
-  Remedy: Enough of the new data needs to be labeled to introduce the
+  \item Remedy: Enough of the new data needs to be labeled to introduce the
   model to the new classes, and the model needs to be retrained
+    \end{itemize}
+    \item \textbf{Concept drift}: interpretation of data changes
+    \begin{itemize}
+    \tightlist
+        \item Example: A classification problem into “high blood pressure”, and the cutoff
+for “high blood pressure” changes from 140mmHg to 135mmHg.
+        \item Remedy: Your affected old data needs to be relabeled and the model retrained
+    \end{itemize}
 \end{itemize}
+
 \end{frame}
 
-\begin{frame}{Monitoring - Concept drift}
-\phantomsection\label{monitoring---concept-drift}
-\begin{itemize}
-\tightlist
-\item
-  \textbf{Concept drift} means that our interpretation of the data
-  changes
 
-  \begin{itemize}
-  \tightlist
-  \item
-    Example: A classification problem into ``high blood pressure'', and
-    the cutoff for ``high blood pressure'' changes from 140mmHg to
-    135mmHg.
-  \end{itemize}
-\item
-  The general distribution of the data may even stay the same
-\item
-  This means that your \emph{existing} data may become invalid
-\item
-  Remedy: Your affected old data needs to be relabeled and the model
-  retrained
-\end{itemize}
-\end{frame}
 
-\begin{frame}{User Feedback and Acceptance}
+\begin{frame}{User Feedback, Reinforcement}
 \phantomsection\label{user-feedback-and-acceptance}
+At the end of the project, you will:
 \begin{itemize}
 \tightlist
-\item
-  Two main tasks are necessary for this final step:
-
-  \begin{itemize}
-  \tightlist
-  \item
-    \textbf{System Validation}: Ask for customer feedback if the model
+    \item \textbf{System Validation}: Ask for customer feedback if the model
     and data pipeline meet their needs
-  \item
-    \textbf{Project handover}: Transfer the project to the team that
+    \item \textbf{Project handover}: Transfer the project to the team that
     will run your system in production
-  \end{itemize}
-\item
-  You should generate a final report with all details that are useful
-  for learning about how to operate the system.
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Feedback Loops / Self Reinforcing Behavior}
-\phantomsection\label{feedback-loops-self-reinforcing-behavior}
-%TODO include graphics for data flow here?
+\begin{frame}{User Feedback, Reinforcement}
+\phantomsection\label{user-feedback-and-acceptance}
+
+You can also include \textbf{Feedback Loops/ Reinforcement}:
+
 \begin{itemize}
 \tightlist
-\item
-  A deployed ML model often influences its own behavior if it updates
-  over time. This can lead to unexpected behavior
 \item
   \textbf{Direct feedback loops}: A model may influence the selection of
   \emph{its own} future training data.
@@ -1240,6 +1146,8 @@ Technical Debt in ML Systems}
   \end{itemize}
 \end{itemize}
 \end{frame}
+
+
 
 \section{Best Practices for Competition Success}
 %TODO graphics with overview over steps
