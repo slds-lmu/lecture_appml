@@ -51,8 +51,8 @@ def main():
     )
     parser.add_argument(
         '--marker',
-        default='# SOLUTION-TAG',
-        help="The marker text to identify solution cells (default: '# SOLUTION-TAG')"
+        default='#===SOLUTION===',
+        help="The marker text to identify solution cells.')"
     )
     parser.add_argument(
         '--remove',
