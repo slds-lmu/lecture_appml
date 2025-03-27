@@ -6,3 +6,5 @@ seaborn
 scikit-learn
 matplotlib
 notebook
+nbconvert
+nbformat
