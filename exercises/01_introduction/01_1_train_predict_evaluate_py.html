@@ -7520,24 +7520,6 @@ a.anchor-link {
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=initial_id">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
-<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">"ignore"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=4a3531e12ba6e622">
 <div class="jp-Cell-inputWrapper" tabindex="0">
@@ -7593,14 +7575,21 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Load the German Credit dataset from OpenML</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="c1"># openml sometimes throw future warnings, in these exercises we can ignore them</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">"ignore"</span><span class="p">)</span>
+
+<span class="c1"># Load the German Credit dataset from OpenML</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">fetch_openml</span>
 <span class="n">german_data</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"credit-g"</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">german_data</span><span class="o">.</span><span class="n">frame</span>
-<span class="n">df</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">german_data</span><span class="o">.</span><span class="n">data</span>
+
+<span class="n">X</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -7615,32 +7604,31 @@ a.anchor-link {
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>&lt;class 'pandas.core.frame.DataFrame'&gt;
 RangeIndex: 1000 entries, 0 to 999
-Data columns (total 21 columns):
+Data columns (total 20 columns):
  #   Column                  Non-Null Count  Dtype   
 ---  ------                  --------------  -----   
  0   checking_status         1000 non-null   category
- 1   duration                1000 non-null   float64 
+ 1   duration                1000 non-null   int64   
  2   credit_history          1000 non-null   category
  3   purpose                 1000 non-null   category
- 4   credit_amount           1000 non-null   float64 
+ 4   credit_amount           1000 non-null   int64   
  5   savings_status          1000 non-null   category
  6   employment              1000 non-null   category
- 7   installment_commitment  1000 non-null   float64 
+ 7   installment_commitment  1000 non-null   int64   
  8   personal_status         1000 non-null   category
  9   other_parties           1000 non-null   category
- 10  residence_since         1000 non-null   float64 
+ 10  residence_since         1000 non-null   int64   
  11  property_magnitude      1000 non-null   category
- 12  age                     1000 non-null   float64 
+ 12  age                     1000 non-null   int64   
  13  other_payment_plans     1000 non-null   category
  14  housing                 1000 non-null   category
- 15  existing_credits        1000 non-null   float64 
+ 15  existing_credits        1000 non-null   int64   
  16  job                     1000 non-null   category
- 17  num_dependents          1000 non-null   float64 
+ 17  num_dependents          1000 non-null   int64   
  18  own_telephone           1000 non-null   category
  19  foreign_worker          1000 non-null   category
- 20  class                   1000 non-null   category
-dtypes: category(14), float64(7)
-memory usage: 71.0 KB
+dtypes: category(13), int64(7)
+memory usage: 69.9 KB
 </pre>
 </div>
 </div>
@@ -7651,10 +7639,10 @@ memory usage: 71.0 KB
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="s2">"all"</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">X</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="s2">"all"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7665,7 +7653,7 @@ memory usage: 71.0 KB
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[3]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[2]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -7695,7 +7683,7 @@ memory usage: 71.0 KB
 <th>installment_commitment</th>
 <th>personal_status</th>
 <th>other_parties</th>
-<th>...</th>
+<th>residence_since</th>
 <th>property_magnitude</th>
 <th>age</th>
 <th>other_payment_plans</th>
@@ -7705,7 +7693,6 @@ memory usage: 71.0 KB
 <th>num_dependents</th>
 <th>own_telephone</th>
 <th>foreign_worker</th>
-<th>class</th>
 </tr>
 </thead>
 <tbody>
@@ -7721,15 +7708,14 @@ memory usage: 71.0 KB
 <td>1000.000000</td>
 <td>1000</td>
 <td>1000</td>
-<td>...</td>
-<td>1000</td>
-<td>1000.000000</td>
-<td>1000</td>
-<td>1000</td>
 <td>1000.000000</td>
 <td>1000</td>
 <td>1000.000000</td>
 <td>1000</td>
+<td>1000</td>
+<td>1000.000000</td>
+<td>1000</td>
+<td>1000.000000</td>
 <td>1000</td>
 <td>1000</td>
 </tr>
@@ -7745,7 +7731,7 @@ memory usage: 71.0 KB
 <td>NaN</td>
 <td>4</td>
 <td>3</td>
-<td>...</td>
+<td>NaN</td>
 <td>4</td>
 <td>NaN</td>
 <td>3</td>
@@ -7753,7 +7739,6 @@ memory usage: 71.0 KB
 <td>NaN</td>
 <td>4</td>
 <td>NaN</td>
-<td>2</td>
 <td>2</td>
 <td>2</td>
 </tr>
@@ -7769,7 +7754,7 @@ memory usage: 71.0 KB
 <td>NaN</td>
 <td>male single</td>
 <td>none</td>
-<td>...</td>
+<td>NaN</td>
 <td>car</td>
 <td>NaN</td>
 <td>none</td>
@@ -7779,7 +7764,6 @@ memory usage: 71.0 KB
 <td>NaN</td>
 <td>none</td>
 <td>yes</td>
-<td>good</td>
 </tr>
 <tr>
 <th>freq</th>
@@ -7793,7 +7777,7 @@ memory usage: 71.0 KB
 <td>NaN</td>
 <td>548</td>
 <td>907</td>
-<td>...</td>
+<td>NaN</td>
 <td>332</td>
 <td>NaN</td>
 <td>814</td>
@@ -7803,7 +7787,6 @@ memory usage: 71.0 KB
 <td>NaN</td>
 <td>596</td>
 <td>963</td>
-<td>700</td>
 </tr>
 <tr>
 <th>mean</th>
@@ -7817,7 +7800,7 @@ memory usage: 71.0 KB
 <td>2.973000</td>
 <td>NaN</td>
 <td>NaN</td>
-<td>...</td>
+<td>2.845000</td>
 <td>NaN</td>
 <td>35.546000</td>
 <td>NaN</td>
@@ -7825,7 +7808,6 @@ memory usage: 71.0 KB
 <td>1.407000</td>
 <td>NaN</td>
 <td>1.155000</td>
-<td>NaN</td>
 <td>NaN</td>
 <td>NaN</td>
 </tr>
@@ -7841,7 +7823,7 @@ memory usage: 71.0 KB
 <td>1.118715</td>
 <td>NaN</td>
 <td>NaN</td>
-<td>...</td>
+<td>1.103718</td>
 <td>NaN</td>
 <td>11.375469</td>
 <td>NaN</td>
@@ -7849,7 +7831,6 @@ memory usage: 71.0 KB
 <td>0.577654</td>
 <td>NaN</td>
 <td>0.362086</td>
-<td>NaN</td>
 <td>NaN</td>
 <td>NaN</td>
 </tr>
@@ -7865,7 +7846,7 @@ memory usage: 71.0 KB
 <td>1.000000</td>
 <td>NaN</td>
 <td>NaN</td>
-<td>...</td>
+<td>1.000000</td>
 <td>NaN</td>
 <td>19.000000</td>
 <td>NaN</td>
@@ -7873,7 +7854,6 @@ memory usage: 71.0 KB
 <td>1.000000</td>
 <td>NaN</td>
 <td>1.000000</td>
-<td>NaN</td>
 <td>NaN</td>
 <td>NaN</td>
 </tr>
@@ -7889,7 +7869,7 @@ memory usage: 71.0 KB
 <td>2.000000</td>
 <td>NaN</td>
 <td>NaN</td>
-<td>...</td>
+<td>2.000000</td>
 <td>NaN</td>
 <td>27.000000</td>
 <td>NaN</td>
@@ -7897,7 +7877,6 @@ memory usage: 71.0 KB
 <td>1.000000</td>
 <td>NaN</td>
 <td>1.000000</td>
-<td>NaN</td>
 <td>NaN</td>
 <td>NaN</td>
 </tr>
@@ -7913,7 +7892,7 @@ memory usage: 71.0 KB
 <td>3.000000</td>
 <td>NaN</td>
 <td>NaN</td>
-<td>...</td>
+<td>3.000000</td>
 <td>NaN</td>
 <td>33.000000</td>
 <td>NaN</td>
@@ -7921,7 +7900,6 @@ memory usage: 71.0 KB
 <td>1.000000</td>
 <td>NaN</td>
 <td>1.000000</td>
-<td>NaN</td>
 <td>NaN</td>
 <td>NaN</td>
 </tr>
@@ -7937,7 +7915,7 @@ memory usage: 71.0 KB
 <td>4.000000</td>
 <td>NaN</td>
 <td>NaN</td>
-<td>...</td>
+<td>4.000000</td>
 <td>NaN</td>
 <td>42.000000</td>
 <td>NaN</td>
@@ -7945,7 +7923,6 @@ memory usage: 71.0 KB
 <td>2.000000</td>
 <td>NaN</td>
 <td>1.000000</td>
-<td>NaN</td>
 <td>NaN</td>
 <td>NaN</td>
 </tr>
@@ -7961,7 +7938,7 @@ memory usage: 71.0 KB
 <td>4.000000</td>
 <td>NaN</td>
 <td>NaN</td>
-<td>...</td>
+<td>4.000000</td>
 <td>NaN</td>
 <td>75.000000</td>
 <td>NaN</td>
@@ -7971,12 +7948,64 @@ memory usage: 71.0 KB
 <td>2.000000</td>
 <td>NaN</td>
 <td>NaN</td>
-<td>NaN</td>
 </tr>
 </tbody>
 </table>
-<p>11 rows × 21 columns</p>
 </div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=6b7aa5c0-42ff-4a17-86b4-67b66f884ac4">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">y</span> <span class="o">=</span> <span class="n">german_data</span><span class="o">.</span><span class="n">target</span>
+<span class="n">y</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[3]:</div>
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
+<pre>0      good
+1       bad
+2      good
+3      good
+4       bad
+       ... 
+995    good
+996    good
+997    good
+998     bad
+999    good
+Name: class, Length: 1000, dtype: category
+Categories (2, object): ['bad', 'good']</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=a73b97cd-35ca-4506-a220-69154a381fd2">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># One-hot encode categorical features for both training and test sets</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+</pre></div>
 </div>
 </div>
 </div>
@@ -8014,7 +8043,8 @@ In practice, a 70% to 30% (~ 2:1) ratio is a good starting point.</p>
 </details>
 <details>
 <summary>Hint 1:</summary>
-<p>Use np.random.choice to sample 70% of the indices randomly.
+<p>Use <code>np.random.default_rng</code> to get a random generator with seed fixed,
+and then use <code>rng.choice</code> to sample 70% of the indices randomly.
 Then, use the remaining indices for the test set.
 Based on the ids, set up two datasets, one for training and one for testing/evaluating.</p>
 <p>Set a seed (e.g, <code>100</code>) to make your results reproducible.</p>
@@ -8023,64 +8053,10 @@ Based on the ids, set up two datasets, one for training and one for testing/eval
 <summary>Hint 2:</summary>
 The class label is stored in the column "class".
 </details>
-<h3 id="Solution:">Solution:<a class="anchor-link" href="#Solution:">¶</a></h3>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=816bee1c2a8c6b93">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Split the dataset into training (70%) and test (30%) sets</span>
-<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-
-<span class="n">indices</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-<span class="n">train_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.7</span> <span class="o">*</span> <span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">train_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">train_size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">test_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">train_ids</span><span class="p">))</span>
-<span class="n">train_set</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train_ids</span><span class="p">]</span>
-<span class="n">test_set</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">test_ids</span><span class="p">]</span>
-
-<span class="c1"># Separate features and target (target is in column "class")</span>
-<span class="n">X_train</span> <span class="o">=</span> <span class="n">train_set</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">"class"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">y_train</span> <span class="o">=</span> <span class="n">train_set</span><span class="p">[</span><span class="s2">"class"</span><span class="p">]</span>
-<span class="n">X_test</span> <span class="o">=</span> <span class="n">test_set</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">"class"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">y_test</span> <span class="o">=</span> <span class="n">test_set</span><span class="p">[</span><span class="s2">"class"</span><span class="p">]</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=4b3dd24b7a9d5b2f">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Create-a-Classification-Task">Create a Classification Task<a class="anchor-link" href="#Create-a-Classification-Task">¶</a></h2><p>We first do some feature pre-processing as follows:</p>
-<ol>
-<li>One-hot encode the categorical features in the training and test sets.</li>
-<li>use <code>pd.DataFrame.align</code> to ensure that the encoded training and test sets have the same feature columns.</li>
-</ol>
-<details>
-<summary>Hint 1:</summary>
-    Use `pd.get_dummies` for onehot encoding of the categorical features.
-</details>
-<div class="highlight"><pre><span></span><span class="n">X_train_encoded</span> <span class="o">=</span> <span class="o">...</span>
-<span class="n">X_test_encoded</span> <span class="o">=</span> <span class="o">...</span>
-<span class="c1"># Ensures that the encoded training and test sets have the same feature columns by aligning them.</span>
-<span class="n">X_train_encoded</span><span class="p">,</span> <span class="n">X_test_encoded</span> <span class="o">=</span> <span class="o">...</span>
-</pre></div>
-<h2 id="Solution:">Solution:<a class="anchor-link" href="#Solution:">¶</a></h2>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=ee9721845cdbbd5">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs celltag_remove_cell" id="cell-id=816bee1c2a8c6b93">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8088,11 +8064,21 @@ The class label is stored in the column "class".
 <div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># One-hot encode categorical features for both training and test sets</span>
-<span class="n">X_train_encoded</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
-<span class="n">X_test_encoded</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-<span class="c1"># Ensures that the encoded training and test sets have the same feature columns by aligning them.</span>
-<span class="n">X_train_encoded</span><span class="p">,</span> <span class="n">X_test_encoded</span> <span class="o">=</span> <span class="n">X_train_encoded</span><span class="o">.</span><span class="n">align</span><span class="p">(</span><span class="n">X_test_encoded</span><span class="p">,</span> <span class="n">join</span><span class="o">=</span><span class="s2">"outer"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+
+<span class="c1"># Split the dataset into training (70%) and test (30%) sets</span>
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+<span class="n">indices</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="n">train_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.7</span> <span class="o">*</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">train_ids</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">train_size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">test_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">train_ids</span><span class="p">))</span>
+
+<span class="c1"># Separate features and target (target is in column "class")</span>
+<span class="n">X_train</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train_ids</span><span class="p">]</span>
+<span class="n">y_train</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train_ids</span><span class="p">]</span>
+<span class="n">X_test</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">test_ids</span><span class="p">]</span>
+<span class="n">y_test</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">test_ids</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -8105,15 +8091,14 @@ The class label is stored in the column "class".
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Train-a-Model-on-the-Training-Dataset">Train a Model on the Training Dataset<a class="anchor-link" href="#Train-a-Model-on-the-Training-Dataset">¶</a></h2><p>Next, we train a logistic regression model on the training data.</p>
-<div class="highlight"><pre><span></span><span class="n">logreg</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-<span class="n">logreg</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-</pre></div>
-<h3 id="Solution:">Solution:<a class="anchor-link" href="#Solution:">¶</a></h3>
+<h2 id="Create-a-Classification-Task">Create a Classification Task<a class="anchor-link" href="#Create-a-Classification-Task">¶</a></h2><h2 id="Train-a-Model-on-the-Training-Dataset">Train a Model on the Training Dataset<a class="anchor-link" href="#Train-a-Model-on-the-Training-Dataset">¶</a></h2><p>Next, we train a logistic regression model on the training data.</p>
+<details><summary>Hint:</summary>
+    Check the documentation of `sklearn.linear_model.LogisitcRegression`.
+</details>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=fca61377513a0979">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell celltag_remove_cell" id="cell-id=fca61377513a0979">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8121,11 +8106,13 @@ The class label is stored in the column "class".
 <div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogisticRegression</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogisticRegression</span>
 
 <span class="c1"># Train a logistic regression model using sklearn</span>
 <span class="n">logreg</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-<span class="n">logreg</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_encoded</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">logreg</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -8138,7 +8125,422 @@ The class label is stored in the column "class".
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
 <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[6]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
-<style>#sk-container-id-1 {color: black;background-color: white;}#sk-container-id-1 pre{padding: 0;}#sk-container-id-1 div.sk-toggleable {background-color: white;}#sk-container-id-1 label.sk-toggleable__label {cursor: pointer;display: block;width: 100%;margin-bottom: 0;padding: 0.3em;box-sizing: border-box;text-align: center;}#sk-container-id-1 label.sk-toggleable__label-arrow:before {content: "▸";float: left;margin-right: 0.25em;color: #696969;}#sk-container-id-1 label.sk-toggleable__label-arrow:hover:before {color: black;}#sk-container-id-1 div.sk-estimator:hover label.sk-toggleable__label-arrow:before {color: black;}#sk-container-id-1 div.sk-toggleable__content {max-height: 0;max-width: 0;overflow: hidden;text-align: left;background-color: #f0f8ff;}#sk-container-id-1 div.sk-toggleable__content pre {margin: 0.2em;color: black;border-radius: 0.25em;background-color: #f0f8ff;}#sk-container-id-1 input.sk-toggleable__control:checked~div.sk-toggleable__content {max-height: 200px;max-width: 100%;overflow: auto;}#sk-container-id-1 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {content: "▾";}#sk-container-id-1 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 input.sk-hidden--visually {border: 0;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);height: 1px;margin: -1px;overflow: hidden;padding: 0;position: absolute;width: 1px;}#sk-container-id-1 div.sk-estimator {font-family: monospace;background-color: #f0f8ff;border: 1px dotted black;border-radius: 0.25em;box-sizing: border-box;margin-bottom: 0.5em;}#sk-container-id-1 div.sk-estimator:hover {background-color: #d4ebff;}#sk-container-id-1 div.sk-parallel-item::after {content: "";width: 100%;border-bottom: 1px solid gray;flex-grow: 1;}#sk-container-id-1 div.sk-label:hover label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 div.sk-serial::before {content: "";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: 0;}#sk-container-id-1 div.sk-serial {display: flex;flex-direction: column;align-items: center;background-color: white;padding-right: 0.2em;padding-left: 0.2em;position: relative;}#sk-container-id-1 div.sk-item {position: relative;z-index: 1;}#sk-container-id-1 div.sk-parallel {display: flex;align-items: stretch;justify-content: center;background-color: white;position: relative;}#sk-container-id-1 div.sk-item::before, #sk-container-id-1 div.sk-parallel-item::before {content: "";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: -1;}#sk-container-id-1 div.sk-parallel-item {display: flex;flex-direction: column;z-index: 1;position: relative;background-color: white;}#sk-container-id-1 div.sk-parallel-item:first-child::after {align-self: flex-end;width: 50%;}#sk-container-id-1 div.sk-parallel-item:last-child::after {align-self: flex-start;width: 50%;}#sk-container-id-1 div.sk-parallel-item:only-child::after {width: 0;}#sk-container-id-1 div.sk-dashed-wrapped {border: 1px dashed gray;margin: 0 0.4em 0.5em 0.4em;box-sizing: border-box;padding-bottom: 0.4em;background-color: white;}#sk-container-id-1 div.sk-label label {font-family: monospace;font-weight: bold;display: inline-block;line-height: 1.2em;}#sk-container-id-1 div.sk-label-container {text-align: center;}#sk-container-id-1 div.sk-container {/* jupyter's `normalize.less` sets `[hidden] { display: none; }` but bootstrap.min.css set `[hidden] { display: none !important; }` so we also need the `!important` here to be able to override the default hidden behavior on the sphinx rendered scikit-learn.org. See: https://github.com/scikit-learn/scikit-learn/issues/21755 */display: inline-block !important;position: relative;}#sk-container-id-1 div.sk-text-repr-fallback {display: none;}</style><div class="sk-top-container" id="sk-container-id-1"><div class="sk-text-repr-fallback"><pre>LogisticRegression(max_iter=1000)</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br/>On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden=""><div class="sk-item"><div class="sk-estimator sk-toggleable"><input checked="" class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-1" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-1">LogisticRegression</label><div class="sk-toggleable__content"><pre>LogisticRegression(max_iter=1000)</pre></div></div></div></div></div>
+<style>#sk-container-id-1 {
+  /* Definition of color scheme common for light and dark mode */
+  --sklearn-color-text: #000;
+  --sklearn-color-text-muted: #666;
+  --sklearn-color-line: gray;
+  /* Definition of color scheme for unfitted estimators */
+  --sklearn-color-unfitted-level-0: #fff5e6;
+  --sklearn-color-unfitted-level-1: #f6e4d2;
+  --sklearn-color-unfitted-level-2: #ffe0b3;
+  --sklearn-color-unfitted-level-3: chocolate;
+  /* Definition of color scheme for fitted estimators */
+  --sklearn-color-fitted-level-0: #f0f8ff;
+  --sklearn-color-fitted-level-1: #d4ebff;
+  --sklearn-color-fitted-level-2: #b3dbfd;
+  --sklearn-color-fitted-level-3: cornflowerblue;
+
+  /* Specific color for light theme */
+  --sklearn-color-text-on-default-background: var(--sg-text-color, var(--theme-code-foreground, var(--jp-content-font-color1, black)));
+  --sklearn-color-background: var(--sg-background-color, var(--theme-background, var(--jp-layout-color0, white)));
+  --sklearn-color-border-box: var(--sg-text-color, var(--theme-code-foreground, var(--jp-content-font-color1, black)));
+  --sklearn-color-icon: #696969;
+
+  @media (prefers-color-scheme: dark) {
+    /* Redefinition of color scheme for dark theme */
+    --sklearn-color-text-on-default-background: var(--sg-text-color, var(--theme-code-foreground, var(--jp-content-font-color1, white)));
+    --sklearn-color-background: var(--sg-background-color, var(--theme-background, var(--jp-layout-color0, #111)));
+    --sklearn-color-border-box: var(--sg-text-color, var(--theme-code-foreground, var(--jp-content-font-color1, white)));
+    --sklearn-color-icon: #878787;
+  }
+}
+
+#sk-container-id-1 {
+  color: var(--sklearn-color-text);
+}
+
+#sk-container-id-1 pre {
+  padding: 0;
+}
+
+#sk-container-id-1 input.sk-hidden--visually {
+  border: 0;
+  clip: rect(1px 1px 1px 1px);
+  clip: rect(1px, 1px, 1px, 1px);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+#sk-container-id-1 div.sk-dashed-wrapped {
+  border: 1px dashed var(--sklearn-color-line);
+  margin: 0 0.4em 0.5em 0.4em;
+  box-sizing: border-box;
+  padding-bottom: 0.4em;
+  background-color: var(--sklearn-color-background);
+}
+
+#sk-container-id-1 div.sk-container {
+  /* jupyter's `normalize.less` sets `[hidden] { display: none; }`
+     but bootstrap.min.css set `[hidden] { display: none !important; }`
+     so we also need the `!important` here to be able to override the
+     default hidden behavior on the sphinx rendered scikit-learn.org.
+     See: https://github.com/scikit-learn/scikit-learn/issues/21755 */
+  display: inline-block !important;
+  position: relative;
+}
+
+#sk-container-id-1 div.sk-text-repr-fallback {
+  display: none;
+}
+
+div.sk-parallel-item,
+div.sk-serial,
+div.sk-item {
+  /* draw centered vertical line to link estimators */
+  background-image: linear-gradient(var(--sklearn-color-text-on-default-background), var(--sklearn-color-text-on-default-background));
+  background-size: 2px 100%;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+/* Parallel-specific style estimator block */
+
+#sk-container-id-1 div.sk-parallel-item::after {
+  content: "";
+  width: 100%;
+  border-bottom: 2px solid var(--sklearn-color-text-on-default-background);
+  flex-grow: 1;
+}
+
+#sk-container-id-1 div.sk-parallel {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  background-color: var(--sklearn-color-background);
+  position: relative;
+}
+
+#sk-container-id-1 div.sk-parallel-item {
+  display: flex;
+  flex-direction: column;
+}
+
+#sk-container-id-1 div.sk-parallel-item:first-child::after {
+  align-self: flex-end;
+  width: 50%;
+}
+
+#sk-container-id-1 div.sk-parallel-item:last-child::after {
+  align-self: flex-start;
+  width: 50%;
+}
+
+#sk-container-id-1 div.sk-parallel-item:only-child::after {
+  width: 0;
+}
+
+/* Serial-specific style estimator block */
+
+#sk-container-id-1 div.sk-serial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--sklearn-color-background);
+  padding-right: 1em;
+  padding-left: 1em;
+}
+
+
+/* Toggleable style: style used for estimator/Pipeline/ColumnTransformer box that is
+clickable and can be expanded/collapsed.
+- Pipeline and ColumnTransformer use this feature and define the default style
+- Estimators will overwrite some part of the style using the `sk-estimator` class
+*/
+
+/* Pipeline and ColumnTransformer style (default) */
+
+#sk-container-id-1 div.sk-toggleable {
+  /* Default theme specific background. It is overwritten whether we have a
+  specific estimator or a Pipeline/ColumnTransformer */
+  background-color: var(--sklearn-color-background);
+}
+
+/* Toggleable label */
+#sk-container-id-1 label.sk-toggleable__label {
+  cursor: pointer;
+  display: flex;
+  width: 100%;
+  margin-bottom: 0;
+  padding: 0.5em;
+  box-sizing: border-box;
+  text-align: center;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.5em;
+}
+
+#sk-container-id-1 label.sk-toggleable__label .caption {
+  font-size: 0.6rem;
+  font-weight: lighter;
+  color: var(--sklearn-color-text-muted);
+}
+
+#sk-container-id-1 label.sk-toggleable__label-arrow:before {
+  /* Arrow on the left of the label */
+  content: "▸";
+  float: left;
+  margin-right: 0.25em;
+  color: var(--sklearn-color-icon);
+}
+
+#sk-container-id-1 label.sk-toggleable__label-arrow:hover:before {
+  color: var(--sklearn-color-text);
+}
+
+/* Toggleable content - dropdown */
+
+#sk-container-id-1 div.sk-toggleable__content {
+  max-height: 0;
+  max-width: 0;
+  overflow: hidden;
+  text-align: left;
+  /* unfitted */
+  background-color: var(--sklearn-color-unfitted-level-0);
+}
+
+#sk-container-id-1 div.sk-toggleable__content.fitted {
+  /* fitted */
+  background-color: var(--sklearn-color-fitted-level-0);
+}
+
+#sk-container-id-1 div.sk-toggleable__content pre {
+  margin: 0.2em;
+  border-radius: 0.25em;
+  color: var(--sklearn-color-text);
+  /* unfitted */
+  background-color: var(--sklearn-color-unfitted-level-0);
+}
+
+#sk-container-id-1 div.sk-toggleable__content.fitted pre {
+  /* unfitted */
+  background-color: var(--sklearn-color-fitted-level-0);
+}
+
+#sk-container-id-1 input.sk-toggleable__control:checked~div.sk-toggleable__content {
+  /* Expand drop-down */
+  max-height: 200px;
+  max-width: 100%;
+  overflow: auto;
+}
+
+#sk-container-id-1 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {
+  content: "▾";
+}
+
+/* Pipeline/ColumnTransformer-specific style */
+
+#sk-container-id-1 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {
+  color: var(--sklearn-color-text);
+  background-color: var(--sklearn-color-unfitted-level-2);
+}
+
+#sk-container-id-1 div.sk-label.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
+  background-color: var(--sklearn-color-fitted-level-2);
+}
+
+/* Estimator-specific style */
+
+/* Colorize estimator box */
+#sk-container-id-1 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {
+  /* unfitted */
+  background-color: var(--sklearn-color-unfitted-level-2);
+}
+
+#sk-container-id-1 div.sk-estimator.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
+  /* fitted */
+  background-color: var(--sklearn-color-fitted-level-2);
+}
+
+#sk-container-id-1 div.sk-label label.sk-toggleable__label,
+#sk-container-id-1 div.sk-label label {
+  /* The background is the default theme color */
+  color: var(--sklearn-color-text-on-default-background);
+}
+
+/* On hover, darken the color of the background */
+#sk-container-id-1 div.sk-label:hover label.sk-toggleable__label {
+  color: var(--sklearn-color-text);
+  background-color: var(--sklearn-color-unfitted-level-2);
+}
+
+/* Label box, darken color on hover, fitted */
+#sk-container-id-1 div.sk-label.fitted:hover label.sk-toggleable__label.fitted {
+  color: var(--sklearn-color-text);
+  background-color: var(--sklearn-color-fitted-level-2);
+}
+
+/* Estimator label */
+
+#sk-container-id-1 div.sk-label label {
+  font-family: monospace;
+  font-weight: bold;
+  display: inline-block;
+  line-height: 1.2em;
+}
+
+#sk-container-id-1 div.sk-label-container {
+  text-align: center;
+}
+
+/* Estimator-specific */
+#sk-container-id-1 div.sk-estimator {
+  font-family: monospace;
+  border: 1px dotted var(--sklearn-color-border-box);
+  border-radius: 0.25em;
+  box-sizing: border-box;
+  margin-bottom: 0.5em;
+  /* unfitted */
+  background-color: var(--sklearn-color-unfitted-level-0);
+}
+
+#sk-container-id-1 div.sk-estimator.fitted {
+  /* fitted */
+  background-color: var(--sklearn-color-fitted-level-0);
+}
+
+/* on hover */
+#sk-container-id-1 div.sk-estimator:hover {
+  /* unfitted */
+  background-color: var(--sklearn-color-unfitted-level-2);
+}
+
+#sk-container-id-1 div.sk-estimator.fitted:hover {
+  /* fitted */
+  background-color: var(--sklearn-color-fitted-level-2);
+}
+
+/* Specification for estimator info (e.g. "i" and "?") */
+
+/* Common style for "i" and "?" */
+
+.sk-estimator-doc-link,
+a:link.sk-estimator-doc-link,
+a:visited.sk-estimator-doc-link {
+  float: right;
+  font-size: smaller;
+  line-height: 1em;
+  font-family: monospace;
+  background-color: var(--sklearn-color-background);
+  border-radius: 1em;
+  height: 1em;
+  width: 1em;
+  text-decoration: none !important;
+  margin-left: 0.5em;
+  text-align: center;
+  /* unfitted */
+  border: var(--sklearn-color-unfitted-level-1) 1pt solid;
+  color: var(--sklearn-color-unfitted-level-1);
+}
+
+.sk-estimator-doc-link.fitted,
+a:link.sk-estimator-doc-link.fitted,
+a:visited.sk-estimator-doc-link.fitted {
+  /* fitted */
+  border: var(--sklearn-color-fitted-level-1) 1pt solid;
+  color: var(--sklearn-color-fitted-level-1);
+}
+
+/* On hover */
+div.sk-estimator:hover .sk-estimator-doc-link:hover,
+.sk-estimator-doc-link:hover,
+div.sk-label-container:hover .sk-estimator-doc-link:hover,
+.sk-estimator-doc-link:hover {
+  /* unfitted */
+  background-color: var(--sklearn-color-unfitted-level-3);
+  color: var(--sklearn-color-background);
+  text-decoration: none;
+}
+
+div.sk-estimator.fitted:hover .sk-estimator-doc-link.fitted:hover,
+.sk-estimator-doc-link.fitted:hover,
+div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
+.sk-estimator-doc-link.fitted:hover {
+  /* fitted */
+  background-color: var(--sklearn-color-fitted-level-3);
+  color: var(--sklearn-color-background);
+  text-decoration: none;
+}
+
+/* Span, style for the box shown on hovering the info icon */
+.sk-estimator-doc-link span {
+  display: none;
+  z-index: 9999;
+  position: relative;
+  font-weight: normal;
+  right: .2ex;
+  padding: .5ex;
+  margin: .5ex;
+  width: min-content;
+  min-width: 20ex;
+  max-width: 50ex;
+  color: var(--sklearn-color-text);
+  box-shadow: 2pt 2pt 4pt #999;
+  /* unfitted */
+  background: var(--sklearn-color-unfitted-level-0);
+  border: .5pt solid var(--sklearn-color-unfitted-level-3);
+}
+
+.sk-estimator-doc-link.fitted span {
+  /* fitted */
+  background: var(--sklearn-color-fitted-level-0);
+  border: var(--sklearn-color-fitted-level-3);
+}
+
+.sk-estimator-doc-link:hover span {
+  display: block;
+}
+
+/* "?"-specific style due to the `<a>` HTML tag */
+
+#sk-container-id-1 a.estimator_doc_link {
+  float: right;
+  font-size: 1rem;
+  line-height: 1em;
+  font-family: monospace;
+  background-color: var(--sklearn-color-background);
+  border-radius: 1rem;
+  height: 1rem;
+  width: 1rem;
+  text-decoration: none;
+  /* unfitted */
+  color: var(--sklearn-color-unfitted-level-1);
+  border: var(--sklearn-color-unfitted-level-1) 1pt solid;
+}
+
+#sk-container-id-1 a.estimator_doc_link.fitted {
+  /* fitted */
+  border: var(--sklearn-color-fitted-level-1) 1pt solid;
+  color: var(--sklearn-color-fitted-level-1);
+}
+
+/* On hover */
+#sk-container-id-1 a.estimator_doc_link:hover {
+  /* unfitted */
+  background-color: var(--sklearn-color-unfitted-level-3);
+  color: var(--sklearn-color-background);
+  text-decoration: none;
+}
+
+#sk-container-id-1 a.estimator_doc_link.fitted:hover {
+  /* fitted */
+  background-color: var(--sklearn-color-fitted-level-3);
+}
+</style><div class="sk-top-container" id="sk-container-id-1"><div class="sk-text-repr-fallback"><pre>LogisticRegression(max_iter=1000)</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br/>On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden=""><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input checked="" class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-1" type="checkbox"/><label class="sk-toggleable__label fitted sk-toggleable__label-arrow" for="sk-estimator-id-1"><div><div>LogisticRegression</div></div><div><a class="sk-estimator-doc-link fitted" href="https://scikit-learn.org/1.6/modules/generated/sklearn.linear_model.LogisticRegression.html" rel="noreferrer" target="_blank">?<span>Documentation for LogisticRegression</span></a><span class="sk-estimator-doc-link fitted">i<span>Fitted</span></span></div></label><div class="sk-toggleable__content fitted"><pre>LogisticRegression(max_iter=1000)</pre></div> </div></div></div></div>
 </div>
 </div>
 </div>
@@ -8155,11 +8557,10 @@ The class label is stored in the column "class".
  `logreg.coef_[0]` contains the coefficients of the model.
 
 </details>
-<h3 id="Solution:">Solution:<a class="anchor-link" href="#Solution:">¶</a></h3>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=d8b01629328037d9">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell celltag_remove_cell" id="cell-id=d8b01629328037d9">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8167,9 +8568,11 @@ The class label is stored in the column "class".
 <div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Print the model coefficients along with their corresponding feature names</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+
+<span class="c1"># Print the model coefficients along with their corresponding feature names</span>
 <span class="n">coef</span> <span class="o">=</span> <span class="n">logreg</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">features</span> <span class="o">=</span> <span class="n">X_train_encoded</span><span class="o">.</span><span class="n">columns</span>
+<span class="n">features</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">columns</span>
 <span class="n">coefficients_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"Feature"</span><span class="p">:</span> <span class="n">features</span><span class="p">,</span> <span class="s2">"Coefficient"</span><span class="p">:</span> <span class="n">coef</span><span class="p">})</span>
 <span class="n">coefficients_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">"Coefficient"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
@@ -8210,27 +8613,27 @@ The class label is stored in the column "class".
 <tr>
 <th>10</th>
 <td>checking_status_no checking</td>
-<td>0.851724</td>
+<td>1.123781</td>
 </tr>
 <tr>
 <th>12</th>
 <td>credit_history_critical/other existing credit</td>
-<td>0.806829</td>
+<td>0.955700</td>
 </tr>
 <tr>
-<th>25</th>
+<th>18</th>
 <td>purpose_used car</td>
-<td>0.702586</td>
+<td>0.940480</td>
 </tr>
 <tr>
 <th>41</th>
 <td>other_parties_guarantor</td>
-<td>0.632587</td>
+<td>0.869472</td>
 </tr>
 <tr>
 <th>59</th>
 <td>foreign_worker_no</td>
-<td>0.597217</td>
+<td>0.674127</td>
 </tr>
 <tr>
 <th>...</th>
@@ -8238,29 +8641,29 @@ The class label is stored in the column "class".
 <td>...</td>
 </tr>
 <tr>
-<th>37</th>
-<td>personal_status_male div/sep</td>
-<td>-0.410687</td>
+<th>11</th>
+<td>credit_history_all paid</td>
+<td>-0.420558</td>
 </tr>
 <tr>
-<th>28</th>
-<td>savings_status_&lt;100</td>
-<td>-0.428762</td>
-</tr>
-<tr>
-<th>15</th>
-<td>credit_history_no credits/all paid</td>
-<td>-0.469233</td>
+<th>20</th>
+<td>purpose_education</td>
+<td>-0.456654</td>
 </tr>
 <tr>
 <th>8</th>
 <td>checking_status_&lt;0</td>
-<td>-0.614544</td>
+<td>-0.470530</td>
 </tr>
 <tr>
-<th>20</th>
+<th>17</th>
 <td>purpose_new car</td>
-<td>-0.783373</td>
+<td>-0.708395</td>
+</tr>
+<tr>
+<th>15</th>
+<td>credit_history_no credits/all paid</td>
+<td>-0.757750</td>
 </tr>
 </tbody>
 </table>
@@ -8271,24 +8674,19 @@ The class label is stored in the column "class".
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a6f8638b-14f7-49d8-b614-8b889085b91a">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=43d4b186-ad49-4629-a0cc-2c2de5370ae7">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<details> <summary>Discussion about the solution:</summary>
-    According to the table above, the features e.g. `check_status` and `credit_history` have a significant effect on the outcome. The positive sign of the coefficient indicates that the feature has a positive influence on being a creditworthy client (while a negative sign will have a negative influence).
-</details>
-<p>Check the positive class of the model.</p>
-<details><summary> Hint 1:</summary>
+<h3 id="Check-the-positive-class-of-the-model.">Check the positive class of the model.<a class="anchor-link" href="#Check-the-positive-class-of-the-model.">¶</a></h3><details><summary> Hint 1:</summary>
     `logreg.class_` stores the negative and postive classes.
 </details>
-<h3 id="Solution:">Solution:<a class="anchor-link" href="#Solution:">¶</a></h3>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=c50f7d7a0b5fad89">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell celltag_remove_cell" id="cell-id=c50f7d7a0b5fad89">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8296,7 +8694,9 @@ The class label is stored in the column "class".
 <div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">positive_class</span> <span class="o">=</span> <span class="n">logreg</span><span class="o">.</span><span class="n">classes_</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+
+<span class="n">positive_class</span> <span class="o">=</span> <span class="n">logreg</span><span class="o">.</span><span class="n">classes_</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Positive class: </span><span class="si">{</span><span class="n">positive_class</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -8317,18 +8717,26 @@ The class label is stored in the column "class".
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=3cf0e101c0564c5f">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=85a36649-9826-4232-9242-dce26dc4658b">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<details>
-<summary>Discussion on the solution:</summary>
-According to the summary, e.g., `credit_history` and `check_status` significantly influence the creditworthiness and the bank's risk assessment.
-By looking on `logreg.classes_[1]`, we see that the class `good` (creditworthy client) is the positive class.
-This means that a positive sign of the estimated coefficient of a feature means that the feature has a positive influence on being a creditworthy client (while a negative sign will have a negative influence).
-</details>
+<h3 id="Discuss-the-results">Discuss the results<a class="anchor-link" href="#Discuss-the-results">¶</a></h3><p>Which coefficients have siginifcant influences on the outcome?</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=3cf0e101c0564c5f">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput celltag_remove_cell" data-mime-type="text/markdown">
+<h1 id="===SOLUTION===">===SOLUTION===<a class="anchor-link" href="#===SOLUTION===">¶</a></h1><p>According to the summary, e.g., <code>credit_history</code> and <code>check_status</code> significantly influence the creditworthiness and the bank's risk assessment.
+By looking on <code>logreg.classes_[1]</code>, we see that the class <code>good</code> (creditworthy client) is the positive class.
+This means that a positive sign of the estimated coefficient of a feature means that the feature has a positive influence on being a creditworthy client (while a negative sign will have a negative influence).</p>
 </div>
 </div>
 </div>
@@ -8340,11 +8748,10 @@ This means that a positive sign of the estimated coefficient of a feature means 
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="Predict-on-the-Test-Dataset">Predict on the Test Dataset<a class="anchor-link" href="#Predict-on-the-Test-Dataset">¶</a></h2><p>Use the trained model to predict on the hold-out/test dataset.</p>
-<h3 id="Solution:">Solution:<a class="anchor-link" href="#Solution:">¶</a></h3>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=dabc76334150f3ea">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs celltag_remove_cell" id="cell-id=dabc76334150f3ea">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8352,8 +8759,10 @@ This means that a positive sign of the estimated coefficient of a feature means 
 <div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Predict labels on the test dataset and compute classification error</span>
-<span class="n">pred_labels</span> <span class="o">=</span> <span class="n">logreg</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test_encoded</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+
+<span class="c1"># Predict labels on the test dataset and compute classification error</span>
+<span class="n">pred_labels</span> <span class="o">=</span> <span class="n">logreg</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -8375,11 +8784,10 @@ Use the `score` method of the logistic regression model to calculate the accurac
 <summary>Hint 2:</summary>
 The classification error is defined as $1 - \text{accuracy}$.
 </details>
-<h3 id="Solution:">Solution:<a class="anchor-link" href="#Solution:">¶</a></h3>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=1a2be86ac01e96a2">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell celltag_remove_cell" id="cell-id=1a2be86ac01e96a2">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8387,7 +8795,9 @@ The classification error is defined as $1 - \text{accuracy}$.
 <div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">accuracy</span> <span class="o">=</span> <span class="n">logreg</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test_encoded</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+
+<span class="n">accuracy</span> <span class="o">=</span> <span class="n">logreg</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
 <span class="n">classification_error</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">accuracy</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Classification error: </span><span class="si">{</span><span class="n">classification_error</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
@@ -8402,7 +8812,7 @@ The classification error is defined as $1 - \text{accuracy}$.
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Classification error: 0.2567
+<pre>Classification error: 0.2433
 </pre>
 </div>
 </div>
@@ -8428,11 +8838,10 @@ Map the true labels to binary: 1 if "good", else 0.
 <summary>Hint 3:</summary>
 Use the `roc_auc_score` function from `sklearn.metrics` to calculate the AUC.
 </details>
-<h3 id="Solution:">Solution:<a class="anchor-link" href="#Solution:">¶</a></h3>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ea8387219639294">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell celltag_remove_cell" id="cell-id=ea8387219639294">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8440,11 +8849,13 @@ Use the `roc_auc_score` function from `sklearn.metrics` to calculate the AUC.
 <div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">roc_auc_score</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">roc_auc_score</span>
 
 <span class="c1"># Predict probabilities for the positive class ("good")</span>
 <span class="n">positive_index</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">logreg</span><span class="o">.</span><span class="n">classes_</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">positive_class</span><span class="p">)</span>
-<span class="n">pred_proba</span> <span class="o">=</span> <span class="n">logreg</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test_encoded</span><span class="p">)[:,</span> <span class="n">positive_index</span><span class="p">]</span>
+<span class="n">pred_proba</span> <span class="o">=</span> <span class="n">logreg</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)[:,</span> <span class="n">positive_index</span><span class="p">]</span>
 
 <span class="c1"># Map true labels to binary: 1 if "good", else 0</span>
 <span class="n">y_test_bin</span> <span class="o">=</span> <span class="n">y_test</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="s2">"good"</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
@@ -8464,7 +8875,7 @@ Use the `roc_auc_score` function from `sklearn.metrics` to calculate the AUC.
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>AUC: 0.7788
+<pre>AUC: 0.7830
 </pre>
 </div>
 </div>
