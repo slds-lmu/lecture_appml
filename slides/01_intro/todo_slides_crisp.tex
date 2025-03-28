@@ -388,7 +388,7 @@
 \begin{frame}{Learning Objective}
     \begin{itemize}
         \item overview over data science lifecycle
-        \item become familiar with concepts and know what to look up in case you need it
+        \item familiarize with concepts and know what to look up in case you need it
         \item have some structure when it comes to completing a data science task
     \end{itemize}
 \end{frame}
@@ -397,7 +397,7 @@
 \phantomsection\label{the-data-science-lifecycle-1}
 \textbf{Lifecycle Management}: Process of managing a product lifecycle from inception, through engineering, design and manufacturing to deployment and eventual disposal.
 
-%https://docs.google.com/presentation/d/1qiK0ShkIEbLwAzhEME_Yu7hz3lhnZhl2/edit?slide=id.p5#slide=id.p5
+%https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
 \begin{figure}[h]
 \includegraphics[width=8cm]{slides/01_intro/DSLifecycle1.png}
 \end{figure}
@@ -407,7 +407,7 @@
 \begin{frame}{The Data Science Lifecycle}
 \phantomsection\label{the-data-science-lifecycle-1}
 
-%https://docs.google.com/presentation/d/1qiK0ShkIEbLwAzhEME_Yu7hz3lhnZhl2/edit?slide=id.p5#slide=id.p5
+%https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
 \begin{figure}[h]
 \includegraphics[width=11cm]{slides/01_intro/DSLifecycle2.png}
 \end{figure}
@@ -418,7 +418,7 @@
 \section{Business Understanding}\label{business-understanding-1}
 
 \begin{frame}{Overview Business Understanding}
-%https://docs.google.com/presentation/d/1qiK0ShkIEbLwAzhEME_Yu7hz3lhnZhl2/edit?slide=id.p5#slide=id.p5
+%https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
 \begin{figure}[h]
 \includegraphics[width=9cm]{slides/01_intro/BusinessUnderstandingOverview.png}
 \end{figure}
@@ -489,7 +489,7 @@
   important to think about these problems!
 \end{itemize}
 ML-tasks you can select from:
-%https://docs.google.com/presentation/d/1qiK0ShkIEbLwAzhEME_Yu7hz3lhnZhl2/edit?slide=id.p5#slide=id.p5
+%https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
 \begin{figure}[h]
 \includegraphics[width=7cm]{slides/01_intro/MLTasks.png}
 \end{figure}
@@ -575,7 +575,7 @@ ML-tasks you can select from:
   an accuracy of 99.9\%
 \end{itemize}
 
-%https://docs.google.com/presentation/d/1qiK0ShkIEbLwAzhEME_Yu7hz3lhnZhl2/edit?slide=id.p5#slide=id.p5
+%https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
 \begin{figure}[h]
 \includegraphics[width=10cm]{slides/01_intro/ConfusionMatrix.png}
 \end{figure}
@@ -644,10 +644,10 @@ be aware of \textbf{data leakage}
     \tightlist
         \item Example: Using "Total Sales in Next Month" as a predictor when trying to forecast sales.
     \end{itemize} 
-    \item Train-Test Leakage: Example: Normalizing the dataset using the entire data before splitting into train and test sets.
+    \item Train-Test Leakage: 
     \begin{itemize}
     \tightlist
-        \item Example: Using "Total Sales in Next Month" as a predictor when trying to forecast sales.
+        \item Example: Normalizing the dataset using the entire data before splitting into train and test sets.
     \end{itemize}
 \end{itemize}
 \end{frame}
@@ -662,15 +662,16 @@ Understanding}\label{data-acquisition-and-understanding-1}
 In real world, there are multiple data sources
 
 \begin{minipage}{0.3\textwidth}
+%https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
 \includegraphics[width=\linewidth]{slides/01_intro/DataSources.png}
 \end{minipage}
 \begin{minipage}{0.6\textwidth}\RaggedRight
 \begin{itemize}
 \tightlist
-    \item \textbf{internal vs. external data sources}: external providers might change their data format or discontinue the servise
+    \item \textbf{internal vs. external data sources}: external providers might change their data format or discontinue the service
     \item \textbf{structured vs. unstructured}: structured data can be stored in a database, unstructured one might include images and is not so straightforward to work with
-    \item \textbf{database vs. files}: databases are combine many advantages of other file types, most software can grab and process data from there.
-    \item \textbf{on-premise vs. cloud:} decision depends on data protection laws costs and team preferences
+    \item \textbf{database vs. files}: databases combine many advantages of other file types, most software can grab and process data from there.
+    \item \textbf{on-premise vs. cloud:} decision depends on data protection laws, costs and team preferences
 \end{itemize}
 \end{minipage}
 
@@ -859,7 +860,7 @@ Be aware of \textbf{bias}:
 \item
   The necessary steps include exploratory data analysis (EDA), data
   wrangling (e.g.~joins) and data cleaning
-  \item Sometimes the data you obtain is not yet labeled $\rightarrow$CRISP-DM slides  you need humans (with domain knowledge) to assign labels to your data points
+  \item Sometimes the data you obtain is not yet labeled $\rightarrow$ you need humans (with domain knowledge) to assign labels to your data points
   
 \end{itemize}
 \end{frame}
@@ -868,12 +869,14 @@ Be aware of \textbf{bias}:
 \section{Modeling}\label{modeling-1}
 
 \begin{frame}{Modeling Steps Overview}
+%https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
 \includegraphics[width = \linewidth]{slides/01_intro/Modelling1.png}
     
 \end{frame}
 
 \begin{frame}{Feature Engineering}
 \phantomsection\label{feature-engineering}
+%https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
 \includegraphics[width = \linewidth]{slides/01_intro/Modelling2.png}
 \textbf{Feature Engineering}: selection, aggregation and
   transformation of your raw data to derive meaningful features
@@ -897,6 +900,7 @@ Don't overdo it: Including too many useless features introduces
 
 \begin{frame}{Model Training}
 \phantomsection\label{model-training}
+%https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
 \includegraphics[width = \linewidth]{slides/01_intro/Modelling3.png}
 Consider your model training as a scientific experiment:
 
@@ -929,6 +933,7 @@ Consider your model training as a scientific experiment:
 
 \begin{frame}{Model Configuration}
 \phantomsection\label{model-configuration}
+%https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
 \includegraphics[width = \linewidth]{slides/01_intro/Modelling4.png}
 \begin{itemize}
 \tightlist
@@ -947,6 +952,7 @@ Consider your model training as a scientific experiment:
 
 \begin{frame}{Model Evaluation}
 \phantomsection\label{model-evaluation}
+%https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
 \includegraphics[width = \linewidth]{slides/01_intro/Modelling5.png}
 \begin{itemize}
 \tightlist
@@ -970,6 +976,7 @@ Consider your model training as a scientific experiment:
 
 \begin{frame}{Interpretation}
 \phantomsection\label{interpretation}
+%https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
 \includegraphics[width = \linewidth]{slides/01_intro/Modelling6.png}
 To understand your model better, you can use methods from
   \textbf{Interpretable Machine Learning (IML)}
@@ -991,6 +998,7 @@ To understand your model better, you can use methods from
 
 \begin{frame}{Model Cards}
 \phantomsection\label{model-cards}
+%https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
 \includegraphics[width = \linewidth]{slides/01_intro/Modelling7.png}
 \textbf{Model Card}: documentation for the model similar to Datasheet for data, includes:
 \begin{itemize}
@@ -1038,6 +1046,7 @@ Technical Debt in ML Systems}
 
 \begin{frame}{Model Governance}
     Model Governance Steps are:
+    %https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
     \includegraphics[width = \linewidth]{slides/01_intro/Model Governace.png}
 \end{frame}
 
@@ -1155,7 +1164,7 @@ You can also include \textbf{Feedback Loops/ Reinforcement}:
 \begin{itemize}
   \item \textbf{Clarify Objectives \& Business Impact}: Determine whether it’s a classification or regression task, the domain context, and what “success” looks like.
   \item \textbf{Target Variable}: Understand how the target is defined and distributed.
-  \item \textbf{Constraints \& Permissions}: Check for external data limits, privacy, or regulatory issues.
+  \item \textbf{Constraints \& Permissions}: External data limits, privacy, or regulatory issues.
   \item \textbf{Action Points}:
     \begin{itemize}
       \item Annotate key requirements and assumptions.
@@ -1184,9 +1193,9 @@ You can also include \textbf{Feedback Loops/ Reinforcement}:
 
 \begin{frame}{Step 3: Perform an Initial Data Analysis (EDA)}
 \begin{itemize}
-  \item \textbf{Data Profiling}: Summarize shape, basic statistics, and distribution of features and target.
+  \item \textbf{Data Profiling}: Summarize shape, basic statistics, feature and target distribution.
   \item \textbf{Quality Checks}: Identify missing values, outliers, or suspicious patterns; confirm no hidden data leakage.
-  \item \textbf{Train-Test Shift}: Check if training and test sets differ significantly in their feature distributions.
+  \item \textbf{Train-Test Shift}: Check if train and test set differ significantly in their feature distributions.
   \item \textbf{Action Points}:
     \begin{itemize}
       \item Use tools like Pandas Profiling or Sweetviz for automated EDA.
@@ -1199,8 +1208,8 @@ You can also include \textbf{Feedback Loops/ Reinforcement}:
 \begin{frame}{Step 4: Develop a Baseline Model}
 \begin{itemize}
   \item \textbf{Why a Baseline?} A simple model (e.g., Logistic Regression, Decision Tree) gives you a reference performance.
-  \item \textbf{Pipeline Check}: Ensures data loading, preprocessing, and validation splits are correct.
-  \item \textbf{Diagnostics}: Analyze misclassifications and residuals to spot improvement areas.
+  \item \textbf{Pipeline Check}: Make sure that data loading, preprocessing, and validation splits are correct.
+  \item \textbf{Diagnostics} : Analyze misclassifications/ residuals to spot improvement areas.
   \item \textbf{Action Points}:
     \begin{itemize}
       \item Start with a naive or default-parameter model.
@@ -1212,7 +1221,7 @@ You can also include \textbf{Feedback Loops/ Reinforcement}:
 
 \begin{frame}{Step 5: Set Up a Robust Validation Strategy}
 \begin{itemize}
-  \item \textbf{Importance of Validation}: Avoid overfitting to the training set or a single random split.
+  \item \textbf{Importance of Validation}: Avoid overfitting or a single random split.
   \item \textbf{Common Methods}:
     \begin{itemize}
       \item K-Fold (balanced data).
@@ -1230,10 +1239,10 @@ You can also include \textbf{Feedback Loops/ Reinforcement}:
 
 \begin{frame}{Step 6: Feature Engineering and Data Preprocessing}
 \begin{itemize}
-  \item \textbf{Missing Data}: Mean/median imputation, advanced methods, or flags for “missingness.”
-  \item \textbf{Encoding Categorical Variables}: One-hot, target, or frequency encoding (watch for leakage).
+  \item \textbf{Missing Data}: Mean/median imputation, advanced methods, or flags.
+  \item \textbf{Encoding Categorical Variables}: One-hot/ target/ frequency enc. (leakage?!).
   \item \textbf{Scaling \& Transformations}: Normalize or log-transform skewed features, especially for sensitive models (SVMs, neural nets).
-  \item \textbf{New Features}: Time-based, domain knowledge, interactions (e.g., multiplications or ratios).
+  \item \textbf{New Features}: Time-based, domain knowledge, interactions (e.g. ratios).
   \item \textbf{Action Points}:
     \begin{itemize}
       \item Add features in small batches and track validation changes.
@@ -1260,7 +1269,7 @@ You can also include \textbf{Feedback Loops/ Reinforcement}:
     \begin{itemize}
       \item Track experiments (MLflow, Weights \& Biases, or spreadsheets).
       \item Start with defaults and refine gradually.
-      \item Use interpretability tools (SHAP, permutation importance) for feature insights.
+      \item Use IML tools (SHAP, permutation importance) for feature insights.
     \end{itemize}
 \end{itemize}
 \end{frame}
@@ -1268,10 +1277,10 @@ You can also include \textbf{Feedback Loops/ Reinforcement}:
 \begin{frame}{Step 8: Track Experiments and Iterate}
 \begin{itemize}
   \item \textbf{Experiment Logging}: Keep detailed records of data versions, hyperparams, code revisions.
-  \item \textbf{Error Analysis}: Study misclassified samples or large residuals to guide feature tweaks.
+  \item \textbf{Error Analysis}: Study misclassifications and residuals to guide feature tweaks.
   \item \textbf{Iterative Improvements}:
     \begin{itemize}
-      \item Refine features, adjust validation, revisit transformations based on your findings.
+      \item Refine features, adjust validation, revisit transformations.
       \item Maintain a “changelog” for each iteration.
     \end{itemize}
   \item \textbf{Action Points}:
@@ -1324,9 +1333,9 @@ You can also include \textbf{Feedback Loops/ Reinforcement}:
 
 \begin{frame}{Final Advice}
 \begin{itemize}
-  \item \textbf{Start Simple, Then Iterate}: Don’t jump into complex models before a solid baseline.
+  \item \textbf{Start Simple, Then Iterate}: Don’t jump into complex models, get a solid baseline.
   \item \textbf{Prioritize Validation}: A robust validation strategy prevents nasty surprises.
-  \item \textbf{Log Everything}: Document all transformations, parameter settings, and model versions.
+  \item \textbf{Log Everything}: Document transformations, parameters, and model versions.
   \item \textbf{Aim for Generalizable Solutions}: Don’t just chase leaderboard scores—focus on reproducibility and reliability.
 \end{itemize}
 \end{frame}
