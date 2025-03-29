@@ -7551,7 +7551,9 @@ a.anchor-link {
 <span class="c1"># So we provide the data along with the exercise sheet.</span>
 <span class="c1"># @matthias: This is the most convenient way, and this csv file is &lt; 2MB. </span>
 <span class="c1"># So it is fine to include it in the repo.</span>
-<span class="n">cells</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">"./cells.csv"</span><span class="p">)</span>
+
+<span class="c1"># To the students: please adjust the path to the csv file accordingly.</span>
+<span class="n">cells</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">"../data/cells.csv"</span><span class="p">)</span>
 
 <span class="c1"># Remove the unwanted 'case' column if it exists.</span>
 <span class="k">if</span> <span class="s1">'case'</span> <span class="ow">in</span> <span class="n">cells</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
