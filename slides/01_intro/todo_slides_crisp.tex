@@ -171,6 +171,7 @@
 %% ---------------------------------------------------------------
 %\usepackage{./../../_setup/lmu-lecture}
 \usepackage{../../style/lmu-lecture}
+\input{../../style/common.tex}
 % \usefonttheme{structurebold}
 % \RequirePackage[T1]{fontenc}
 % \RequirePackage[scaled=0.92]{helvet}   %% Helvetica for sans serif
@@ -395,11 +396,12 @@
 
 \begin{frame}{The Data Science Lifecycle}
 \phantomsection\label{the-data-science-lifecycle-1}
-\textbf{Lifecycle Management}: Process of managing a product lifecycle from inception, through engineering, design and manufacturing to deployment and eventual disposal.
+\textbf{Lifecycle Management}: Process of managing a (product) lifecycle from inception, through engineering, design and manufacturing to deployment and eventual disposal.
+\textbf{CRISP-DM}: Cross-Industry Standard Process for Data Mining is a data mining standard model, which was conceived in 1996. \citebutton{Shearer C., The CRISP-DM model (2000)}{https://mineracaodedados.wordpress.com/wp-content/uploads/2012/04/the-crisp-dm-model-the-new-blueprint-for-data-mining-shearer-colin.pdf}
 
 %https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
 \begin{figure}[h]
-\includegraphics[width=8cm]{slides/01_intro/DSLifecycle1.png}
+\includegraphics[width=7cm]{slides/01_intro/DSLifecycle1.png}
 \end{figure}
 
 \end{frame}
@@ -533,7 +535,7 @@ ML-tasks you can select from:
 
 \end{frame}
 
-\begin{frame}{Multiple objectives}
+\begin{frame}{Multiple Objectives}
 \phantomsection\label{multiple-objectives}
 \textbf{Key question}: How to optimize multiple objectives?
 \begin{itemize}
@@ -541,7 +543,7 @@ ML-tasks you can select from:
 \item
   What if a choice increases objective 1, but decreases objective 2? Is
   it better?
-\item i.e. in some case maximizing AUC leads to more model complexity and less explainability
+\item Maybe maximizing AUC leads to more model complexity and less explainability
 \item
   There are two common ways to deal with multiple objectives:
 
@@ -577,7 +579,7 @@ ML-tasks you can select from:
 
 %https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
 \begin{figure}[h]
-\includegraphics[width=10cm]{slides/01_intro/ConfusionMatrix.png}
+\includegraphics[width=0.72\textwidth]{slides/01_intro/ConfusionMatrix.png}
 \end{figure}
 \end{frame}
 
@@ -778,7 +780,7 @@ Be aware of \textbf{bias}:
   Also known as \emph{confounder variables} (or \emph{mediator
   variables} in psychology)
 \item
-  These are variables that influence your target outcome, but that you
+  Variables that influence your target outcome, but that you
   didn't measure
 \item
   Simple example:
