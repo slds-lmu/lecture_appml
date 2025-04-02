@@ -9,11 +9,20 @@ def add_solution_tag(notebook_path, solution_marker, solution_tag='remove_cell')
       - For code cells, look for '#' + solution_marker.
       - For markdown cells, look for solution_marker.
     If found, add the solution_tag to the cell's metadata.
+    First clears any existing solution tags, then re-adds them based on current content.
     """
     with open(notebook_path, 'r', encoding='utf-8') as f:
         nb = nbformat.read(f, as_version=4)
 
-    changed = False
+    # First pass: clear any existing solution tags
+    for cell in nb.cells:
+        if 'tags' in cell.metadata and solution_tag in cell.metadata['tags']:
+            cell.metadata['tags'].remove(solution_tag)
+            # Remove empty tags list to keep metadata clean
+            if not cell.metadata['tags']:
+                del cell.metadata['tags']
+
+    # Second pass: add solution tags where the marker is found
     for cell in nb.cells:
         if cell.cell_type == 'code':
             marker_text = '#' + solution_marker
@@ -27,11 +36,10 @@ def add_solution_tag(notebook_path, solution_marker, solution_tag='remove_cell')
             if solution_tag not in tags:
                 tags.append(solution_tag)
                 cell.metadata['tags'] = tags
-                changed = True
 
-    if changed:
-        with open(notebook_path, 'w', encoding='utf-8') as f:
-            nbformat.write(nb, f)
+    # Write the file back with updated tags
+    with open(notebook_path, 'w', encoding='utf-8') as f:
+        nbformat.write(nb, f)
 
 
 def export_notebook(notebook_path, remove_solutions):
