@@ -7552,9 +7552,7 @@ For this exercise, use default hyperparameters except for `max_depth=5`, otherwi
 
 <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
 
-<span class="n">data</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="s2">"credit-g"</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">data</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">target</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="s2">"credit-g"</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">drop_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -7672,9 +7670,9 @@ For this exercise, use default hyperparameters except for `max_depth=5`, otherwi
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Visualize-the-tree-structure">Visualize the tree structure<a class="anchor-link" href="#Visualize-the-tree-structure">¶</a></h3><p>To interpret the model and gain more insights into its decision-making process, visualize the trained decision tree using scikit-learn's <code>plot_tree</code> function. Limit the depth or adjust visualization parameters (such as node proportion and precision) to reduce visual clutter and improve interpretability.</p>
+<h3 id="Visualize-the-tree-structure">Visualize the tree structure<a class="anchor-link" href="#Visualize-the-tree-structure">¶</a></h3><p>To interpret the model and gain more insights into its decision-making process, visualize the trained decision tree using scikit-learn. Limit the depth or adjust visualization parameters (such as node proportion and precision) to reduce visual clutter and improve interpretability.</p>
 <details><summary>Hint 1:</summary>
-Use `plot_tree` from scikit-learn to visualize the trained decision tree. You can customize visualization options like `filled=True` to add colors and `rounded=True` for better aesthetics.
+Use `sklearn.tree.plot_tree` to visualize the trained decision tree. You can customize visualization options like `filled=True` to add colors and `rounded=True` for better aesthetics.
 </details>
 </div>
 </div>
@@ -8381,6 +8379,19 @@ Use `plt.fill_between()` to create a shaded region to inidicate the +/- 1x stand
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="Understand-hyperparameters">Understand hyperparameters<a class="anchor-link" href="#Understand-hyperparameters">¶</a></h2><p>Use the German Credit dataset to create a classification task. In this exercise, you will fit decision trees and random forests with varying hyperparameter settings, as these can significantly impact model performance. Both learners—decision trees (<code>DecisionTreeClassifier</code>) and random forests (<code>RandomForestClassifier</code>)—offer several hyperparameters that influence model behavior during training.</p>
+<p>Focus on parameters <code>max_depth</code> and <code>max_features</code>.</p>
+<p>According to the <a href="https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html">Docs of <code>sklearn.tree.DecisionClassifier</code></a>:</p>
+<blockquote>
+<p><code>max_depth int, default=None</code>: The maximum depth of the tree. If None, then nodes are expanded until all leaves are pure or until all leaves contain less than min_samples_split samples.</p>
+</blockquote>
+<blockquote>
+<p><code>max_features int, float or {“sqrt”, “log2”}, default=None</code>: The number of features to consider when looking for the best split:
+If int, then consider <code>max_features</code> features at each split.
+If float, then <code>max_features</code> is a fraction and <code>max(1, int(max_features * n_features_in_))</code> features are considered at each split.
+If “sqrt”, then <code>max_features=sqrt(n_features)</code>.
+If “log2”, then <code>max_features=log2(n_features)</code>.
+If None, then <code>max_features=n_features</code>.</p>
+</blockquote>
 <p>Focus on the following:</p>
 <ul>
 <li>For decision trees, vary the <code>max_depth</code> parameter, which controls how deep the tree can grow.</li>
