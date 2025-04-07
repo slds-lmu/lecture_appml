@@ -7600,16 +7600,20 @@ Better wrap the creation of the learners in a function, so that we can reuse it 
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogisticRegression</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.neighbors</span><span class="w"> </span><span class="kn">import</span> <span class="n">KNeighborsClassifier</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">create_learners</span><span class="p">():</span>
+    <span class="c1"># Create a dictionary to store learners</span>
+    <span class="n">learners</span> <span class="o">=</span> <span class="p">{}</span>
+    
     <span class="c1"># Logistic Regression</span>
-    <span class="n">log_reg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'classif.log_reg'</span><span class="p">,</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">))</span>
-    <span class="c1"># KNN learners with k from 3 to 30.</span>
-    <span class="n">knn_list</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">'classif.knn'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="n">KNeighborsClassifier</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="n">k</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">31</span><span class="p">)]</span>
-    <span class="n">learners</span> <span class="o">=</span> <span class="p">[</span><span class="n">log_reg</span><span class="p">]</span> <span class="o">+</span> <span class="n">knn_list</span>
+    <span class="n">learners</span><span class="p">[</span><span class="s1">'classif.log_reg'</span><span class="p">]</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+    
+    <span class="c1"># KNN learners with k from 3 to 30</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">31</span><span class="p">):</span>
+        <span class="n">learners</span><span class="p">[</span><span class="sa">f</span><span class="s1">'classif.knn</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">KNeighborsClassifier</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
+    
     <span class="k">return</span> <span class="n">learners</span>
 
 <span class="n">learners</span> <span class="o">=</span> <span class="n">create_learners</span><span class="p">()</span>
@@ -7666,7 +7670,7 @@ Define a custom scorer for false negative rate (FNR) with 1 as the positive clas
 </details>
 <details>
 <summary>Hint 2:</summary>
-Use the `make_scorer` function from scikit-learn to create a scorer object for the FNR. Set the `greater_is_better` argument to `False` because we want to minimize the FNR.
+Use `sklearn.metrics.confusion_matrix` to compute the TP and FN, and use `sklearn.metrics.make_scorer` function to create a scorer object for the FNR. Set the `greater_is_better` argument to `False` because we want to minimize the FNR.
 </details>
 </div>
 </div>
@@ -7682,18 +7686,24 @@ Use the `make_scorer` function from scikit-learn to create a scorer object for t
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
 
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_scorer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_scorer</span><span class="p">,</span> <span class="n">confusion_matrix</span>
 
 <span class="c1"># Define a custom scorer for false negative rate (FNR) with 1 as the positive class.</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">false_negative_rate_percent</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
     <span class="n">y_true</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
     <span class="n">y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span>
     
-    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">y_true</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="c1"># Use confusion_matrix to compute TP and FN</span>
+    <span class="n">cm</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="c1"># For binary classification with 1 as positive class:</span>
+    <span class="c1"># cm[0,0] = TP (true positives)</span>
+    <span class="c1"># cm[0,1] = FN (false negatives)</span>
+    
+    <span class="n">TP</span> <span class="o">=</span> <span class="n">cm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">FN</span> <span class="o">=</span> <span class="n">cm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="n">TP</span> <span class="o">+</span> <span class="n">FN</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="mf">0.0</span>
-    <span class="n">TP</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y_pred</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">FN</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y_pred</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="p">(</span><span class="n">FN</span> <span class="o">/</span> <span class="p">(</span><span class="n">TP</span> <span class="o">+</span> <span class="n">FN</span><span class="p">))</span> <span class="o">*</span> <span class="mi">100</span>
 
@@ -7719,6 +7729,7 @@ Use the `cross_validate` function from scikit-learn to evaluate each learner usi
 <summary>Hint 2:</summary>
 Calculate the mean accuracy and false negative rate for each learner. In addition, check the docs of "greater_is_better" argument of `make_scorer()`. Based on this documentation, what adaptation do you need to make to the code?
 </details>
+<p>Note, when using <code>sklearn.model_selection.cross_validate</code>, we use the argument <code>n_jobs=None</code> by default, this means that we haven't enabled the parallelism in <code>sklearn</code>. Therefore, it might take some while. You can also try different values of <code>n_jobs</code> and see how much speedup you can get on your computer.</p>
 <h2 id="Solution:">Solution:<a class="anchor-link" href="#Solution:">¶</a></h2>
 </div>
 </div>
@@ -7739,7 +7750,7 @@ Calculate the mean accuracy and false negative rate for each learner. In additio
 <span class="c1"># We will store the fold-wise accuracy scores for the boxplot.</span>
 <span class="n">accuracy_scores</span> <span class="o">=</span> <span class="p">{}</span>
 <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">for</span> <span class="n">learner_id</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">learners</span><span class="p">:</span>
+<span class="k">for</span> <span class="n">learner_id</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">learners</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
     <span class="n">cv_results</span> <span class="o">=</span> <span class="n">cross_validate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
                                 <span class="n">scoring</span><span class="o">=</span><span class="p">{</span><span class="s1">'accuracy'</span><span class="p">:</span> <span class="s1">'accuracy'</span><span class="p">,</span> <span class="s1">'fnr'</span><span class="p">:</span> <span class="n">fnr_scorer</span><span class="p">})</span>
     <span class="c1"># Store all fold accuracy scores for the boxplot.</span>
@@ -7896,7 +7907,7 @@ We have already recorded the continuous columns' indices in the `continuous_cols
 <span class="c1"># Standardize continuous features, otherwise sklearn will throw ConvergenceWarning.</span>
 <span class="n">X</span><span class="p">[</span><span class="n">continuous_cols</span><span class="p">]</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">continuous_cols</span><span class="p">])</span>
 
-<span class="n">learners</span> <span class="o">=</span> <span class="n">create_learners</span><span class="p">()</span>
+<span class="n">learners</span> <span class="o">=</span> <span class="n">create_learners</span><span class="p">()</span>  <span class="c1"># Now returns a dict of name -&gt; learner object</span>
 
 <span class="c1"># We define a function to run cross-validation for a single learner.</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">run_learner</span><span class="p">(</span><span class="n">learner_id</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
@@ -7907,7 +7918,7 @@ We have already recorded the continuous columns' indices in the `continuous_cols
     <span class="n">fnr_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cv_results</span><span class="p">[</span><span class="s1">'test_fnr'</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">learner_id</span><span class="p">,</span> <span class="n">cv_results</span><span class="p">[</span><span class="s1">'test_accuracy'</span><span class="p">],</span> <span class="n">acc_mean</span><span class="p">,</span> <span class="n">fnr_mean</span>
 
-<span class="n">parallel_results</span> <span class="o">=</span> <span class="p">[</span><span class="n">run_learner</span><span class="p">(</span><span class="n">learner_id</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span> <span class="k">for</span> <span class="n">learner_id</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">learners</span><span class="p">]</span>
+<span class="n">parallel_results</span> <span class="o">=</span> <span class="p">[</span><span class="n">run_learner</span><span class="p">(</span><span class="n">learner_id</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span> <span class="k">for</span> <span class="n">learner_id</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">learners</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
 
 <span class="c1"># Process results: gather fold-wise accuracy scores and aggregated results.</span>
 <span class="n">accuracy_scores</span> <span class="o">=</span> <span class="p">{}</span>
