@@ -7546,7 +7546,6 @@ a.anchor-link {
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">qmc</span>
 
 <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
 </pre></div>
@@ -7685,7 +7684,9 @@ a.anchor-link {
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">qmc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
 
 <span class="c1"># Use SciPy's Sobol sequence to generate 30 points in a 2-dimensional unit cube</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_sobol_design</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -7714,11 +7715,11 @@ a.anchor-link {
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>First 5 rows of Sobol design:
          x1        x2
-0  0.277161  0.509505
-1  0.529633  0.003023
-2  0.995925  0.963173
-3  0.248397  0.454017
-4  0.114907  0.819101
+0  0.216830  0.909018
+1  0.767219  0.173173
+2  0.590168  0.507804
+3  0.394517  0.270007
+4  0.283221  0.632319
 </pre>
 </div>
 </div>
@@ -7787,63 +7788,63 @@ a.anchor-link {
 <tbody>
 <tr>
 <th>0</th>
-<td>0.959239</td>
-<td>0.254505</td>
-<td>0.093399</td>
+<td>0.035258</td>
+<td>0.979281</td>
+<td>0.027160</td>
 </tr>
 <tr>
 <th>1</th>
-<td>0.372753</td>
-<td>0.660524</td>
-<td>-0.264236</td>
+<td>0.525245</td>
+<td>0.446224</td>
+<td>0.177478</td>
 </tr>
 <tr>
 <th>2</th>
-<td>0.043917</td>
-<td>0.136503</td>
-<td>0.000941</td>
+<td>0.833514</td>
+<td>0.621623</td>
+<td>-0.471656</td>
 </tr>
 <tr>
 <th>3</th>
-<td>0.631871</td>
-<td>0.792217</td>
-<td>0.389753</td>
+<td>0.351837</td>
+<td>0.092456</td>
+<td>-0.005870</td>
 </tr>
 <tr>
 <th>4</th>
-<td>0.533105</td>
-<td>0.089341</td>
-<td>0.007859</td>
+<td>0.412410</td>
+<td>0.687521</td>
+<td>-0.175514</td>
 </tr>
 <tr>
 <th>5</th>
-<td>0.134857</td>
-<td>0.995611</td>
-<td>0.214081</td>
+<td>0.901908</td>
+<td>0.220837</td>
+<td>0.005262</td>
 </tr>
 <tr>
 <th>6</th>
-<td>0.464220</td>
-<td>0.457179</td>
-<td>0.040137</td>
+<td>0.710757</td>
+<td>0.834256</td>
+<td>-0.440944</td>
 </tr>
 <tr>
 <th>7</th>
-<td>0.860038</td>
-<td>0.614120</td>
-<td>-0.305529</td>
+<td>0.228592</td>
+<td>0.363652</td>
+<td>-0.003469</td>
 </tr>
 <tr>
 <th>8</th>
-<td>0.793727</td>
-<td>0.195759</td>
-<td>-0.060036</td>
+<td>0.164900</td>
+<td>0.530089</td>
+<td>0.065406</td>
 </tr>
 <tr>
 <th>9</th>
-<td>0.382046</td>
-<td>0.852082</td>
-<td>-0.394144</td>
+<td>0.645603</td>
+<td>0.059486</td>
+<td>0.001721</td>
 </tr>
 </tbody>
 </table>
@@ -8035,7 +8036,7 @@ The pseudo code is like this:
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Best y in initial instance archive: -0.8433661857715185
+<pre>Best y in initial instance archive: -0.7320026991664957
 Initial evaluations: 50
 
 Final incumbent candidate from automated BO:
@@ -8106,12 +8107,12 @@ Final incumbent candidate from automated BO:
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs celltag_remove_cell" id="cell-id=547451ee552941b3">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell celltag_remove_cell" id="cell-id=547451ee552941b3">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
@@ -8119,7 +8120,6 @@ Final incumbent candidate from automated BO:
 <span class="kn">from</span><span class="w"> </span><span class="nn">skopt</span><span class="w"> </span><span class="kn">import</span> <span class="n">BayesSearchCV</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.svm</span><span class="w"> </span><span class="kn">import</span> <span class="n">SVC</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_scorer</span>
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">StratifiedKFold</span>
 
 <span class="c1"># Define the SVM classifier with a radial (RBF) kernel.</span>
@@ -8166,6 +8166,21 @@ Final incumbent candidate from automated BO:
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"cost (C) = </span><span class="si">{</span><span class="n">best_hp</span><span class="p">[</span><span class="s1">'C'</span><span class="p">]</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">, gamma = </span><span class="si">{</span><span class="n">best_hp</span><span class="p">[</span><span class="s1">'gamma'</span><span class="p">]</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Misclassification error: </span><span class="si">{</span><span class="n">best_misclassification_error</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Best HP configuration (shown in original scale, not log-transformed)
+cost (C) = 3856.87501, gamma = 0.18238
+Misclassification error: 0.134714
+</pre>
 </div>
 </div>
 </div>
