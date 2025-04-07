@@ -7542,7 +7542,6 @@ a.anchor-link {
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">fetch_openml</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.compose</span><span class="w"> </span><span class="kn">import</span> <span class="n">ColumnTransformer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">OneHotEncoder</span><span class="p">,</span> <span class="n">LabelEncoder</span>
@@ -7551,9 +7550,7 @@ a.anchor-link {
 <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
 
 <span class="c1"># Load the German credit dataset from OpenML</span>
-<span class="n">german</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="s2">"credit-g"</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">X</span> <span class="o">=</span> <span class="n">german</span><span class="o">.</span><span class="n">data</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">german</span><span class="o">.</span><span class="n">target</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="s2">"credit-g"</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="c1"># Encode the target variable: 'good' as 1 and 'bad' as 0</span>
 <span class="n">label_encoder</span> <span class="o">=</span> <span class="n">LabelEncoder</span><span class="p">()</span>
@@ -8374,7 +8371,7 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
                                                             n_jobs=None,
                                                             num_parallel_tree=None, ...))]),
                    n_iter=20, n_jobs=-1,
-                   param_distributions={'classifier__learning_rate': &lt;scipy.stats._distn_infrastructure.rv_continuous_frozen object at 0x14e987310&gt;,
+                   param_distributions={'classifier__learning_rate': &lt;scipy.stats._distn_infrastructure.rv_continuous_frozen object at 0x10690b670&gt;,
                                         'classifier__max_depth': [1, 2, 3, 4, 5,
                                                                   6, 7, 8]},
                    random_state=42,
@@ -8398,7 +8395,7 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
                                                             n_jobs=None,
                                                             num_parallel_tree=None, ...))]),
                    n_iter=20, n_jobs=-1,
-                   param_distributions={'classifier__learning_rate': &lt;scipy.stats._distn_infrastructure.rv_continuous_frozen object at 0x14e987310&gt;,
+                   param_distributions={'classifier__learning_rate': &lt;scipy.stats._distn_infrastructure.rv_continuous_frozen object at 0x10690b670&gt;,
                                         'classifier__max_depth': [1, 2, 3, 4, 5,
                                                                   6, 7, 8]},
                    random_state=42,
@@ -8525,7 +8522,6 @@ Since our original pipeline contains a preprocessor, we need to ensure that both
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
 
-<span class="c1"># Assume that random_search is already completed and holds the best parameters.</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
 
 
@@ -8580,7 +8576,6 @@ Since our original pipeline contains a preprocessor, we need to ensure that both
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
 
-<span class="c1"># Train the classifier with early stopping using the transformed validation set.</span>
 <span class="n">xgb_es</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
     <span class="n">X_train_es_trans</span><span class="p">,</span>
     <span class="n">y_train_es</span><span class="p">,</span>
