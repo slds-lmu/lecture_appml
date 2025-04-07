@@ -8682,7 +8682,8 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Check-the-positive-class-of-the-model.">Check the positive class of the model.<a class="anchor-link" href="#Check-the-positive-class-of-the-model.">¶</a></h3><details><summary> Hint 1:</summary>
+<h3 id="Check-the-positive-class-of-the-model.">Check the positive class of the model.<a class="anchor-link" href="#Check-the-positive-class-of-the-model.">¶</a></h3><p>Before inspecting the model's weights, we need to check the positive class. This is because the positive class determines which log odds are estimated, misidentifying it can lead to incorrect coefficient interpretation.</p>
+<details><summary> Hint 1:</summary>
     `logreg.class_` stores the negative and postive classes.
 </details>
 </div>
@@ -8697,10 +8698,6 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
-
-<span class="c1"># Why do we need to check the positive class?</span>
-<span class="c1"># The positive class determines which log odds are estimated. </span>
-<span class="c1"># Misidentifying it can lead to incorrect coefficient interpretation.</span>
 
 <span class="n">positive_class</span> <span class="o">=</span> <span class="n">logreg</span><span class="o">.</span><span class="n">classes_</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Positive class: </span><span class="si">{</span><span class="n">positive_class</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>

@@ -7663,7 +7663,7 @@ Use the `StratifiedKFold` class from scikit-learn to create a 4-fold cross-valid
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Define-a-custom-scorer-for-false-negative-rate-(FNR).">Define a custom scorer for false negative rate (FNR).<a class="anchor-link" href="#Define-a-custom-scorer-for-false-negative-rate-(FNR).">¶</a></h2><p>Unlike mlr3, sklearn's learners are not inherently equiped with FNR. So, we need to manually define it.</p>
+<h2 id="Define-a-custom-scorer-for-false-negative-rate-(FNR).">Define a custom scorer for false negative rate (FNR).<a class="anchor-link" href="#Define-a-custom-scorer-for-false-negative-rate-(FNR).">¶</a></h2><p>In case of a credit use case the false negative rate may be innteresting to study next to the accuracy. However, unlike mlr3, sklearn's learners are not inherently equiped with FNR. So, we need to manually define it.</p>
 <details>
 <summary>Hint 1:</summary>
 Define a custom scorer for false negative rate (FNR) with 1 as the positive class. The FNR is calculated as the ratio of false negatives (FN) to the sum of true positives (TP) and false negatives (FN). The FNR is then multiplied by 100 to get a percentage value.
@@ -7750,6 +7750,9 @@ Calculate the mean accuracy and false negative rate for each learner. In additio
 <span class="c1"># We will store the fold-wise accuracy scores for the boxplot.</span>
 <span class="n">accuracy_scores</span> <span class="o">=</span> <span class="p">{}</span>
 <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c1"># Note: we benchmark the models sequentially, so the simple for-loop might reduce the speed</span>
+<span class="c1"># In mlr3 the benchmark is parallalized. </span>
 <span class="k">for</span> <span class="n">learner_id</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">learners</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
     <span class="n">cv_results</span> <span class="o">=</span> <span class="n">cross_validate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
                                 <span class="n">scoring</span><span class="o">=</span><span class="p">{</span><span class="s1">'accuracy'</span><span class="p">:</span> <span class="s1">'accuracy'</span><span class="p">,</span> <span class="s1">'fnr'</span><span class="p">:</span> <span class="n">fnr_scorer</span><span class="p">})</span>
@@ -7801,7 +7804,8 @@ Calculate the mean accuracy and false negative rate for each learner. In additio
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Boxplot-the-benchmark-results">Boxplot the benchmark results<a class="anchor-link" href="#Boxplot-the-benchmark-results">¶</a></h2><details>
+<h2 id="Boxplot-the-benchmark-results">Boxplot the benchmark results<a class="anchor-link" href="#Boxplot-the-benchmark-results">¶</a></h2><p>To gain a comprehensive understanding of the model's performance, it's important not only to look at the average accuracy across the $k$-folds, but also to examine the variability in performance across the different folds. This helps assess the model's stability. In this case, a boxplot is a useful tool.</p>
+<details>
 <summary>Hint 1:</summary>
 Use the `matplotlib.pyplot.boxplot` to create a boxplot of the accuracy scores for each learner.
 </details>
