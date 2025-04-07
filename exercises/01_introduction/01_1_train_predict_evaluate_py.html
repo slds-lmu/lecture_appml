@@ -7578,14 +7578,13 @@ a.anchor-link {
 <div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">fetch_openml</span>
 <span class="c1"># openml sometimes throw future warnings, in these exercises we can ignore them</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">"ignore"</span><span class="p">)</span>
 
-<span class="c1"># Load the German Credit dataset from OpenML</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">fetch_openml</span>
 <span class="n">german_data</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"credit-g"</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">X</span> <span class="o">=</span> <span class="n">german_data</span><span class="o">.</span><span class="n">data</span>
 
@@ -8051,7 +8050,7 @@ Based on the ids, set up two datasets, one for training and one for testing/eval
 </details>
 <details>
 <summary>Hint 2:</summary>
-The class label is stored in the column "class".
+Use `X_train = X.loc[...]` and `y_train = y.loc[...]` to retrieve the training instances.
 </details>
 </div>
 </div>
@@ -8074,7 +8073,6 @@ The class label is stored in the column "class".
 <span class="n">train_ids</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">train_size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">test_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">train_ids</span><span class="p">))</span>
 
-<span class="c1"># Separate features and target (target is in column "class")</span>
 <span class="n">X_train</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train_ids</span><span class="p">]</span>
 <span class="n">y_train</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train_ids</span><span class="p">]</span>
 <span class="n">X_test</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">test_ids</span><span class="p">]</span>
@@ -8093,7 +8091,7 @@ The class label is stored in the column "class".
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="Create-a-Classification-Task">Create a Classification Task<a class="anchor-link" href="#Create-a-Classification-Task">¶</a></h2><h2 id="Train-a-Model-on-the-Training-Dataset">Train a Model on the Training Dataset<a class="anchor-link" href="#Train-a-Model-on-the-Training-Dataset">¶</a></h2><p>Next, we train a logistic regression model on the training data.</p>
 <details><summary>Hint:</summary>
-    Check the documentation of `sklearn.linear_model.LogisitcRegression`.
+    Check the documentation of [`sklearn.linear_model.LogisitcRegression`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html).
 </details>
 </div>
 </div>
@@ -8570,6 +8568,10 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
 
+<span class="c1"># Comment: statsmodels (link below) is an alternative to sklearn for fitting linear models</span>
+<span class="c1"># and it is closer to the linear models in R.</span>
+<span class="c1"># https://www.statsmodels.org/stable/user-guide.html#regression-and-linear-models</span>
+
 <span class="c1"># Print the model coefficients along with their corresponding feature names</span>
 <span class="n">coef</span> <span class="o">=</span> <span class="n">logreg</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">features</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">columns</span>
@@ -8695,6 +8697,10 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+
+<span class="c1"># Why do we need to check the positive class?</span>
+<span class="c1"># The positive class determines which log odds are estimated. </span>
+<span class="c1"># Misidentifying it can lead to incorrect coefficient interpretation.</span>
 
 <span class="n">positive_class</span> <span class="o">=</span> <span class="n">logreg</span><span class="o">.</span><span class="n">classes_</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Positive class: </span><span class="si">{</span><span class="n">positive_class</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
@@ -8826,17 +8832,13 @@ The classification error is defined as $1 - \text{accuracy}$.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Predicting-probabilities-instead-of-labels">Predicting probabilities instead of labels<a class="anchor-link" href="#Predicting-probabilities-instead-of-labels">¶</a></h2><p>Similarly, we can assess the performance of our model using the AUC. However, this requires predicted probabilities instead of predicted labels. Evaluate the model using the AUC. To do so, retrain the model with a learner that returns probabilities.</p>
+<h2 id="Predicting-probabilities-instead-of-labels">Predicting probabilities instead of labels<a class="anchor-link" href="#Predicting-probabilities-instead-of-labels">¶</a></h2><p>Similarly, we can assess the performance of our model using the AUC. However, this requires predicted probabilities instead of predicted labels. Evaluate the model using the AUC. To do so, we need to use the <code>predict_proba</code> method of the model.</p>
 <details>
 <summary>Hint 1:</summary>
-Use the `predict_proba` method of the logistic regression model to get the predicted probabilities.
-</details>
-<details>
-<summary>Hint 2:</summary>
 Map the true labels to binary: 1 if "good", else 0.
 </details>
 <details>
-<summary>Hint 3:</summary>
+<summary>Hint 2:</summary>
 Use the `roc_auc_score` function from `sklearn.metrics` to calculate the AUC.
 </details>
 </div>
@@ -8889,7 +8891,17 @@ Use the `roc_auc_score` function from `sklearn.metrics` to calculate the AUC.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Summary">Summary<a class="anchor-link" href="#Summary">¶</a></h2><p>In this exercise sheet we learned how to fit a logistic regression model on a training task and how to assess its performance on unseen test data. We showed how to split data manually into training and test data, but in most scenarios it is a call to resample or benchmark. We will learn more on this in the next sections.</p>
+<h2 id="Summary">Summary<a class="anchor-link" href="#Summary">¶</a></h2><p>In this exercise sheet we learned how to fit a logistic regression model using <code>sklearn.linear_models.LogisticRegression</code> on a training task and how to assess its performance on unseen test data. We showed how to split data manually into training and test data, but in most scenarios it is a call to resample or benchmark. We will learn more on this in the next sections.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=02e7c05b">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 </div>
 </div>
 </div>
