@@ -7752,7 +7752,7 @@ Calculate the mean accuracy and false negative rate for each learner. In additio
 <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
 
 <span class="c1"># Note: we benchmark the models sequentially, so the simple for-loop might reduce the speed</span>
-<span class="c1"># In mlr3 the benchmark is parallalized. </span>
+<span class="c1"># In contrast, the benchmark is fully parallelized in mlr3. </span>
 <span class="k">for</span> <span class="n">learner_id</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">learners</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
     <span class="n">cv_results</span> <span class="o">=</span> <span class="n">cross_validate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
                                 <span class="n">scoring</span><span class="o">=</span><span class="p">{</span><span class="s1">'accuracy'</span><span class="p">:</span> <span class="s1">'accuracy'</span><span class="p">,</span> <span class="s1">'fnr'</span><span class="p">:</span> <span class="n">fnr_scorer</span><span class="p">})</span>
