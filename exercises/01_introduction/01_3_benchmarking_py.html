@@ -7663,14 +7663,14 @@ Use the `StratifiedKFold` class from scikit-learn to create a 4-fold cross-valid
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Define-a-custom-scorer-for-false-negative-rate-(FNR).">Define a custom scorer for false negative rate (FNR).<a class="anchor-link" href="#Define-a-custom-scorer-for-false-negative-rate-(FNR).">¶</a></h2><p>In case of a credit use case the false negative rate may be innteresting to study next to the accuracy. However, unlike mlr3, sklearn's learners are not inherently equiped with FNR. So, we need to manually define it.</p>
+<h2 id="Define-a-custom-scorer-for-false-positive-rate-(FPR).">Define a custom scorer for false positive rate (FPR).<a class="anchor-link" href="#Define-a-custom-scorer-for-false-positive-rate-(FPR).">¶</a></h2><p>In case of a credit use case the false positive rate (FPR) may be innteresting to study next to the accuracy. However, unlike mlr3, sklearn's learners are not inherently equiped with FPR. So, we need to manually define it.</p>
 <details>
 <summary>Hint 1:</summary>
-Define a custom scorer for false negative rate (FNR) with 1 as the positive class. The FNR is calculated as the ratio of false negatives (FN) to the sum of true positives (TP) and false negatives (FN). The FNR is then multiplied by 100 to get a percentage value.
+Define a custom scorer for FPR with 1 as the positive class. The FPR is calculated as the ratio of false positive (FP) to the sum of true negative (TN) and false positives (FP). The FPR is then multiplied by 100 to get a percentage value.
 </details>
 <details>
 <summary>Hint 2:</summary>
-Use `sklearn.metrics.confusion_matrix` to compute the TP and FN, and use `sklearn.metrics.make_scorer` function to create a scorer object for the FNR. Set the `greater_is_better` argument to `False` because we want to minimize the FNR.
+Use `sklearn.metrics.confusion_matrix` to compute the FP and TN, and use `sklearn.metrics.make_scorer` function to create a scorer object for the FPR. Set the `greater_is_better` argument to `False` because we want to minimize the FPR.
 </details>
 </div>
 </div>
@@ -7685,30 +7685,29 @@ Use `sklearn.metrics.confusion_matrix` to compute the TP and FN, and use `sklear
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
 
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_scorer</span><span class="p">,</span> <span class="n">confusion_matrix</span>
 
-<span class="c1"># Define a custom scorer for false negative rate (FNR) with 1 as the positive class.</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">false_negative_rate_percent</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+<span class="c1"># Define a custom scorer for false positive rate (FPR) with 1 as the positive class.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">false_positive_rate_percent</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
     <span class="n">y_true</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
     <span class="n">y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span>
     
-    <span class="c1"># Use confusion_matrix to compute TP and FN</span>
+    <span class="c1"># Use confusion_matrix to compute TN and FP</span>
     <span class="n">cm</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
     <span class="c1"># For binary classification with 1 as positive class:</span>
-    <span class="c1"># cm[0,0] = TP (true positives)</span>
-    <span class="c1"># cm[0,1] = FN (false negatives)</span>
+    <span class="c1"># cm[1,1] = TN (true negatives)</span>
+    <span class="c1"># cm[1,0] = FP (false positives)</span>
     
-    <span class="n">TP</span> <span class="o">=</span> <span class="n">cm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-    <span class="n">FN</span> <span class="o">=</span> <span class="n">cm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">TN</span> <span class="o">=</span> <span class="n">cm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">FP</span> <span class="o">=</span> <span class="n">cm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
     
-    <span class="k">if</span> <span class="n">TP</span> <span class="o">+</span> <span class="n">FN</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">TN</span> <span class="o">+</span> <span class="n">FP</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="mf">0.0</span>
     
-    <span class="k">return</span> <span class="p">(</span><span class="n">FN</span> <span class="o">/</span> <span class="p">(</span><span class="n">TP</span> <span class="o">+</span> <span class="n">FN</span><span class="p">))</span> <span class="o">*</span> <span class="mi">100</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">FP</span> <span class="o">/</span> <span class="p">(</span><span class="n">TN</span> <span class="o">+</span> <span class="n">FP</span><span class="p">))</span> <span class="o">*</span> <span class="mi">100</span>
 
-<span class="c1"># The lower FNR, the better</span>
-<span class="n">fnr_scorer</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">false_negative_rate_percent</span><span class="p">,</span> <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="c1"># The lower FPR, the better</span>
+<span class="n">fpr_scorer</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">false_positive_rate_percent</span><span class="p">,</span> <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7755,22 +7754,22 @@ Calculate the mean accuracy and false negative rate for each learner. In additio
 <span class="c1"># In contrast, the benchmark is fully parallelized in mlr3. </span>
 <span class="k">for</span> <span class="n">learner_id</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">learners</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
     <span class="n">cv_results</span> <span class="o">=</span> <span class="n">cross_validate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
-                                <span class="n">scoring</span><span class="o">=</span><span class="p">{</span><span class="s1">'accuracy'</span><span class="p">:</span> <span class="s1">'accuracy'</span><span class="p">,</span> <span class="s1">'fnr'</span><span class="p">:</span> <span class="n">fnr_scorer</span><span class="p">})</span>
+                                <span class="n">scoring</span><span class="o">=</span><span class="p">{</span><span class="s1">'accuracy'</span><span class="p">:</span> <span class="s1">'accuracy'</span><span class="p">,</span> <span class="s1">'fpr'</span><span class="p">:</span> <span class="n">fpr_scorer</span><span class="p">})</span>
     <span class="c1"># Store all fold accuracy scores for the boxplot.</span>
     <span class="n">accuracy_scores</span><span class="p">[</span><span class="n">learner_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">cv_results</span><span class="p">[</span><span class="s1">'test_accuracy'</span><span class="p">]</span>
 
     <span class="n">acc_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cv_results</span><span class="p">[</span><span class="s1">'test_accuracy'</span><span class="p">])</span>
-    <span class="n">fnr_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cv_results</span><span class="p">[</span><span class="s1">'test_fnr'</span><span class="p">])</span>
+    <span class="n">fpr_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cv_results</span><span class="p">[</span><span class="s1">'test_fpr'</span><span class="p">])</span>
     <span class="c1"># According to the docs of "greater_is_better" argument of `make_scorer()`,</span>
     <span class="c1"># "greater_is_betterbool, default=True. Whether score_func is a score function (default), </span>
     <span class="c1">#  meaning high is good, or a loss function, meaning low is good. In the latter case, </span>
     <span class="c1">#  the scorer object will sign-flip the outcome of the score_func."</span>
 
-    <span class="c1"># Hence, we need to re-flip the sign of `fnr_mean`.</span>
+    <span class="c1"># Hence, we need to re-flip the sign of `fpr_mean`.</span>
     
     <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">'learner_id'</span><span class="p">:</span> <span class="n">learner_id</span><span class="p">,</span>
                     <span class="s1">'classif.acc'</span><span class="p">:</span> <span class="n">acc_mean</span><span class="p">,</span>
-                    <span class="s1">'classif.fn'</span><span class="p">:</span> <span class="o">-</span> <span class="n">fnr_mean</span><span class="p">})</span>
+                    <span class="s1">'classif.fpr'</span><span class="p">:</span> <span class="o">-</span> <span class="n">fpr_mean</span><span class="p">})</span>
 
 <span class="n">results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">results_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
@@ -7786,12 +7785,12 @@ Calculate the mean accuracy and false negative rate for each learner. In additio
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>        learner_id  classif.acc  classif.fn
-0  classif.log_reg        0.760   12.285714
-1     classif.knn3        0.643   19.857143
-2     classif.knn4        0.610   31.428571
-3     classif.knn5        0.667   15.571429
-4     classif.knn6        0.652   21.857143
+<pre>        learner_id  classif.acc  classif.fpr
+0  classif.log_reg        0.760    51.333333
+1     classif.knn3        0.643    72.666667
+2     classif.knn4        0.610    56.666667
+3     classif.knn5        0.667    74.666667
+4     classif.knn6        0.652    65.000000
 </pre>
 </div>
 </div>
@@ -7916,22 +7915,22 @@ We have already recorded the continuous columns' indices in the `continuous_cols
 <span class="c1"># We define a function to run cross-validation for a single learner.</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">run_learner</span><span class="p">(</span><span class="n">learner_id</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
     <span class="n">cv_results</span> <span class="o">=</span> <span class="n">cross_validate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
-                    <span class="n">scoring</span><span class="o">=</span><span class="p">{</span><span class="s1">'accuracy'</span><span class="p">:</span> <span class="s1">'accuracy'</span><span class="p">,</span> <span class="s1">'fnr'</span><span class="p">:</span> <span class="n">fnr_scorer</span><span class="p">},</span>
+                    <span class="n">scoring</span><span class="o">=</span><span class="p">{</span><span class="s1">'accuracy'</span><span class="p">:</span> <span class="s1">'accuracy'</span><span class="p">,</span> <span class="s1">'fpr'</span><span class="p">:</span> <span class="n">fpr_scorer</span><span class="p">},</span>
                     <span class="n">n_jobs</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
     <span class="n">acc_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cv_results</span><span class="p">[</span><span class="s1">'test_accuracy'</span><span class="p">])</span>
-    <span class="n">fnr_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cv_results</span><span class="p">[</span><span class="s1">'test_fnr'</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">learner_id</span><span class="p">,</span> <span class="n">cv_results</span><span class="p">[</span><span class="s1">'test_accuracy'</span><span class="p">],</span> <span class="n">acc_mean</span><span class="p">,</span> <span class="n">fnr_mean</span>
+    <span class="n">fpr_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cv_results</span><span class="p">[</span><span class="s1">'test_fpr'</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">learner_id</span><span class="p">,</span> <span class="n">cv_results</span><span class="p">[</span><span class="s1">'test_accuracy'</span><span class="p">],</span> <span class="n">acc_mean</span><span class="p">,</span> <span class="n">fpr_mean</span>
 
 <span class="n">parallel_results</span> <span class="o">=</span> <span class="p">[</span><span class="n">run_learner</span><span class="p">(</span><span class="n">learner_id</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span> <span class="k">for</span> <span class="n">learner_id</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">learners</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
 
 <span class="c1"># Process results: gather fold-wise accuracy scores and aggregated results.</span>
 <span class="n">accuracy_scores</span> <span class="o">=</span> <span class="p">{}</span>
 <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">for</span> <span class="n">learner_id</span><span class="p">,</span> <span class="n">scores</span><span class="p">,</span> <span class="n">acc_mean</span><span class="p">,</span> <span class="n">fnr_mean</span> <span class="ow">in</span> <span class="n">parallel_results</span><span class="p">:</span>
+<span class="k">for</span> <span class="n">learner_id</span><span class="p">,</span> <span class="n">scores</span><span class="p">,</span> <span class="n">acc_mean</span><span class="p">,</span> <span class="n">fpr_mean</span> <span class="ow">in</span> <span class="n">parallel_results</span><span class="p">:</span>
     <span class="n">accuracy_scores</span><span class="p">[</span><span class="n">learner_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">scores</span>
     <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">'learner_id'</span><span class="p">:</span> <span class="n">learner_id</span><span class="p">,</span>
                     <span class="s1">'classif.acc'</span><span class="p">:</span> <span class="n">acc_mean</span><span class="p">,</span>
-                    <span class="s1">'classif.fn'</span><span class="p">:</span> <span class="o">-</span> <span class="n">fnr_mean</span><span class="p">})</span>
+                    <span class="s1">'classif.fp'</span><span class="p">:</span> <span class="o">-</span> <span class="n">fpr_mean</span><span class="p">})</span>
 
 <span class="n">results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
 <span class="n">results_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
@@ -7967,7 +7966,7 @@ We have already recorded the continuous columns' indices in the `continuous_cols
 <th></th>
 <th>learner_id</th>
 <th>classif.acc</th>
-<th>classif.fn</th>
+<th>classif.fp</th>
 </tr>
 </thead>
 <tbody>
@@ -7975,31 +7974,31 @@ We have already recorded the continuous columns' indices in the `continuous_cols
 <th>0</th>
 <td>classif.log_reg</td>
 <td>0.758</td>
-<td>11.857143</td>
+<td>53.000000</td>
 </tr>
 <tr>
 <th>1</th>
 <td>classif.knn3</td>
 <td>0.707</td>
-<td>15.714286</td>
+<td>61.000000</td>
 </tr>
 <tr>
 <th>2</th>
 <td>classif.knn4</td>
 <td>0.678</td>
-<td>24.714286</td>
+<td>49.666667</td>
 </tr>
 <tr>
 <th>3</th>
 <td>classif.knn5</td>
 <td>0.722</td>
-<td>11.714286</td>
+<td>65.333333</td>
 </tr>
 <tr>
 <th>4</th>
 <td>classif.knn6</td>
 <td>0.704</td>
-<td>18.714286</td>
+<td>55.000000</td>
 </tr>
 </tbody>
 </table>
