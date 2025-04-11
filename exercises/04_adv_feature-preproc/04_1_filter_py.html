@@ -7549,9 +7549,8 @@ a.anchor-link {
 
 <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
 
-<span class="n">data</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">'credit-g'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">X_raw</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">map</span><span class="p">({</span><span class="s1">'good'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'bad'</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+<span class="n">X_raw</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">'credit-g'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">map</span><span class="p">({</span><span class="s1">'good'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'bad'</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
 <span class="c1"># Separate numerical and categorical features</span>
 <span class="n">categorical_features</span> <span class="o">=</span> <span class="n">X_raw</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s1">'category'</span><span class="p">,</span> <span class="s1">'object'</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span>
@@ -7776,7 +7775,7 @@ Use `SelectKBest(score_func=mutual_info_classif, k=5)` inside a `Pipeline` to fi
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>Original task shape: 1000 samples and 20 features.
 Filtered task shape: 1000 samples and 5 features.
-Selected features based on Information Gain: ['duration', 'installment_commitment', 'checking_status', 'employment', 'other_payment_plans']
+Selected features based on Information Gain: ['duration', 'checking_status', 'property_magnitude', 'other_payment_plans', 'foreign_worker']
 </pre>
 </div>
 </div>
@@ -7850,8 +7849,8 @@ Use `pipe.set_params()` to adjust the number of selected features (`k`) without 
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>5-Fold CV Error Rate (with 5 selected features): 0.302
-5-Fold CV Error Rate (with 2 selected features): 0.265
+<pre>5-Fold CV Error Rate (with 5 selected features): 0.309
+5-Fold CV Error Rate (with 2 selected features): 0.281
 </pre>
 </div>
 </div>
