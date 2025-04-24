@@ -7679,7 +7679,7 @@ Fold 2: 0.4292
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="2-Block-Resampling">2 Block Resampling<a class="anchor-link" href="#2-Block-Resampling">¶</a></h2><p>An additional concern when specifying resampling is respecting the natural grouping of the data. Blocking refers to the situation where subsets of observations belong together and must not be separated during resampling. Hence, for one train/test set pair the entire block is either in the training set or in the test set.</p>
-<p>In the following example, we will consider the Breast Cancer dataset from scikit-learn:</p>
+<p>In the following example, we will consider the Breast Cancer dataset from OpenML:</p>
 </div>
 </div>
 </div>
@@ -7691,17 +7691,10 @@ Fold 2: 0.4292
 <div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_breast_cancer</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">fetch_openml</span>
 
-<span class="c1"># Load the breast cancer dataset from scikit-learn</span>
-<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="c1"># Note: In the sklearn version of "breast cancer" dataset, there is no ID column, while the "mlbench" in R code has.</span>
-<span class="c1"># TODO: @matthias, is there any other option for loading the breast cancer dataset with an ID column?</span>
-
-<span class="c1"># We simulate a grouping variable 'Id' by assigning each observation a patient id between 1 and 100.</span>
-<span class="n">num_patients</span> <span class="o">=</span> <span class="mi">100</span>
-<span class="n">X</span><span class="p">[</span><span class="s2">"Id"</span><span class="p">]</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_patients</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="c1"># Load the breast cancer dataset from openml with dataset ID 46591</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="n">data_id</span><span class="o">=</span><span class="mi">46591</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7714,7 +7707,7 @@ Fold 2: 0.4292
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>In this dataset, we simulate a scenario where several observations have the same Id (patient identifier),
+<p>In this dataset, we simulate a scenario where several observations have the same patient identifier (column "Sample code number"),
 which implies these are samples taken from the same patient at different times.</p>
 <h2 id="2.1-Count-groups">2.1 Count groups<a class="anchor-link" href="#2.1-Count-groups">¶</a></h2><p>Let's count how many observations actually have the same Id more than once:</p>
 </div>
@@ -7730,7 +7723,8 @@ which implies these are samples taken from the same patient at different times.<
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
 
-<span class="n">id_counts</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="s2">"Id"</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+<span class="n">id_col</span> <span class="o">=</span> <span class="s1">'Sample code number'</span>
+<span class="n">id_counts</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">id_col</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
 <span class="n">num_multiple</span> <span class="o">=</span> <span class="p">(</span><span class="n">id_counts</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Number of Ids with more than one observation: </span><span class="si">{</span><span class="n">num_multiple</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
@@ -7745,7 +7739,7 @@ which implies these are samples taken from the same patient at different times.<
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Number of Ids with more than one observation: 99
+<pre>Number of Ids with more than one observation: 46
 </pre>
 </div>
 </div>
@@ -7770,7 +7764,7 @@ which implies these are samples taken from the same patient at different times.<
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="2.2-&amp;-2.3-Instantiate-GroupKFold">2.2 &amp; 2.3 Instantiate GroupKFold<a class="anchor-link" href="#2.2-&amp;-2.3-Instantiate-GroupKFold">¶</a></h2><p>In scikit-learn, block resampling is performed using <code>GroupKFold</code>. This method ensures that observations belonging to the same group, identified by the grouping variable (e.g., Id), are kept together within the same fold. Below we set up block resampling using the Id column as the grouping variable.</p>
-<p>Then we check which fold is each sample assigned to. I.e. we print out a table containing two columns "Id" and "fold".</p>
+<p>Then we check which fold is each sample assigned to. I.e. we print out a table containing two columns "Sample code number" and "fold".</p>
 </div>
 </div>
 </div>
@@ -7789,12 +7783,12 @@ which implies these are samples taken from the same patient at different times.<
 <span class="n">gkf</span> <span class="o">=</span> <span class="n">GroupKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 
 <span class="c1"># Create a mapping from each group (Id) to a fold number.</span>
-<span class="n">fold_assignments</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">"Id"</span><span class="p">,</span> <span class="s2">"fold"</span><span class="p">])</span>
-<span class="k">for</span> <span class="n">fold</span><span class="p">,</span> <span class="p">(</span><span class="n">train_idx</span><span class="p">,</span> <span class="n">test_idx</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gkf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="s2">"Id"</span><span class="p">]),</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-    <span class="n">unique_ids</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">test_idx</span><span class="p">][</span><span class="s2">"Id"</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-    <span class="n">temp_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"Id"</span><span class="p">:</span> <span class="n">unique_ids</span><span class="p">,</span> <span class="s2">"fold"</span><span class="p">:</span> <span class="n">fold</span><span class="p">})</span>
+<span class="n">fold_assignments</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">id_col</span><span class="p">,</span> <span class="s2">"fold"</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">fold</span><span class="p">,</span> <span class="p">(</span><span class="n">train_idx</span><span class="p">,</span> <span class="n">test_idx</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gkf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">id_col</span><span class="p">]),</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">unique_ids</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">test_idx</span><span class="p">][</span><span class="n">id_col</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+    <span class="n">temp_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">id_col</span><span class="p">:</span> <span class="n">unique_ids</span><span class="p">,</span> <span class="s2">"fold"</span><span class="p">:</span> <span class="n">fold</span><span class="p">})</span>
     <span class="n">fold_assignments</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">fold_assignments</span><span class="p">,</span> <span class="n">temp_df</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">fold_assignments</span> <span class="o">=</span> <span class="n">fold_assignments</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">"Id"</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">fold_assignments</span> <span class="o">=</span> <span class="n">fold_assignments</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">id_col</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Block resampling instance (group to fold mapping):"</span><span class="p">)</span>
 <span class="n">fold_assignments</span>
 </pre></div>
@@ -7834,34 +7828,34 @@ which implies these are samples taken from the same patient at different times.<
 <thead>
 <tr style="text-align: right;">
 <th></th>
-<th>Id</th>
+<th>Sample code number</th>
 <th>fold</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <th>0</th>
-<td>1</td>
-<td>5</td>
+<td>61634</td>
+<td>4</td>
 </tr>
 <tr>
 <th>1</th>
-<td>2</td>
-<td>3</td>
+<td>63375</td>
+<td>4</td>
 </tr>
 <tr>
 <th>2</th>
+<td>76389</td>
 <td>3</td>
-<td>1</td>
 </tr>
 <tr>
 <th>3</th>
-<td>4</td>
-<td>5</td>
+<td>95719</td>
+<td>2</td>
 </tr>
 <tr>
 <th>4</th>
-<td>5</td>
+<td>128059</td>
 <td>1</td>
 </tr>
 <tr>
@@ -7870,33 +7864,33 @@ which implies these are samples taken from the same patient at different times.<
 <td>...</td>
 </tr>
 <tr>
-<th>94</th>
-<td>96</td>
-<td>2</td>
+<th>640</th>
+<td>1369821</td>
+<td>1</td>
 </tr>
 <tr>
-<th>95</th>
-<td>97</td>
-<td>4</td>
-</tr>
-<tr>
-<th>96</th>
-<td>98</td>
-<td>4</td>
-</tr>
-<tr>
-<th>97</th>
-<td>99</td>
-<td>3</td>
-</tr>
-<tr>
-<th>98</th>
-<td>100</td>
+<th>641</th>
+<td>1371026</td>
 <td>5</td>
+</tr>
+<tr>
+<th>642</th>
+<td>1371920</td>
+<td>4</td>
+</tr>
+<tr>
+<th>643</th>
+<td>8233704</td>
+<td>1</td>
+</tr>
+<tr>
+<th>644</th>
+<td>13454352</td>
+<td>2</td>
 </tr>
 </tbody>
 </table>
-<p>99 rows × 2 columns</p>
+<p>645 rows × 2 columns</p>
 </div>
 </div>
 </div>
@@ -7923,7 +7917,7 @@ which implies these are samples taken from the same patient at different times.<
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
 
-<span class="n">id_counts</span> <span class="o">=</span> <span class="n">fold_assignments</span><span class="p">[</span><span class="s2">"Id"</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+<span class="n">id_counts</span> <span class="o">=</span> <span class="n">fold_assignments</span><span class="p">[</span><span class="n">id_col</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
 
 <span class="c1"># Identify any Id that appears more than once.</span>
 <span class="n">duplicates</span> <span class="o">=</span> <span class="n">id_counts</span><span class="p">[</span><span class="n">id_counts</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
@@ -7958,9 +7952,12 @@ which implies these are samples taken from the same patient at different times.<
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="3-Custom-Performance-Measures">3 Custom Performance Measures<a class="anchor-link" href="#3-Custom-Performance-Measures">¶</a></h2><p>Many domain applications require custom measures for performance evaluations not supported in scikit-learn. You can inspect all available measures by checking the scikit-learn documentation on metrics (<code>sklearn.metrics</code>). Luckily, you can design your own measures for evaluating model performance. To do so, we simply define a custom scoring function that takes as input the true and predicted values. Let’s see how this works in practice. Consider a regression measure that scores a prediction as 1 if the difference between the true and predicted values is less than one standard deviation of the true values, and scores the prediction as 0 otherwise. In mathematical terms, this would be defined as $ f(y, \hat{y}) = \frac{1}{n} \sum_{i=1}^{n} \mathbb{I}(|y_i - \hat{y}_i| &lt; \sigma_y) $, where $\sigma_y$ is the standard deviation of the true values and $\mathbb{I}$ is the indicator function. To create such a measure in Python, we implement a scoring function as follows:</p>
+<h2 id="3-Custom-Performance-Measures">3 Custom Performance Measures<a class="anchor-link" href="#3-Custom-Performance-Measures">¶</a></h2><p>Many domain applications require custom measures for performance evaluations not supported in scikit-learn. You can inspect all available measures by checking the scikit-learn documentation on metrics (<code>sklearn.metrics</code>). Luckily, you can design your own measures for evaluating model performance. To do so, we simply define a custom function that takes as input the true and predicted values and returns the performance measure. Let’s see how this works in practice. Consider a regression measure that scores a prediction as 1 if the difference between the true and predicted values is less than one standard deviation of the true values, and scores the prediction as 0 otherwise. In mathematical terms, this would be defined as $ f(y, \hat{y}) = \frac{1}{n} \sum_{i=1}^{n} \mathbb{I}(|y_i - \hat{y}_i| &lt; \sigma_y) $, where $\sigma_y$ is the standard deviation of the true values and $\mathbb{I}$ is the indicator function. To create such a measure in Python, we implement a performance measure as follows:</p>
 <details><summary>Hint 1:</summary>
-To create a custom scoring function, we need to define a function that takes the true values and predicted values as input and returns a value, and the value serves as a performance evaluation for the model. The value can be something similar to e.g. accuracy, but also can be a loss. We can then use `make_scorer` from `sklearn.metrics` to convert this function into a scorer object that can be used with scikit-learn's cross-validation and model selection tools.
+To create a custom performance evaluation function, we need to define a function that takes the true values and predicted values as input and returns a value, and the value serves as a performance evaluation for the model. The value can be something similar to e.g. accuracy, but also can be a loss. We can then use `make_scorer` from `sklearn.metrics` to convert this function into a scorer object that can be used with scikit-learn's cross-validation and model selection tools.
+</details>
+<details><summary>Hint 2:</summary>
+In scikit-learn, there are two types of evaluation metrics: score functions and loss functions. Score functions (like accuracy, $R^2$) return higher values for better models - we want to maximize these. Loss functions (like MSE, MAE) return lower values for better models - we want to minimize these. When using `make_scorer`, you need to specify `greater_is_better=True` for score functions (the default) and `greater_is_better=False` for loss functions. Alternatively, you can negate a loss function to convert it to a score function.
 </details>
 </div>
 </div>
@@ -8098,7 +8095,7 @@ To create a custom scoring function, we need to define a function that takes the
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">data_mtcars</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">get_rdataset</span><span class="p">(</span><span class="s2">"mtcars"</span><span class="p">,</span> <span class="s2">"datasets"</span><span class="p">)</span>
@@ -8122,7 +8119,7 @@ To create a custom scoring function, we need to define a function that takes the
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[11]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[ ]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <style>#sk-container-id-1 {
   /* Definition of color scheme common for light and dark mode */

@@ -7559,7 +7559,7 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Parameter-spaces">Parameter spaces<a class="anchor-link" href="#Parameter-spaces">¶</a></h2><p>Define a meaningful search space for the HPs k and scale. You can check the scikit-learn documentation for KNeighborsClassifier for an overview of the k-NN classifier.</p>
+<h2 id="Parameter-spaces">Parameter spaces<a class="anchor-link" href="#Parameter-spaces">¶</a></h2><p>Define a meaningful search space for the hyperparameters k and scale. You can check the scikit-learn documentation for KNeighborsClassifier for an overview of the k-NN classifier.</p>
 <details><summary>Hint 1: </summary>
 In scikit-learn, hyperparameters are defined via dictionaries when setting up a search space. According to the docs of [RandomizedSearchCV](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.RandomizedSearchCV.html):
 
@@ -7658,15 +7658,11 @@ The elements required for the tuning are:
 <span class="n">random_search</span> <span class="o">=</span> <span class="n">RandomizedSearchCV</span><span class="p">(</span>
     <span class="n">estimator</span><span class="o">=</span><span class="n">pipeline</span><span class="p">,</span>
     <span class="n">param_distributions</span><span class="o">=</span><span class="n">param_distributions</span><span class="p">,</span>
-    <span class="n">n_iter</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
-    <span class="n">cv</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">n_iter</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>  <span class="c1"># 40 different HPCs</span>
+    <span class="n">cv</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>  <span class="c1"># 3-fold cross-validation</span>
     <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
-    <span class="n">n_jobs</span><span class="o">=</span><span class="mi">4</span>
+    <span class="n">n_jobs</span><span class="o">=</span><span class="mi">4</span>  <span class="c1"># Parallel processing with 4 jobs</span>
 <span class="p">)</span>
-<span class="c1"># Set up RandomizedSearchCV to mimic:</span>
-<span class="c1"># - 3-fold cross validation,</span>
-<span class="c1"># - 40 evaluations (n_iter=40),</span>
-<span class="c1"># - Parallel processing with 4 jobs.</span>
 
 <span class="c1"># Run hyperparameter optimization</span>
 <span class="n">random_search</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>

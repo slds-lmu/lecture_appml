@@ -7593,8 +7593,8 @@ a.anchor-link {
 <ol>
 <li><p>Generate and evaluate an initial design</p>
 </li>
-<li><p>Loop:
-2.1. Fit a surrogate model on the archive of all observations made so far to model the unknown black box function.</p>
+<li><p>Loop:</p>
+<p>2.1. Fit a surrogate model on the archive of all observations made so far to model the unknown black box function.</p>
 <p>2.2. Optimize an acquisition function to determine which points of the search space are promising candidate(s) that should be evaluated next.</p>
 <p>2.3. Evaluate the next candidate(s) and update the archive of all observations made so far.</p>
 <p>2.4. Check if a given termination criterion is met; if not, go back to step 2.1.</p>
@@ -7667,9 +7667,9 @@ a.anchor-link {
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>As you can see, this is essentially a DataFrame encoding the set of hyperparameter configurations we want to evaluate first, before any of the real BO magic starts.</p>
-<h3 id="Task">Task<a class="anchor-link" href="#Task">¶</a></h3><p>Construct a more refined initial design, using SciPy to implement a Sobol design with 30 points, which has better coverage properties than grid or random search. If you are interested in why the Sobol design has favorable properties, you can take a look at the original paper by Niederreiter (1988).</p>
+<h3 id="Task">Task<a class="anchor-link" href="#Task">¶</a></h3><p>Construct a more refined initial design, using SciPy to implement a Sobol design with 30 points, which has better coverage properties than grid or random search. If you are interested in why the Sobol design has favorable properties, you can take a look at the original paper by <a href="https://www.sciencedirect.com/science/article/pii/0022314X8890025X?via%3Dihub">Niederreiter (1988)</a>.</p>
 <details><summary>Hint: </summary> 
-    Wrap the code as a function as we will use it later. The signature should be `def get_sobol_design(n: int, d: int = 2) -&gt; pd.DataFrame:` and the docstring is: # Use SciPy's Sobol sequence to generate `n` points in a `d`-dimensional unit cube.
+    Wrap the code as a function as we will use it later. The signature should be `def get_sobol_design(n: int, d: int = 2) -&gt; pd.DataFrame:` and the function uses [`scipy.stats.qmc.Sobol`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.qmc.Sobol.html) sequence to generate `n` points in a `d`-dimensional unit cube.
 </details>
 </div>
 </div>
@@ -7715,11 +7715,11 @@ a.anchor-link {
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>First 5 rows of Sobol design:
          x1        x2
-0  0.216830  0.909018
-1  0.767219  0.173173
-2  0.590168  0.507804
-3  0.394517  0.270007
-4  0.283221  0.632319
+0  0.037234  0.858525
+1  0.682477  0.238989
+2  0.913639  0.702771
+3  0.308027  0.332259
+4  0.467227  0.520526
 </pre>
 </div>
 </div>
@@ -7788,63 +7788,63 @@ a.anchor-link {
 <tbody>
 <tr>
 <th>0</th>
-<td>0.035258</td>
-<td>0.979281</td>
-<td>0.027160</td>
+<td>0.481464</td>
+<td>0.862594</td>
+<td>0.278560</td>
 </tr>
 <tr>
 <th>1</th>
-<td>0.525245</td>
-<td>0.446224</td>
-<td>0.177478</td>
+<td>0.510817</td>
+<td>0.194880</td>
+<td>0.029425</td>
 </tr>
 <tr>
 <th>2</th>
-<td>0.833514</td>
-<td>0.621623</td>
-<td>-0.471656</td>
+<td>0.912156</td>
+<td>0.730913</td>
+<td>0.180162</td>
 </tr>
 <tr>
 <th>3</th>
-<td>0.351837</td>
-<td>0.092456</td>
-<td>-0.005870</td>
+<td>0.062605</td>
+<td>0.336613</td>
+<td>0.010698</td>
 </tr>
 <tr>
 <th>4</th>
-<td>0.412410</td>
-<td>0.687521</td>
-<td>-0.175514</td>
+<td>0.166602</td>
+<td>0.508670</td>
+<td>0.059739</td>
 </tr>
 <tr>
 <th>5</th>
-<td>0.901908</td>
-<td>0.220837</td>
-<td>0.005262</td>
+<td>0.824763</td>
+<td>0.433738</td>
+<td>-0.256165</td>
 </tr>
 <tr>
 <th>6</th>
-<td>0.710757</td>
-<td>0.834256</td>
-<td>-0.440944</td>
+<td>0.720281</td>
+<td>0.898313</td>
+<td>-0.619996</td>
 </tr>
 <tr>
 <th>7</th>
-<td>0.228592</td>
-<td>0.363652</td>
-<td>-0.003469</td>
+<td>0.257348</td>
+<td>0.034279</td>
+<td>-0.000269</td>
 </tr>
 <tr>
 <th>8</th>
-<td>0.164900</td>
-<td>0.530089</td>
-<td>0.065406</td>
+<td>0.325177</td>
+<td>0.641783</td>
+<td>-0.246670</td>
 </tr>
 <tr>
 <th>9</th>
-<td>0.645603</td>
-<td>0.059486</td>
-<td>0.001721</td>
+<td>0.666916</td>
+<td>0.287026</td>
+<td>0.009520</td>
 </tr>
 </tbody>
 </table>
@@ -7923,17 +7923,58 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="2-Run-Bayesian-Optimization-Loop">2 Run Bayesian Optimization Loop<a class="anchor-link" href="#2-Run-Bayesian-Optimization-Loop">¶</a></h2><p>Note that due to the discrepancy between mlr3 and scikit-optimize, we dont't need the 1.4 and 1.5 sections in the R exercise.</p>
-<p>The Bayesian optimization loop iteratively updates the surrogate model and selects the next most promising candidate by optimizing an acquisition function. We'll use Differential Evolution to optimize the Expected Improvement (EI) acquisition function.</p>
-<p>Task: Implement the Bayesian optimization loop to find the optimal hyperparameter configuration by iteratively updating the surrogate model and optimizing the acquisition function.</p>
+<h2 id="2-Bayesian-Optimization">2 Bayesian Optimization<a class="anchor-link" href="#2-Bayesian-Optimization">¶</a></h2><p>Note that due to the discrepancy between mlr3 and scikit-optimize, we dont't need the 1.4 and 1.5 sections in the R exercise.</p>
+<p>The Bayesian optimization iteratively updates the surrogate model and selects the next most promising candidate by optimizing an acquisition function.</p>
+<h3 id="2.1-Implementation-of-the-Acquisition-Function">2.1 Implementation of the Acquisition Function<a class="anchor-link" href="#2.1-Implementation-of-the-Acquisition-Function">¶</a></h3><p>We first implement the Expected Improvement (EI) acquisition function.</p>
 <details><summary>Hint 1:</summary>
-    Use `scipy.optimize.differential_evolution` as the optimizer for the acquisition function.
     Use `skopt.aquisition.gaussian_ei` as the acquisition function.
 </details>
 <details><summary>Hint 2:</summary>
     You need to define a negative expeteced improvement function that captures the current y_best. Why negative ei? Because x_next = argmax_x EI(x), but the scipy.optimize solves argmin problems.
 </details>
-<details><summary>Hint 3:</summary>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=b3afac08">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">skopt.acquisition</span><span class="w"> </span><span class="kn">import</span> <span class="n">gaussian_ei</span> 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">make_neg_ei</span><span class="p">(</span><span class="n">y_best</span><span class="p">,</span> <span class="n">gaussian_process</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Define a closure to generate a negative expected improvement function that captures the current y_best</span>
+<span class="sd">    Why negative ei? Because x_next = argmax_x EI(x), but the scipy.optimize solves argmin problems.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_neg_ei</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># Compute expected improvement using skopt's gaussian_ei; xi controls exploration-exploitation</span>
+        <span class="n">ei</span> <span class="o">=</span> <span class="n">gaussian_ei</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">gaussian_process</span><span class="p">,</span> <span class="n">y_opt</span><span class="o">=</span><span class="n">y_best</span><span class="p">,</span> <span class="n">xi</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">ei</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">_neg_ei</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ff5d0b88">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="2.2-Implementation-of-the-Bayesian-Optimization-Loop">2.2 Implementation of the Bayesian Optimization Loop<a class="anchor-link" href="#2.2-Implementation-of-the-Bayesian-Optimization-Loop">¶</a></h3><p>Task: We use Differential Evolution to optimize the EI acquisition function. Implement the Bayesian optimization loop to find the optimal hyperparameter configuration by iteratively updating the surrogate model and optimizing the acquisition function.</p>
+<details><summary>Hint 1:</summary>
+    Use `scipy.optimize.differential_evolution` as the optimizer for the acquisition function.
+</details>
+<details><summary>Hint 2:</summary>
 The pseudo code is like this:
 
 <pre><code>1. Re-create the data (50 initial instances) as the initial archive data (which we will gradually expand).
@@ -7965,13 +8006,12 @@ The pseudo code is like this:
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">differential_evolution</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">skopt.acquisition</span><span class="w"> </span><span class="kn">import</span> <span class="n">gaussian_ei</span> 
 
 <span class="c1"># Re-create the data</span>
 <span class="n">archive_data</span> <span class="o">=</span> <span class="n">get_sobol_design</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
@@ -7980,16 +8020,6 @@ The pseudo code is like this:
 
 <span class="c1"># Define bounds corresponding to our domain</span>
 <span class="n">bounds</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
-
-<span class="c1"># Define a closure to generate a negative expected improvement function that captures the current y_best</span>
-<span class="c1"># Why negative ei? Because x_next = argmax_x EI(x), but the scipy.optimize solves argmin problems.</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">make_neg_ei</span><span class="p">(</span><span class="n">y_best</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_neg_ei</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="c1"># Compute expected improvement using skopt's gaussian_ei; xi controls exploration-exploitation</span>
-        <span class="n">ei</span> <span class="o">=</span> <span class="n">gaussian_ei</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">gpr</span><span class="p">,</span> <span class="n">y_opt</span><span class="o">=</span><span class="n">y_best</span><span class="p">,</span> <span class="n">xi</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
-        <span class="k">return</span> <span class="o">-</span><span class="n">ei</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">_neg_ei</span>
 
 <span class="n">n_evals</span> <span class="o">=</span> <span class="mi">200</span>
 <span class="n">current_evals</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">archive_data</span><span class="p">)</span>
@@ -8005,7 +8035,7 @@ The pseudo code is like this:
     <span class="n">y_best</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
     
     <span class="c1"># Create a negative EI function based on the current best value</span>
-    <span class="n">neg_ei</span> <span class="o">=</span> <span class="n">make_neg_ei</span><span class="p">(</span><span class="n">y_best</span><span class="p">)</span>
+    <span class="n">neg_ei</span> <span class="o">=</span> <span class="n">make_neg_ei</span><span class="p">(</span><span class="n">y_best</span><span class="p">,</span> <span class="n">gpr</span><span class="p">)</span>
     
     <span class="c1"># Optimize the acquisition function using differential evolution</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">differential_evolution</span><span class="p">(</span><span class="n">neg_ei</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">111</span><span class="p">)</span>
@@ -8036,7 +8066,7 @@ The pseudo code is like this:
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Best y in initial instance archive: -0.7320026991664957
+<pre>Best y in initial instance archive: -0.7692861588543976
 Initial evaluations: 50
 
 Final incumbent candidate from automated BO:
@@ -8067,14 +8097,12 @@ Final incumbent candidate from automated BO:
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">fetch_openml</span>
 
-<span class="n">sonar</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="s2">"sonar"</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">X</span> <span class="o">=</span> <span class="n">sonar</span><span class="o">.</span><span class="n">data</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">sonar</span><span class="o">.</span><span class="n">target</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="s2">"sonar"</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -8112,7 +8140,7 @@ Final incumbent candidate from automated BO:
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
@@ -8134,8 +8162,6 @@ Final incumbent candidate from automated BO:
 <span class="p">}</span>
 
 <span class="c1"># Define a scorer for misclassification error.</span>
-<span class="c1"># Since scikit-learn scorers are maximized by default, we define the scorer</span>
-<span class="c1"># as the negative misclassification error.</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">misclassification_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y_true</span> <span class="o">!=</span> <span class="n">y_pred</span><span class="p">)</span>
 
