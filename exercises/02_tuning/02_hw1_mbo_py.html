@@ -7715,11 +7715,11 @@ a.anchor-link {
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>First 5 rows of Sobol design:
          x1        x2
-0  0.037234  0.858525
-1  0.682477  0.238989
-2  0.913639  0.702771
-3  0.308027  0.332259
-4  0.467227  0.520526
+0  0.149825  0.713632
+1  0.834242  0.027197
+2  0.546443  0.763425
+3  0.469386  0.449845
+4  0.327801  0.922830
 </pre>
 </div>
 </div>
@@ -7788,63 +7788,63 @@ a.anchor-link {
 <tbody>
 <tr>
 <th>0</th>
-<td>0.481464</td>
-<td>0.862594</td>
-<td>0.278560</td>
+<td>0.333681</td>
+<td>0.417837</td>
+<td>-0.113058</td>
 </tr>
 <tr>
 <th>1</th>
-<td>0.510817</td>
-<td>0.194880</td>
-<td>0.029425</td>
+<td>0.903953</td>
+<td>0.699388</td>
+<td>0.072327</td>
 </tr>
 <tr>
 <th>2</th>
-<td>0.912156</td>
-<td>0.730913</td>
-<td>0.180162</td>
+<td>0.637362</td>
+<td>0.175630</td>
+<td>0.018813</td>
 </tr>
 <tr>
 <th>3</th>
-<td>0.062605</td>
-<td>0.336613</td>
-<td>0.010698</td>
+<td>0.067130</td>
+<td>0.957188</td>
+<td>0.084838</td>
 </tr>
 <tr>
 <th>4</th>
-<td>0.166602</td>
-<td>0.508670</td>
-<td>0.059739</td>
+<td>0.168884</td>
+<td>0.036630</td>
+<td>0.000318</td>
 </tr>
 <tr>
 <th>5</th>
-<td>0.824763</td>
-<td>0.433738</td>
-<td>-0.256165</td>
+<td>0.598612</td>
+<td>0.814893</td>
+<td>0.613732</td>
 </tr>
 <tr>
 <th>6</th>
-<td>0.720281</td>
-<td>0.898313</td>
-<td>-0.619996</td>
+<td>0.865203</td>
+<td>0.310085</td>
+<td>-0.071736</td>
 </tr>
 <tr>
 <th>7</th>
-<td>0.257348</td>
-<td>0.034279</td>
-<td>-0.000269</td>
+<td>0.435435</td>
+<td>0.588341</td>
+<td>-0.052892</td>
 </tr>
 <tr>
 <th>8</th>
-<td>0.325177</td>
-<td>0.641783</td>
-<td>-0.246670</td>
+<td>0.474751</td>
+<td>0.218133</td>
+<td>0.015929</td>
 </tr>
 <tr>
 <th>9</th>
-<td>0.666916</td>
-<td>0.287026</td>
-<td>0.009520</td>
+<td>0.795111</td>
+<td>0.930356</td>
+<td>-1.175340</td>
 </tr>
 </tbody>
 </table>
@@ -7930,7 +7930,7 @@ a.anchor-link {
     Use `skopt.aquisition.gaussian_ei` as the acquisition function.
 </details>
 <details><summary>Hint 2:</summary>
-    You need to define a negative expeteced improvement function that captures the current y_best. Why negative ei? Because x_next = argmax_x EI(x), but the scipy.optimize solves argmin problems.
+    You need to define a negative expeteced improvement function that captures the current `y_best`. Why negative ei? Because `x_next = argmax_x EI(x)`, but the `scipy.optimize` solves argmin problems.
 </details>
 </div>
 </div>
@@ -8038,7 +8038,7 @@ The pseudo code is like this:
     <span class="n">neg_ei</span> <span class="o">=</span> <span class="n">make_neg_ei</span><span class="p">(</span><span class="n">y_best</span><span class="p">,</span> <span class="n">gpr</span><span class="p">)</span>
     
     <span class="c1"># Optimize the acquisition function using differential evolution</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">differential_evolution</span><span class="p">(</span><span class="n">neg_ei</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">111</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">differential_evolution</span><span class="p">(</span><span class="n">neg_ei</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
     <span class="n">candidate_x</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">x</span>
     <span class="n">candidate_y</span> <span class="o">=</span> <span class="n">sinus_1D</span><span class="p">({</span><span class="s1">'x1'</span><span class="p">:</span> <span class="n">candidate_x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">'x2'</span><span class="p">:</span> <span class="n">candidate_x</span><span class="p">[</span><span class="mi">1</span><span class="p">]})</span>
     
@@ -8066,12 +8066,94 @@ The pseudo code is like this:
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Best y in initial instance archive: -0.7692861588543976
+<pre>Best y in initial instance archive: -0.8625724502170931
 Initial evaluations: 50
 
 Final incumbent candidate from automated BO:
           x1        x2         y
-65  0.763957  0.901273 -1.031499
+75  0.837354  0.983681 -1.024403
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=850ad448">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput celltag_remove_cell" data-mime-type="text/markdown">
+<p>===SOLUTION===</p>
+<p>Furthermore, we can leverage the <code>skopt.gp_minimize</code> function, an off-the-shelf Bayesian Optimization tool that encapsulates the preceding steps for added convenience.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell celltag_remove_cell" id="cell-id=a2ce9e29">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">skopt</span><span class="w"> </span><span class="kn">import</span> <span class="n">gp_minimize</span>
+
+<span class="c1"># Create wrapper to adapt sinus_1D to the format expected by skopt</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">objective</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">sinus_1D</span><span class="p">({</span><span class="s1">'x1'</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">'x2'</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]})</span>
+
+<span class="c1"># Define the search space</span>
+<span class="n">dimensions</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)]</span>
+
+<span class="c1"># Number of initial points and total evaluations</span>
+<span class="n">n_initial_points</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">n_total_calls</span> <span class="o">=</span> <span class="mi">200</span>
+
+<span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+    <span class="c1"># ignore "UserWarning: The balance properties of Sobol' points require n to be a power of 2"</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">"ignore"</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
+    <span class="c1"># Run Bayesian optimization</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">gp_minimize</span><span class="p">(</span>
+        <span class="n">func</span><span class="o">=</span><span class="n">objective</span><span class="p">,</span>
+        <span class="n">dimensions</span><span class="o">=</span><span class="n">dimensions</span><span class="p">,</span>
+        <span class="n">n_calls</span><span class="o">=</span><span class="n">n_total_calls</span> <span class="o">-</span> <span class="n">n_initial_points</span><span class="p">,</span>
+        <span class="n">n_initial_points</span><span class="o">=</span><span class="n">n_initial_points</span><span class="p">,</span>
+        <span class="n">initial_point_generator</span><span class="o">=</span><span class="s2">"sobol"</span><span class="p">,</span>
+        <span class="n">acq_func</span><span class="o">=</span><span class="s2">"EI"</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="mi">111</span>
+    <span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best y in initial instance archive: </span><span class="si">{</span><span class="nb">min</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">func_vals</span><span class="p">[:</span><span class="n">n_initial_points</span><span class="p">])</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Initial evaluations: </span><span class="si">{</span><span class="n">n_initial_points</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Create dataframe with best result</span>
+<span class="n">best_x</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">x</span>
+<span class="n">best_y</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">fun</span>
+<span class="n">best_candidate</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">'x1'</span><span class="p">:</span> <span class="p">[</span><span class="n">best_x</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="s1">'x2'</span><span class="p">:</span> <span class="p">[</span><span class="n">best_x</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="s1">'y'</span><span class="p">:</span> <span class="p">[</span><span class="n">best_y</span><span class="p">]})</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Final incumbent candidate from automated BO:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">best_candidate</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Best y in initial instance archive: -0.9516148029280513
+Initial evaluations: 50
+
+Final incumbent candidate from automated BO:
+         x1        x2         y
+0  0.791804  0.999493 -1.326099
 </pre>
 </div>
 </div>
@@ -8097,7 +8179,7 @@ Final incumbent candidate from automated BO:
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">fetch_openml</span>
@@ -8140,7 +8222,7 @@ Final incumbent candidate from automated BO:
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
