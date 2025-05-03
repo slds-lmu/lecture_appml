@@ -7718,103 +7718,7 @@ Test set shape: (8646, 19)
 <li>Replace the categorical feature with the impact scores.</li>
 </ol>
 <p>Impact encoding preserves the information of the categorical feature while also creating a numerical representation that reflects its importance in predicting the target. Compared to one-hot encoding, the main advantage is that only a single numeric feature is created regardless of the number of levels of the categorical features, hence it is especially useful for high-cardinality features. As information from the target is used to compute the impact scores, the encoding process must be embedded in cross-validation to avoid leakage between training and testing data.</p>
-<p>Note that <code>scikit-learn</code> has not implemented impact encoding yet. Here we implement it from scratch. The implemented <code>ImpactEncoder</code> is compatible with the sklearn's feature transform and Pipeline APIs. However, there is room for improvement. In particular, the official encoders in sklearn often accept a broader range of inputs including <code>pd.DataFrame</code>, <code>numpy.ndarray</code>, <code>List[List[Union[float, int]]]</code> etc, while our implementation only accepts <code>pd.DataFrame</code> as inputs for the demonstration purpose.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span>
-
-
-<span class="k">class</span><span class="w"> </span><span class="nc">ImpactEncoder</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">smoothing</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""</span>
-<span class="sd">        Args:</span>
-<span class="sd">            features: list of column names to encode. If None, all columns of type 'object' or 'category'</span>
-<span class="sd">                will be encoded.</span>
-<span class="sd">            smoothing: non-negative float. If &gt; 0, smoothing is applied to the group mean to reduce variance</span>
-<span class="sd">                for categories with few observations.</span>
-<span class="sd">        """</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">features</span> <span class="o">=</span> <span class="n">features</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span> <span class="o">=</span> <span class="n">smoothing</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">features_</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">global_mean_</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mapping_</span> <span class="o">=</span> <span class="kc">None</span>
-        
-    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""</span>
-<span class="sd">        Fit the impact encoder on X and y.</span>
-<span class="sd">        </span>
-<span class="sd">        Args:</span>
-<span class="sd">            X: DataFrame containing features</span>
-<span class="sd">            y: Target variable</span>
-<span class="sd">        </span>
-<span class="sd">        Returns:</span>
-<span class="sd">            self</span>
-<span class="sd">        """</span>
-        <span class="c1"># If features not provided, select categorical columns automatically</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">features_</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s1">'object'</span><span class="p">,</span> <span class="s1">'category'</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">features_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span>
-            
-        <span class="c1"># Compute the global mean of the target</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">global_mean_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mapping_</span> <span class="o">=</span> <span class="p">{}</span>
-        
-        <span class="c1"># For each specified feature, compute the impact encoding mapping</span>
-        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features_</span><span class="p">:</span>
-            <span class="c1"># Group by the categorical column and calculate mean and count</span>
-            <span class="n">group_stats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">'target'</span><span class="p">:</span> <span class="n">y</span><span class="p">})</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="n">observed</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="s1">'target'</span><span class="p">]</span><span class="o">.</span><span class="n">agg</span><span class="p">([</span><span class="s1">'mean'</span><span class="p">,</span> <span class="s1">'count'</span><span class="p">])</span>
-            
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="c1"># Apply smoothing: weighted average between group mean and global mean</span>
-                <span class="c1"># Formula: (count * group_mean + smoothing * global_mean) / (count + smoothing)</span>
-                <span class="n">smoothed_mean</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="p">(</span><span class="n">group_stats</span><span class="p">[</span><span class="s1">'count'</span><span class="p">]</span> <span class="o">*</span> <span class="n">group_stats</span><span class="p">[</span><span class="s1">'mean'</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_mean_</span><span class="p">)</span> <span class="o">/</span> 
-                    <span class="p">(</span><span class="n">group_stats</span><span class="p">[</span><span class="s1">'count'</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span><span class="p">)</span>
-                <span class="p">)</span>
-                <span class="c1"># Impact is the difference between smoothed mean and global mean</span>
-                <span class="n">group_stats</span><span class="p">[</span><span class="s1">'impact'</span><span class="p">]</span> <span class="o">=</span> <span class="n">smoothed_mean</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_mean_</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># Without smoothing, impact is simply the difference between group mean and global mean</span>
-                <span class="n">group_stats</span><span class="p">[</span><span class="s1">'impact'</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_stats</span><span class="p">[</span><span class="s1">'mean'</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_mean_</span>
-                
-            <span class="c1"># Store the mapping for this column</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">mapping_</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_stats</span><span class="p">[</span><span class="s1">'impact'</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
-            
-        <span class="k">return</span> <span class="bp">self</span>
-    
-    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""</span>
-<span class="sd">        Transform X using the fitted impact encoder.</span>
-<span class="sd">        </span>
-<span class="sd">        Args:</span>
-<span class="sd">            X: DataFrame containing features to transform</span>
-<span class="sd">        </span>
-<span class="sd">        Returns:</span>
-<span class="sd">            DataFrame with categorical features replaced by their impact scores</span>
-<span class="sd">        """</span>
-        <span class="c1"># Create a copy to avoid altering the original DataFrame</span>
-        <span class="n">X_transformed</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    
-        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features_</span><span class="p">:</span>
-            <span class="c1"># Map each categorical value to its impact encoding and cast to float.</span>
-            <span class="n">X_transformed</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">X_transformed</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mapping_</span><span class="p">[</span><span class="n">col</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
-            <span class="c1"># For categories not seen in training, fill with 0 (no impact relative to global mean)</span>
-            <span class="n">X_transformed</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">X_transformed</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-            
-        <span class="k">return</span> <span class="n">X_transformed</span>
-</pre></div>
-</div>
+<p><code>sklearn</code> has implemented impact encoding in the class <code>sklearn.preprocessing.TargetEncoder</code>. Please refer to <a href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.TargetEncoder.html">the documentation</a> for more details.</p>
 </div>
 </div>
 </div>
@@ -7853,7 +7757,7 @@ Test set shape: (8646, 19)
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
@@ -7862,7 +7766,7 @@ Test set shape: (8646, 19)
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.compose</span><span class="w"> </span><span class="kn">import</span> <span class="n">ColumnTransformer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomizedSearchCV</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pipeline</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">OneHotEncoder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">OneHotEncoder</span><span class="p">,</span> <span class="n">TargetEncoder</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">xgboost</span><span class="w"> </span><span class="kn">import</span> <span class="n">XGBRegressor</span>
 
 
@@ -7881,14 +7785,14 @@ Test set shape: (8646, 19)
 <span class="n">categorical_features</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'zipcode'</span><span class="p">,</span> <span class="s1">'waterfront'</span><span class="p">]</span>
 <span class="n">numerical_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">X_train</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">categorical_features</span><span class="p">]</span>
 
-<span class="c1"># 1. Pipeline with ImpactEncoder</span>
-<span class="n">impact_preprocessor</span> <span class="o">=</span> <span class="n">ColumnTransformer</span><span class="p">([</span>
-    <span class="p">(</span><span class="s1">'impact_encoder'</span><span class="p">,</span> <span class="n">ImpactEncoder</span><span class="p">(</span><span class="n">features</span><span class="o">=</span><span class="n">categorical_features</span><span class="p">,</span> <span class="n">smoothing</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">),</span> <span class="n">categorical_features</span><span class="p">),</span>
+<span class="c1"># 1. Pipeline with TargetEncoder</span>
+<span class="n">target_preprocessor</span> <span class="o">=</span> <span class="n">ColumnTransformer</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">'target_encoder'</span><span class="p">,</span> <span class="n">TargetEncoder</span><span class="p">(</span><span class="n">smooth</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">),</span> <span class="n">categorical_features</span><span class="p">),</span>
     <span class="p">(</span><span class="s1">'passthrough'</span><span class="p">,</span> <span class="s1">'passthrough'</span><span class="p">,</span> <span class="n">numerical_features</span><span class="p">)</span>
 <span class="p">])</span>
 
-<span class="n">impact_pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
-    <span class="p">(</span><span class="s1">'preprocessor'</span><span class="p">,</span> <span class="n">impact_preprocessor</span><span class="p">),</span>
+<span class="n">target_pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">'preprocessor'</span><span class="p">,</span> <span class="n">target_preprocessor</span><span class="p">),</span>
     <span class="p">(</span><span class="s1">'xgb'</span><span class="p">,</span> <span class="n">XGBRegressor</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">objective</span><span class="o">=</span><span class="s1">'reg:squarederror'</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
 <span class="p">])</span>
 
@@ -7903,14 +7807,14 @@ Test set shape: (8646, 19)
     <span class="p">(</span><span class="s1">'xgb'</span><span class="p">,</span> <span class="n">XGBRegressor</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">objective</span><span class="o">=</span><span class="s1">'reg:squarederror'</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
 <span class="p">])</span>
 
-<span class="c1"># Create RandomizedSearchCV for ImpactEncoder pipeline</span>
-<span class="n">impact_search</span> <span class="o">=</span> <span class="n">RandomizedSearchCV</span><span class="p">(</span>
-    <span class="n">estimator</span><span class="o">=</span><span class="n">impact_pipeline</span><span class="p">,</span>
+<span class="c1"># Create RandomizedSearchCV for TargetEncoder pipeline</span>
+<span class="n">target_search</span> <span class="o">=</span> <span class="n">RandomizedSearchCV</span><span class="p">(</span>
+    <span class="n">estimator</span><span class="o">=</span><span class="n">target_pipeline</span><span class="p">,</span>
     <span class="n">param_distributions</span><span class="o">=</span><span class="n">param_distributions</span><span class="p">,</span>
     <span class="n">n_iter</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
     <span class="n">scoring</span><span class="o">=</span><span class="s1">'neg_mean_squared_error'</span><span class="p">,</span>
     <span class="n">cv</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-    <span class="n">random_state</span><span class="o">=</span><span class="mi">124</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">111</span><span class="p">,</span>
     <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span>
 <span class="p">)</span>
 
@@ -7956,7 +7860,7 @@ Test set shape: (8646, 19)
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
@@ -7964,8 +7868,8 @@ Test set shape: (8646, 19)
 <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Training model with OneHotEncoder..."</span><span class="p">)</span>
 <span class="n">onehot_search</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Training model with ImpactEncoder..."</span><span class="p">)</span>
-<span class="n">impact_search</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Training model with TargetEncoder..."</span><span class="p">)</span>
+<span class="n">target_search</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 
 <span class="c1"># Output results for OneHotEncoder</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">--- OneHotEncoder Results ---"</span><span class="p">)</span>
@@ -7974,12 +7878,12 @@ Test set shape: (8646, 19)
 <span class="n">onehot_test_score</span> <span class="o">=</span> <span class="n">onehot_search</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Test set score (MSE): </span><span class="si">{</span><span class="o">-</span><span class="n">onehot_test_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="c1"># Output results for ImpactEncoder</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">--- ImpactEncoder Results ---"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best parameters: </span><span class="si">{</span><span class="n">impact_search</span><span class="o">.</span><span class="n">best_params_</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best CV score (MSE): </span><span class="si">{</span><span class="o">-</span><span class="n">impact_search</span><span class="o">.</span><span class="n">best_score_</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="n">impact_test_score</span> <span class="o">=</span> <span class="n">impact_search</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Test set score (MSE): </span><span class="si">{</span><span class="o">-</span><span class="n">impact_test_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="c1"># Output results for TargetEncoder</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">--- TargetEncoder Results ---"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best parameters: </span><span class="si">{</span><span class="n">target_search</span><span class="o">.</span><span class="n">best_params_</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best CV score (MSE): </span><span class="si">{</span><span class="o">-</span><span class="n">target_search</span><span class="o">.</span><span class="n">best_score_</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">target_test_score</span> <span class="o">=</span> <span class="n">target_search</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Test set score (MSE): </span><span class="si">{</span><span class="o">-</span><span class="n">target_test_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7995,7 +7899,7 @@ Test set shape: (8646, 19)
 <pre>
 Training model with OneHotEncoder...
 Fitting 2 folds for each of 50 candidates, totalling 100 fits
-Training model with ImpactEncoder...
+Training model with TargetEncoder...
 Fitting 2 folds for each of 50 candidates, totalling 100 fits
 
 --- OneHotEncoder Results ---
@@ -8003,10 +7907,10 @@ Best parameters: {'xgb__colsample_bylevel': 0.9739842882294312, 'xgb__colsample_
 Best CV score (MSE): 17172.8399
 Test set score (MSE): 16400.9192
 
---- ImpactEncoder Results ---
-Best parameters: {'xgb__colsample_bylevel': 0.9739842882294312, 'xgb__colsample_bytree': 0.2816306321316162, 'xgb__learning_rate': 0.24734640788083925, 'xgb__max_depth': 4, 'xgb__reg_alpha': 63.31327250747733, 'xgb__reg_lambda': 0.014633103639863188, 'xgb__subsample': 0.8480834882645039}
-Best CV score (MSE): 17353.5632
-Test set score (MSE): 14385.5918
+--- TargetEncoder Results ---
+Best parameters: {'xgb__colsample_bylevel': 0.8656327252373124, 'xgb__colsample_bytree': 0.5827666592066569, 'xgb__learning_rate': 0.07834804904588204, 'xgb__max_depth': 8, 'xgb__reg_alpha': 57.53289051844459, 'xgb__reg_lambda': 0.8489426245140799, 'xgb__subsample': 0.658346139517151}
+Best CV score (MSE): 17768.8488
+Test set score (MSE): 15063.3413
 </pre>
 </div>
 </div>
