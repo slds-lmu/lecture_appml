@@ -7715,11 +7715,11 @@ a.anchor-link {
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>First 5 rows of Sobol design:
          x1        x2
-0  0.811952  0.394043
-1  0.364281  0.757940
-2  0.227204  0.195109
-3  0.659052  0.590255
-4  0.621852  0.068698
+0  0.833708  0.714247
+1  0.393502  0.301624
+2  0.166035  0.927012
+3  0.606692  0.088859
+4  0.641449  0.768583
 </pre>
 </div>
 </div>
@@ -7788,63 +7788,63 @@ a.anchor-link {
 <tbody>
 <tr>
 <th>0</th>
-<td>0.797446</td>
-<td>0.257810</td>
-<td>-0.103348</td>
+<td>0.970342</td>
+<td>0.645288</td>
+<td>0.641158</td>
 </tr>
 <tr>
 <th>1</th>
-<td>0.397857</td>
-<td>0.569261</td>
-<td>-0.159736</td>
+<td>0.160936</td>
+<td>0.213977</td>
+<td>0.011351</td>
 </tr>
 <tr>
 <th>2</th>
-<td>0.218773</td>
-<td>0.192899</td>
-<td>0.001273</td>
+<td>0.360321</td>
+<td>0.977642</td>
+<td>-0.552262</td>
 </tr>
 <tr>
 <th>3</th>
-<td>0.570267</td>
-<td>0.879472</td>
-<td>0.766270</td>
+<td>0.552327</td>
+<td>0.412843</td>
+<td>0.181627</td>
 </tr>
 <tr>
 <th>4</th>
-<td>0.672423</td>
-<td>0.067010</td>
-<td>0.000065</td>
+<td>0.731361</td>
+<td>0.817742</td>
+<td>-0.634655</td>
 </tr>
 <tr>
 <th>5</th>
-<td>0.022941</td>
-<td>0.755422</td>
-<td>0.007502</td>
+<td>0.415546</td>
+<td>0.260273</td>
+<td>-0.024989</td>
 </tr>
 <tr>
 <th>6</th>
-<td>0.343857</td>
-<td>0.381737</td>
-<td>-0.097295</td>
+<td>0.122744</td>
+<td>0.555186</td>
+<td>0.071058</td>
 </tr>
 <tr>
 <th>7</th>
-<td>0.945244</td>
-<td>0.695271</td>
-<td>0.520918</td>
+<td>0.805533</td>
+<td>0.116548</td>
+<td>-0.020973</td>
 </tr>
 <tr>
 <th>8</th>
-<td>0.891410</td>
-<td>0.182479</td>
-<td>-0.005108</td>
+<td>0.862980</td>
+<td>0.905423</td>
+<td>-0.572770</td>
 </tr>
 <tr>
 <th>9</th>
-<td>0.303954</td>
-<td>0.995883</td>
-<td>-0.455932</td>
+<td>0.053580</td>
+<td>0.454092</td>
+<td>0.014551</td>
 </tr>
 </tbody>
 </table>
@@ -7977,36 +7977,8 @@ a.anchor-link {
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="2-Automating-Bayesian-Optimization">2 Automating Bayesian Optimization<a class="anchor-link" href="#2-Automating-Bayesian-Optimization">¶</a></h2><p>Note that due to the discrepancy between mlr3 and scikit-optimize, we dont't need Section 1.5 in the R exercise.</p>
-<p><strong>Task</strong>: Use Differential Evolution to optimize the EI acquisition function. Find the optimal hyperparameter configuration by iteratively updating the surrogate model and optimizing the acquisition function.</p>
-<p>You can leverage the <code>skopt.gp_minimize</code> function, an off-the-shelf Bayesian Optimization tool that encapsulates the preceding steps (in Exercise 1) for added convenience.</p>
-<p>Alternatively, you can use the following hints to implement the Bayesian Optimization Loop from scratch.</p>
-<details><summary>Hint 1:</summary>
-    Use `scipy.optimize.differential_evolution` as the optimizer for the acquisition function.
-</details>
-<details><summary>Hint 2:</summary>
-The pseudo code is like this:
-
-<pre><code>1. Re-create the data (50 initial instances) as the initial archive data (which we will gradually expand).
-
-2. Define bounds corresponding to our domain.
-
-3. Define a closure to generate a negative expected improvement function.
-
-4. Set up how many instances we have, and how many instances (200) we are allowed to evaluate in total?
-
-5. Then we enter the loop, while termination condition is not met:
-
-6. Fit (update) the surrogate model using current archive data.
-
-7. Compute the best observed objective value (for minimization, the smallest y).
-
-8. Create a negative EI function based on the current best value.
-
-9. Optimize the acquisition function using differential evolution.
-
-10. Append the new candidate to the archive data.</code></pre>
-<p>In the end, we print out the best sample in the archive data.</p>
-</details>
+<p><strong>Task</strong>: Find the optimal hyperparameter configuration by iteratively updating the surrogate model and optimizing the acquisition function.</p>
+<p>For convenience, you can utilize the <code>skopt.gp_minimize</code> function, a readily available Bayesian Optimization tool that internally handles the steps outlined in Exercise 1. This allows you to specify Bayesian Optimization details directly through the arguments of <code>skopt.gp_minimize</code>, eliminating the need to manually define an acquisition function.</p>
 </div>
 </div>
 </div>
@@ -8020,7 +7992,6 @@ The pseudo code is like this:
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
 
-<span class="c1"># Solution 1: Use skopt.gp_minimize</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">skopt</span><span class="w"> </span><span class="kn">import</span> <span class="n">gp_minimize</span>
 
 <span class="c1"># Create wrapper to adapt sinus_1D to the format expected by skopt</span>
@@ -8081,83 +8052,6 @@ Final incumbent candidate from automated BO:
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell celltag_remove_cell" id="cell-id=24080519-91a8-4ba2-bd46-c11e09e3176e">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
-
-<span class="c1"># Solution 2: Implement the Bayesian Optimization Loop from scratch</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">differential_evolution</span>
-
-<span class="c1"># Re-create the data</span>
-<span class="n">archive_data</span> <span class="o">=</span> <span class="n">get_sobol_design</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
-<span class="n">archive_data</span><span class="p">[</span><span class="s1">'y'</span><span class="p">]</span> <span class="o">=</span> <span class="n">archive_data</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">sinus_1D</span><span class="p">(</span><span class="n">row</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best y in initial instance archive: </span><span class="si">{</span><span class="n">archive_data</span><span class="p">[</span><span class="s1">'y'</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-
-<span class="c1"># Define bounds corresponding to our domain</span>
-<span class="n">bounds</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
-
-<span class="n">n_evals</span> <span class="o">=</span> <span class="mi">200</span>
-<span class="n">current_evals</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">archive_data</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Initial evaluations: </span><span class="si">{</span><span class="n">current_evals</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="c1"># In a typical MBO loop, we would update the surrogate and add new evaluations until termination.</span>
-<span class="k">while</span> <span class="n">current_evals</span> <span class="o">&lt;</span> <span class="n">n_evals</span><span class="p">:</span>
-    <span class="c1"># Fit (update) the surrogate model using current archive data</span>
-    <span class="n">X</span> <span class="o">=</span> <span class="n">archive_data</span><span class="p">[[</span><span class="s1">'x1'</span><span class="p">,</span> <span class="s1">'x2'</span><span class="p">]]</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="n">archive_data</span><span class="p">[</span><span class="s1">'y'</span><span class="p">]</span>
-    <span class="n">gpr</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-    
-    <span class="c1"># Compute the best observed objective value (for minimization, the smallest y)</span>
-    <span class="n">y_best</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
-    
-    <span class="c1"># Create a negative EI function based on the current best value</span>
-    <span class="n">neg_ei</span> <span class="o">=</span> <span class="n">make_neg_ei</span><span class="p">(</span><span class="n">y_best</span><span class="p">,</span> <span class="n">gpr</span><span class="p">)</span>
-    
-    <span class="c1"># Optimize the acquisition function using differential evolution</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">differential_evolution</span><span class="p">(</span><span class="n">neg_ei</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
-    <span class="n">candidate_x</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">x</span>
-    <span class="n">candidate_y</span> <span class="o">=</span> <span class="n">sinus_1D</span><span class="p">({</span><span class="s1">'x1'</span><span class="p">:</span> <span class="n">candidate_x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">'x2'</span><span class="p">:</span> <span class="n">candidate_x</span><span class="p">[</span><span class="mi">1</span><span class="p">]})</span>
-    
-    <span class="c1"># Append the new candidate to the archive</span>
-    <span class="n">new_row</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'x1'</span><span class="p">:</span> <span class="n">candidate_x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">'x2'</span><span class="p">:</span> <span class="n">candidate_x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">'y'</span><span class="p">:</span> <span class="n">candidate_y</span><span class="p">}</span>
-    <span class="n">archive_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">archive_data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">new_row</span><span class="p">])],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">current_evals</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">archive_data</span><span class="p">)</span>
-
-<span class="c1"># At this point, the termination criterion is met.</span>
-<span class="c1"># Retrieve the best candidate from the instance (the incumbent)</span>
-<span class="n">best_idx</span> <span class="o">=</span> <span class="n">archive_data</span><span class="p">[</span><span class="s1">'y'</span><span class="p">]</span><span class="o">.</span><span class="n">idxmin</span><span class="p">()</span>
-<span class="n">best_candidate</span> <span class="o">=</span> <span class="n">archive_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[[</span><span class="n">best_idx</span><span class="p">],</span> <span class="p">[</span><span class="s1">'x1'</span><span class="p">,</span> <span class="s1">'x2'</span><span class="p">,</span><span class="s1">'y'</span><span class="p">]]</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Final incumbent candidate from automated BO:"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">best_candidate</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Best y in initial instance archive: -0.5580367207366327
-Initial evaluations: 50
-
-Final incumbent candidate from automated BO:
-          x1        x2         y
-75  0.837354  0.983681 -1.024403
-</pre>
-</div>
-</div>
-</div>
-</div>
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=10db9989-9cbf-43d4-acc3-992221611684">
 <div class="jp-Cell-inputWrapper" tabindex="0">
@@ -8178,7 +8072,7 @@ Final incumbent candidate from automated BO:
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">fetch_openml</span>
@@ -8221,7 +8115,7 @@ Final incumbent candidate from automated BO:
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
@@ -8287,6 +8181,121 @@ Final incumbent candidate from automated BO:
 <pre>Best HP configuration (shown in original scale, not log-transformed)
 cost (C) = 3856.87501, gamma = 0.18238
 Misclassification error: 0.134714
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=835c058f">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="4-Bonus:-Implementing-BO-Loop-from-Scratch">4 Bonus: Implementing BO Loop from Scratch<a class="anchor-link" href="#4-Bonus:-Implementing-BO-Loop-from-Scratch">¶</a></h2><p>In Exercise 2, you performed Bayesian Optimization using <code>skopt.gp_minimize</code>.</p>
+<p>Alternatively, you can implement the Bayesian Optimization Loop from scratch. The following hints may be helpful.</p>
+<details><summary>Hint 1:</summary>
+    Use `scipy.optimize.differential_evolution` as the optimizer for the acquisition function.
+</details>
+<details><summary>Hint 2:</summary>
+The pseudo code is like this:
+
+<pre><code>1. Re-create the data (50 initial instances) as the initial archive data (which we will gradually expand).
+
+2. Define bounds corresponding to our domain.
+
+3. Define a closure to generate a negative expected improvement function.
+
+4. Set up how many instances we have, and how many instances (200) we are allowed to evaluate in total?
+
+5. Then we enter the loop, while termination condition is not met:
+
+6. Fit (update) the surrogate model using current archive data.
+
+7. Compute the best observed objective value (for minimization, the smallest y).
+
+8. Create a negative EI function based on the current best value.
+
+9. Optimize the acquisition function using differential evolution.
+
+10. Append the new candidate to the archive data.</code></pre>
+<p>In the end, we print out the best sample in the archive data.</p>
+</details>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell celltag_remove_cell" id="cell-id=24080519-91a8-4ba2-bd46-c11e09e3176e">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">differential_evolution</span>
+
+<span class="c1"># Re-create the data</span>
+<span class="n">archive_data</span> <span class="o">=</span> <span class="n">get_sobol_design</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">archive_data</span><span class="p">[</span><span class="s1">'y'</span><span class="p">]</span> <span class="o">=</span> <span class="n">archive_data</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">sinus_1D</span><span class="p">(</span><span class="n">row</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best y in initial instance archive: </span><span class="si">{</span><span class="n">archive_data</span><span class="p">[</span><span class="s1">'y'</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Define bounds corresponding to our domain</span>
+<span class="n">bounds</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+
+<span class="n">n_evals</span> <span class="o">=</span> <span class="mi">200</span>
+<span class="n">current_evals</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">archive_data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Initial evaluations: </span><span class="si">{</span><span class="n">current_evals</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="c1"># In a typical MBO loop, we would update the surrogate and add new evaluations until termination.</span>
+<span class="k">while</span> <span class="n">current_evals</span> <span class="o">&lt;</span> <span class="n">n_evals</span><span class="p">:</span>
+    <span class="c1"># Fit (update) the surrogate model using current archive data</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">archive_data</span><span class="p">[[</span><span class="s1">'x1'</span><span class="p">,</span> <span class="s1">'x2'</span><span class="p">]]</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">archive_data</span><span class="p">[</span><span class="s1">'y'</span><span class="p">]</span>
+    <span class="n">gpr</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    
+    <span class="c1"># Compute the best observed objective value (for minimization, the smallest y)</span>
+    <span class="n">y_best</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    
+    <span class="c1"># Create a negative EI function based on the current best value</span>
+    <span class="n">neg_ei</span> <span class="o">=</span> <span class="n">make_neg_ei</span><span class="p">(</span><span class="n">y_best</span><span class="p">,</span> <span class="n">gpr</span><span class="p">)</span>
+    
+    <span class="c1"># Optimize the acquisition function using differential evolution</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">differential_evolution</span><span class="p">(</span><span class="n">neg_ei</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
+    <span class="n">candidate_x</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">x</span>
+    <span class="n">candidate_y</span> <span class="o">=</span> <span class="n">sinus_1D</span><span class="p">({</span><span class="s1">'x1'</span><span class="p">:</span> <span class="n">candidate_x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">'x2'</span><span class="p">:</span> <span class="n">candidate_x</span><span class="p">[</span><span class="mi">1</span><span class="p">]})</span>
+    
+    <span class="c1"># Append the new candidate to the archive</span>
+    <span class="n">new_row</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'x1'</span><span class="p">:</span> <span class="n">candidate_x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">'x2'</span><span class="p">:</span> <span class="n">candidate_x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">'y'</span><span class="p">:</span> <span class="n">candidate_y</span><span class="p">}</span>
+    <span class="n">archive_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">archive_data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">new_row</span><span class="p">])],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">current_evals</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">archive_data</span><span class="p">)</span>
+
+<span class="c1"># At this point, the termination criterion is met.</span>
+<span class="c1"># Retrieve the best candidate from the instance (the incumbent)</span>
+<span class="n">best_idx</span> <span class="o">=</span> <span class="n">archive_data</span><span class="p">[</span><span class="s1">'y'</span><span class="p">]</span><span class="o">.</span><span class="n">idxmin</span><span class="p">()</span>
+<span class="n">best_candidate</span> <span class="o">=</span> <span class="n">archive_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[[</span><span class="n">best_idx</span><span class="p">],</span> <span class="p">[</span><span class="s1">'x1'</span><span class="p">,</span> <span class="s1">'x2'</span><span class="p">,</span><span class="s1">'y'</span><span class="p">]]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Final incumbent candidate from automated BO:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">best_candidate</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Best y in initial instance archive: -0.8605392053911493
+Initial evaluations: 50
+
+Final incumbent candidate from automated BO:
+          x1        x2         y
+75  0.837354  0.983681 -1.024403
 </pre>
 </div>
 </div>
