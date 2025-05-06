@@ -7976,19 +7976,8 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="2-Bayesian-Optimization">2 Bayesian Optimization<a class="anchor-link" href="#2-Bayesian-Optimization">¶</a></h2><p>Note that due to the discrepancy between mlr3 and scikit-optimize, we dont't need Section 1.5 in the R exercise.</p>
-<p>The Bayesian optimization iteratively updates the surrogate model and selects the next most promising candidate by optimizing an acquisition function.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ff5d0b88">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="2.2-Implementation-of-the-Bayesian-Optimization-Loop">2.2 Implementation of the Bayesian Optimization Loop<a class="anchor-link" href="#2.2-Implementation-of-the-Bayesian-Optimization-Loop">¶</a></h3><p>Task: Use Differential Evolution to optimize the EI acquisition function. Implement the Bayesian optimization loop to find the optimal hyperparameter configuration by iteratively updating the surrogate model and optimizing the acquisition function.</p>
+<h2 id="2-Automating-Bayesian-Optimization">2 Automating Bayesian Optimization<a class="anchor-link" href="#2-Automating-Bayesian-Optimization">¶</a></h2><p>Note that due to the discrepancy between mlr3 and scikit-optimize, we dont't need Section 1.5 in the R exercise.</p>
+<p><strong>Task</strong>: Use Differential Evolution to optimize the EI acquisition function. Find the optimal hyperparameter configuration by iteratively updating the surrogate model and optimizing the acquisition function.</p>
 <p>You can leverage the <code>skopt.gp_minimize</code> function, an off-the-shelf Bayesian Optimization tool that encapsulates the preceding steps (in Exercise 1) for added convenience.</p>
 <p>Alternatively, you can use the following hints to implement the Bayesian Optimization Loop from scratch.</p>
 <details><summary>Hint 1:</summary>
