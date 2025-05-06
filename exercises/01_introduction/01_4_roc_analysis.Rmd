@@ -277,7 +277,7 @@ resampling = rsmp(..)
 learners = lrns(...)
 design = benchmark_grid(...)
 bmr = benchmark(...)
-autoplot(...)
+autoplot(..., show_cb = FALSE)
 ```
 
 </details>
@@ -307,7 +307,7 @@ Now we proceed with showing the ROC curve. The grey area indicated the uncertain
 obtain a different ROC curve for each fold.
 
 ```{r, eval = show.solution}
-autoplot(bmr, type = "roc")
+autoplot(bmr, type = "roc", show_cb = FALSE) 
 ```
 
 The random forest is clearly better, as for virtually every specificity it has a higher
