@@ -562,7 +562,7 @@ $\Rightarrow$ \textbf{How can we measure calibration quality?}
 %     \end{column}
 % \end{columns}
 
-\includegraphics{slides/05_perf_eval_1/figure_man/calibplot2.png}
+\includegraphics{figure_man/calibplot2.png}
 
 \textbf{Gap pred. mean:} Shows deviation between observed proportion of positives (red points) and average predicted probability within each group (red bar).
 
@@ -979,7 +979,7 @@ $\hat{p}$ & $y$ \\
 \begin{frame}{Calibration: Over- and Under-estimates}
 %TODO remove the tabular example and give the graphics from this paper https://link.springer.com/article/10.1007/s10994-023-06336-7
 
-\includegraphics{slides/05_perf_eval_1/figure_man/OverAndUnderConfidence.png}
+\includegraphics{figure_man/OverAndUnderConfidence.png}
 \citebutton{Filho et al. (2023).}{https://link.springer.com/article/10.1007/s10994-023-06336-7/figures/3}
 
 \begin{itemize}
@@ -1347,7 +1347,7 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[ s^{(i)}  \in B_{J(s)}] \c
 
 \textbf{Simplest Solution}: Hold out split.
 
-\includegraphics[width = \linewidth]{slides/05_perf_eval_1/figure_man/CalibWorkflow1.png}
+\includegraphics[width = \linewidth]{figure_man/CalibWorkflow1.png}
 
 \textbf{But}: We want to use ALL the data for training the model and calibrator \\ $\Rightarrow$ \textbf{Cross-validation}
 
@@ -1361,7 +1361,7 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[ s^{(i)}  \in B_{J(s)}] \c
 
 \begin{frame}{Calibration Workflow}
 \textbf{Option A}: Cross-validation per fold
-\includegraphics[width = \linewidth]{slides/05_perf_eval_1/figure_man/CalibWorkflow2.png}
+\includegraphics[width = \linewidth]{figure_man/CalibWorkflow2.png}
 
 Disadvantage:
 \begin{itemize}
@@ -1374,7 +1374,7 @@ $\Rightarrow$ Pooled CV
 
 \begin{frame}{Calibration Workflow}
 \textbf{Option B}: Cross-validation poolded
-\includegraphics[width = 0.7 \linewidth]{slides/05_perf_eval_1/figure_man/CalibWorkflow3.png}
+\includegraphics[width = 0.7 \linewidth]{figure_man/CalibWorkflow3.png}
 \begin{itemize}
     \item fit multiple models on CV folds
     \item fit calibrator on pooled out-of-fold predictions and data
@@ -1395,7 +1395,7 @@ $\Rightarrow$ Pooled CV
     \item Better: Nested Cross-validation, i.e. per-fold:
 \end{itemize}
 
-\includegraphics[width = 0.7 \linewidth]{slides/05_perf_eval_1/figure_man/CalibrationCVFold.png}
+\includegraphics[width = 0.7 \linewidth]{figure_man/CalibrationCVFold.png}
     
 \end{frame}
 

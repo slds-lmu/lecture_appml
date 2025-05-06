@@ -1,380 +1,27 @@
-\pdfminorversion=4
-\pdfobjcompresslevel=0
-\documentclass[ignorenonframetext,]{beamer}
-\setbeamertemplate{caption}[numbered]
-\setbeamertemplate{caption label separator}{:}
-\setbeamercolor{caption name}{fg=normal text.fg}
-%\usepackage{amssymb,amsmath}
-\usepackage{colortbl}
-\usepackage{booktabs}
-\usepackage{pifont}
-\usepackage{graphicx}
-\usepackage{ifxetex,ifluatex}
-%\usepackage{fixltx2e} % provides \textsubscript
-\usepackage{lmodern}
-\usepackage{pdfpages}
-%\setbeamercolor{background canvas}{bg=}
-\makeatletter\beamer@ignorenonframefalse\makeatother
-% see https://tex.stackexchange.com/questions/96581/incorrect-frame-numbers-when-pages-included-using-pdfpages-in-beamer
-\def\getpdfpages#1#2{\begingroup
-	\setbeamercolor{background canvas}{bg=}
-	\includepdf[pages={#1}, trim=0mm 1mm 0mm 0mm,%
-	pagecommand={\global\setcounter{framenumber}{%
-			\the\numexpr\value{framenumber}+1\relax}%
-		\expandafter\def\expandafter\insertshorttitle\expandafter{%
-			\insertshorttitle\hfill\insertframenumber\,/\,\inserttotalframenumber}}%
-	]{#2}
-	\endgroup}
-
-\ifxetex
-  \usepackage{fontspec,xltxtra,xunicode}
-  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
-  \newcommand{\euro}{€}
-\else
-  \ifluatex
-    \usepackage{fontspec}
-    \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
-    \newcommand{\euro}{€}
-  \else
-    \usepackage[T1]{fontenc}
-    \usepackage[utf8]{inputenc}
-      \fi
-\fi
-% use upquote if available, for straight quotes in verbatim environments
-\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
-% use microtype if available
-\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
-\usepackage{url}
-
-\providecommand{\tightlist}{%
-  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-
-% Comment these out if you don't want a slide with just the
-% part/section/subsection/subsubsection title:
-\AtBeginPart{
-  \let\insertpartnumber\relax
-  \let\partname\relax
-  \frame{\partpage}
-}
-\AtBeginSection{
-  \let\insertsectionnumber\relax
-  \let\sectionname\relax
-  \frame{\sectionpage}
-}
-\AtBeginSubsection{
-  \let\insertsubsectionnumber\relax
-  \let\subsectionname\relax
-  \frame{\subsectionpage}
-}
-
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{6pt plus 2pt minus 1pt}
-\setlength{\emergencystretch}{3em}  % prevent overfull lines
-\setcounter{secnumdepth}{0}
-\usepackage[english]{babel}
-\usepackage{dsfont}
-\usepackage{verbatim}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{amsthm}
-\usepackage{amsfonts}
-\usepackage{csquotes}
-\usepackage{multirow}
-\usepackage{longtable}
-\usepackage{enumerate}
-% \usepackage[absolute,overlay]{textpos}
-\usepackage{psfrag}
-\usepackage{algorithm}
-\usepackage{algpseudocode}
-\usepackage{eqnarray}
-\usepackage{arydshln}
-\usepackage{tabularx}
-\usepackage{placeins}
-\usepackage{tikz}
-% see https://tex.stackexchange.com/questions/32918/how-can-i-decrease-spaces-between-equations
-%\usepackage{setspace}
-\usepackage[nodisplayskipstretch]{setspace}
-\setstretch{1.0}
-\usetikzlibrary{shapes,arrows,automata,positioning,calc}
-%\usepackage{subfig}
-% \usepackage{paralist}
-%\usepackage{graphicx}
-\usepackage{array}
-\usepackage{framed}
-\usepackage{excludeonly}
-\usepackage{fancyvrb}
-\usecolortheme{dove}
-% \usefonttheme{serif}
-\usepackage{xfrac}
-\usepackage{xcolor}
-\usepackage{mdframed}
-\usepackage{caption}
-\captionsetup[figure]{labelformat=empty}
-\usepackage{transparent}
-\usepackage{bm}
-
-% URL color:
-\definecolor{myorange}{RGB}{80,224,176}
-% Theme color of metropolis
-\definecolor{metropolis_theme_color}{RGB}{38,38,38}
-% Upper and lower rules of code chunks
-\definecolor{darkblue}{RGB}{38,38,38}
-% Font color of footer:
-\definecolor{mygrey}{RGB}{240,240,240}
-
-\definecolor{accents}{RGB}{80,224,176}
-
-\usepackage{hyperref}
-\hypersetup{
-    colorlinks = true,
-    linkcolor = {black},
-    urlcolor = {accents},
-    linkbordercolor = {white}
-}
+\documentclass[10pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
 
 
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% METROPOLIS THEME + CUSTOMIZATIONS
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%\usetheme{metropolis}
-%\usetheme{metropolis}
-%\useoutertheme{metropolis}
-%\useinnertheme{metropolis}
-\setbeamercolor{background canvas}{bg=white}
-\AtBeginSection{
-  \let\insertsectionnumber\relax
-  \let\sectionname\relax
-    \begin{frame}[c,plain,noframenumbering]
-    \sectionpage
-    \small{\tableofcontents[currentsection]}
-    \end{frame}
-}
-
-% remove space of center enviroment which often occurs around includegraphics produced from knitr plots
-% https://tex.stackexchange.com/questions/74212/how-can-i-change-the-whitespace-above-and-below-center
-\let\oldcenter\center
-\let\oldendcenter\endcenter
-\renewenvironment{center}{\setlength\topsep{0pt}\oldcenter}{\oldendcenter}
-
-% reduce margins / border
-% \setbeamersize{text margin left=10pt,text margin right=10pt}
-
-% Reduce space between code chunks and code output in rmarkdown beamer presentation: https://stackoverflow.com/questions/35734525/reduce-space-between-code-chunks-and-code-output-in-rmarkdown-beamer-presentatio
-%\setlength{\parskip}{0pt}
-%\setlength{\OuterFrameSep}{-20pt}
-\makeatletter
-\preto{\@verbatim}{\parskip=0pt \topsep=0pt \partopsep=0pt}
-\makeatother
-
-%% Add LMU template:
-%% ---------------------------------------------------------------
-%\usepackage{./../../_setup/lmu-lecture}
-\usepackage{../../style/lmu-lecture}
+\usepackage[nospeakermargin]{../../style/lmu-lecture-2}
+% Defines macros and environments
 \input{../../style/common.tex}
-% \usefonttheme{structurebold}
-% \RequirePackage[T1]{fontenc}
-% \RequirePackage[scaled=0.92]{helvet}   %% Helvetica for sans serif
-% \defbeamertemplate*{frametitle}{lecture}[1][left]
-% {
-%   \ifbeamercolorempty[bg]{frametitle}{}{\nointerlineskip}%
-%   \@tempdima=\textwidth%
-%   \advance\@tempdima by\beamer@leftmargin%
-%   \advance\@tempdima by\beamer@rightmargin%
-%   \begin{beamercolorbox}[sep=0.2cm,#1,wd=\the\@tempdima]{frametitle}
-%     \if@tempswa\else\csname beamer@fte#1\endcsname\fi%
-%     {\usebeamerfont{frametitle}\rule[-0.5ex]{0pt}{2.3ex}\insertframetitle\par}%
-%     \if@tempswa\else\vskip-.2cm\fi% set inside beamercolorbox... evil here...
-%   \end{beamercolorbox}%
-% }
-% \def\beamer@fteright{\vskip0.35cm\advance\leftskip by 1.7cm\advance\rightskip by1.7cm}
-% \setbeamertemplate{frametitle continuation}[from second][{\small/~\insertcontinuationcount}]
-% % ------------------------------------------------------------------------
-% % Geometry
-% \setbeamersize{text margin left=0.8cm,text margin right=0.8cm}
-% \pgfdeclarehorizontalshading{footlineshade}{4mm}{%
-%   color(0pt)=(black);%
-%   color(1.0\paperwidth)=(structure!50!black)}
-% % redefine \ref (it has been redefined somewhere by the beamerclass)
-% \def\lectureref#1{\expandafter\@setref\csname r@#1\endcsname\@firstoftwo{#1}}
-% % counter for framenumber for current lecture
-% \newcounter{lectureframenumber}
-% % adjust framenumbers for lecture (check whether reference is already defined)
-% \def\addjustlectureframenumber#1{\ifx#1\relax\else%
-%   \addtocounter{lectureframenumber}{-\lectureref{lect:@@\thelecture}}\fi}
-
-% % ------------------------------------------------------------------------
-% % Navigation symbols
-% \setbeamertemplate{navigation symbols}{}
-% % ------------------------------------------------------------------------
-% % No head lines
-% \defbeamertemplate*{headline}{lecture theme}{}
-% \setbeamertemplate{frametitle}{\expandafter\uppercase\expandafter\insertframetitle}
-
-
-
-
-
-
-
-
-%% Add footer:
-%% ---------------------------------------------------------------
-\setbeamertemplate{footline}[text line]{%
-    \noindent\hspace*{\dimexpr-\oddsidemargin-1in\relax}%
-     \colorbox{white}{
-     \makebox[\dimexpr\paperwidth-2\fboxsep\relax]{
-     \color{black}
-     \begin{minipage}[c][4.5ex][c]{0.5\linewidth}
-       \secname
-     \end{minipage}
-     \hfill\begin{minipage}[c][4.5ex][c]{0.5\linewidth}
-       \flushright
-       \insertframenumber{}~/~\inserttotalframenumber~~
-     \end{minipage}
-     }}%
-  \hspace*{-\paperwidth}
-}
-
-%% Add titlegraphic:
-%% ---------------------------------------------------------------
-% \titlegraphic{
-%   \transparent{0.7}
-%   \includegraphics[width=5cm]{./../../_setup/images/logos/eds_logo_black.png}
-% }
-
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% NICER CODE BACKGROUND
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% Define Shaded if not defined already through knitr:
-%\definecolor{shadecolor}{RGB}{228,228,228}
+\usepackage{etoolbox}
 \makeatletter
-\@ifundefined{Shaded}{%
-\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}%
-}{}
+\newlength{\parboxtodim}
+\patchcmd{\@iiiparbox}
+  {\hsize}
+  {\ifx\relax#2\else\setlength{\parboxtodim}{#2}\fi\hsize}
+  {}{}
 \makeatother
-
-\renewenvironment{Shaded}{
-  %\vspace{5pt}
-  \begin{mdframed}[backgroundcolor=black!8,
-                   linecolor=darkblue,
-                   rightline=false,
-				   leftline=false]}{
-  \end{mdframed}}
-
-
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% CHANGE URL COLOR
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\renewcommand\UrlFont{\color{accents}}
-% \hypersetup{
-%     colorlinks=true,
-%     linkcolor=myorange
-% }
-
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% INCLUDE LATEX MATH + OTHER CUSTOMIZATIONS
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-% Include latex-math
-\DeclareOldFontCommand{\sf}{\normalfont\sffamily}{\mathsf}
-
-% \input{./../../latex-math/basic-math.tex}
-% \input{./../../latex-math/basic-ml.tex}
-% \input{./../../latex-math/ml-bagging.tex}
-% \input{./../../latex-math/ml-boosting.tex}
-% \input{./../../latex-math/ml-gp.tex}
-% \input{./../../latex-math/ml-mbo.tex}
-% \input{./../../latex-math/ml-nn.tex}
-% \input{./../../latex-math/ml-svm.tex}
-% \input{./../../latex-math/ml-trees.tex}
-% \InputIfFileExists{./../../latex-math/ml-lm.tex}{}{}
-% \InputIfFileExists{./../../latex-math/ml-automl.tex}{}{}
-% Additional commands:
-\newcommand{\abs}[1]{\ensuremath{\left| #1 \right|}}
-%\renewcommand{\pikN}{\hat{\pi}^\Np} % This collides with z
-
-
-
-% basic latex stuff
-%\newcommand{\pkg}[1]{{\fontseries{b}\selectfont #1}} %fontstyle for R packages
-%\newcommand{\lz}{\vspace{0.5cm}} %vertical space
-
-%\newcommand{\oneliner}[1] % Oneliner for important statements
-%{\begin{block}{}\begin{center}\begin{Large}#1\end{Large}\end{center}\end{block}}
-
-\let\code=\texttt
-\let\proglang=\textsf
-
-\setkeys{Gin}{width=0.9\textwidth}
-
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% EXERCISE COUNTER
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% Command for an automatic exercise counter for the exercise sheets:
-\newcounter{Exercise}
-\newcommand{\exercise}{
-  \stepcounter{Exercise}
-  \ifnum \theExercise = 1
-    \Large{\textbf{Exercise \theExercise}} \\
-  \else
-    \vspace{\baselineskip} \Large{\textbf{Exercise \theExercise}} \\
-  \fi
-}
-
-% Command for an automatic exercise counter for the courses:
-\newcounter{CourseExercise}
-\newcommand{\oneExercise}{
-  \stepcounter{CourseExercise}
-    \begin{center}
-      \huge{Exercise \Roman{CourseExercise}}
-    \end{center}
-}
-\newcommand{\twoExercises}{
-  \stepcounter{CourseExercise}
-    \begin{center}
-      \huge{Exercise \Roman{CourseExercise} \& \stepcounter{CourseExercise} \Roman{CourseExercise}}
-    \end{center}
-}
-\newcommand{\threeExercises}{
-  \stepcounter{CourseExercise}
-    \begin{center}
-      \huge{Exercise \Roman{CourseExercise}, \stepcounter{CourseExercise} \Roman{CourseExercise} \& \stepcounter{CourseExercise} \Roman{CourseExercise}}
-    \end{center}
-}
-
-\newcommand{\resetExercises}{\setcounter{CourseExercise}{0}}
-
-\usetikzlibrary{shapes,arrows,automata,positioning,calc,chains,trees, shadows}
-\tikzset{
-  %Define standard arrow tip
-  >=stealth',
-  %Define style for boxes
-  punkt/.style={
-    rectangle,
-    rounded corners,
-    draw=black, very thick,
-    text width=6.5em,
-    minimum height=2em,
-    text centered},
-  % Define arrow style
-  pil/.style={
-    ->,
-    thick,
-    shorten <=2pt,
-    shorten >=2pt,}
-}
-\usepackage{subfig}
-%\beamerdefaultoverlayspecification{<+->}
-
-\title{Data Science Lifecycle}
-\date{}
-
 \begin{document}
+
+\newcommand{\titlefigure}{figure_man/DSLifecycle1}
+\newcommand{\learninggoals}{
+  \item Know phases of data science lifecycle
+  \item Identify essential concepts, tools, and methods for each phase
+  \item Plan an end-to-end ML workflow with attention to constraints and dependencies}
+
+\lecturechapter{The Data Science Lifecycle}
+\lecture{Applied Machine Learning}
 % \begin{frame}[plain]
 % \titlepage
 % \end{frame}
@@ -384,17 +31,17 @@
 % \phantomsection\label{section}
 % \end{frame}
 
-\section{The Data Science Lifecycle}\label{the-data-science-lifecycle}
+% \section{The Data Science Lifecycle}\label{the-data-science-lifecycle}
 
-\begin{frame}{Learning Objectives}
-By the end of this session, you should be able to:
-\begin{itemize}
-  \item Describe key phases of the data science lifecycle
-  \item Identify essential concepts, tools, and methods for each phase
-  \item Plan an end-to-end ML workflow with attention to constraints and dependencies
-\end{itemize}
+% \begin{frame}{Learning Objectives}
+% By the end of this session, you should be able to:
+% \begin{itemize}
+%   \item Describe key phases of the data science lifecycle
+%   \item Identify essential concepts, tools, and methods for each phase
+%   \item Plan an end-to-end ML workflow with attention to constraints and dependencies
+% \end{itemize}
 
-\end{frame}
+% \end{frame}
 
 \begin{frame}{The Data Science Lifecycle \citebutton{CRISP-DM}{https://en.wikipedia.org/wiki/Cross-industry_standard_process_for_data_mining}}
 \phantomsection\label{the-data-science-lifecycle-1}
@@ -470,7 +117,6 @@ A widely used framework that formalizes the iterative process of turning data in
   \item Use ML only if it adds clear value over simpler/existing alternatives
 \end{itemize}
 \pause
-\bigskip
 \textbf{2. Problem Framing: How to frame the task?}
 \begin{itemize}
   \tightlist
@@ -479,7 +125,6 @@ A widely used framework that formalizes the iterative process of turning data in
   \item Select the ML task that aligns with your KPI and data characteristics
 \end{itemize}
 
-\vfill
 \centering
 \includegraphics[width=0.6\textwidth]{figure_man/MLTasks.png}
 \end{frame}
@@ -796,7 +441,7 @@ A widely used framework that formalizes the iterative process of turning data in
 \only<2>{
 \textbf{2. Beware of Data Leakage}
 \begin{itemize}
-  \item \textbf{Target Leakage:} Features leak future information not available at prediction time
+  \item \textbf{Target Leakage:} Features leak future info not available at prediction time
     \begin{itemize}
       \item Example: "Total Sales in Next Month" used to predict this month
     \end{itemize}
@@ -841,7 +486,7 @@ A widely used framework that formalizes the iterative process of turning data in
 
 \section{2. Data Acquisition and Understanding}\label{data-acquisition-and-understanding}
 
-\begin{frame}{Data Sources}
+\begin{frame}{Data Sources and Data Versioning}
 \phantomsection\label{data-source}
 \textbf{Key question:} What data is available and where does it come from?
 
@@ -862,6 +507,17 @@ A widely used framework that formalizes the iterative process of turning data in
     \end{itemize}
   \end{column}
 \end{columns}
+
+\textbf{Data Versioning:}
+
+\begin{itemize}
+\tightlist
+\item Data can evolve - use version control for data, like \texttt{git} for code  
+\item Tools: \texttt{DVC} (Data Version Control), \texttt{Pachyderm}
+\end{itemize}
+
+
+
 \end{frame}
 
 
@@ -877,28 +533,78 @@ A widely used framework that formalizes the iterative process of turning data in
 % \end{itemize}
 % \end{frame}
 
-\begin{frame}{Data Exploration}
-\phantomsection\label{data-exploration}
-\textbf{Key question}: What are the data features and how do they look like?
-\begin{itemize}
-\tightlist
-\item Create a \emph{data dictionary} to clarify:
+
+
+\begin{frame}{Datasheets \citebutton{Gebru et al., 2018}{https://arxiv.org/abs/1803.09010}}
+\phantomsection\label{datasheets}
+
+\emph{Datasheets} summarize key metadata about a dataset’s content, structure, provenance, and known limitations to support informed and responsible use.
 
   \begin{itemize}
   \tightlist
-\item Semantic meaning of each feature
-    \item Measurement units and expected ranges
-    \item Valid levels for categorical features (factors)
-    \item Encoding scheme for missing or special values
+    \item Why and how was the data collected?
+    \item What are its limitations and ethical concerns?
+    \item For which tasks is it suitable or unsuitable?
   \end{itemize}
-\item  Compute (stratified) summary statistics and inspect missingness
-\item  Plot uni- and bivariate diagrams to explore distributions and structure
-  \item Identify:
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\linewidth]{figure_man/DataSheet.png}\\
+\tiny Source: \href{https://www.kaggle.com/datasets/samithsachidanandan/netflix-stock-price-2002-2025}{Kaggle Datasets}
+\end{figure}
+
+%\scriptsize
+%Based on: \href{https://arxiv.org/abs/1803.09010}{Gebru et al., 2018 — Datasheets for Datasets}
+\end{frame}
+
+% \begin{frame}{Data Exploration}
+% \phantomsection\label{data-exploration}
+% \textbf{Key question}: What are the data features and how do they look like?
+% \begin{itemize}
+% \tightlist
+% \item Create a \emph{data dictionary} to clarify:
+
+%   \begin{itemize}
+%   \tightlist
+% \item Semantic meaning of each feature
+%     \item Measurement units and expected ranges
+%     \item Valid levels for categorical features (factors)
+%     \item Encoding scheme for missing or special values
+%   \end{itemize}
+% \item  Compute (stratified) summary statistics and inspect missingness
+% \item  Plot uni- and bivariate diagrams to explore distributions and structure
+% \item Identify: Outliers, anomalies, imbalances, or highly correlated features
+% \end{itemize}
+
+% \textbf{Beware of confounders:} Unmeasured variables may bias analysis
+% \includegraphics[width = \linewidth]{figure_man/confounder.png}
+% \end{frame}
+
+\begin{frame}{Data Exploration}
+\phantomsection\label{data-exploration}
+
+\textbf{Key question}: What features are in the data, and what do they reveal?
+
+\begin{itemize}
+  \item \textbf{Build a data dictionary}:
   \begin{itemize}
-    \item Outliers, anomalies, imbalances
-    \item Redundant or highly correlated features
+    \item Feature meaning, units, valid ranges/category-levels
+    \item Missing value encoding and special codes
   \end{itemize}
+  
+  \item \textbf{Examine structure and quality to gain understanding}:
+  \begin{itemize}
+    \item Compute (stratified) summary statistics and inspect missingness
+    \item Plot univariate and bivariate distributions
+    \item Identify outliers, anomalies, imbalances, redundancy, or high correlation
+  \end{itemize}
+  
+  \item \textbf{Watch for confounders:} unmeasured variables may distort associations
 \end{itemize}
+
+\begin{center}
+\includegraphics[width=\linewidth]{figure_man/confounder.png}
+\end{center}
 \end{frame}
 
 \begin{frame}{Data Quality}
@@ -921,29 +627,6 @@ A widely used framework that formalizes the iterative process of turning data in
 \end{itemize}
 \end{frame}
 
-
-
-\begin{frame}{Datasheets \citebutton{Gebru et al., 2018}{https://arxiv.org/abs/1803.09010}}
-\phantomsection\label{datasheets}
-
-\emph{Datasheets} summarize key metadata about a dataset’s content, structure, provenance, and known limitations to support informed and responsible use.
-
-  \begin{itemize}
-    \item Why and how was the data collected?
-    \item What are its limitations and ethical concerns?
-    \item For which tasks is it suitable or unsuitable?
-  \end{itemize}
-
-\begin{figure}
-    \centering
-    \includegraphics[width=0.5\linewidth]{figure_man/DataSheet.png}
-
-\caption{\tiny Source: \href{https://www.kaggle.com/datasets/samithsachidanandan/netflix-stock-price-2002-2025}{Kaggle Datasets}}
-\end{figure}
-
-%\scriptsize
-%Based on: \href{https://arxiv.org/abs/1803.09010}{Gebru et al., 2018 — Datasheets for Datasets}
-\end{frame}
 
 
 
@@ -1013,40 +696,40 @@ A widely used framework that formalizes the iterative process of turning data in
 % \end{frame}
 
 
-\begin{frame}{Hidden Complexity in Data}
-\phantomsection\label{hidden-complexity}
+% \begin{frame}{Hidden Complexity in Data}
+% \phantomsection\label{hidden-complexity}
 
-\vspace{0.5em}
-\begin{itemize}
-  \item \textbf{Hidden Features:} Unmeasured variables (e.g., confounders) may bias analysis
-  \end{itemize}
-\includegraphics[width = \linewidth]{figure_man/confounder.png}
-  % \begin{itemize}
-  %   \item Example: Low customer satisfaction on Friday/Saturday may be due to \texttt{weather}, not weekday
-  %   \item Real-world case: Subtle biases across facilities due to sensor differences
-  % \end{itemize}
-  \vspace{-1em}
-  \pause
-\begin{itemize}
-  \item \textbf{Data Pipelines:} Ensure consistent and reproducible data ingestion
-  \begin{columns}[T, totalwidth=\textwidth]
-      \begin{column}{0.38\textwidth}
-          \includegraphics[width = \linewidth]{figure_man/pipeline.png}
-      \end{column}
-            \begin{column}{0.62\textwidth}
-            \begin{itemize}
-    \item Can be batch-based, streaming, or hybrid
-    \item Should support automated refresh \& monitoring
-    \item \textbf{Data Versioning} helps track changes over time (e.g., with \texttt{DVC}, \texttt{Pachyderm})
-  \end{itemize}
-      \end{column}
-  \end{columns}
+% \vspace{0.5em}
+% \begin{itemize}
+%   \item \textbf{Hidden Features:} Unmeasured variables (e.g., confounders) may bias analysis
+%   \end{itemize}
+% \includegraphics[width = \linewidth]{figure_man/confounder.png}
+%   % \begin{itemize}
+%   %   \item Example: Low customer satisfaction on Friday/Saturday may be due to \texttt{weather}, not weekday
+%   %   \item Real-world case: Subtle biases across facilities due to sensor differences
+%   % \end{itemize}
+%   \vspace{-1em}
+%   \pause
+% \begin{itemize}
+%   \item \textbf{Data Pipelines:} Ensure consistent and reproducible data ingestion
+%   \begin{columns}[T, totalwidth=\textwidth]
+%       \begin{column}{0.38\textwidth}
+%           \includegraphics[width = \linewidth]{figure_man/pipeline.png}
+%       \end{column}
+%             \begin{column}{0.62\textwidth}
+%             \begin{itemize}
+%     \item Can be batch-based, streaming, or hybrid
+%     \item Should support automated refresh \& monitoring
+%     \item \textbf{Data Versioning} helps track changes over time (e.g., with \texttt{DVC}, \texttt{Pachyderm})
+%   \end{itemize}
+%       \end{column}
+%   \end{columns}
 
-\end{itemize}
+% \end{itemize}
 
-\vspace{0.5em}
-\textit{Key message: Understanding your data requires both domain awareness and engineering discipline.}
-\end{frame}
+% \vspace{0.5em}
+% \textit{Key message: Understanding your data requires both domain awareness and engineering discipline.}
+% \end{frame}
 
 
 
@@ -1289,15 +972,15 @@ To understand and trust your model, apply methods from \textbf{Interpretable Mac
 
 \section{4. Model Governance}\label{model-governance-1}
 
-\begin{frame}{Model Governance}
-\phantomsection\label{model-governance-2}
-\begin{quote}
-Developing and deploying ML systems is relatively fast and cheap, but
-maintaining them over time is difficult and expensive.
-~\href{https://papers.nips.cc/paper/5656-hidden-technical-debt-in-machine-learning-systems.pdf}{Hidden
-Technical Debt in ML Systems}
-\end{quote}
-\end{frame}
+% \begin{frame}{Model Governance}
+% \phantomsection\label{model-governance-2}
+% \begin{quote}
+% Developing and deploying ML systems is relatively fast and cheap, but
+% maintaining them over time is difficult and expensive.
+% ~\href{https://papers.nips.cc/paper/5656-hidden-technical-debt-in-machine-learning-systems.pdf}{Hidden
+% Technical Debt in ML Systems}
+% \end{quote}
+% \end{frame}
 
 % \begin{frame}{Model Governance}
 % \phantomsection\label{model-governance-3}
@@ -1323,9 +1006,10 @@ Technical Debt in ML Systems}
 \begin{frame}{Model Governance}
 \phantomsection\label{model-governance-3}
 
+
 \begin{itemize}
 \tightlist
-  \item Model Governance includes the \textbf{people, processes, and technologies} needed to manage and protect your ML models.
+  \item Model Governance includes \textbf{people, processes, and technologies} needed to manage and protect your ML models.
     \item Ensures long-term maintainability and adaptation as requirements evolve.
   \item Two extremes must be avoided:
     \begin{itemize}
@@ -1336,9 +1020,18 @@ Technical Debt in ML Systems}
   %\item Good governance ensures your models remain \textbf{maintainable}, \textbf{adaptable}, and usable over time - even as requirements evolve.
 \end{itemize}
 
-    Model Governance steps are:
+    Model governance steps are:
     %https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
     \includegraphics[width = \linewidth]{figure_man/Model Governace.png}
+
+    
+\begin{quote}
+\footnotesize
+"Developing and deploying ML systems is relatively fast and cheap, but
+maintaining them over time is difficult and expensive."
+\hfill~\href{https://papers.nips.cc/paper/5656-hidden-technical-debt-in-machine-learning-systems.pdf}{Hidden
+Technical Debt in ML Systems}
+\end{quote}
 \end{frame}
 
 % \begin{frame}{Deployment}
@@ -1476,7 +1169,7 @@ Technical Debt in ML Systems}
 \begin{frame}{Monitoring}
 \phantomsection\label{monitoring}
 
-\textbf{Monitoring} ensures that deployed models function reliably and alerts you to issues in production:
+\textbf{Monitoring} ensures that deployed models work reliably and flags issues in production:
 
 \begin{itemize}
 \tightlist
@@ -1576,14 +1269,18 @@ Technical Debt in ML Systems}
 
 \begin{frame}{Step 4: Develop a Baseline Model}
 \begin{itemize}
-  \item \textbf{Why a Baseline?} A simple model (e.g., Logistic Regression, Decision Tree) gives you a reference performance.
-  \item \textbf{Pipeline Check}: Make sure that data loading, preprocessing, and validation splits are correct.
-  \item \textbf{Diagnostics} : Analyze misclassifications/ residuals to spot improvement areas.
+  \item \textbf{Why a Baseline?} 
+  \begin{itemize}
+      \item A simple model (e.g., LM, Decision Tree) provides a reference performance.
+      \item Include a \emph{featureless} model (e.g., predicting the majority class or mean) to benchmark against trivial solutions.
+  \end{itemize}
+  \item \textbf{Pipeline Check}: Make sure that data loading, preprocessing, and validation splits are correct and leakage-free.
+  \item \textbf{Diagnostics} : Analyze misclassifications/residuals to spot improvement areas.
   \item \textbf{Action Points}:
     \begin{itemize}
       \item Start with a naive or default-parameter model.
-      \item Use cross-validation to assess reliability.
-      \item Record baseline metrics to quantify future gains.
+      \item Use cross-validation to assess generalization.
+      \item Log baseline metrics to quantify future gains.
     \end{itemize}
 \end{itemize}
 \end{frame}
@@ -1606,7 +1303,7 @@ Technical Debt in ML Systems}
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Step 6: Feature Engineering and Data Preprocessing}
+\begin{frame}{Step 6: Feature Engineering \& Preprocessing}
 \begin{itemize}
   \item \textbf{Missing Data}: Mean/median imputation, advanced methods, or flags.
   \item \textbf{Encoding Categorical Variables}: One-hot/ target/ frequency enc. (leakage?!).
@@ -1621,7 +1318,7 @@ Technical Debt in ML Systems}
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Step 7: Select and Tune Models Strategically}
+\begin{frame}{Step 7: Select \& Tune Models Strategically}
 \begin{itemize}
   \item \textbf{Model Choices}:
     \begin{itemize}
@@ -1661,9 +1358,9 @@ Technical Debt in ML Systems}
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Step 9: Understand the Leaderboard and Avoid Overfitting}
+\begin{frame}{Step 9: Understand the Leaderboard}
 \begin{itemize}
-  \item \textbf{Public vs. Private Leaderboard}: Public boards use only part of the test set—overfitting leads to dramatic rank changes later.
+  \item \textbf{Public vs. Private Leaderboard}: Public boards use only part of the test set, overfitting leads to dramatic rank changes later.
   \item \textbf{Submission Strategy}:
     \begin{itemize}
       \item Rely mainly on internal validation.
@@ -1702,13 +1399,13 @@ Technical Debt in ML Systems}
 
 \begin{frame}{Final Advice}
 \begin{itemize}
-  \item \textbf{Start Simple, Then Iterate}: Don’t jump into complex models, get a solid baseline.
+  \item \textbf{Start Simple, Iterate}: Build a solid baseline before adding complexity.
   \item \textbf{Prioritize Validation}: A robust validation strategy prevents nasty surprises.
   \item \textbf{Log Everything}: Document transformations, parameters, and model versions.
-  \item \textbf{Aim for Generalizable Solutions}: Don’t just chase leaderboard scores—focus on reproducibility and reliability.
+  \item \textbf{Aim for Generalizable Solutions}: Don’t just chase leaderboard scores, keep your focus on reproducibility and reliability.
 \end{itemize}
 \end{frame}
 
 
-
+\endlecture
 \end{document}
