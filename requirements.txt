@@ -10,3 +10,5 @@ matplotlib
 notebook
 nbconvert
 nbformat
+openml
+scikit-posthocs
