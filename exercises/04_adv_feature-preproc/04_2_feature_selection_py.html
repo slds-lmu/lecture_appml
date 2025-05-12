@@ -7573,7 +7573,6 @@ a.anchor-link {
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="s1">'credit-g'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">map</span><span class="p">({</span><span class="s1">'good'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'bad'</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
 </pre></div>
 </div>
 </div>
@@ -7609,8 +7608,7 @@ a.anchor-link {
 <span class="n">categorical_features</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"credit_history"</span><span class="p">,</span> <span class="p">]</span>
 <span class="n">numerical_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">feat</span> <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">selected_features</span> <span class="k">if</span> <span class="n">feat</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">categorical_features</span><span class="p">]</span>
 
-<span class="c1"># Note: in previous exercises we primarily used one-hot encoding,</span>
-<span class="c1"># In this exercise, we use ordinal encoding to align the results with the R solution.</span>
+<span class="c1"># This feature is ordinal, so we encode it using OrdinalEncoder</span>
 <span class="n">unique_credit_history</span> <span class="o">=</span> <span class="n">X_four_feats</span><span class="p">[</span><span class="s1">'credit_history'</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unique credit history values: </span><span class="si">{</span><span class="n">unique_credit_history</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
@@ -7729,8 +7727,7 @@ After fitting, use `.get_support()` or `.get_feature_names_out()` to identify wh
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
 
 <span class="n">sfs_forward</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_four_feats</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-<span class="n">selected_features_forward</span> <span class="o">=</span> <span class="n">X_four_feats</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">sfs_forward</span><span class="o">.</span><span class="n">get_support</span><span class="p">()]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Selected features: </span><span class="si">{</span><span class="n">selected_features_forward</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Selected features: </span><span class="si">{</span><span class="n">sfs_forward</span><span class="o">.</span><span class="n">get_feature_names_out</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7743,7 +7740,7 @@ After fitting, use `.get_support()` or `.get_feature_names_out()` to identify wh
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Selected features: ['duration', 'credit_history']
+<pre>Selected features: ['duration' 'credit_history']
 </pre>
 </div>
 </div>
@@ -7791,7 +7788,7 @@ After fitting, use `.get_support()` or `.get_feature_names_out()` to identify wh
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best feature set: </span><span class="si">{</span><span class="n">best_feature_set</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="n">X_best</span> <span class="o">=</span> <span class="n">X_four_feats</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">best_feature_set</span><span class="p">)]</span>
+<span class="n">X_best</span> <span class="o">=</span> <span class="n">sfs_forward</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_four_feats</span><span class="p">)</span>
 
 <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
     <span class="n">X_best</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y</span>
@@ -7943,10 +7940,10 @@ After selecting the best features for each metric, evaluate the performance of e
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">tpr_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">recall_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">pos_label</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">recall_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">pos_label</span><span class="o">=</span><span class="s2">"good"</span><span class="p">)</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">tnr_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">recall_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">pos_label</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">recall_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">pos_label</span><span class="o">=</span><span class="s2">"bad"</span><span class="p">)</span>
 
 <span class="n">tpr_scorer</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">tpr_score</span><span class="p">)</span>
 <span class="n">tnr_scorer</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">tnr_score</span><span class="p">)</span>
@@ -7954,82 +7951,52 @@ After selecting the best features for each metric, evaluate the performance of e
 <span class="n">clf</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">2025</span><span class="p">)</span>
 <span class="n">cv</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">2025</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">2 Multiple Performance Measures"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Using custom random search for feature selection with multiple metrics"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"2 Multiple Performance Measures. Using custom random search for feature selection with multiple metrics"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Running random feature search..."</span><span class="p">)</span>
 
+<span class="c1"># Function to evaluate feature set across all metrics</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">evaluate_feature_set</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="n">X_subset</span> <span class="o">=</span> <span class="n">X_full</span><span class="p">[</span><span class="n">features</span><span class="p">]</span>
+    <span class="n">acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cross_val_score</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_subset</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s1">'accuracy'</span><span class="p">))</span>
+    <span class="n">tpr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cross_val_score</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_subset</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="n">tpr_scorer</span><span class="p">))</span>
+    <span class="n">tnr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cross_val_score</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_subset</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="n">tnr_scorer</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"features"</span><span class="p">:</span> <span class="n">features</span><span class="p">,</span>
+        <span class="s2">"features_str"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> optimized"</span><span class="p">,</span>
+        <span class="s2">"num_features"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">),</span>
+        <span class="s2">"accuracy"</span><span class="p">:</span> <span class="n">acc</span><span class="p">,</span>
+        <span class="s2">"classif.tpr"</span><span class="p">:</span> <span class="n">tpr</span><span class="p">,</span>
+        <span class="s2">"classif.tnr"</span><span class="p">:</span> <span class="n">tnr</span>
+    <span class="p">}</span>
 
 <span class="c1"># Run random search for each metric</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Running random feature search..."</span><span class="p">)</span>
-
-<span class="c1"># For accuracy</span>
-<span class="n">acc_features</span><span class="p">,</span> <span class="n">acc_score</span> <span class="o">=</span> <span class="n">random_feature_search</span><span class="p">(</span>
-    <span class="n">X_full</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">clf</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="s1">'accuracy'</span><span class="p">,</span> <span class="n">n_iterations</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span>
-<span class="p">)</span>
-
-<span class="c1"># For TPR</span>
-<span class="n">tpr_features</span><span class="p">,</span> <span class="n">tpr_score_val</span> <span class="o">=</span> <span class="n">random_feature_search</span><span class="p">(</span>
-    <span class="n">X_full</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">clf</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">tpr_scorer</span><span class="p">,</span> <span class="n">n_iterations</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span>
-<span class="p">)</span>
-
-<span class="c1"># For TNR</span>
-<span class="n">tnr_features</span><span class="p">,</span> <span class="n">tnr_score_val</span> <span class="o">=</span> <span class="n">random_feature_search</span><span class="p">(</span>
-    <span class="n">X_full</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">clf</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">tnr_scorer</span><span class="p">,</span> <span class="n">n_iterations</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span>
-<span class="p">)</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'Accuracy'</span><span class="p">:</span> <span class="p">(</span><span class="s1">'accuracy'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="s1">'TPR'</span><span class="p">:</span> <span class="p">(</span><span class="n">tpr_scorer</span><span class="p">,</span> <span class="s1">'TPR'</span><span class="p">),</span>
+    <span class="s1">'TNR'</span><span class="p">:</span> <span class="p">(</span><span class="n">tnr_scorer</span><span class="p">,</span> <span class="s1">'TNR'</span><span class="p">)</span>
+<span class="p">}</span>
 
 <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">best_features</span> <span class="o">=</span> <span class="p">{}</span>
 
-<span class="c1"># Evaluate accuracy-optimized features</span>
-<span class="n">X_acc</span> <span class="o">=</span> <span class="n">X_full</span><span class="p">[</span><span class="n">acc_features</span><span class="p">]</span>
-<span class="n">tpr_acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cross_val_score</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_acc</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="n">tpr_scorer</span><span class="p">))</span>
-<span class="n">tnr_acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cross_val_score</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_acc</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="n">tnr_scorer</span><span class="p">))</span>
-<span class="n">acc_acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cross_val_score</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_acc</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s1">'accuracy'</span><span class="p">))</span>
-
-<span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
-    <span class="s2">"features"</span><span class="p">:</span> <span class="n">acc_features</span><span class="p">,</span>
-    <span class="s2">"features_str"</span><span class="p">:</span> <span class="s2">"Accuracy optimized"</span><span class="p">,</span>
-    <span class="s2">"num_features"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">acc_features</span><span class="p">),</span>
-    <span class="s2">"accuracy"</span><span class="p">:</span> <span class="n">acc_acc</span><span class="p">,</span>
-    <span class="s2">"classif.tpr"</span><span class="p">:</span> <span class="n">tpr_acc</span><span class="p">,</span>
-    <span class="s2">"classif.tnr"</span><span class="p">:</span> <span class="n">tnr_acc</span>
-<span class="p">})</span>
-
-<span class="c1"># Evaluate TPR-optimized features</span>
-<span class="n">X_tpr</span> <span class="o">=</span> <span class="n">X_full</span><span class="p">[</span><span class="n">tpr_features</span><span class="p">]</span>
-<span class="n">tpr_tpr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cross_val_score</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_tpr</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="n">tpr_scorer</span><span class="p">))</span>
-<span class="n">tnr_tpr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cross_val_score</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_tpr</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="n">tnr_scorer</span><span class="p">))</span>
-<span class="n">acc_tpr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cross_val_score</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_tpr</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s1">'accuracy'</span><span class="p">))</span>
-
-<span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
-    <span class="s2">"features"</span><span class="p">:</span> <span class="n">tpr_features</span><span class="p">,</span>
-    <span class="s2">"features_str"</span><span class="p">:</span> <span class="s2">"TPR optimized"</span><span class="p">,</span>
-    <span class="s2">"num_features"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">tpr_features</span><span class="p">),</span>
-    <span class="s2">"accuracy"</span><span class="p">:</span> <span class="n">acc_tpr</span><span class="p">,</span>
-    <span class="s2">"classif.tpr"</span><span class="p">:</span> <span class="n">tpr_tpr</span><span class="p">,</span>
-    <span class="s2">"classif.tnr"</span><span class="p">:</span> <span class="n">tnr_tpr</span>
-<span class="p">})</span>
-
-<span class="c1"># Evaluate TNR-optimized features</span>
-<span class="n">X_tnr</span> <span class="o">=</span> <span class="n">X_full</span><span class="p">[</span><span class="n">tnr_features</span><span class="p">]</span>
-<span class="n">tpr_tnr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cross_val_score</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_tnr</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="n">tpr_scorer</span><span class="p">))</span>
-<span class="n">tnr_tnr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cross_val_score</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_tnr</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="n">tnr_scorer</span><span class="p">))</span>
-<span class="n">acc_tnr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cross_val_score</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_tnr</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s1">'accuracy'</span><span class="p">))</span>
-
-<span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
-    <span class="s2">"features"</span><span class="p">:</span> <span class="n">tnr_features</span><span class="p">,</span>
-    <span class="s2">"features_str"</span><span class="p">:</span> <span class="s2">"TNR optimized"</span><span class="p">,</span>
-    <span class="s2">"num_features"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">tnr_features</span><span class="p">),</span>
-    <span class="s2">"accuracy"</span><span class="p">:</span> <span class="n">acc_tnr</span><span class="p">,</span>
-    <span class="s2">"classif.tpr"</span><span class="p">:</span> <span class="n">tpr_tnr</span><span class="p">,</span>
-    <span class="s2">"classif.tnr"</span><span class="p">:</span> <span class="n">tnr_tnr</span>
-<span class="p">})</span>
+<span class="c1"># Perform feature selection for each metric</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">scorer</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">features</span><span class="p">,</span> <span class="n">score</span> <span class="o">=</span> <span class="n">random_feature_search</span><span class="p">(</span>
+        <span class="n">X_full</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">clf</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">scorer</span><span class="p">,</span> <span class="n">n_iterations</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span>
+    <span class="p">)</span>
+    <span class="n">best_features</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">features</span>
+    
+    <span class="c1"># Evaluate this feature set across all metrics</span>
+    <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">evaluate_feature_set</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
 
 <span class="n">results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Feature selection results with different optimization criteria:"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">results_df</span><span class="p">[[</span><span class="s2">"features_str"</span><span class="p">,</span> <span class="s2">"num_features"</span><span class="p">,</span> <span class="s2">"accuracy"</span><span class="p">,</span> <span class="s2">"classif.tpr"</span><span class="p">,</span> <span class="s2">"classif.tnr"</span><span class="p">]])</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Accuracy-optimized features:"</span><span class="p">,</span> <span class="n">acc_features</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">TPR-optimized features:"</span><span class="p">,</span> <span class="n">tpr_features</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">TNR-optimized features:"</span><span class="p">,</span> <span class="n">tnr_features</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Accuracy-optimized features:"</span><span class="p">,</span> <span class="n">best_features</span><span class="p">[</span><span class="s1">'Accuracy'</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">TPR-optimized features:"</span><span class="p">,</span> <span class="n">best_features</span><span class="p">[</span><span class="s1">'TPR'</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">TNR-optimized features:"</span><span class="p">,</span> <span class="n">best_features</span><span class="p">[</span><span class="s1">'TNR'</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -8042,11 +8009,7 @@ After selecting the best features for each metric, evaluate the performance of e
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>
-2 Multiple Performance Measures
-
-Using custom random search for feature selection with multiple metrics
-
+<pre>2 Multiple Performance Measures. Using custom random search for feature selection with multiple metrics
 Running random feature search...
 
 Feature selection results with different optimization criteria:
@@ -8082,7 +8045,8 @@ TNR-optimized features: ['credit_amount', 'foreign_worker', 'purpose', 'checking
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput celltag_remove_cell" data-mime-type="text/markdown">
+<p>===SOLUTION===</p>
 <p>Note that the measures can not be optimal at the same time so one has to choose according to their preferences. Here, we see different tradeoffs of sensitivity and specificity but no feature subset is dominated by another, i.e. has worse sensitivity and specificity than any other subset.</p>
 </div>
 </div>
@@ -8095,7 +8059,7 @@ TNR-optimized features: ['credit_amount', 'foreign_worker', 'purpose', 'checking
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="3-Nested-Resampling">3 Nested Resampling<a class="anchor-link" href="#3-Nested-Resampling">¶</a></h2><p>Nested resampling enables finding unbiased performance estimators when feature selection is part of the modeling process. In Python with <code>scikit-learn</code>, this can be implemented by creating a custom wrapper class (e.g., <code>AutoFSelector</code>) that integrates feature selection within cross-validation.</p>
-<h3 id="3.1-Create-an-AutoFSelector-Instance">3.1 Create an AutoFSelector Instance<a class="anchor-link" href="#3.1-Create-an-AutoFSelector-Instance">¶</a></h3><p>Implement an <code>AutoFSelector</code> instance that uses random search to find the subset of features resulting in the highest classification accuracy for a logistic regression model. The feature selector should perform the search using holdout validation and terminate after <code>n_evals</code> evaluations.</p>
+<h3 id="3.1-Create-an-AutoFSelector-Instance">3.1 Create an AutoFSelector Instance<a class="anchor-link" href="#3.1-Create-an-AutoFSelector-Instance">¶</a></h3><p>Implement an <code>AutoFSelector</code> class that uses random search to find the subset of features resulting in the highest classification accuracy for a logistic regression model. The feature selector should perform the search using holdout validation and terminate after <code>n_evals</code> evaluations.</p>
 <p>Use the provided custom <code>AutoFSelector</code> class with logistic regression (<code>LogisticRegression</code>) as the base estimator.</p>
 <p>Note: the random search feature selection comes with large randomness. So, you may need to set <code>n_evals</code> to 20 and try multiple random seeds to get the best performance. In the solution, we use a lucky <code>random_state=543</code> for <code>AutoFSelector</code>.</p>
 </div>
@@ -8199,11 +8163,20 @@ TNR-optimized features: ['credit_amount', 'foreign_worker', 'purpose', 'checking
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pipeline</span>
 
 
-<span class="n">log_reg</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">2025</span><span class="p">)</span>
+<span class="n">log_reg</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">'scaler'</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">()),</span>
+    <span class="p">(</span><span class="s1">'classifier'</span><span class="p">,</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">2025</span><span class="p">))</span>
+<span class="p">])</span>
+
 <span class="n">afs</span> <span class="o">=</span> <span class="n">AutoFSelector</span><span class="p">(</span>
-    <span class="n">base_estimator</span><span class="o">=</span><span class="n">LogisticRegression</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">2025</span><span class="p">),</span>
+    <span class="n">base_estimator</span><span class="o">=</span><span class="n">Pipeline</span><span class="p">([</span>
+        <span class="p">(</span><span class="s1">'scaler'</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">()),</span>
+        <span class="p">(</span><span class="s1">'classifier'</span><span class="p">,</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">2025</span><span class="p">))</span>
+    <span class="p">]),</span>
     <span class="n">n_evals</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
     <span class="n">cv</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
     <span class="n">random_state</span><span class="o">=</span><span class="mi">543</span>
@@ -8236,8 +8209,7 @@ Perform cross-validation separately for both the logistic regression and the `Au
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Load the Sonar dataset from OpenML</span>
-<span class="n">sonar</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="s1">'Sonar'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">X_sonar</span><span class="p">,</span> <span class="n">y_sonar</span> <span class="o">=</span> <span class="n">sonar</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">sonar</span><span class="o">.</span><span class="n">target</span>
+<span class="n">X_sonar</span><span class="p">,</span> <span class="n">y_sonar</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="s1">'Sonar'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="c1"># Set up 3-fold cross-validation</span>
 <span class="n">cv</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">2025</span><span class="p">)</span>
@@ -8267,8 +8239,8 @@ Perform cross-validation separately for both the logistic regression and the `Au
 <pre>
 Benchmark Results:
            learner_id  classif.acc
-0       AutoFSelector     0.783920
-1  LogisticRegression     0.764803
+0       AutoFSelector     0.759834
+1  LogisticRegression     0.759696
 </pre>
 </div>
 </div>

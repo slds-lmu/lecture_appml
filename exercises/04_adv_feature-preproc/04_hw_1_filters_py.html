@@ -7746,25 +7746,6 @@ Correlation between x2 and price: 0.01329962
 </div>
 </div>
 </div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<div style="background-color: #fff3cd; border-left: 6px solid #ffa502; padding: 1em; margin: 1em 0; border-radius: 4px;">
-<strong>⚠️ Note</strong>
-<p>
-    Here the Python version of code is slightly different from the R version. In the R version, the feature encodings are only applied to <code>"zipcode"</code> and <code>"waterfront"</code>. Here, we also consider the several extra columns with integer values as discrete features and apply one‑hot encoding or impact encoding to them.
-  </p>
-<p>
-    If we don't do so, the Information Gain filter in Exercise 2 below will not select the artificial feature <code>x_2</code>, which does not match our expectation in Exercise 3.
-  </p>
-</div>
-</div>
-</div>
-</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -7773,10 +7754,7 @@ Correlation between x2 and price: 0.01329962
 <div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Get all categorical features including object, category, and integer types (discrete features)</span>
-<span class="n">categorical_features</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s1">'object'</span><span class="p">,</span> <span class="s1">'category'</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-<span class="c1"># Also include some extra columns</span>
-<span class="n">categorical_features</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">'view'</span><span class="p">,</span> <span class="s1">'grade'</span><span class="p">,</span> <span class="s1">'date'</span><span class="p">,</span> <span class="s1">'yr_built'</span><span class="p">,</span> <span class="s1">'condition'</span><span class="p">,</span> <span class="s1">'bedrooms'</span><span class="p">])</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">categorical_features</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s1">'object'</span><span class="p">,</span> <span class="s1">'category'</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -7842,8 +7820,8 @@ Correlation between x2 and price: 0.01329962
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Features to be one-hot encoded: ['waterfront', 'view', 'grade', 'condition']
-Features to be target encoded: ['zipcode', 'date', 'yr_built', 'bedrooms']
+<pre>Features to be one-hot encoded: ['waterfront']
+Features to be target encoded: ['zipcode']
 </pre>
 </div>
 </div>
@@ -7964,6 +7942,7 @@ As the hyperparameter space contains `bootstrap`, you may need to wrap the rando
     <span class="n">scoring</span><span class="o">=</span><span class="s1">'neg_mean_squared_error'</span><span class="p">,</span>
     <span class="n">random_state</span><span class="o">=</span><span class="mi">124</span><span class="p">,</span>
     <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span>
 <span class="p">)</span>
 
 <span class="n">cv_corr</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
@@ -7984,7 +7963,7 @@ As the hyperparameter space contains `bootstrap`, you may need to wrap the rando
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>Fitting 2 folds for each of 20 candidates, totalling 40 fits
-Test MSE: 29074.56
+Test MSE: 27413.29
 </pre>
 </div>
 </div>
@@ -7999,6 +7978,67 @@ Test MSE: 29074.56
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="Exercise-2:-Information-gain">Exercise 2: Information gain<a class="anchor-link" href="#Exercise-2:-Information-gain">¶</a></h2><p>An alternative filter method is information gain. Recreate the pipeline from exercise 1, but use information gain as filter. Again, select the three features with the highest information gain. Train the <code>RandomizedSearchCV</code> on the training data, and evaluate the performance on the holdout test data.</p>
 <p>You can make the score function based on <code>sklearn.feature_selection.information_gain_score</code>.</p>
+<p>Important: We need to construct a Boolean mask vector, <code>is_discrete</code>, to flag which features are discrete. Later, we’ll pass this vector to the <code>mutual_info_regression</code> function. Note that using the <code>cat_transformer</code> (with <code>OneHotEncoder</code>) will expand the number of columns, so we must inspect the transformed feature names to determine which columns correspond to discrete features. Any transformed feature that originates from <code>categorical_features</code>—or from one of the following: <code>['view', 'grade', 'date', 'yr_built', 'condition', 'bedrooms']</code>—should be marked as discrete.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># We create a temporary ColumnTransformer to transform the data and get the transformed feature names</span>
+<span class="n">tmp_cat_transformer</span> <span class="o">=</span> <span class="n">ColumnTransformer</span><span class="p">(</span><span class="n">transformers</span><span class="o">=</span><span class="n">transformers</span><span class="p">,</span> <span class="n">remainder</span><span class="o">=</span><span class="s1">'passthrough'</span><span class="p">)</span>
+<span class="n">X_train_transformed</span> <span class="o">=</span> <span class="n">tmp_cat_transformer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="c1"># Get the transformed feature names</span>
+<span class="n">transformed_features</span> <span class="o">=</span> <span class="n">tmp_cat_transformer</span><span class="o">.</span><span class="n">get_feature_names_out</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Transformed feature names:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">transformed_features</span><span class="p">)</span>
+
+<span class="c1"># Check the shape of the transformed data</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Transformed data shape: </span><span class="si">{</span><span class="n">X_train_transformed</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Create a boolean vector indicating which features are discrete</span>
+<span class="n">is_discrete</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+    <span class="s1">'waterfront'</span> <span class="ow">in</span> <span class="n">feature</span> <span class="ow">or</span> 
+    <span class="s1">'zipcode'</span> <span class="ow">in</span> <span class="n">feature</span> <span class="ow">or</span>
+    <span class="nb">any</span><span class="p">(</span><span class="n">discrete_feat</span> <span class="ow">in</span> <span class="n">feature</span> <span class="k">for</span> <span class="n">discrete_feat</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">'view'</span><span class="p">,</span> <span class="s1">'grade'</span><span class="p">,</span> <span class="s1">'date'</span><span class="p">,</span> <span class="s1">'yr_built'</span><span class="p">,</span> <span class="s1">'condition'</span><span class="p">,</span> <span class="s1">'bedrooms'</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">transformed_features</span>
+<span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Discrete features mask:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">is_discrete</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Transformed feature names:
+['onehot__waterfront_0' 'onehot__waterfront_1' 'target__zipcode'
+ 'remainder__date' 'remainder__bedrooms' 'remainder__bathrooms'
+ 'remainder__sqft_living' 'remainder__sqft_lot' 'remainder__floors'
+ 'remainder__view' 'remainder__condition' 'remainder__grade'
+ 'remainder__sqft_above' 'remainder__yr_built' 'remainder__lat'
+ 'remainder__long' 'remainder__sqft_living15' 'remainder__sqft_lot15'
+ 'remainder__x1' 'remainder__x2']
+
+Transformed data shape: (12967, 20)
+
+Discrete features mask:
+[ True  True  True  True  True False False False False  True  True  True
+ False  True False False False False False False]
+</pre>
+</div>
 </div>
 </div>
 </div>
@@ -8007,7 +8047,7 @@ Test MSE: 29074.56
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
@@ -8017,7 +8057,7 @@ Test MSE: 29074.56
 
 <span class="c1"># Define a custom scoring function using mutual information (information gain)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">information_gain_score</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-    <span class="n">scores</span> <span class="o">=</span> <span class="n">mutual_info_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">124</span><span class="p">)</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="n">mutual_info_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">discrete_features</span><span class="o">=</span><span class="n">is_discrete</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">124</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">scores</span>
 
 <span class="c1"># Build the pipeline with information gain feature selection</span>
@@ -8033,8 +8073,9 @@ Test MSE: 29074.56
     <span class="n">n_iter</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
     <span class="n">cv</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
     <span class="n">scoring</span><span class="o">=</span><span class="s1">'neg_mean_squared_error'</span><span class="p">,</span>
-    <span class="n">random_state</span><span class="o">=</span><span class="mi">124</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">111</span><span class="p">,</span>
     <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span>
 <span class="p">)</span>
 
 <span class="n">cv_info</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
@@ -8054,7 +8095,7 @@ Test MSE: 29074.56
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>Fitting 2 folds for each of 20 candidates, totalling 40 fits
-Test MSE with Information Gain Filter: 29402.52
+Test MSE with Information Gain Filter: 30643.63
 </pre>
 </div>
 </div>
@@ -8081,7 +8122,7 @@ Use `.get_support(indices=True)` from `SelectKBest` to retrieve the indices of t
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
@@ -8090,38 +8131,8 @@ Use `.get_support(indices=True)` from `SelectKBest` to retrieve the indices of t
 <span class="n">correlation_features</span> <span class="o">=</span> <span class="n">cv_corr</span><span class="o">.</span><span class="n">best_estimator_</span><span class="o">.</span><span class="n">named_steps</span><span class="p">[</span><span class="s1">'feature_selector'</span><span class="p">]</span><span class="o">.</span><span class="n">get_support</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">info_gain_features</span> <span class="o">=</span> <span class="n">cv_info</span><span class="o">.</span><span class="n">best_estimator_</span><span class="o">.</span><span class="n">named_steps</span><span class="p">[</span><span class="s1">'feature_selector'</span><span class="p">]</span><span class="o">.</span><span class="n">get_support</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="c1"># Create a list of all the column names after transformation</span>
-<span class="c1"># For one-hot encoded features, we need to expand them</span>
-<span class="n">feature_names</span> <span class="o">=</span> <span class="p">[]</span>
-
-<span class="c1"># One-hot encoded features (waterfront)</span>
-<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">onehot_features</span><span class="p">:</span>
-    <span class="c1"># Get unique values instead of using .cat accessor</span>
-    <span class="n">categories</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">category</span> <span class="ow">in</span> <span class="n">categories</span><span class="p">:</span>
-        <span class="n">feature_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">category</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-
-<span class="c1"># Target encoded features (zipcode)</span>
-<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">target_features</span><span class="p">:</span>
-    <span class="n">feature_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
-
-<span class="n">numeric_features</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">onehot_features</span> <span class="o">+</span> <span class="n">target_features</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-<span class="n">feature_names</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">numeric_features</span><span class="p">)</span>
-
-<span class="c1"># Map selected feature indices to names</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Features selected by Pearson correlation filter:"</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">correlation_features</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_names</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Feature </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">feature_names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Feature </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: Unknown (index out of range)"</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Features selected by Information Gain filter:"</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">info_gain_features</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_names</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Feature </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">feature_names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Feature </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: Unknown (index out of range)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">transformed_features</span><span class="p">[</span><span class="n">correlation_features</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">transformed_features</span><span class="p">[</span><span class="n">info_gain_features</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -8134,15 +8145,8 @@ Use `.get_support(indices=True)` from `SelectKBest` to retrieve the indices of t
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Features selected by Pearson correlation filter:
-Feature 22: zipcode
-Feature 27: floors
-Feature 30: sqft_above
-
-Features selected by Information Gain filter:
-Feature 22: zipcode
-Feature 27: floors
-Feature 36: x2
+<pre>['target__zipcode' 'remainder__sqft_living' 'remainder__grade']
+['target__zipcode' 'remainder__sqft_living' 'remainder__x2']
 </pre>
 </div>
 </div>
@@ -8176,7 +8180,7 @@ Feature 36: x2
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
@@ -8230,7 +8234,7 @@ Feature 36: x2
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.impute</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleImputer</span>
@@ -8289,7 +8293,7 @@ Number of missing values in sqft_basement: 2169
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span>
@@ -8352,11 +8356,12 @@ Use `SimpleImputer(strategy='mean')` for mean imputation and the provided `Histo
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
 
+<span class="c1"># Set a max depth for the random forest regressor. This step is optional.</span>
 <span class="n">max_depth</span> <span class="o">=</span> <span class="mi">10</span>
 
 <span class="n">pipeline_mean</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="p">[</span>
