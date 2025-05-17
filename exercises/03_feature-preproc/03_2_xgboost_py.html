@@ -7862,11 +7862,11 @@ verbosity: None
 <ul>
 <li>Search space:<ul>
 <li><code>max_depth</code>: integer values between 1 and 8.</li>
-<li><code>learning_rate</code>: continuous values between 0.2 and 0.4.</li>
+<li><code>learning_rate</code>: continuous values between 0.2 and 0.4. Note: in practice the learning rate is usually much smaller. The range of large learning rates here is only for an educational purpose, so that you can train the models faster on your laptop.</li>
 </ul>
 </li>
 <li>Termination criterion: Perform 20 evaluations.</li>
-<li>Performance measure: Classification error (equivalent to 1 - accuracy).</li>
+<li>Performance measure: Classification error (equivalent to 1 - accuracy). Note: This dataset is imbalanced, so accuracy is not an ideal evaluation metric. For now, we'll use (1 - accuracy), but you'll later learn how to apply more advanced metrics that are better suited for imbalanced classification tasks.</li>
 <li>Resampling strategy: 3-fold cross-validation.</li>
 </ul>
 <details><summary>Hint 1:</summary>
