@@ -50,7 +50,7 @@ bikes[rows, "temp"] <- NA
 
 # Compare different learners
 
-In this exercise, we want to compare the performance of two learners to impute the missing feature `temp`: a linear model and a k-nearest neighbors learner. For the k-nearest neighbor, we want to tune the hyperparameter `k` and compare how it affects the performance of a pipeline that connects the imputation with a random forest learner.
+In this exercise, we want to compare the performance of two learners that are used to impute the missing values in `temp`: a linear model (LM) and a k-nearest neighbor (kNN), where we want to tune the hyperparameter `k`. We benchmark the performance of a pipeline that connects the different imputation methods with a random forest learner.
 
 ## Construct a pipeline graph
 
@@ -85,13 +85,13 @@ cat("-->")
 
 We want to tune a number of hyperparameters in the pipeline:
 1) The imputation method, as represented in the graph, and
-2) the `k` parameter of the kNN-based imputation method.
+2) the `k` parameter of the kNN-based imputation method for values from 1 to 8.
 Define an appropriate search space.
 
 <details>
 <summary>**Hint 1:**</summary>
 
-Remember that a graph can be treated as any other learner, and therefore, its parameter set can be accessed correspondingly. This means you can find the relevant parameter names in the correct field of the graph object..
+Remember that a graph can be treated as any other learner, and therefore, its parameter set can be accessed correspondingly. This means you can find the relevant parameter names in the correct field of the graph object.
 
 </details>
 
@@ -123,7 +123,7 @@ cat("-->")
 
 ## Tune the pipeline and visualize results
 
-Create a task for the bike rental data and tune a graph learner with grid search over the defined search space, using 4-fold CV repeated 3 times, then visualize and interpret the results.
+Create a task for the bike rental data and tune a graph learner with grid search over the defined search space, using 4-fold CV repeated 3 times, MSE as performance measure and no terminator. Visualize and interpret the results.
 
 <details>
 <summary>**Hint 1:**</summary>
@@ -156,13 +156,13 @@ instance = tune(
   search_space = tune_ps,
   resampling = rsmp("repeated_cv", folds = 4, repeats = 3),
   measure = msr("regr.mse"),
-  terminator = trm("evals", n_evals = 20)
+  terminator = trm("none")
 )
 
 autoplot(instance)
 ```
 
-As can be seen, kNN imputation performs much better than LM-based imputation. For the `k` parameter, there is no clear trend, but values of 1, 5 and 8 seem to perform better.
+As can be seen, LM-based imputation performs much better than kNN imputation. Note, that the right plot might be misleading since the lower values, where LM was used for imputation, does not depend on the choice of `k`.
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
 cat("-->")

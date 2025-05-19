@@ -312,15 +312,14 @@ cat("-->")
 ## Define a search space
 
 We want to tune a number of hyperparameters in the pipeline:
-1) The `mtry` parameter in the random forest,
+1) The `mtry` parameter in the random forest between 2 and 8,
 2) The imputation method, as represented by our graph, and
-3) the `maxdepth` parameter of the decision tree-based imputation.
-Define an appropriate search space.
+3) the `maxdepth` parameter of the decision tree-based imputation between 1 and 30.
 
 <details>
 <summary>**Hint 1:**</summary>
 
-Remember that a graph can be treated as any other learner, and therefore, its parameter set can be accessed correspondingly. This means you can find the relevant parameter names in the correct field of the graph object..
+Remember that a graph can be treated as any other learner, and therefore, its parameter set can be accessed correspondingly. This means you can find the relevant parameter names in the correct field of the graph object.
 
 </details>
 
@@ -353,7 +352,7 @@ cat("-->")
 
 ## Tuning the pipeline
 
-Now, tune the pipeline using an AutoTuner with 3-fold CV and random search. You can terminate after 10 evaluations to reduce run time. Then, display the optimal hyperparameter set as chosen by the tuner.
+Now, tune the pipeline using an AutoTuner with 3-fold CV and random search. You can terminate after 10 evaluations to reduce run time. Then, display the optimal hyperparameter set as chosen by the tuner based on the mean squared error.
 
 <details>
 <summary>**Hint 1:**</summary>
