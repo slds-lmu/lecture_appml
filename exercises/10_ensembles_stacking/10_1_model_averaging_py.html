@@ -7573,13 +7573,10 @@ Data is available from OpenML under the name <code>"credit-g"</code>.</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">fetch_openml</span>
 
 <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">2409</span><span class="p">)</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"credit-g"</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"credit-g"</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">data</span>
 <span class="n">categorical_features</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">"object"</span><span class="p">,</span> <span class="s2">"category"</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span>
 <span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">categorical_features</span><span class="p">,</span> <span class="n">drop_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">map</span><span class="p">({</span><span class="s2">"good"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"bad"</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
 </pre></div>
 </div>
 </div>
@@ -8719,33 +8716,33 @@ Use `cma.fmin()` to optimize a function that returns the **negative** ROC AUC, s
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>Precomputed predictions for 10 folds.
-(3_w,7)-aCMA-ES (mu_w=2.3,w_1=58%) in dimension 3 (seed=835145, Fri Apr  4 16:11:46 2025)
+(3_w,7)-aCMA-ES (mu_w=2.3,w_1=58%) in dimension 3 (seed=748448, Mon May 19 12:30:39 2025)
 Iterat #Fevals   function value  axis ratio  sigma  min&amp;max std  t[m:s]
-    1      7 -7.920447851626511e-01 1.0e+00 1.79e-01  2e-01  2e-01 0:00.1
-    2     14 -7.967465866877801e-01 1.2e+00 1.72e-01  2e-01  2e-01 0:00.1
-    3     21 -7.968463578220721e-01 1.1e+00 1.35e-01  1e-01  1e-01 0:00.2
-    4     28 -7.977284566376194e-01 1.3e+00 1.32e-01  1e-01  1e-01 0:00.2
-    5     35 -7.987627221150196e-01 1.3e+00 1.89e-01  2e-01  2e-01 0:00.2
-    6     42 -7.978761198800026e-01 1.2e+00 2.15e-01  2e-01  2e-01 0:00.3
-    7     49 -7.977450112704391e-01 1.2e+00 2.04e-01  1e-01  2e-01 0:00.3
-    8     56 -7.975839007164365e-01 1.3e+00 1.68e-01  1e-01  1e-01 0:00.4
-    9     63 -7.975596001384126e-01 1.3e+00 1.38e-01  7e-02  1e-01 0:00.4
-   10     70 -7.985195028793517e-01 1.4e+00 1.01e-01  5e-02  7e-02 0:00.4
+    1      7 -7.944459549287289e-01 1.0e+00 1.94e-01  2e-01  2e-01 0:00.1
+    2     14 -7.956705054744518e-01 1.2e+00 1.60e-01  1e-01  2e-01 0:00.1
+    3     21 -7.958817825655461e-01 1.5e+00 1.45e-01  1e-01  1e-01 0:00.2
+    4     28 -7.973704070093677e-01 1.4e+00 1.67e-01  1e-01  2e-01 0:00.2
+    5     35 -7.966840001920674e-01 1.5e+00 1.38e-01  1e-01  1e-01 0:00.3
+    6     42 -7.973377718540319e-01 1.6e+00 1.26e-01  9e-02  1e-01 0:00.3
+    7     49 -7.971337896491760e-01 1.5e+00 1.11e-01  7e-02  9e-02 0:00.4
+    8     56 -7.970965076430577e-01 1.5e+00 9.27e-02  5e-02  7e-02 0:00.4
+    9     63 -7.975273977312088e-01 1.7e+00 1.17e-01  6e-02  1e-01 0:00.4
+   10     70 -7.986905769479922e-01 2.0e+00 1.19e-01  7e-02  1e-01 0:00.5
 Iterat #Fevals   function value  axis ratio  sigma  min&amp;max std  t[m:s]
-   11     77 -7.989215284474052e-01 1.6e+00 8.12e-02  4e-02  5e-02 0:00.5
-   12     84 -7.990778484459518e-01 1.7e+00 7.45e-02  3e-02  4e-02 0:00.5
-   13     91 -7.986782596506368e-01 1.6e+00 6.87e-02  3e-02  4e-02 0:00.5
-   14     98 -7.993599741261331e-01 1.8e+00 5.68e-02  2e-02  3e-02 0:00.6
-   15    105 -7.989817407839854e-01 1.9e+00 4.87e-02  2e-02  3e-02 0:00.6
-termination on maxfevals=100 (Fri Apr  4 16:11:46 2025)
-final/bestever f-value = -7.988230e-01 -7.993600e-01 after 106/94 evaluations
-incumbent solution: [0.0796397944232155, 0.17340470862340426, 0.7413500400319765]
-std deviation: [0.0189004544245365, 0.018372522636215673, 0.027544055009867115]
-Decision Tree Weight: 0.0794
-k-NN Weight:         0.1559
-Logistic Reg Weight: 0.7646
+   11     77 -7.971690304126936e-01 2.1e+00 1.16e-01  6e-02  1e-01 0:00.5
+   12     84 -7.980137532057168e-01 2.6e+00 1.20e-01  6e-02  1e-01 0:00.6
+   13     91 -7.987906314947439e-01 2.8e+00 1.01e-01  5e-02  8e-02 0:00.6
+   14     98 -7.985147547061876e-01 2.9e+00 7.43e-02  3e-02  6e-02 0:00.6
+   15    105 -7.994853750180047e-01 2.9e+00 6.17e-02  2e-02  5e-02 0:00.7
+termination on maxfevals=100 (Mon May 19 12:30:40 2025)
+final/bestever f-value = -7.990966e-01 -7.994854e-01 after 106/101 evaluations
+incumbent solution: [0.07077255388177658, 0.14658063772742286, 0.6723596947767566]
+std deviation: [0.02134307255362244, 0.03354545154192687, 0.05111275015541784]
+Decision Tree Weight: 0.0791
+k-NN Weight:         0.1487
+Logistic Reg Weight: 0.7722
 ==========
-Best Mean ROC AUC:   0.7994
+Best Mean ROC AUC:   0.7995
 </pre>
 </div>
 </div>
