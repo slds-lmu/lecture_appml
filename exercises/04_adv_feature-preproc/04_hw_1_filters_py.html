@@ -7530,13 +7530,7 @@ a.anchor-link {
 <h2 id="Goal">Goal<a class="anchor-link" href="#Goal">¶</a></h2><p>Apply what you have learned about using pipelines for efficient pre-processing and model training on a regression problem.</p>
 <h2 id="House-Prices-in-King-County">House Prices in King County<a class="anchor-link" href="#House-Prices-in-King-County">¶</a></h2><p>In this exercise, we want to model house sale prices in King County in the state of Washington, USA.</p>
 <p>We use a dataset containing information about residential home sales, which includes various features such as the date of sale, number of bedrooms and bathrooms, living space area, and location data like the zipcode.</p>
-<p>We begin with some basic feature preprocessing:</p>
-<ul>
-<li>The <code>date</code> column is converted to a numeric feature representing the number of days since the earliest date in the dataset.</li>
-<li>The target variable, <code>price</code>, is scaled by dividing it by 1000 to make it numerically more convenient.</li>
-<li>Although the table does not contain any <code>nan</code> value, we still assume that <code>yr_renovated</code> and <code>sqft_basement</code> contain missing values and remove them, in order to align our data with the R version.</li>
-<li>Categorical variables such as <code>zipcode</code> and <code>waterfront</code> are converted to categorical data types.</li>
-</ul>
+<p>We begin with some basic feature preprocessing as in the previous exercise.</p>
 </div>
 </div>
 </div>
@@ -7554,20 +7548,26 @@ a.anchor-link {
 
 <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">124</span><span class="p">)</span>
 
-<span class="c1"># This time, we don't use return_X_y=True, because we want to re-load the X in the later part.</span>
-<span class="n">dataset</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="n">data_id</span><span class="o">=</span><span class="mi">42092</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="c1"># Make a copy of X, we will drop some columns. In the later part, we will add back the columns with missing values.</span>
-<span class="n">X</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">target</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="n">data_id</span><span class="o">=</span><span class="mi">42092</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># To be consistent with mlr3data package, we need the following steps [1-4].</span>
+<span class="c1"># 1. Convert dates from strings to datetime</span>
+<span class="n">X</span><span class="p">[</span><span class="s1">'date'</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="s1">'date'</span><span class="p">])</span>
 
-<span class="c1"># Convert to datetime and calculate days since minimum date</span>
-<span class="n">X</span><span class="p">[</span><span class="s1">'date'</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="s1">'date'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">)</span>
-<span class="n">min_date</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="s1">'date'</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
-<span class="n">X</span><span class="p">[</span><span class="s1">'date'</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="s1">'date'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">date</span><span class="p">:</span> <span class="p">(</span><span class="n">date</span> <span class="o">-</span> <span class="n">min_date</span><span class="p">)</span><span class="o">.</span><span class="n">days</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">'int'</span><span class="p">)</span>
+<span class="c1"># 2. Replace 0 values with NA in yr_renovated</span>
+<span class="n">X</span><span class="p">[</span><span class="s1">'yr_renovated'</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="s1">'yr_renovated'</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
 
-<span class="c1"># Convert zipcode and waterfront to category</span>
-<span class="n">X</span><span class="p">[</span><span class="s1">'zipcode'</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="s1">'zipcode'</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">'category'</span><span class="p">)</span>
+<span class="c1"># 3. Replace 0 values with NA in sqft_basement</span>
+<span class="n">X</span><span class="p">[</span><span class="s1">'sqft_basement'</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="s1">'sqft_basement'</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+<span class="c1"># 4. Convert waterfront to category</span>
 <span class="n">X</span><span class="p">[</span><span class="s1">'waterfront'</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="s1">'waterfront'</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">'category'</span><span class="p">)</span>
+
+<span class="c1"># Convert zipcode to category</span>
+<span class="n">X</span><span class="p">[</span><span class="s1">'zipcode'</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="s1">'zipcode'</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">'category'</span><span class="p">)</span>
+
+<span class="c1"># Transform date to numeric variable (days since earliest date)</span>
+<span class="n">min_date</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="s1">'date'</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+<span class="n">X</span><span class="p">[</span><span class="s1">'date'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="s1">'date'</span><span class="p">]</span> <span class="o">-</span> <span class="n">min_date</span><span class="p">)</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">days</span>
 
 <span class="c1"># Scale the target variable by dividing by 1000</span>
 <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span>
@@ -7576,22 +7576,13 @@ a.anchor-link {
 <span class="n">cols_with_nan</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">X</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Columns with NaN values: </span><span class="si">{</span><span class="n">cols_with_nan</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="c1"># In the R version, 'yr_renovated' and 'sqft_basement' have missing values</span>
-<span class="c1"># Let's check if these columns exist in our dataset</span>
-<span class="n">columns_to_check</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'yr_renovated'</span><span class="p">,</span> <span class="s1">'sqft_basement'</span><span class="p">]</span>
-<span class="n">columns_to_drop</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">columns_to_check</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+<span class="c1"># Make a copy of X, we will drop some columns. In the later part, we will add back the columns with missing values.</span>
+<span class="n">X_with_missing</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-<span class="k">if</span> <span class="n">columns_to_drop</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Manually dropping columns that might have missing values in R version: </span><span class="si">{</span><span class="n">columns_to_drop</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-    <span class="n">X</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns_to_drop</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Columns </span><span class="si">{</span><span class="n">columns_to_check</span><span class="si">}</span><span class="s2"> not found in the dataset"</span><span class="p">)</span>
+<span class="c1"># Delete columns containing NAs</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">cols_with_nan</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-<span class="c1"># Also drop any other columns with NaN values</span>
-<span class="k">if</span> <span class="n">cols_with_nan</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Dropping additional columns with NaN values: </span><span class="si">{</span><span class="n">cols_with_nan</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-    <span class="n">X</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">cols_with_nan</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
+<span class="c1"># Print information about the DataFrame</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"DataFrame info:"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">info</span><span class="p">())</span>
 </pre></div>
@@ -7606,8 +7597,7 @@ a.anchor-link {
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Columns with NaN values: []
-Manually dropping columns that might have missing values in R version: ['yr_renovated', 'sqft_basement']
+<pre>Columns with NaN values: ['sqft_basement', 'yr_renovated']
 DataFrame info:
 &lt;class 'pandas.core.frame.DataFrame'&gt;
 RangeIndex: 21613 entries, 0 to 21612
@@ -7963,7 +7953,7 @@ As the hyperparameter space contains `bootstrap`, you may need to wrap the rando
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>Fitting 2 folds for each of 20 candidates, totalling 40 fits
-Test MSE: 27413.29
+Test MSE: 27807.49
 </pre>
 </div>
 </div>
@@ -8095,7 +8085,7 @@ Discrete features mask:
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>Fitting 2 folds for each of 20 candidates, totalling 40 fits
-Test MSE with Information Gain Filter: 30643.63
+Test MSE with Information Gain Filter: 30552.07
 </pre>
 </div>
 </div>
@@ -8218,8 +8208,7 @@ Use `.get_support(indices=True)` from `SelectKBest` to retrieve the indices of t
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Exercise-4:-Imputation">Exercise 4: Imputation<a class="anchor-link" href="#Exercise-4:-Imputation">¶</a></h3><p>In the previous exercises, we excluded two variables (<code>yr_renovated</code> and <code>sqft_basement</code>) from the dataset because they contained missing values in the original R version. In this exercise, we will add them back and handle the missing values using imputation.</p>
-<p>Since the actual dataset in Python does not contain missing values in these columns, we simulate this by setting 10% of the values in each column to <code>NaN</code> to mimic the missing data scenario.</p>
+<h3 id="Exercise-4:-Imputation">Exercise 4: Imputation<a class="anchor-link" href="#Exercise-4:-Imputation">¶</a></h3><p>In the previous exercises, we excluded two variables (<code>yr_renovated</code> and <code>sqft_basement</code>) from the dataset because they contained missing values. In this exercise, we will add them back and handle the missing values using imputation.</p>
 <p>Both of these features are numeric, so we can compare two simple strategies for imputation:</p>
 <ul>
 <li>Mean imputation: replaces missing values with the mean of the observed values in the column.</li>
@@ -8237,30 +8226,7 @@ Use `.get_support(indices=True)` from `SelectKBest` to retrieve the indices of t
 <div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.impute</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleImputer</span>
-
-
-<span class="c1"># Create a copy of the original dataset before dropping columns with NaN values</span>
-<span class="n">X_with_missing</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-
-<span class="c1"># Convert to datetime and calculate days since minimum date (same as before)</span>
-<span class="n">X_with_missing</span><span class="p">[</span><span class="s1">'date'</span><span class="p">]</span> <span class="o">=</span> <span class="n">X_with_missing</span><span class="p">[</span><span class="s1">'date'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">)</span>
-<span class="n">min_date</span> <span class="o">=</span> <span class="n">X_with_missing</span><span class="p">[</span><span class="s1">'date'</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
-<span class="n">X_with_missing</span><span class="p">[</span><span class="s1">'date'</span><span class="p">]</span> <span class="o">=</span> <span class="n">X_with_missing</span><span class="p">[</span><span class="s1">'date'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">date</span><span class="p">:</span> <span class="p">(</span><span class="n">date</span> <span class="o">-</span> <span class="n">min_date</span><span class="p">)</span><span class="o">.</span><span class="n">days</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">'int'</span><span class="p">)</span>
-
-<span class="c1"># Convert zipcode and waterfront to category (same as before)</span>
-<span class="n">X_with_missing</span><span class="p">[</span><span class="s1">'zipcode'</span><span class="p">]</span> <span class="o">=</span> <span class="n">X_with_missing</span><span class="p">[</span><span class="s1">'zipcode'</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">'category'</span><span class="p">)</span>
-<span class="n">X_with_missing</span><span class="p">[</span><span class="s1">'waterfront'</span><span class="p">]</span> <span class="o">=</span> <span class="n">X_with_missing</span><span class="p">[</span><span class="s1">'waterfront'</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">'category'</span><span class="p">)</span>
-
-<span class="c1"># Manually create missing values in the columns we want to add back in the R version.</span>
-<span class="c1"># Create NaN values in 10% of the rows for each column</span>
-<span class="n">mask_yr_renovated</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">X_with_missing</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">])</span>
-<span class="n">mask_sqft_basement</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">X_with_missing</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">])</span>
-
-<span class="n">X_with_missing</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mask_yr_renovated</span><span class="p">,</span> <span class="s1">'yr_renovated'</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-<span class="n">X_with_missing</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mask_sqft_basement</span><span class="p">,</span> <span class="s1">'sqft_basement'</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-
-<span class="n">cols_with_nan</span> <span class="o">=</span> <span class="n">X_with_missing</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">X_with_missing</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">cols_with_nan</span> <span class="o">=</span> <span class="n">X_with_missing</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">X_with_missing</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Columns with missing values: </span><span class="si">{</span><span class="n">cols_with_nan</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Number of missing values in yr_renovated: </span><span class="si">{</span><span class="n">X_with_missing</span><span class="p">[</span><span class="s1">'yr_renovated'</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Number of missing values in sqft_basement: </span><span class="si">{</span><span class="n">X_with_missing</span><span class="p">[</span><span class="s1">'sqft_basement'</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
@@ -8281,8 +8247,8 @@ Use `.get_support(indices=True)` from `SelectKBest` to retrieve the indices of t
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>Columns with missing values: ['sqft_basement', 'yr_renovated']
-Number of missing values in yr_renovated: 2203
-Number of missing values in sqft_basement: 2169
+Number of missing values in yr_renovated: 20699
+Number of missing values in sqft_basement: 13126
 </pre>
 </div>
 </div>
@@ -8360,18 +8326,17 @@ Use `SimpleImputer(strategy='mean')` for mean imputation and the provided `Histo
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.impute</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleImputer</span>
 
-<span class="c1"># Set a max depth for the random forest regressor. This step is optional.</span>
-<span class="n">max_depth</span> <span class="o">=</span> <span class="mi">10</span>
 
 <span class="n">pipeline_mean</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="p">[</span>
     <span class="p">(</span><span class="s1">'imputer'</span><span class="p">,</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s1">'mean'</span><span class="p">)),</span>
-    <span class="p">(</span><span class="s1">'regressor'</span><span class="p">,</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="n">max_depth</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">124</span><span class="p">))</span>
+    <span class="p">(</span><span class="s1">'regressor'</span><span class="p">,</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">124</span><span class="p">))</span>
 <span class="p">])</span>
 
 <span class="n">pipeline_hist</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="p">[</span>
-    <span class="p">(</span><span class="s1">'imputer'</span><span class="p">,</span> <span class="n">HistogramImputer</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">cols_with_nan</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">124</span><span class="p">)),</span>
-    <span class="p">(</span><span class="s1">'regressor'</span><span class="p">,</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="n">max_depth</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">124</span><span class="p">))</span>
+    <span class="p">(</span><span class="s1">'imputer'</span><span class="p">,</span> <span class="n">HistogramImputer</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">cols_with_nan</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s1">'regressor'</span><span class="p">,</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">124</span><span class="p">))</span>
 <span class="p">])</span>
 
 <span class="n">pipeline_mean</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_with_missing</span><span class="p">,</span> <span class="n">y_train_with_missing</span><span class="p">)</span>
@@ -8397,8 +8362,8 @@ Use `SimpleImputer(strategy='mean')` for mean imputation and the provided `Histo
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Test MSE with Mean Imputation: 22636.47
-Test MSE with Histogram Imputation: 22250.22
+<pre>Test MSE with Mean Imputation: 20906.31
+Test MSE with Histogram Imputation: 20719.79
 </pre>
 </div>
 </div>
