@@ -1,6 +1,6 @@
 ---
 title: "Applied Machine Learning"
-subtitle: "In-class exercise 07-2"
+subtitle: "Homework exercise 07-2"
 output:
   prettydoc::html_pretty:
     theme: hpstr
@@ -154,7 +154,7 @@ bmr = benchmark(design)
 bmr$aggregate(msrs(c("classif.acc", "classif.fpr", "classif.tpr")))
 ```
 
-  The accuracy is problematic for this problem, because it focuses too heavily on the majority class.
+  The accuracy is problematic for this task, because it focuses too heavily on the majority class.
   The FPR and TPR show that, despite the high accuracy, we classify most of the positive instances incorrectly for both models. Interestingly, the simple classification tree has a higher TPR than the - usually superior - random forest.
 
 </details>

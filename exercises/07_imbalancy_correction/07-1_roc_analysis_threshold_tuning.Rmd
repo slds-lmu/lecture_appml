@@ -245,7 +245,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 ```{r, eval = show.solution}
-autoplot(pred, type = "roc")
+autoplot(pred, type = "roc", show_cb = FALSE)
 ```
 </details>
 
@@ -473,11 +473,10 @@ design = benchmark_grid(task, learners, resampling)
 bmr = benchmark(design)
 ```
 
-Now we proceed with showing the ROC curve. The grey area indicated the uncertainty, as we
-obtain a different ROC curve for each fold.
+Now we proceed with showing the ROC curve. 
 
 ```{r, eval = show.solution}
-autoplot(bmr, type = "roc")
+autoplot(bmr, type = "roc", show_cb = FALSE)
 ```
 
 The random forest is clearly better, as for virtually every specificity it has a higher
