@@ -4,7 +4,10 @@ scipy
 pandas
 seaborn
 scikit-learn
+scikit-optimize
+statsmodels
 matplotlib
 notebook
 nbconvert
 nbformat
+xgboost
