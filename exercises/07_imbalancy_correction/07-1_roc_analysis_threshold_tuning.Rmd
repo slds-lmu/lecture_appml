@@ -245,7 +245,7 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 ```{r, eval = show.solution}
-autoplot(pred, type = "roc")
+autoplot(pred, type = "roc", show_cb = FALSE)
 ```
 </details>
 
@@ -257,52 +257,137 @@ cat("-->")
 
 In this exercise, we assume that predicting a false positive is 4 times worse than a false negative.
 Use a measure that considers classification costs (e.g., misclassification costs `msr("classif.costs")$help()`) and tune the threshold of our classifier to systematically optimize the asymmetric cost function. 
-To do so, create predictions for all thresholds 0, 0.01, 0.02, ..., 1 and find the threshold that
-minimizes this measure. Summarize the evaluated scores for these thresholds in a plot.
 
-You can use the following code as a starting point.
+## 5.1 Cost Matrix
 
-```{r, eval = FALSE}
-# Define the sequence of threshold values
+First, define the cost matrix. Here, this is a 2x2 matrix with rows corresponding to the predicted class and columns corresponding to the true class. The first row/column implies `"good"`, the second `"bad"` credit rating.
+
+<details>
+<summary>**Hint 1:**</summary>
+
+The order of the classes in the rows and columns of the matrix must correspond to the order of classes in `task$class_names`.
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>**Click me:**</summary>
+
+```{r, eval = show.solution}
+costs = matrix(c(0, 1, 4, 0), nrow = 2, dimnames =
+  list("Predicted Credit" = c("good", "bad"),
+    Truth = c("good", "bad")))
+costs
+```
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## 5.2 Cost-Sensitive Measure
+
+Next, define a cost-sensitive measure. This measure takes one argument, which is a matrix with row and column names corresponding to the class labels in the task of interest. 
+
+<details>
+<summary>**Hint 1:**</summary>
+You can use `as.data.table(mlr_measures)` to find the relevant measure.
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>**Click me:**</summary>
+
+```{r, eval = show.solution}
+msr_costs = msr("classif.costs", costs = costs)
+msr_costs
+```
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## 5.3 Thresholding
+
+In default settings, a model will classify a customer as good credit if the predicted probability is greater than 0.5. Here, this might not be a sensible approach as we would likely act more conservatively and reject more credit applications with a higher threshold due to the non-uniform costs. Use the `autplot()` function to plot the costs associated with predicting at various thresholds between 0 and 1 for the random forest predictions stored in the `pred` object from before.
+
+<details>
+<summary>**Hint 1:**</summary>
+You need to specify `type = "threshold` within autoplot as well as the previously defined measure.
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>**Click me:**</summary>
+
+```{r, eval = show.solution}
+autoplot(pred, type = "threshold", measure = msr_costs)
+```
+
+As expected, the optimal threshold is greater than 0.5 which means the optimal model should predict ‘bad’ credit more often than not.
+
+# Alternative without autoplot
+
+```{r, eval = show.solution}
+library(ggplot2)
 thresholds = seq(0, 1, by = 0.01)
-
-# The function below takes a:
-#   * prediction object
-#   * threshold value (scalar value between 0 and 1)
-#   * measure object
-#   * task object
-# It then gets new predictions for the given threshold and calculates the score of the specified measure.
-# Note that it modifies the prediction in place.
 eval_threshold = function(pred, threshold, measure, task) {
   pred$set_threshold(threshold)
   score = pred$score(measure, task = task)
   return(score)
 }
+costs = matrix(c(0, 1, 4, 0), nrow = 2)
+dimnames(costs) = list(truth = task$class_names, response = task$class_names)
+measure = msr("classif.costs", costs = costs)
+scores = sapply(thresholds, function(threshold) eval_threshold(pred, threshold, measure, task))
+thresholds[which.min(scores)]
+min(scores)
+qplot(x = thresholds, y = scores) + geom_vline(xintercept = thresholds[which.min(scores)])
 
-# Example of the usage of `eval_threshold` with the FPR measure
-eval_threshold(pred, threshold = 0.5, measure = msr("classif.fpr"), task = task)
-eval_threshold(pred, threshold = 0.7, measure = msr("classif.fpr"), task = task)
 ```
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## 5.4 Tuning the Threshold
+
+The optimal threshold can be automated via `po("tunethreshold")`. Create a graph that consists of a logistic regression learner and this threshold tuning pipeline object. Then, turn the graph into a learner as in previous tutorials. Finally, benchmark the pipeline against a standard logistic regression learner using 3-fold CV.
 
 <details>
 <summary>**Hint 1:**</summary>
-Read the examples of `msr("classif.costs")$help()` to learn how to define the cost function.
-Use `sapply()` (or a for loop) in combination with the `eval_threshold` function above to compute the misclassification costs for the sequence of different threshold values.
-You can use `which.min` to find the index of a vector with the minimum value.
+You can use this code skeleton for the pipeline:
+```{r, eval = FALSE}
+logreg = po("learner_cv", lrn(...)) # base learner
+graph =  logreg %>>% po(...) # graph with threshold tuning
+```
 </details>
 
 <details>
 <summary>**Hint 2:**</summary>
+You can use this code skeleton for the benchmark:
 ```{r, eval = FALSE}
-library(ggplot2)
-costs = matrix(c(...), nrow = 2)
-dimnames(costs) = list(truth = ..., response = ...)
-measure = msr(...)
-scores = sapply(thresholds, function(threshold) eval_threshold(...))
-
-thresholds[which.min(...)]
-min(...)
-qplot(x = ..., y = ...)
+learners = list(..., lrn("classif.log_reg"))
+bmr = benchmark(benchmark_grid(task, learners,
+  rsmp("cv", folds = 3)))
 ```
 </details>
 
@@ -315,34 +400,20 @@ cat("<!--")
 <details>
 <summary>**Click me:**</summary>
 
-We start with defining the thresholds we want to evaluate and the function that
-returns the metric for each threshold.
-
 ```{r, eval = show.solution}
-library(ggplot2)
-thresholds = seq(0, 1, by = 0.01)
-eval_threshold = function(pred, threshold, measure, task) {
-  pred$set_threshold(threshold)
-  score = pred$score(measure, task = task)
-  return(score)
-}
+# Pipeline:
+po_cv = po("learner_cv", lrn("classif.log_reg", predict_type = "prob"))
+graph =  po_cv %>>% po("tunethreshold", measure = msr_costs)
+
+# Benchmark:
+learners = list(as_learner(graph), lrn("classif.log_reg"))
+bmr = benchmark(benchmark_grid(task, learners,
+  rsmp("cv", folds = 3)))
+
+# Evaluate:
+bmr$aggregate(msr_costs)[, c(4, 7)]
 ```
 
-We then define the cost matrix and from it the cost function.
-
-```{r, eval = show.solution}
-costs = matrix(c(0, 1, 4, 0), nrow = 2)
-dimnames(costs) = list(truth = task$class_names, response = task$class_names)
-measure = msr("classif.costs", costs = costs)
-```
-Finally we evaluate each threshold, find the minimum and plot the results.
-
-```{r, eval = show.solution}
-scores = sapply(thresholds, function(threshold) eval_threshold(pred, threshold, measure, task))
-thresholds[which.min(scores)]
-min(scores)
-qplot(x = thresholds, y = scores) + geom_vline(xintercept = thresholds[which.min(scores)])
-```
 </details>
 
 ```{r, eval = !show.solution, echo = FALSE, results='asis'}
@@ -402,11 +473,10 @@ design = benchmark_grid(task, learners, resampling)
 bmr = benchmark(design)
 ```
 
-Now we proceed with showing the ROC curve. The grey area indicated the uncertainty, as we
-obtain a different ROC curve for each fold.
+Now we proceed with showing the ROC curve. 
 
 ```{r, eval = show.solution}
-autoplot(bmr, type = "roc")
+autoplot(bmr, type = "roc", show_cb = FALSE)
 ```
 
 The random forest is clearly better, as for virtually every specificity it has a higher
