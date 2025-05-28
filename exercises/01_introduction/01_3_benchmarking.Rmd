@@ -181,10 +181,10 @@ cat("<!--")
 <details>
   <summary>Click me:</summary>
   
-In case of a credit use case the false negative rate may be innteresting to study next to the accuracy.
+In case of a credit use case the false positive rate may be interesting to study next to the accuracy.
 
 ```{r}
-res = bmr$aggregate(measures = c(msr("classif.fn"), msr("classif.acc")))
+res = bmr$aggregate(measures = c(msr("classif.fp"), msr("classif.acc")))
 head(res)
 autoplot(bmr, measure = msr("classif.acc"))
 ```

@@ -146,7 +146,7 @@ pointer-events: auto;
 <header class="header-title">
 <div class="header-title-wrap">
 <h1 class="title toc-ignore entry-title">Applied Machine Learning</h1>
-<h2 class="subtitle">In-class exercise 01-3</h2>
+<h2 class="subtitle">In-class exercise Imputation</h2>
 </div><!-- /.header-title-wrap -->
 </header>
 
@@ -155,272 +155,456 @@ pointer-events: auto;
 <div id="TOC" class="toc">
 <ul>
 <li><a href="#goal" id="toc-goal">Goal</a></li>
-<li><a href="#german-credit-data" id="toc-german-credit-data">German
-Credit Data</a></li>
-<li><a href="#exercise-benchmark-multiple-learners" id="toc-exercise-benchmark-multiple-learners">Exercise: Benchmark
-multiple learners</a>
+<li><a href="#required-packages" id="toc-required-packages">Required
+packages</a></li>
+<li><a href="#data-miami-house-prices" id="toc-data-miami-house-prices">Data: Miami house prices</a></li>
+<li><a href="#create-simple-imputation-pipeops" id="toc-create-simple-imputation-pipeops">1 Create simple imputation
+PipeOps</a></li>
+<li><a href="#create-and-plot-a-graph" id="toc-create-and-plot-a-graph">2 Create and plot a graph</a>
 <ul>
-<li><a href="#create-the-learners" id="toc-create-the-learners">Create
-the learners</a></li>
-<li><a href="#create-the-resampling" id="toc-create-the-resampling">Create the resampling</a></li>
-<li><a href="#create-a-benchmarking-design" id="toc-create-a-benchmarking-design">Create a benchmarking
-design</a></li>
-<li><a href="#run-the-benchmark" id="toc-run-the-benchmark">Run the
-benchmark</a></li>
-<li><a href="#evaluate-the-benchmark" id="toc-evaluate-the-benchmark">Evaluate the benchmark</a></li>
-<li><a href="#interpret-the-results" id="toc-interpret-the-results">Interpret the results</a></li>
+<li><a href="#simple-imputation" id="toc-simple-imputation">Simple
+Imputation</a></li>
+<li><a href="#assessing-performance" id="toc-assessing-performance">Assessing Performance</a></li>
 </ul></li>
-<li><a href="#extra-parallelize-your-efforts" id="toc-extra-parallelize-your-efforts">Extra: Parallelize your
-efforts</a></li>
-<li><a href="#summary" id="toc-summary">Summary</a></li>
+<li><a href="#model-based-imputation" id="toc-model-based-imputation">3
+Model-based imputation</a>
+<ul>
+<li><a href="#assessing-performance-1" id="toc-assessing-performance-1">Assessing Performance</a></li>
+</ul></li>
+<li><a href="#branches-in-pipelines" id="toc-branches-in-pipelines">3
+Branches in pipelines</a>
+<ul>
+<li><a href="#define-a-search-space" id="toc-define-a-search-space">Define a search space</a></li>
+<li><a href="#tuning-the-pipeline" id="toc-tuning-the-pipeline">Tuning
+the pipeline</a></li>
+</ul></li>
 </ul>
 </div>
 
 <div id="goal" class="section level1">
 <h1>Goal</h1>
-<p>We will go beyond resampling single learners. We will learn how to
-compare a large number of different models using benchmarking. In this
-exercise, we will not show you how to tune a learner. Instead, we will
-compare identical learners with different hyperparameters that are set
-manually. In particular, we will learn how to set up benchmarking
-instances in <code>mlr3</code>.</p>
+<p>Our goal for this exercise sheet is to learn the basics of imputation
+within the <code>mlr3</code> universe, specifically,
+<code>mlr3pipelines</code>. Imputation is the process of filling in
+missing data in a data set using statistical methods like mean, median,
+mode, or predictive models.</p>
 </div>
-<div id="german-credit-data" class="section level1">
-<h1>German Credit Data</h1>
-<p>We create the task as for the resampling exercise: Again, we make us
-of our work horse: The German Credit Data set.</p>
+<div id="required-packages" class="section level1">
+<h1>Required packages</h1>
+<p>We will use <code>mlr3</code> for machine learning and
+<code>mlr3oml</code> for data access from OpenML:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(mlr3verse)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>task <span class="ot">=</span> <span class="fu">tsk</span>(<span class="st">&quot;german_credit&quot;</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20220801</span>)</span></code></pre></div>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(mlr3tuning)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(mlr3oml)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span></code></pre></div>
 </div>
-<div id="exercise-benchmark-multiple-learners" class="section level1">
-<h1>Exercise: Benchmark multiple learners</h1>
-<p>We are going to compare a range of different KNN models ranging from
-a <span class="math inline">\(k\)</span> of 3 to 30. Furthermore, we
-want to assess the performance of a logistic regression.</p>
-<div id="create-the-learners" class="section level2">
-<h2>Create the learners</h2>
-<p>Create a logistic regression learner and many KNN learners. You
-should cover all KNNs with a <span class="math inline">\(k\)</span>
-between 3 and 30. Save all learners in a list. Give the KNN learners an
-appropriate <code>id</code> that reflects their <span class="math inline">\(k\)</span>.</p>
+<div id="data-miami-house-prices" class="section level1">
+<h1>Data: Miami house prices</h1>
+<p>We will use house price data on 13,932 single-family homes sold in
+Miami in 2016. The target variable is <code>&quot;SALE_PRC&quot;</code>.</p>
+<p>Let’s load the data and remove an unwanted column:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>miami <span class="ot">=</span> <span class="fu">as.data.frame</span>(<span class="fu">odt</span>(<span class="at">id =</span> <span class="dv">43093</span>)<span class="sc">$</span>data[,<span class="sc">-</span><span class="fu">c</span>(<span class="dv">3</span>)])</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="do">## INFO  [17:26:14.365] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/43093`, authenticated: `FALSE`}</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="do">## INFO  [17:26:14.745] Retrieving ARFF {url: `https://api.openml.org/data/v1/download/22047757/MiamiHousing2016.arff`, authenticated: `FALSE`}</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="do">## INFO  [17:26:17.151] Retrieving JSON {url: `https://www.openml.org/api/v1/json/data/features/43093`, authenticated: `FALSE`}</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>miami[<span class="dv">1</span><span class="sc">:</span><span class="dv">16</span>] <span class="ot">=</span> <span class="fu">lapply</span>(miami[<span class="dv">1</span><span class="sc">:</span><span class="dv">16</span>], as.numeric)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>miami[,<span class="fu">c</span>(<span class="dv">14</span>,<span class="dv">16</span>)] <span class="ot">=</span> <span class="fu">lapply</span>(miami[,<span class="fu">c</span>(<span class="dv">14</span>,<span class="dv">16</span>)], as.factor)</span></code></pre></div>
+<p>Further, we artificially generate missing data entries for three
+features:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>indices <span class="ot">=</span> <span class="fu">which</span>(miami<span class="sc">$</span>age <span class="sc">&gt;</span> <span class="dv">50</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">c</span>(<span class="st">&quot;OCEAN_DIST&quot;</span>, <span class="st">&quot;TOT_LVG_AREA&quot;</span>, <span class="st">&quot;structure_quality&quot;</span>)) {</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  sample_indices <span class="ot">&lt;-</span> <span class="fu">sample</span>(indices, <span class="dv">2000</span>, <span class="at">replace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  miami[sample_indices, i] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="create-simple-imputation-pipeops" class="section level1">
+<h1>1 Create simple imputation PipeOps</h1>
+<p>Imputation can be executed via standard pipeline workflows using
+<code>PipeOp</code> objects. You can get an overview of the relevant
+options with <code>?PipeOpImpute</code>, which is the abstract base
+class for feature imputation. Create a <code>PipeOp</code> that imputes
+numerical features based on randomly sampling feature values from the
+non-missing values and another <code>PipeOp</code> that imputes
+factor/categorical (including ordinal) features by out of range
+imputation. The latter introduces a new level “.MISSING” for
+missings.</p>
 <details>
 <summary>
-<strong>Show Hint 1:</strong>
+<strong>Hint 1:</strong>
 </summary>
-Use the <code>lapply</code> function or a for-loop to create the list of
-learners with <span class="math inline">\(k\)</span> between 3 and 30.
-Don’t forget to also include the logistic regression learner in your
-list (the <code>append</code> function might be helpful here to extend a
-created list). The <code>lrn</code> function has an argument
-<code>id</code> that can be used to change the name of the learner
-(here, you should give the KNN learners an appropriate <code>id</code>
-that reflects their value of <span class="math inline">\(k\)</span> to
-be able to distinguish the learners).
+<p>You can set up a <code>PipeOp</code> with the <code>po()</code>
+function and use the <code>affect_columns</code> argument to address the
+columns to which the preprocessing should be applied (see also
+<code>?PipeOpImpute</code> for how to use the
+<code>affect_columns</code> argument). There exists a shortcut for
+setting up the imputation based on randomly sampling feature values from
+the non-missing values which is <code>imputesample</code> (see also
+<code>?PipeOpImputeSample</code>) and for out of range imputation which
+is <code>imputeoor</code> (see also <code>?PipeOpImputeOOR</code>).</p>
 </details>
 <details>
 <summary>
-<strong>Show Hint 2:</strong>
+<strong>Hint 2:</strong>
 </summary>
-To create a list of KNN learners, you can use this template:
-<code>lapply(..., function(i) lrn(&quot;classif.kknn&quot;, k = i, id = paste0(&quot;classif.knn&quot;, i))</code>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>impute_numeric <span class="ot">=</span> <span class="fu">po</span>(<span class="st">&quot;...&quot;</span>, <span class="at">affect_columns =</span> <span class="fu">selector_type</span>(<span class="st">&quot;...&quot;</span>))</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>impute_factor <span class="ot">=</span> <span class="fu">po</span>(<span class="st">&quot;...&quot;</span>, <span class="at">affect_columns =</span> <span class="fu">...</span>(<span class="fu">c</span>(<span class="st">&quot;factor&quot;</span>, <span class="st">&quot;ordered&quot;</span>)))</span></code></pre></div>
 </details>
 <div id="solution" class="section level3">
-<h3>Solution</h3>
+<h3>Solution:</h3>
 <details>
 <summary>
 Click me:
 </summary>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>log_reg <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;classif.log_reg&quot;</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>knn <span class="ot">=</span> <span class="fu">lapply</span>(<span class="dv">3</span><span class="sc">:</span><span class="dv">30</span>, <span class="cf">function</span>(i) <span class="fu">lrn</span>(<span class="st">&quot;classif.kknn&quot;</span>, <span class="at">k =</span> i, <span class="at">id =</span> <span class="fu">paste0</span>(<span class="st">&quot;classif.knn&quot;</span>, i)))</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>lrns <span class="ot">=</span> <span class="fu">append</span>(log_reg, knn)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>impute_numeric <span class="ot">=</span> <span class="fu">po</span>(<span class="st">&quot;imputesample&quot;</span>, <span class="at">affect_columns =</span> <span class="fu">selector_type</span>(<span class="st">&quot;numeric&quot;</span>))</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>impute_factor <span class="ot">=</span> <span class="fu">po</span>(<span class="st">&quot;imputeoor&quot;</span>, <span class="at">affect_columns =</span> <span class="fu">selector_type</span>(<span class="fu">c</span>(<span class="st">&quot;factor&quot;</span>, <span class="st">&quot;ordered&quot;</span>)))</span></code></pre></div>
 </div>
 </div>
-<div id="create-the-resampling" class="section level2">
-<h2>Create the resampling</h2>
-<p>Create a 4-fold cross-validation resampling. Create a list that only
-contains this resampling (this is needed later for the
-<code>benchmark_grid</code> function).</p>
+<div id="create-and-plot-a-graph" class="section level1">
+<h1>2 Create and plot a graph</h1>
+<p>Combine both imputation <code>PipeOps</code> with a random forest
+learning algorithm into a <code>Graph</code>. Then, plot the graph.</p>
 <details>
 <summary>
-<strong>Show Hint:</strong>
+<strong>Hint 1:</strong>
 </summary>
-See the previous resampling use case.
+<p>Create a random forest learner using <code>lrn()</code>. You can
+concatenate different pre-processing steps and a learner using the
+<code>%&gt;&gt;%</code> operator.</p>
+</details>
+<details>
+<summary>
+<strong>Hint 2:</strong>
+</summary>
+<p>You can plot a graph using the corresponding R6 method of the graph
+object.</p>
 </details>
 <div id="solution-1" class="section level3">
-<h3>Solution</h3>
+<h3>Solution:</h3>
 <details>
 <summary>
 Click me:
 </summary>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>cv4 <span class="ot">=</span> <span class="fu">list</span>(<span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> <span class="dv">4</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>graph <span class="ot">=</span> impute_numeric <span class="sc">%&gt;&gt;%</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  impute_factor <span class="sc">%&gt;&gt;%</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="fu">lrn</span>(<span class="st">&quot;regr.ranger&quot;</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>graph<span class="sc">$</span><span class="fu">plot</span>()</span></code></pre></div>
+<p><img src="data:image/png;base64,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cIYgiUc3UtiQwhmCJB7dSGFDCmcIknh0I9uG9rOu65Z9f1ydLjddd/P37uQ/V8PF7bM3zt/uDJOUeHQj04Y2V+sa6W35dnt9V6/Zzfvtst9/WNfvduXmXXdz/+yNb3WGaUo8utHZDe1u+23tsxZactuWDuu1y/7nu6HB449DoEPEz9y4Wb7BGaYr8ehGZza0KS/dh8Wpu+OqPEF+arCoDdb/qIFuy6v7czfW/wXfGaYs8ehGr22ovKmsqQ3PnNX2syfJ3hZof3r1/9ozTFzi0Y1e3tBhcXplL4E9BPpCgzXQ/ay+B3020Jr46c3pxWeYvMSjG728oe3Da/P5Z9D6eb1e/1Kg5X/rtU9LiX9KiUc3em1D42vzw3vQflPfg44f1H/xEl89d2N93Jm/bUr8U0o8utHrGzq9Nj/9FD/G+LfTNV8E+tyNh0V37oN84p9S4tGNzm3osLj97O9Bj6snr+VfBvrMjZtX333azjBhiUc3sm2ovsscKxz+vej07nQ7/FPRkyt+eeMbnmGSEo9upLAhhTMESTy6kcKGFM4QJPHoRgobUjhDkMSjGylsSOEMQRKPbqSwIYUzBEk8upHChhTOECTx6EYKG1I4Q5DEoxspbEjhDEESj26ksCGFMwRJPLpR9O+uHUQvIU7i0fEeECikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESik/T8S/pPecjXMlgAAAABJRU5ErkJggg==" /><!-- --></p>
 </div>
-</div>
-<div id="create-a-benchmarking-design" class="section level2">
-<h2>Create a benchmarking design</h2>
-<p>To design your benchmark experiment consisting of tasks, learners and
-resampling technique, you can use the <code>benchmark_grid</code>
-function from <code>mlr3</code>. Here, we will use only one task and one
-resampling technique but multiple learners. Use the previously created
-task (german credit), learners (the list of many KNN learners and a
-single logistic regression learner) and resampling (4 fold CV) as
-input.</p>
-<details>
-<summary>
-<strong>Show Hint 1:</strong>
-</summary>
-Also make sure that the task is included in a list as the arguments of
-the <code>benchmark_grid</code> function requires lists as input.
-</details>
-<details>
-<summary>
-<strong>Show Hint 2:</strong>
-</summary>
-<code>benchmark_grid(...</code>
-</details>
+<div id="simple-imputation" class="section level2">
+<h2>Simple Imputation</h2>
+<p>Alternative to a pipeline that includes a learner, we can even set up
+a simpler pipeline that only creates imputations for missing data and
+apply it to a data set. For this, define first a simpler pipeline with
+only the imputation steps from above, create a task for the
+<code>miami</code> data, use the <code>$train()</code> method to impute
+the missing rows. Then, inspect the imputed data set with
+<code>...[[1]]$head()</code>.</p>
 <div id="solution-2" class="section level3">
-<h3>Solution</h3>
+<h3>Solution:</h3>
 <details>
 <summary>
 Click me:
 </summary>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>design <span class="ot">=</span> <span class="fu">benchmark_grid</span>(<span class="fu">list</span>(task), lrns, cv4)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>graph_im <span class="ot">=</span> impute_numeric <span class="sc">%&gt;&gt;%</span> impute_factor</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>task <span class="ot">=</span> TaskRegr<span class="sc">$</span><span class="fu">new</span>(<span class="at">id =</span> <span class="st">&quot;miami&quot;</span>, <span class="at">backend =</span> miami, <span class="at">target =</span> <span class="st">&quot;SALE_PRC&quot;</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>abs <span class="ot">=</span> graph_im<span class="sc">$</span><span class="fu">train</span>(task)[[<span class="dv">1</span>]]<span class="sc">$</span><span class="fu">head</span>()</span></code></pre></div>
 </div>
 </div>
-<div id="run-the-benchmark" class="section level2">
-<h2>Run the benchmark</h2>
-<p>Now you still need to run all experiments specified in the design. Do
-so by using the <code>benchmark</code> function. This may take some
-time. (Still less than a minute.) Make sure to store the benchmark in a
-new object called <code>bmr</code> as you will reuse and inspect the
-benchmark result in the subsequent exercises.</p>
+<div id="assessing-performance" class="section level2">
+<h2>Assessing Performance</h2>
+<p>Use 3-fold cross-validation to estimate the error of the first
+pipeline (the one that contains a random forest learner) stored in the
+graph.</p>
 <details>
 <summary>
-<strong>Show Hint 1:</strong>
+<strong>Hint 1:</strong>
 </summary>
+<p>Specifically, you need three things:</p>
+<ol style="list-style-type: decimal">
+<li>A <code>Resampling</code> object using <code>rsmp()</code> and
+instantiate the train-test splits on the task.</li>
+<li>Use this object together with the task and the graph learner
+specified above as an input to the <code>resample()</code> method.</li>
+<li>Measure the performance with <code>$aggregate()</code>.</li>
+</ol>
+</details>
+<details>
+<summary>
+<strong>Hint 2:</strong>
+</summary>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>resampling <span class="ot">=</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, ...)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>resampling<span class="sc">$</span><span class="fu">instantiate</span>(...)</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>rr <span class="ot">=</span> <span class="fu">resample</span>(<span class="at">task =</span> ..., <span class="at">learner =</span> ..., <span class="at">resampling =</span> ...)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>rr<span class="sc">$</span><span class="fu">...</span>()</span></code></pre></div>
 </details>
 <div id="solution-3" class="section level3">
-<h3>Solution</h3>
+<h3>Solution:</h3>
 <details>
 <summary>
 Click me:
 </summary>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>bmr <span class="ot">=</span> <span class="fu">benchmark</span>(design)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>resampling <span class="ot">=</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> 3L)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>resampling<span class="sc">$</span><span class="fu">instantiate</span>(task)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>rr <span class="ot">=</span> <span class="fu">resample</span>(<span class="at">task =</span> task, <span class="at">learner =</span> graph, <span class="at">resampling =</span> resampling)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>rr<span class="sc">$</span><span class="fu">aggregate</span>()</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="do">##    regr.mse </span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="do">## 10699608064</span></span></code></pre></div>
 </div>
 </div>
-<div id="evaluate-the-benchmark" class="section level2">
-<h2>Evaluate the benchmark</h2>
-<p>Choose two appropriate metrics to evaluate the different learners
-performance on the task. Compute these metrics and also visualize at
-least one of them using the <code>autoplot</code> function.</p>
+</div>
+<div id="model-based-imputation" class="section level1">
+<h1>3 Model-based imputation</h1>
+<p>We can use a learner to impute missing values, which works by
+learning a model that treats the feature to-be-imputed as target and the
+other features as covariates. This has to be done separately for each
+feature that we impute. Obviously, the performance of learner-based
+imputation can depend on the type of learner used. Set up two distinct
+pipelines, modifying the pipeline from the previous exercise. Now, for
+numeric features, use learner-based imputation, using a linear model for
+the first and a decision tree for the second pipeline.</p>
 <details>
 <summary>
-<strong>Show Hint 1:</strong>
+<strong>Hint 1:</strong>
 </summary>
-The previously stored benchmark object has a method
-<code>$aggregate(...)</code> just like the objects created with the
-<code>resample</code> function from the previous use case.
+<p>You can learn about the mechanics of using learners for imputation in
+<code>?mlr_pipeops_imputelearner</code>.</p>
 </details>
 <details>
 <summary>
-<strong>Show Hint 2:</strong>
+<strong>Hint 2:</strong>
 </summary>
-<code>autoplot(..., measure = msr(...))</code>
+<p>As the documentation states, if a learner used for imputation is
+itself supposed to train on features containing missing data, it needs
+to be able handle missing data natively. Otherwise, it needs its own
+imputation, requiring a more complicated pipeline. In this case, use
+histogram-based imputation within the learner-based imputation.
+Similarly, if categorical features are to be imputed, they need to be
+imputed before the numeric features in this case.</p>
 </details>
 <div id="solution-4" class="section level3">
-<h3>Solution</h3>
+<h3>Solution:</h3>
 <details>
 <summary>
 Click me:
 </summary>
-<p>In case of a credit use case the false positive rate may be
-interesting to study next to the accuracy.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>res <span class="ot">=</span> bmr<span class="sc">$</span><span class="fu">aggregate</span>(<span class="at">measures =</span> <span class="fu">c</span>(<span class="fu">msr</span>(<span class="st">&quot;classif.fp&quot;</span>), <span class="fu">msr</span>(<span class="st">&quot;classif.acc&quot;</span>)))</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">head</span>(res)</span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="do">##       nr       task_id      learner_id resampling_id iters classif.fp classif.acc</span></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="do">##    &lt;int&gt;        &lt;char&gt;          &lt;char&gt;        &lt;char&gt; &lt;int&gt;      &lt;num&gt;       &lt;num&gt;</span></span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="do">## 1:     1 german_credit classif.log_reg            cv     4      38.75       0.747</span></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="do">## 2:     2 german_credit    classif.knn3            cv     4      44.25       0.683</span></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="do">## 3:     3 german_credit    classif.knn4            cv     4      44.25       0.683</span></span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="do">## 4:     4 german_credit    classif.knn5            cv     4      44.00       0.724</span></span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="do">## 5:     5 german_credit    classif.knn6            cv     4      44.75       0.728</span></span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="do">## 6:     6 german_credit    classif.knn7            cv     4      44.75       0.728</span></span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="do">## Hidden columns: resample_result</span></span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="fu">autoplot</span>(bmr, <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">&quot;classif.acc&quot;</span>))</span></code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>impute_rpart <span class="ot">=</span> <span class="fu">po</span>(<span class="st">&quot;imputelearner&quot;</span>,</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>                  <span class="at">learner =</span> <span class="fu">lrn</span>(<span class="st">&quot;regr.rpart&quot;</span>),</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>                  <span class="at">affect_columns =</span> <span class="fu">selector_type</span>(<span class="st">&quot;numeric&quot;</span>))</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>impute_lm <span class="ot">=</span> <span class="fu">po</span>(<span class="st">&quot;imputelearner&quot;</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>                  <span class="at">learner =</span> <span class="fu">po</span>(<span class="st">&quot;imputehist&quot;</span>) <span class="sc">%&gt;&gt;%</span> <span class="fu">lrn</span>(<span class="st">&quot;regr.lm&quot;</span>),</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>                  <span class="at">affect_columns =</span> <span class="fu">selector_type</span>(<span class="st">&quot;numeric&quot;</span>))</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>graph_rpart <span class="ot">=</span> impute_factor <span class="sc">%&gt;&gt;%</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>  impute_rpart <span class="sc">%&gt;&gt;%</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>  <span class="fu">lrn</span>(<span class="st">&quot;regr.ranger&quot;</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>graph_lm <span class="ot">=</span> impute_factor <span class="sc">%&gt;&gt;%</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>  impute_lm <span class="sc">%&gt;&gt;%</span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>  <span class="fu">lrn</span>(<span class="st">&quot;regr.ranger&quot;</span>)</span></code></pre></div>
 </div>
-</div>
-<div id="interpret-the-results" class="section level2">
-<h2>Interpret the results</h2>
-<p>Interpret the plot. Which <span class="math inline">\(k\)</span>
-seems to work well given the task? Would you prefer a logistic
-regression over a KNN learner?</p>
+<div id="assessing-performance-1" class="section level2">
+<h2>Assessing Performance</h2>
+<p>As before, use 3-fold cross-validation to compare the error of the
+two pipelines to identify which learner seems to work best for
+imputation for this data set.</p>
 <div id="solution-5" class="section level3">
-<h3>Solution</h3>
+<h3>Solution:</h3>
 <details>
 <summary>
 Click me:
 </summary>
-<p>A <span class="math inline">\(k\)</span> of approx. 12 seems to
-perform best (in terms of accuracy). A too small <span class="math inline">\(k\)</span> underfits, a large one overfits. Not
-knowing the true <span class="math inline">\(k\)</span>, a logistic
-regression seems preferable. If <span class="math inline">\(k\)</span>
-is too small, the average performance of the logistic regression is much
-better. If <span class="math inline">\(k\)</span> is too large, the
-variance of the performance is much higher compared to the logistic
-regression. However, a KNN an optimal <span class="math inline">\(k\)</span> has a consistently high accuracy.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>rr_rpart <span class="ot">=</span> <span class="fu">resample</span>(<span class="at">task =</span> task, <span class="at">learner =</span> graph_rpart, <span class="at">resampling =</span> resampling)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>rr_lm <span class="ot">=</span> <span class="fu">resample</span>(<span class="at">task =</span> task, <span class="at">learner =</span> graph_lm, <span class="at">resampling =</span> resampling)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>rr_rpart<span class="sc">$</span><span class="fu">aggregate</span>()</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="do">##   regr.mse </span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="do">## 9747673806</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>rr_lm<span class="sc">$</span><span class="fu">aggregate</span>()</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="do">##   regr.mse </span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="do">## 9594620043</span></span></code></pre></div>
+<p>In this case, using a linear model for model-based imputation seems
+to outperform a decision tree with default hyperparameter settings.</p>
 </div>
 </div>
 </div>
-<div id="extra-parallelize-your-efforts" class="section level1">
-<h1>Extra: Parallelize your efforts</h1>
-<p>Benchmarking is <strong>embarassingly</strong> parallel. That means
-it is very easy to run the experiments of the benchmarking on different
-machines or cores. In many cases (not all!), this can significantly
-speed up computation time. We recommend to do this using the
-<code>future::plan</code> function when paralellizing <code>mlr3</code>
-benchmarks.</p>
+<div id="branches-in-pipelines" class="section level1">
+<h1>3 Branches in pipelines</h1>
+<p>Pipelines can become very complex. Within a pipeline, we could be
+interested which imputation method works best. An elegant way to find
+out is to treat the imputation method as just another hyperparameter
+that we tune alongside other hyperparameters when we tune the pipeline.
+A way to do this is by using path branching. Set up a graph that
+contains the following elements: 1. A branch with two different
+imputation methods, a) histogram-based and b) learner-based using a
+decision tree 2. A random forest fit on the (fully imputed) data.</p>
 <details>
 <summary>
-<strong>Show Hint 1:</strong>
+<strong>Hint 1:</strong>
 </summary>
-You need to use the <code>plan</code> function twice. Once to set up a
-<code>multisession</code>, then go back to <code>parallel</code>.
-</details>
-<details>
-<summary>
-<strong>Show Hint 2:</strong>
-</summary>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">library</span>(future)</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">plan</span>(multisession)</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co"># your code                     </span></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="fu">plan</span>(sequential)</span></code></pre></div>
+<p>You can read more about branching in
+<code>??mlr_pipeops_branch</code>.</p>
 </details>
 <div id="solution-6" class="section level3">
-<h3>Solution</h3>
+<h3>Solution:</h3>
 <details>
 <summary>
 Click me:
 </summary>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># load the packages</span></span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">library</span>(mlr3)</span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="fu">library</span>(future)</span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="fu">library</span>(future.apply)</span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a></span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co"># parallel plan</span></span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="fu">plan</span>(multisession)</span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">100</span>) <span class="co"># it is good practice to set a seed before </span></span>
-<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>bmr_par <span class="ot">=</span> <span class="fu">benchmark</span>(design)                     </span>
-<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="fu">plan</span>(sequential)</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>impute <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>  <span class="st">&quot;imputehist&quot;</span> <span class="ot">=</span> <span class="fu">po</span>(<span class="st">&quot;imputehist&quot;</span>),</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  <span class="st">&quot;imputerpart&quot;</span> <span class="ot">=</span> <span class="fu">po</span>(<span class="st">&quot;imputelearner&quot;</span>, <span class="at">learner =</span> <span class="fu">lrn</span>(<span class="st">&quot;regr.rpart&quot;</span>))</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>)</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>forest <span class="ot">=</span> <span class="fu">lrn</span>(<span class="st">&quot;regr.ranger&quot;</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>graph_branch <span class="ot">=</span> <span class="fu">ppl</span>(<span class="st">&quot;branch&quot;</span>, impute) <span class="sc">%&gt;&gt;%</span> forest</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="fu">plot</span>(graph_branch)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="define-a-search-space" class="section level2">
+<h2>Define a search space</h2>
+<p>We want to tune a number of hyperparameters in the pipeline: 1) The
+<code>mtry</code> parameter in the random forest between 2 and 8, 2) The
+imputation method, as represented by our graph, and 3) the
+<code>maxdepth</code> parameter of the decision tree-based imputation
+between 1 and 30.</p>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<p>Remember that a graph can be treated as any other learner, and
+therefore, its parameter set can be accessed correspondingly. This means
+you can find the relevant parameter names in the correct field of the
+graph object.</p>
+</details>
+<details>
+<summary>
+<strong>Hint 2:</strong>
+</summary>
+<p>A parameter space can be defined using the <code>ps()</code> sugar
+function.</p>
+</details>
+<div id="solution-7" class="section level3">
+<h3>Solution:</h3>
+<details>
+<summary>
+Click me:
+</summary>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>tune_ps <span class="ot">=</span> <span class="fu">ps</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>  <span class="at">regr.ranger.mtry =</span> <span class="fu">p_int</span>(2L, 8L),</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  <span class="at">branch.selection =</span> <span class="fu">p_fct</span>(<span class="fu">c</span>(<span class="st">&quot;imputehist&quot;</span>, <span class="st">&quot;imputerpart&quot;</span>)),</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  <span class="at">imputelearner.maxdepth =</span> <span class="fu">p_int</span>(1L, 30L)</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>)</span></code></pre></div>
 </div>
 </div>
-<div id="summary" class="section level1">
-<h1>Summary</h1>
-<p>We learnt how to set benchmark in <code>mlr3</code>. While we only
-looked at a single task and a single resampling, the procedure easily
-applies to more complex benchmarks with many tasks. Additionally, we
-learnt how to understand benchmark results. Last but not least, you may
-have parallelized your benchmark if you still had some time left.</p>
+<div id="tuning-the-pipeline" class="section level2">
+<h2>Tuning the pipeline</h2>
+<p>Now, tune the pipeline using an AutoTuner with 3-fold CV and random
+search. You can terminate after 10 evaluations to reduce run time. Then,
+display the optimal hyperparameter set as chosen by the tuner based on
+the mean squared error.</p>
+<details>
+<summary>
+<strong>Hint 1:</strong>
+</summary>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># AutoTuner</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>glrn_tuned <span class="ot">=</span> AutoTuner<span class="sc">$</span><span class="fu">new</span>(...)</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="co"># Train</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>...</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="co"># Optimal HP set</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>...</span></code></pre></div>
+</details>
+<div id="solution-8" class="section level3">
+<h3>Solution:</h3>
+<details>
+<summary>
+Click me:
+</summary>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co"># AutoTuner</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>glrn_tuned <span class="ot">=</span> AutoTuner<span class="sc">$</span><span class="fu">new</span>(graph_branch,</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>  <span class="at">resampling =</span> <span class="fu">rsmp</span>(<span class="st">&quot;cv&quot;</span>, <span class="at">folds =</span> 3L),</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>  <span class="at">search_space =</span> tune_ps,</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>  <span class="at">measure =</span> <span class="fu">msr</span>(<span class="st">&quot;regr.mse&quot;</span>),</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>  <span class="at">terminator =</span> <span class="fu">trm</span>(<span class="st">&quot;evals&quot;</span>, <span class="at">n_evals =</span> <span class="dv">10</span>),</span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>  <span class="at">tuner =</span> <span class="fu">tnr</span>(<span class="st">&quot;random_search&quot;</span>))</span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="co"># Train</span></span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a>glrn_tuned<span class="sc">$</span><span class="fu">train</span>(task)</span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a><span class="do">## INFO  [17:28:13.071] [bbotk] Starting to optimize 3 parameter(s) with &#39;&lt;OptimizerBatchRandomSearch&gt;&#39; and &#39;&lt;TerminatorEvals&gt; [n_evals=10, k=0]&#39;</span></span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a><span class="do">## INFO  [17:28:13.117] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a><span class="do">## INFO  [17:29:29.210] [bbotk] Result of batch 1:</span></span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a><span class="do">## INFO  [17:29:29.217] [bbotk]  regr.ranger.mtry branch.selection imputelearner.maxdepth    regr.mse warnings errors runtime_learners</span></span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a><span class="do">## INFO  [17:29:29.217] [bbotk]                 7      imputerpart                     27 10476521917        0      0            75.97</span></span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a><span class="do">## INFO  [17:29:29.217] [bbotk]                                 uhash</span></span>
+<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a><span class="do">## INFO  [17:29:29.217] [bbotk]  e99bf93e-231f-446d-9e91-b4ba7d3d1401</span></span>
+<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a><span class="do">## INFO  [17:29:29.237] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a><span class="do">## INFO  [17:30:35.707] [bbotk] Result of batch 2:</span></span>
+<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a><span class="do">## INFO  [17:30:35.710] [bbotk]  regr.ranger.mtry branch.selection imputelearner.maxdepth    regr.mse warnings errors runtime_learners</span></span>
+<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a><span class="do">## INFO  [17:30:35.710] [bbotk]                 5      imputerpart                     27 10327766342        0      0            66.32</span></span>
+<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a><span class="do">## INFO  [17:30:35.710] [bbotk]                                 uhash</span></span>
+<span id="cb15-23"><a href="#cb15-23" tabindex="-1"></a><span class="do">## INFO  [17:30:35.710] [bbotk]  44940b7b-809e-4aa0-997a-9c689990fa9e</span></span>
+<span id="cb15-24"><a href="#cb15-24" tabindex="-1"></a><span class="do">## INFO  [17:30:35.726] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb15-25"><a href="#cb15-25" tabindex="-1"></a><span class="do">## INFO  [17:31:38.659] [bbotk] Result of batch 3:</span></span>
+<span id="cb15-26"><a href="#cb15-26" tabindex="-1"></a><span class="do">## INFO  [17:31:38.662] [bbotk]  regr.ranger.mtry branch.selection imputelearner.maxdepth    regr.mse warnings errors runtime_learners</span></span>
+<span id="cb15-27"><a href="#cb15-27" tabindex="-1"></a><span class="do">## INFO  [17:31:38.662] [bbotk]                 6      imputerpart                      2 10547326873        0      0            62.78</span></span>
+<span id="cb15-28"><a href="#cb15-28" tabindex="-1"></a><span class="do">## INFO  [17:31:38.662] [bbotk]                                 uhash</span></span>
+<span id="cb15-29"><a href="#cb15-29" tabindex="-1"></a><span class="do">## INFO  [17:31:38.662] [bbotk]  ba3edba7-49b9-48ef-9592-519cf1267227</span></span>
+<span id="cb15-30"><a href="#cb15-30" tabindex="-1"></a><span class="do">## INFO  [17:31:38.678] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb15-31"><a href="#cb15-31" tabindex="-1"></a><span class="do">## INFO  [17:32:37.512] [bbotk] Result of batch 4:</span></span>
+<span id="cb15-32"><a href="#cb15-32" tabindex="-1"></a><span class="do">## INFO  [17:32:37.514] [bbotk]  regr.ranger.mtry branch.selection imputelearner.maxdepth    regr.mse warnings errors runtime_learners</span></span>
+<span id="cb15-33"><a href="#cb15-33" tabindex="-1"></a><span class="do">## INFO  [17:32:37.514] [bbotk]                 5      imputerpart                     16 10319078712        0      0            58.73</span></span>
+<span id="cb15-34"><a href="#cb15-34" tabindex="-1"></a><span class="do">## INFO  [17:32:37.514] [bbotk]                                 uhash</span></span>
+<span id="cb15-35"><a href="#cb15-35" tabindex="-1"></a><span class="do">## INFO  [17:32:37.514] [bbotk]  2602775f-1d34-487f-9977-7b1e383fad17</span></span>
+<span id="cb15-36"><a href="#cb15-36" tabindex="-1"></a><span class="do">## INFO  [17:32:37.529] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb15-37"><a href="#cb15-37" tabindex="-1"></a><span class="do">## INFO  [17:33:19.865] [bbotk] Result of batch 5:</span></span>
+<span id="cb15-38"><a href="#cb15-38" tabindex="-1"></a><span class="do">## INFO  [17:33:19.868] [bbotk]  regr.ranger.mtry branch.selection imputelearner.maxdepth    regr.mse warnings errors runtime_learners</span></span>
+<span id="cb15-39"><a href="#cb15-39" tabindex="-1"></a><span class="do">## INFO  [17:33:19.868] [bbotk]                 3       imputehist                      4 11376645660        0      0             42.2</span></span>
+<span id="cb15-40"><a href="#cb15-40" tabindex="-1"></a><span class="do">## INFO  [17:33:19.868] [bbotk]                                 uhash</span></span>
+<span id="cb15-41"><a href="#cb15-41" tabindex="-1"></a><span class="do">## INFO  [17:33:19.868] [bbotk]  6729d044-983f-4eff-95ed-f80dbc23c050</span></span>
+<span id="cb15-42"><a href="#cb15-42" tabindex="-1"></a><span class="do">## INFO  [17:33:19.884] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb15-43"><a href="#cb15-43" tabindex="-1"></a><span class="do">## INFO  [17:33:53.362] [bbotk] Result of batch 6:</span></span>
+<span id="cb15-44"><a href="#cb15-44" tabindex="-1"></a><span class="do">## INFO  [17:33:53.365] [bbotk]  regr.ranger.mtry branch.selection imputelearner.maxdepth    regr.mse warnings errors runtime_learners</span></span>
+<span id="cb15-45"><a href="#cb15-45" tabindex="-1"></a><span class="do">## INFO  [17:33:53.365] [bbotk]                 2      imputerpart                      4 10797032239        0      0            33.32</span></span>
+<span id="cb15-46"><a href="#cb15-46" tabindex="-1"></a><span class="do">## INFO  [17:33:53.365] [bbotk]                                 uhash</span></span>
+<span id="cb15-47"><a href="#cb15-47" tabindex="-1"></a><span class="do">## INFO  [17:33:53.365] [bbotk]  0fce3ef2-9398-4332-824a-23c6ec955ebe</span></span>
+<span id="cb15-48"><a href="#cb15-48" tabindex="-1"></a><span class="do">## INFO  [17:33:53.380] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb15-49"><a href="#cb15-49" tabindex="-1"></a><span class="do">## INFO  [17:35:13.420] [bbotk] Result of batch 7:</span></span>
+<span id="cb15-50"><a href="#cb15-50" tabindex="-1"></a><span class="do">## INFO  [17:35:13.423] [bbotk]  regr.ranger.mtry branch.selection imputelearner.maxdepth    regr.mse warnings errors runtime_learners</span></span>
+<span id="cb15-51"><a href="#cb15-51" tabindex="-1"></a><span class="do">## INFO  [17:35:13.423] [bbotk]                 7       imputehist                     20 11168884713        0      0            79.92</span></span>
+<span id="cb15-52"><a href="#cb15-52" tabindex="-1"></a><span class="do">## INFO  [17:35:13.423] [bbotk]                                 uhash</span></span>
+<span id="cb15-53"><a href="#cb15-53" tabindex="-1"></a><span class="do">## INFO  [17:35:13.423] [bbotk]  44c91136-c589-421e-be8a-5e2a4101f87b</span></span>
+<span id="cb15-54"><a href="#cb15-54" tabindex="-1"></a><span class="do">## INFO  [17:35:13.438] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb15-55"><a href="#cb15-55" tabindex="-1"></a><span class="do">## INFO  [17:36:13.724] [bbotk] Result of batch 8:</span></span>
+<span id="cb15-56"><a href="#cb15-56" tabindex="-1"></a><span class="do">## INFO  [17:36:13.726] [bbotk]  regr.ranger.mtry branch.selection imputelearner.maxdepth    regr.mse warnings errors runtime_learners</span></span>
+<span id="cb15-57"><a href="#cb15-57" tabindex="-1"></a><span class="do">## INFO  [17:36:13.726] [bbotk]                 5      imputerpart                     15 10329946045        0      0            60.17</span></span>
+<span id="cb15-58"><a href="#cb15-58" tabindex="-1"></a><span class="do">## INFO  [17:36:13.726] [bbotk]                                 uhash</span></span>
+<span id="cb15-59"><a href="#cb15-59" tabindex="-1"></a><span class="do">## INFO  [17:36:13.726] [bbotk]  0b7ac8a0-85cf-417c-a4be-23d124581214</span></span>
+<span id="cb15-60"><a href="#cb15-60" tabindex="-1"></a><span class="do">## INFO  [17:36:13.740] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb15-61"><a href="#cb15-61" tabindex="-1"></a><span class="do">## INFO  [17:36:55.152] [bbotk] Result of batch 9:</span></span>
+<span id="cb15-62"><a href="#cb15-62" tabindex="-1"></a><span class="do">## INFO  [17:36:55.155] [bbotk]  regr.ranger.mtry branch.selection imputelearner.maxdepth    regr.mse warnings errors runtime_learners</span></span>
+<span id="cb15-63"><a href="#cb15-63" tabindex="-1"></a><span class="do">## INFO  [17:36:55.155] [bbotk]                 3       imputehist                     22 11309061147        0      0            41.25</span></span>
+<span id="cb15-64"><a href="#cb15-64" tabindex="-1"></a><span class="do">## INFO  [17:36:55.155] [bbotk]                                 uhash</span></span>
+<span id="cb15-65"><a href="#cb15-65" tabindex="-1"></a><span class="do">## INFO  [17:36:55.155] [bbotk]  3ddb8fa5-1049-40e2-913c-61d6a5ef820b</span></span>
+<span id="cb15-66"><a href="#cb15-66" tabindex="-1"></a><span class="do">## INFO  [17:36:55.170] [bbotk] Evaluating 1 configuration(s)</span></span>
+<span id="cb15-67"><a href="#cb15-67" tabindex="-1"></a><span class="do">## INFO  [17:37:35.296] [bbotk] Result of batch 10:</span></span>
+<span id="cb15-68"><a href="#cb15-68" tabindex="-1"></a><span class="do">## INFO  [17:37:35.299] [bbotk]  regr.ranger.mtry branch.selection imputelearner.maxdepth    regr.mse warnings errors runtime_learners</span></span>
+<span id="cb15-69"><a href="#cb15-69" tabindex="-1"></a><span class="do">## INFO  [17:37:35.299] [bbotk]                 3       imputehist                      6 11232577110        0      0            39.98</span></span>
+<span id="cb15-70"><a href="#cb15-70" tabindex="-1"></a><span class="do">## INFO  [17:37:35.299] [bbotk]                                 uhash</span></span>
+<span id="cb15-71"><a href="#cb15-71" tabindex="-1"></a><span class="do">## INFO  [17:37:35.299] [bbotk]  a3fbc3ce-7a99-497a-990c-356d7615eb96</span></span>
+<span id="cb15-72"><a href="#cb15-72" tabindex="-1"></a><span class="do">## INFO  [17:37:35.337] [bbotk] Finished optimizing after 10 evaluation(s)</span></span>
+<span id="cb15-73"><a href="#cb15-73" tabindex="-1"></a><span class="do">## INFO  [17:37:35.338] [bbotk] Result:</span></span>
+<span id="cb15-74"><a href="#cb15-74" tabindex="-1"></a><span class="do">## INFO  [17:37:35.341] [bbotk]  regr.ranger.mtry branch.selection imputelearner.maxdepth learner_param_vals  x_domain    regr.mse</span></span>
+<span id="cb15-75"><a href="#cb15-75" tabindex="-1"></a><span class="do">## INFO  [17:37:35.341] [bbotk]             &lt;int&gt;           &lt;char&gt;                  &lt;int&gt;             &lt;list&gt;    &lt;list&gt;       &lt;num&gt;</span></span>
+<span id="cb15-76"><a href="#cb15-76" tabindex="-1"></a><span class="do">## INFO  [17:37:35.341] [bbotk]                 5      imputerpart                     16          &lt;list[5]&gt; &lt;list[3]&gt; 10319078712</span></span>
+<span id="cb15-77"><a href="#cb15-77" tabindex="-1"></a><span class="co"># Optimal HP set</span></span>
+<span id="cb15-78"><a href="#cb15-78" tabindex="-1"></a>glrn_tuned<span class="sc">$</span>tuning_result</span>
+<span id="cb15-79"><a href="#cb15-79" tabindex="-1"></a><span class="do">##    regr.ranger.mtry branch.selection imputelearner.maxdepth learner_param_vals  x_domain    regr.mse</span></span>
+<span id="cb15-80"><a href="#cb15-80" tabindex="-1"></a><span class="do">##               &lt;int&gt;           &lt;char&gt;                  &lt;int&gt;             &lt;list&gt;    &lt;list&gt;       &lt;num&gt;</span></span>
+<span id="cb15-81"><a href="#cb15-81" tabindex="-1"></a><span class="do">## 1:                5      imputerpart                     16          &lt;list[5]&gt; &lt;list[3]&gt; 10319078712</span></span></code></pre></div>
+</div>
+</div>
 </div>
 </div><!-- /.entry-content -->
 </article>
