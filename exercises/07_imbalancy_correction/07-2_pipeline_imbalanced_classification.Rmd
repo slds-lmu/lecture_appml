@@ -1,6 +1,6 @@
 ---
 title: "Applied Machine Learning"
-subtitle: "In-class exercise 07-2"
+subtitle: "Homework exercise 07-2"
 output:
   prettydoc::html_pretty:
     theme: hpstr
@@ -147,13 +147,14 @@ task$positive = "yes"
 
 ```{r}
 learners = lrns(c("classif.rpart", "classif.ranger"))
-design = benchmark_grid(task, learners, rsmp("repeated_cv", folds = 3, repeats = 5))
+res = rsmp("repeated_cv", folds = 3, repeats = 5)$instantiate(task)
+design = benchmark_grid(task, learners, res)
 
 bmr = benchmark(design)
 bmr$aggregate(msrs(c("classif.acc", "classif.fpr", "classif.tpr")))
 ```
 
-  The accuracy is problematic for this problem, because it focuses too heavily on the majority class.
+  The accuracy is problematic for this task, because it focuses too heavily on the majority class.
   The FPR and TPR show that, despite the high accuracy, we classify most of the positive instances incorrectly for both models. Interestingly, the simple classification tree has a higher TPR than the - usually superior - random forest.
 
 </details>
@@ -393,6 +394,53 @@ autoplot(bmr, measure = msr("classif.bacc"))
 cat("-->")
 ```
 
+# 5 Instance-specific weights
+
+Add another logistic learner to the benchmark that uses instance-specific weights, assigning each observation in the minorty class double the weight compared to the majority class. Further, add a simple logistic regression learner to assess the additional performance difference due to instance-specific weights-
+
+<details>
+  <summary>**Hint 1:**</summary>
+  
+Use a graph that contains `po("classweights")` to specify the weights before the model training.
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+  <summary>**Click me:**</summary>
+
+```{r, eval = show.solution}
+# Learner with instance-specific weights
+graph = po("classweights", minor_weight = 2) %>>%
+  lrn("classif.log_reg")
+
+learner_classweights = as_learner(graph)
+learner_classweights$id = "classweights"
+
+rr1 = resample(task, learner_classweights, resampling)
+
+# Logistic regression learner
+logreg = lrn("classif.log_reg")
+
+rr2 = resample(task, logreg, resampling)
+
+bmr = c(bmr, rr1, rr2)
+
+autoplot(bmr, measure = msr("classif.bacc"))
+```
+
+While not as good as a combination of up- and down-sampling, using instance-specific weights improved the performance of logistic regression.
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
 
 # Bonus exercise: Tuning the sampling rate
 
