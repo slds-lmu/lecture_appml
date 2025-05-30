@@ -7553,22 +7553,16 @@ a.anchor-link {
 <span class="n">miami</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
 <span class="n">miami</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">"PARCELNO"</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">miami</span><span class="o">.</span><span class="n">columns</span><span class="p">[:</span><span class="mi">16</span><span class="p">]:</span>
-    <span class="n">miami</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">miami</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s1">'coerce'</span><span class="p">)</span>
 
-<span class="c1"># Convert "avno60plus" and "structure_quality" to categorical</span>
-<span class="n">cols_to_cat</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"avno60plus"</span><span class="p">,</span> <span class="s2">"structure_quality"</span><span class="p">]</span>
-<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">cols_to_cat</span><span class="p">:</span>
-    <span class="n">miami</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">miami</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">'category'</span><span class="p">)</span>
+<span class="c1"># Convert "avno60plus" and "structure_quality" to object</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"avno60plus"</span><span class="p">,</span> <span class="s2">"structure_quality"</span><span class="p">):</span>
+    <span class="n">miami</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">miami</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">'object'</span><span class="p">)</span>
 
 <span class="c1"># Introduce missingness in three features for homes with age &gt; 50</span>
 <span class="n">mask_idxs</span> <span class="o">=</span> <span class="n">miami</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">miami</span><span class="p">[</span><span class="s1">'age'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">50</span><span class="p">]</span>
 <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">'OCEAN_DIST'</span><span class="p">,</span> <span class="s1">'TOT_LVG_AREA'</span><span class="p">,</span> <span class="s1">'structure_quality'</span><span class="p">]:</span>
     <span class="n">sampled</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">mask_idxs</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">miami</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sampled</span><span class="p">,</span> <span class="n">feature</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-
-<span class="n">numeric_cols</span> <span class="o">=</span> <span class="n">miami</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-<span class="n">categorical_cols</span> <span class="o">=</span> <span class="n">miami</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">"category"</span><span class="p">,</span> <span class="s2">"object"</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
 <span class="c1"># Quick sanity check</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Missing values introduced:"</span><span class="p">)</span>
@@ -7596,25 +7590,25 @@ dtype: int64
 &lt;class 'pandas.core.frame.DataFrame'&gt;
 RangeIndex: 13932 entries, 0 to 13931
 Data columns (total 15 columns):
- #   Column             Non-Null Count  Dtype   
----  ------             --------------  -----   
- 0   LATITUDE           13932 non-null  float64 
- 1   LONGITUDE          13932 non-null  float64 
- 2   LND_SQFOOT         13932 non-null  int64   
- 3   TOT_LVG_AREA       11932 non-null  float64 
- 4   SPEC_FEAT_VAL      13932 non-null  int64   
- 5   RAIL_DIST          13932 non-null  float64 
- 6   OCEAN_DIST         11932 non-null  float64 
- 7   WATER_DIST         13932 non-null  float64 
- 8   CNTR_DIST          13932 non-null  float64 
- 9   SUBCNTR_DI         13932 non-null  float64 
- 10  HWY_DIST           13932 non-null  float64 
- 11  age                13932 non-null  int64   
- 12  avno60plus         13932 non-null  category
- 13  month_sold         13932 non-null  int64   
- 14  structure_quality  11932 non-null  category
-dtypes: category(2), float64(9), int64(4)
-memory usage: 1.4 MB
+ #   Column             Non-Null Count  Dtype  
+---  ------             --------------  -----  
+ 0   LATITUDE           13932 non-null  float64
+ 1   LONGITUDE          13932 non-null  float64
+ 2   LND_SQFOOT         13932 non-null  int64  
+ 3   TOT_LVG_AREA       11932 non-null  float64
+ 4   SPEC_FEAT_VAL      13932 non-null  int64  
+ 5   RAIL_DIST          13932 non-null  float64
+ 6   OCEAN_DIST         11932 non-null  float64
+ 7   WATER_DIST         13932 non-null  float64
+ 8   CNTR_DIST          13932 non-null  float64
+ 9   SUBCNTR_DI         13932 non-null  float64
+ 10  HWY_DIST           13932 non-null  float64
+ 11  age                13932 non-null  int64  
+ 12  avno60plus         13932 non-null  object 
+ 13  month_sold         13932 non-null  int64  
+ 14  structure_quality  11932 non-null  object 
+dtypes: float64(9), int64(4), object(2)
+memory usage: 1.6+ MB
 </pre>
 </div>
 </div>
@@ -7632,8 +7626,9 @@ memory usage: 1.4 MB
 <li>One pipeline to impute <strong>numerical features</strong> by randomly sampling observed (non-missing) values from each column.</li>
 <li>Another pipeline to impute <strong>categorical features</strong> using out-of-range imputation, which adds a new category (in this case, <code>-1</code>) to represent missing values.</li>
 </ul>
-<p>Use the provided <code>RandomSampleImputer</code> to randomly fill in missing numeric values based on the existing observed values in each column. Use the provided <code>OutOfRangeImputer</code> adds an out-of-range (OOR) category (here: <code>-1</code>) to represent missing categorical values.</p>
-<p><strong>Note</strong>: Unlike the R version where string <code>".MISSING"</code> is added by the OOR-imputer as an extra category, we only consider integer <code>-1</code> here as the OOR category. This is because the column <code>structure_quality</code> and <code>avno60plus</code> have values like <code>0, 1, 4, ...</code> that look like <code>int</code>. Although we have explicitly specified the <code>dtype</code> as <code>cateogry</code>, the <code>OneHotEncoder</code> will still identify these values as <code>int</code>, and it treat these columns' data type as mixed data type (int + str) after OOR-imputed using <code>".MISSING"</code>. Consequently, <code>OnetHotEncoder</code> will throw an error. Therefore, to avoid this unnecessity, we only consider <code>-1</code> as the OOR category.</p>
+<p>Use the provided <code>RandomSampleImputer</code> to randomly fill in missing numeric values based on the existing observed values in each column.</p>
+<p>Use the <code>sklearn.impute.SimpleImputer</code> to add an out-of-range (OOR) category (here: <code>-1</code>) to represent missing categorical values.</p>
+<p><strong>Note</strong>: Unlike the R version where string <code>".MISSING"</code> is added by the OOR-imputer as an extra category, we only consider integer <code>-1</code> here as the OOR category. This is because the column <code>structure_quality</code> and <code>avno60plus</code> have values like <code>0, 1, 4, ...</code> that look like <code>int</code>. Although we have explicitly specified the <code>dtype</code> as <code>object</code>, the <code>OneHotEncoder</code> will still identify these values as <code>int</code>, and it treat these columns' data type as mixed data type (int + str) after OOR-imputed using <code>".MISSING"</code>. Consequently, <code>OnetHotEncoder</code> will throw an error. Therefore, to avoid this unnecessity, we only consider <code>-1</code> as the OOR category.</p>
 </div>
 </div>
 </div>
@@ -7648,13 +7643,14 @@ memory usage: 1.4 MB
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pipeline</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.compose</span><span class="w"> </span><span class="kn">import</span> <span class="n">ColumnTransformer</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">OneHotEncoder</span> 
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.utils.validation</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_is_fitted</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">RandomSampleImputer</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_fitted</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sklearn_output_config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"transform"</span><span class="p">:</span> <span class="s2">"default"</span><span class="p">}</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># X is expected to be a DataFrame</span>
@@ -7680,35 +7676,41 @@ memory usage: 1.4 MB
         
     <span class="k">def</span><span class="w"> </span><span class="nf">__sklearn_is_fitted__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"pool_"</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_fitted</span>
-
-
-<span class="k">class</span><span class="w"> </span><span class="nc">OutOfRangeImputer</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">missing_value</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">missing_value</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s2">"For this simple implementation, missing_value must be an integer"</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">missing_value</span> <span class="o">=</span> <span class="n">missing_value</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_fitted</span> <span class="o">=</span> <span class="kc">False</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="c1"># nothing to learn</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_fitted</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">return</span> <span class="bp">self</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-        <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-            <span class="c1"># if it's categorical, add the new level</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">CategoricalDtype</span><span class="p">):</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">missing_value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">X</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">categories</span><span class="p">:</span>
-                    <span class="n">X</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">add_categories</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">missing_value</span><span class="p">])</span>
-                <span class="n">X</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">missing_value</span><span class="p">)</span>
-                <span class="n">X</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">'category'</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">X</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">hasnans</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Column </span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2"> has missing values but is not categorical"</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">X</span>
         
-    <span class="k">def</span><span class="w"> </span><span class="nf">__sklearn_is_fitted__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_fitted</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Set output container.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        transform : {"default", "pandas"}, default=None</span>
+<span class="sd">            Configure output of `transform` and `fit_transform`.</span>
+<span class="sd">            </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self : estimator instance</span>
+<span class="sd">            Estimator instance.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sklearn_output_config</span><span class="p">[</span><span class="s2">"transform"</span><span class="p">]</span> <span class="o">=</span> <span class="n">transform</span>
+        <span class="k">return</span> <span class="bp">self</span>
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_feature_names_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_features</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Get output feature names for transformation.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_features : array-like of str or None, default=None</span>
+<span class="sd">            Input features.</span>
+<span class="sd">            </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        feature_names_out : ndarray of str objects</span>
+<span class="sd">            Transformed feature names.</span>
+<span class="sd">        """</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">input_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Input features not specified"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">input_features</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7723,13 +7725,14 @@ memory usage: 1.4 MB
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.impute</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleImputer</span>
 
 <span class="n">impute_numeric</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
     <span class="p">(</span><span class="s2">"random_sample"</span><span class="p">,</span> <span class="n">RandomSampleImputer</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">12345</span><span class="p">))</span>
 <span class="p">])</span>
 
 <span class="n">impute_factor</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
-    <span class="p">(</span><span class="s2">"oor"</span><span class="p">,</span> <span class="n">OutOfRangeImputer</span><span class="p">(</span><span class="n">missing_value</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
+    <span class="p">(</span><span class="s2">"oor"</span><span class="p">,</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">"constant"</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
 <span class="p">])</span>
 </pre></div>
 </div>
@@ -7746,7 +7749,10 @@ memory usage: 1.4 MB
 <h2 id="2-Create-and-inspect-a-pipeline-graph">2 Create and inspect a pipeline graph<a class="anchor-link" href="#2-Create-and-inspect-a-pipeline-graph">¶</a></h2><p>Combine both imputation pipelines with a random forest learning algorithm into a complete <code>Pipeline</code>. The numeric features are processed using random sampling imputation, while categorical features are imputed with an out-of-range value and then one-hot encoded. These are merged using a <code>ColumnTransformer</code>, and the final estimator is a <code>RandomForestRegressor</code>.</p>
 <p>While scikit-learn does not have a built-in function to <em>plot</em> a pipeline like <code>mlr3pipelines::plot()</code> in R, you can inspect the structure by printing the pipeline object.</p>
 <details><summary>Hint 1:</summary>
-Use `ColumnTransformer` to apply different preprocessing steps to numerical and categorical columns.
+<p>Use <code>ColumnTransformer</code> to apply different preprocessing steps to numerical and categorical columns.</p>
+</details>
+<details><summary>Hint 2:</summary>
+<p>When determining which columns to apply a preprocessing pipeline, use <code>sklearn.compose.make_column_selector</code> to select columns by dtype.</p>
 </details>
 </div>
 </div>
@@ -7762,15 +7768,21 @@ Use `ColumnTransformer` to apply different preprocessing steps to numerical and 
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomForestRegressor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">OneHotEncoder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.compose</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_column_selector</span>
 
 <span class="n">impute_and_encode</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
-    <span class="p">(</span><span class="s2">"oor"</span><span class="p">,</span> <span class="n">OutOfRangeImputer</span><span class="p">(</span><span class="n">missing_value</span><span class="o">=-</span><span class="mi">1</span><span class="p">)),</span>
-    <span class="p">(</span><span class="s2">"onehot"</span><span class="p">,</span> <span class="n">OneHotEncoder</span><span class="p">(</span><span class="n">sparse_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">handle_unknown</span><span class="o">=</span><span class="s1">'ignore'</span><span class="p">))</span>
+    <span class="p">(</span><span class="s2">"oor"</span><span class="p">,</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">"constant"</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=-</span><span class="mi">1</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">"onehot"</span><span class="p">,</span> <span class="n">OneHotEncoder</span><span class="p">())</span>
 <span class="p">])</span>
 
+<span class="c1"># Use make_column_selector to automatically select columns by dtype</span>
+<span class="n">numeric_selector</span> <span class="o">=</span> <span class="n">make_column_selector</span><span class="p">(</span><span class="n">dtype_exclude</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+<span class="n">categorical_selector</span> <span class="o">=</span> <span class="n">make_column_selector</span><span class="p">(</span><span class="n">dtype_include</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+
 <span class="n">preprocessor</span> <span class="o">=</span> <span class="n">ColumnTransformer</span><span class="p">([</span>
-    <span class="p">(</span><span class="s2">"num_impute"</span><span class="p">,</span> <span class="n">impute_numeric</span><span class="p">,</span> <span class="n">numeric_cols</span><span class="p">),</span>
-    <span class="p">(</span><span class="s2">"cat_process"</span><span class="p">,</span> <span class="n">impute_and_encode</span><span class="p">,</span> <span class="n">categorical_cols</span><span class="p">)</span>
+    <span class="p">(</span><span class="s2">"num_impute"</span><span class="p">,</span> <span class="n">impute_numeric</span><span class="p">,</span> <span class="n">numeric_selector</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"cat_process"</span><span class="p">,</span> <span class="n">impute_and_encode</span><span class="p">,</span> <span class="n">categorical_selector</span><span class="p">)</span>    
 <span class="p">],</span> <span class="n">remainder</span><span class="o">=</span><span class="s2">"drop"</span><span class="p">)</span>
 
 <span class="n">full_pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
@@ -8210,54 +8222,36 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
                  ColumnTransformer(transformers=[('num_impute',
                                                   Pipeline(steps=[('random_sample',
                                                                    RandomSampleImputer(random_state=12345))]),
-                                                  ['LATITUDE', 'LONGITUDE',
-                                                   'LND_SQFOOT', 'TOT_LVG_AREA',
-                                                   'SPEC_FEAT_VAL', 'RAIL_DIST',
-                                                   'OCEAN_DIST', 'WATER_DIST',
-                                                   'CNTR_DIST', 'SUBCNTR_DI',
-                                                   'HWY_DIST', 'age',
-                                                   'month_sold']),
+                                                  &lt;sklearn.compose._column_transformer.make_column_selector object at 0x147a8fa90&gt;),
                                                  ('cat_process',
                                                   Pipeline(steps=[('oor',
-                                                                   OutOfRangeImputer()),
+                                                                   SimpleImputer(fill_value=-1,
+                                                                                 strategy='constant')),
                                                                   ('onehot',
-                                                                   OneHotEncoder(handle_unknown='ignore',
-                                                                                 sparse_output=False))]),
-                                                  ['avno60plus',
-                                                   'structure_quality'])])),
+                                                                   OneHotEncoder())]),
+                                                  &lt;sklearn.compose._column_transformer.make_column_selector object at 0x1550ebc70&gt;)])),
                 ('rf', RandomForestRegressor(random_state=12345))])</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br/>On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden=""><div class="sk-item sk-dashed-wrapped"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-1" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-1"><div><div>Pipeline</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.pipeline.Pipeline.html" rel="noreferrer" target="_blank">?<span>Documentation for Pipeline</span></a><span class="sk-estimator-doc-link">i<span>Not fitted</span></span></div></label><div class="sk-toggleable__content"><pre>Pipeline(steps=[('preprocessor',
                  ColumnTransformer(transformers=[('num_impute',
                                                   Pipeline(steps=[('random_sample',
                                                                    RandomSampleImputer(random_state=12345))]),
-                                                  ['LATITUDE', 'LONGITUDE',
-                                                   'LND_SQFOOT', 'TOT_LVG_AREA',
-                                                   'SPEC_FEAT_VAL', 'RAIL_DIST',
-                                                   'OCEAN_DIST', 'WATER_DIST',
-                                                   'CNTR_DIST', 'SUBCNTR_DI',
-                                                   'HWY_DIST', 'age',
-                                                   'month_sold']),
+                                                  &lt;sklearn.compose._column_transformer.make_column_selector object at 0x147a8fa90&gt;),
                                                  ('cat_process',
                                                   Pipeline(steps=[('oor',
-                                                                   OutOfRangeImputer()),
+                                                                   SimpleImputer(fill_value=-1,
+                                                                                 strategy='constant')),
                                                                   ('onehot',
-                                                                   OneHotEncoder(handle_unknown='ignore',
-                                                                                 sparse_output=False))]),
-                                                  ['avno60plus',
-                                                   'structure_quality'])])),
+                                                                   OneHotEncoder())]),
+                                                  &lt;sklearn.compose._column_transformer.make_column_selector object at 0x1550ebc70&gt;)])),
                 ('rf', RandomForestRegressor(random_state=12345))])</pre></div> </div></div><div class="sk-serial"><div class="sk-item sk-dashed-wrapped"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-2" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-2"><div><div>preprocessor: ColumnTransformer</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.compose.ColumnTransformer.html" rel="noreferrer" target="_blank">?<span>Documentation for preprocessor: ColumnTransformer</span></a></div></label><div class="sk-toggleable__content"><pre>ColumnTransformer(transformers=[('num_impute',
                                  Pipeline(steps=[('random_sample',
                                                   RandomSampleImputer(random_state=12345))]),
-                                 ['LATITUDE', 'LONGITUDE', 'LND_SQFOOT',
-                                  'TOT_LVG_AREA', 'SPEC_FEAT_VAL', 'RAIL_DIST',
-                                  'OCEAN_DIST', 'WATER_DIST', 'CNTR_DIST',
-                                  'SUBCNTR_DI', 'HWY_DIST', 'age',
-                                  'month_sold']),
+                                 &lt;sklearn.compose._column_transformer.make_column_selector object at 0x147a8fa90&gt;),
                                 ('cat_process',
-                                 Pipeline(steps=[('oor', OutOfRangeImputer()),
-                                                 ('onehot',
-                                                  OneHotEncoder(handle_unknown='ignore',
-                                                                sparse_output=False))]),
-                                 ['avno60plus', 'structure_quality'])])</pre></div> </div></div><div class="sk-parallel"><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-3" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-3"><div><div>num_impute</div></div></label><div class="sk-toggleable__content"><pre>['LATITUDE', 'LONGITUDE', 'LND_SQFOOT', 'TOT_LVG_AREA', 'SPEC_FEAT_VAL', 'RAIL_DIST', 'OCEAN_DIST', 'WATER_DIST', 'CNTR_DIST', 'SUBCNTR_DI', 'HWY_DIST', 'age', 'month_sold']</pre></div> </div></div><div class="sk-serial"><div class="sk-item"><div class="sk-serial"><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-4" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-4"><div><div>RandomSampleImputer</div></div></label><div class="sk-toggleable__content"><pre>RandomSampleImputer(random_state=12345)</pre></div> </div></div></div></div></div></div></div><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-5" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-5"><div><div>cat_process</div></div></label><div class="sk-toggleable__content"><pre>['avno60plus', 'structure_quality']</pre></div> </div></div><div class="sk-serial"><div class="sk-item"><div class="sk-serial"><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-6" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-6"><div><div>OutOfRangeImputer</div></div></label><div class="sk-toggleable__content"><pre>OutOfRangeImputer()</pre></div> </div></div><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-7" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-7"><div><div>OneHotEncoder</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.preprocessing.OneHotEncoder.html" rel="noreferrer" target="_blank">?<span>Documentation for OneHotEncoder</span></a></div></label><div class="sk-toggleable__content"><pre>OneHotEncoder(handle_unknown='ignore', sparse_output=False)</pre></div> </div></div></div></div></div></div></div></div></div><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-8" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-8"><div><div>RandomForestRegressor</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.ensemble.RandomForestRegressor.html" rel="noreferrer" target="_blank">?<span>Documentation for RandomForestRegressor</span></a></div></label><div class="sk-toggleable__content"><pre>RandomForestRegressor(random_state=12345)</pre></div> </div></div></div></div></div></div>
+                                 Pipeline(steps=[('oor',
+                                                  SimpleImputer(fill_value=-1,
+                                                                strategy='constant')),
+                                                 ('onehot', OneHotEncoder())]),
+                                 &lt;sklearn.compose._column_transformer.make_column_selector object at 0x1550ebc70&gt;)])</pre></div> </div></div><div class="sk-parallel"><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-3" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-3"><div><div>num_impute</div></div></label><div class="sk-toggleable__content"><pre>&lt;sklearn.compose._column_transformer.make_column_selector object at 0x147a8fa90&gt;</pre></div> </div></div><div class="sk-serial"><div class="sk-item"><div class="sk-serial"><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-4" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-4"><div><div>RandomSampleImputer</div></div></label><div class="sk-toggleable__content"><pre>RandomSampleImputer(random_state=12345)</pre></div> </div></div></div></div></div></div></div><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-5" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-5"><div><div>cat_process</div></div></label><div class="sk-toggleable__content"><pre>&lt;sklearn.compose._column_transformer.make_column_selector object at 0x1550ebc70&gt;</pre></div> </div></div><div class="sk-serial"><div class="sk-item"><div class="sk-serial"><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-6" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-6"><div><div>SimpleImputer</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.impute.SimpleImputer.html" rel="noreferrer" target="_blank">?<span>Documentation for SimpleImputer</span></a></div></label><div class="sk-toggleable__content"><pre>SimpleImputer(fill_value=-1, strategy='constant')</pre></div> </div></div><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-7" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-7"><div><div>OneHotEncoder</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.preprocessing.OneHotEncoder.html" rel="noreferrer" target="_blank">?<span>Documentation for OneHotEncoder</span></a></div></label><div class="sk-toggleable__content"><pre>OneHotEncoder()</pre></div> </div></div></div></div></div></div></div></div></div><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-8" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-8"><div><div>RandomForestRegressor</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.ensemble.RandomForestRegressor.html" rel="noreferrer" target="_blank">?<span>Documentation for RandomForestRegressor</span></a></div></label><div class="sk-toggleable__content"><pre>RandomForestRegressor(random_state=12345)</pre></div> </div></div></div></div></div></div>
 </div>
 </div>
 </div>
@@ -8284,14 +8278,17 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Define a "simple" imputation pipeline (no learner)</span>
 <span class="n">simple_impute</span> <span class="o">=</span> <span class="n">ColumnTransformer</span><span class="p">([</span>
-    <span class="p">(</span><span class="s2">"num_impute"</span><span class="p">,</span> <span class="n">impute_numeric</span><span class="p">,</span> <span class="n">numeric_cols</span><span class="p">),</span>
-    <span class="p">(</span><span class="s2">"cat_impute"</span><span class="p">,</span> <span class="n">impute_factor</span><span class="p">,</span> <span class="n">categorical_cols</span><span class="p">)</span>
+    <span class="p">(</span><span class="s2">"num_impute"</span><span class="p">,</span> <span class="n">impute_numeric</span><span class="p">,</span> <span class="n">numeric_selector</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"cat_impute"</span><span class="p">,</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">"constant"</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">categorical_selector</span><span class="p">)</span>
 <span class="p">],</span> <span class="n">remainder</span><span class="o">=</span><span class="s2">"drop"</span><span class="p">)</span>
 
-<span class="n">X_imputed_array</span> <span class="o">=</span> <span class="n">simple_impute</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">miami</span><span class="p">)</span>
+<span class="c1"># Set output to pandas DataFrame directly</span>
+<span class="n">simple_impute</span><span class="o">.</span><span class="n">set_output</span><span class="p">(</span><span class="n">transform</span><span class="o">=</span><span class="s2">"pandas"</span><span class="p">)</span>
 
-<span class="c1"># Reassemble into a DataFrame</span>
-<span class="n">miami_imputed</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X_imputed_array</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">numeric_cols</span> <span class="o">+</span> <span class="n">categorical_cols</span><span class="p">)</span>
+<span class="c1"># The fit_transform will now return a DataFrame automatically</span>
+<span class="n">miami_imputed</span> <span class="o">=</span> <span class="n">simple_impute</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">miami</span><span class="p">)</span>
+
+<span class="c1"># Display the results</span>
 <span class="n">miami_imputed</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -8323,21 +8320,21 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 <thead>
 <tr style="text-align: right;">
 <th></th>
-<th>LATITUDE</th>
-<th>LONGITUDE</th>
-<th>LND_SQFOOT</th>
-<th>TOT_LVG_AREA</th>
-<th>SPEC_FEAT_VAL</th>
-<th>RAIL_DIST</th>
-<th>OCEAN_DIST</th>
-<th>WATER_DIST</th>
-<th>CNTR_DIST</th>
-<th>SUBCNTR_DI</th>
-<th>HWY_DIST</th>
-<th>age</th>
-<th>month_sold</th>
-<th>avno60plus</th>
-<th>structure_quality</th>
+<th>num_impute__LATITUDE</th>
+<th>num_impute__LONGITUDE</th>
+<th>num_impute__LND_SQFOOT</th>
+<th>num_impute__TOT_LVG_AREA</th>
+<th>num_impute__SPEC_FEAT_VAL</th>
+<th>num_impute__RAIL_DIST</th>
+<th>num_impute__OCEAN_DIST</th>
+<th>num_impute__WATER_DIST</th>
+<th>num_impute__CNTR_DIST</th>
+<th>num_impute__SUBCNTR_DI</th>
+<th>num_impute__HWY_DIST</th>
+<th>num_impute__age</th>
+<th>num_impute__month_sold</th>
+<th>cat_impute__avno60plus</th>
+<th>cat_impute__structure_quality</th>
 </tr>
 </thead>
 <tbody>
@@ -8345,91 +8342,91 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 <th>0</th>
 <td>25.891031</td>
 <td>-80.160561</td>
-<td>9375.0</td>
+<td>9375</td>
 <td>2750.0</td>
-<td>0.0</td>
+<td>0</td>
 <td>2815.9</td>
 <td>33320.2</td>
 <td>347.6</td>
 <td>42815.3</td>
 <td>37742.2</td>
 <td>15954.9</td>
-<td>67.0</td>
-<td>8.0</td>
-<td>0.0</td>
-<td>-1.0</td>
+<td>67</td>
+<td>8</td>
+<td>0</td>
+<td>-1</td>
 </tr>
 <tr>
 <th>1</th>
 <td>25.891324</td>
 <td>-80.153968</td>
-<td>9375.0</td>
+<td>9375</td>
 <td>1624.0</td>
-<td>0.0</td>
+<td>0</td>
 <td>4359.1</td>
 <td>17666.7</td>
 <td>337.8</td>
 <td>43504.9</td>
 <td>37340.5</td>
 <td>18125.0</td>
-<td>63.0</td>
-<td>9.0</td>
-<td>0.0</td>
-<td>-1.0</td>
+<td>63</td>
+<td>9</td>
+<td>0</td>
+<td>-1</td>
 </tr>
 <tr>
 <th>2</th>
 <td>25.891334</td>
 <td>-80.153740</td>
-<td>9375.0</td>
+<td>9375</td>
 <td>1283.0</td>
-<td>49206.0</td>
+<td>49206</td>
 <td>4412.9</td>
 <td>32759.1</td>
 <td>297.1</td>
 <td>43530.4</td>
 <td>37328.7</td>
 <td>18200.5</td>
-<td>61.0</td>
-<td>2.0</td>
-<td>0.0</td>
-<td>-1.0</td>
+<td>61</td>
+<td>2</td>
+<td>0</td>
+<td>-1</td>
 </tr>
 <tr>
 <th>3</th>
 <td>25.891765</td>
 <td>-80.152657</td>
-<td>12450.0</td>
+<td>12450</td>
 <td>1294.0</td>
-<td>10033.0</td>
+<td>10033</td>
 <td>4585.0</td>
 <td>10156.5</td>
 <td>0.0</td>
 <td>43797.5</td>
 <td>37423.2</td>
 <td>18514.4</td>
-<td>63.0</td>
-<td>9.0</td>
-<td>0.0</td>
-<td>4.0</td>
+<td>63</td>
+<td>9</td>
+<td>0</td>
+<td>4</td>
 </tr>
 <tr>
 <th>4</th>
 <td>25.891825</td>
 <td>-80.154639</td>
-<td>12800.0</td>
+<td>12800</td>
 <td>1684.0</td>
-<td>16681.0</td>
+<td>16681</td>
 <td>4063.4</td>
 <td>10836.8</td>
 <td>326.6</td>
 <td>43599.7</td>
 <td>37550.8</td>
 <td>17903.4</td>
-<td>42.0</td>
-<td>7.0</td>
-<td>0.0</td>
-<td>4.0</td>
+<td>42</td>
+<td>7</td>
+<td>0</td>
+<td>4</td>
 </tr>
 </tbody>
 </table>
@@ -8538,8 +8535,7 @@ Don't forget to import `enable_iterative_imputer` from `sklearn.experimental` be
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearRegression</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.tree</span><span class="w"> </span><span class="kn">import</span> <span class="n">DecisionTreeRegressor</span>
 
-
-<span class="c1"># 1. Define two numeric imputers:</span>
+<span class="c1"># 1. Define the imputers</span>
 <span class="n">dt_imputer</span> <span class="o">=</span> <span class="n">IterativeImputer</span><span class="p">(</span>
     <span class="n">estimator</span><span class="o">=</span><span class="n">DecisionTreeRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">12345</span><span class="p">),</span>
     <span class="n">initial_strategy</span><span class="o">=</span><span class="s2">"mean"</span><span class="p">,</span>
@@ -8551,19 +8547,17 @@ Don't forget to import `enable_iterative_imputer` from `sklearn.experimental` be
     <span class="n">random_state</span><span class="o">=</span><span class="mi">12345</span>
 <span class="p">)</span>
 
-<span class="c1"># 2. Build two preprocessors that first apply the categorical imputer,</span>
-<span class="c1">#    then the model‐based numeric imputer:</span>
+<span class="c1"># 2. Define the preprocessors and pipelines</span>
 <span class="n">dt_preprocessor</span> <span class="o">=</span> <span class="n">ColumnTransformer</span><span class="p">([</span>
-    <span class="p">(</span><span class="s2">"cat_impute"</span><span class="p">,</span> <span class="n">OutOfRangeImputer</span><span class="p">(</span><span class="n">missing_value</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">categorical_cols</span><span class="p">),</span>
-    <span class="p">(</span><span class="s2">"num_impute"</span><span class="p">,</span> <span class="n">dt_imputer</span><span class="p">,</span> <span class="n">numeric_cols</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"cat_impute"</span><span class="p">,</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">"constant"</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">categorical_selector</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"num_impute"</span><span class="p">,</span> <span class="n">dt_imputer</span><span class="p">,</span> <span class="n">numeric_selector</span><span class="p">),</span>
 <span class="p">],</span> <span class="n">remainder</span><span class="o">=</span><span class="s2">"drop"</span><span class="p">)</span>
 
 <span class="n">linear_preprocessor</span> <span class="o">=</span> <span class="n">ColumnTransformer</span><span class="p">([</span>
-    <span class="p">(</span><span class="s2">"cat_impute"</span><span class="p">,</span> <span class="n">OutOfRangeImputer</span><span class="p">(</span><span class="n">missing_value</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">categorical_cols</span><span class="p">),</span>
-    <span class="p">(</span><span class="s2">"num_impute"</span><span class="p">,</span> <span class="n">linear_imputer</span><span class="p">,</span> <span class="n">numeric_cols</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"cat_impute"</span><span class="p">,</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">"constant"</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">categorical_selector</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"num_impute"</span><span class="p">,</span> <span class="n">linear_imputer</span><span class="p">,</span> <span class="n">numeric_selector</span><span class="p">),</span>
 <span class="p">],</span> <span class="n">remainder</span><span class="o">=</span><span class="s2">"drop"</span><span class="p">)</span>
 
-<span class="c1"># 3. Finally, wrap each in a Pipeline with a RandomForestRegressor:</span>
 <span class="n">dt_pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
     <span class="p">(</span><span class="s2">"preprocessor"</span><span class="p">,</span> <span class="n">dt_preprocessor</span><span class="p">),</span>
     <span class="p">(</span><span class="s2">"rf"</span><span class="p">,</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">12345</span><span class="p">))</span>
@@ -9018,44 +9012,30 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 }
 </style><div class="sk-top-container" id="sk-container-id-2"><div class="sk-text-repr-fallback"><pre>Pipeline(steps=[('preprocessor',
                  ColumnTransformer(transformers=[('cat_impute',
-                                                  OutOfRangeImputer(),
-                                                  ['avno60plus',
-                                                   'structure_quality']),
+                                                  SimpleImputer(fill_value=-1,
+                                                                strategy='constant'),
+                                                  &lt;sklearn.compose._column_transformer.make_column_selector object at 0x1550ebc70&gt;),
                                                  ('num_impute',
                                                   IterativeImputer(estimator=DecisionTreeRegressor(random_state=12345),
                                                                    random_state=12345),
-                                                  ['LATITUDE', 'LONGITUDE',
-                                                   'LND_SQFOOT', 'TOT_LVG_AREA',
-                                                   'SPEC_FEAT_VAL', 'RAIL_DIST',
-                                                   'OCEAN_DIST', 'WATER_DIST',
-                                                   'CNTR_DIST', 'SUBCNTR_DI',
-                                                   'HWY_DIST', 'age',
-                                                   'month_sold'])])),
+                                                  &lt;sklearn.compose._column_transformer.make_column_selector object at 0x147a8fa90&gt;)])),
                 ('rf', RandomForestRegressor(random_state=12345))])</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br/>On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden=""><div class="sk-item sk-dashed-wrapped"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-9" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-9"><div><div>Pipeline</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.pipeline.Pipeline.html" rel="noreferrer" target="_blank">?<span>Documentation for Pipeline</span></a><span class="sk-estimator-doc-link">i<span>Not fitted</span></span></div></label><div class="sk-toggleable__content"><pre>Pipeline(steps=[('preprocessor',
                  ColumnTransformer(transformers=[('cat_impute',
-                                                  OutOfRangeImputer(),
-                                                  ['avno60plus',
-                                                   'structure_quality']),
+                                                  SimpleImputer(fill_value=-1,
+                                                                strategy='constant'),
+                                                  &lt;sklearn.compose._column_transformer.make_column_selector object at 0x1550ebc70&gt;),
                                                  ('num_impute',
                                                   IterativeImputer(estimator=DecisionTreeRegressor(random_state=12345),
                                                                    random_state=12345),
-                                                  ['LATITUDE', 'LONGITUDE',
-                                                   'LND_SQFOOT', 'TOT_LVG_AREA',
-                                                   'SPEC_FEAT_VAL', 'RAIL_DIST',
-                                                   'OCEAN_DIST', 'WATER_DIST',
-                                                   'CNTR_DIST', 'SUBCNTR_DI',
-                                                   'HWY_DIST', 'age',
-                                                   'month_sold'])])),
-                ('rf', RandomForestRegressor(random_state=12345))])</pre></div> </div></div><div class="sk-serial"><div class="sk-item sk-dashed-wrapped"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-10" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-10"><div><div>preprocessor: ColumnTransformer</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.compose.ColumnTransformer.html" rel="noreferrer" target="_blank">?<span>Documentation for preprocessor: ColumnTransformer</span></a></div></label><div class="sk-toggleable__content"><pre>ColumnTransformer(transformers=[('cat_impute', OutOfRangeImputer(),
-                                 ['avno60plus', 'structure_quality']),
+                                                  &lt;sklearn.compose._column_transformer.make_column_selector object at 0x147a8fa90&gt;)])),
+                ('rf', RandomForestRegressor(random_state=12345))])</pre></div> </div></div><div class="sk-serial"><div class="sk-item sk-dashed-wrapped"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-10" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-10"><div><div>preprocessor: ColumnTransformer</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.compose.ColumnTransformer.html" rel="noreferrer" target="_blank">?<span>Documentation for preprocessor: ColumnTransformer</span></a></div></label><div class="sk-toggleable__content"><pre>ColumnTransformer(transformers=[('cat_impute',
+                                 SimpleImputer(fill_value=-1,
+                                               strategy='constant'),
+                                 &lt;sklearn.compose._column_transformer.make_column_selector object at 0x1550ebc70&gt;),
                                 ('num_impute',
                                  IterativeImputer(estimator=DecisionTreeRegressor(random_state=12345),
                                                   random_state=12345),
-                                 ['LATITUDE', 'LONGITUDE', 'LND_SQFOOT',
-                                  'TOT_LVG_AREA', 'SPEC_FEAT_VAL', 'RAIL_DIST',
-                                  'OCEAN_DIST', 'WATER_DIST', 'CNTR_DIST',
-                                  'SUBCNTR_DI', 'HWY_DIST', 'age',
-                                  'month_sold'])])</pre></div> </div></div><div class="sk-parallel"><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-11" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-11"><div><div>cat_impute</div></div></label><div class="sk-toggleable__content"><pre>['avno60plus', 'structure_quality']</pre></div> </div></div><div class="sk-serial"><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-12" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-12"><div><div>OutOfRangeImputer</div></div></label><div class="sk-toggleable__content"><pre>OutOfRangeImputer()</pre></div> </div></div></div></div></div><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-13" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-13"><div><div>num_impute</div></div></label><div class="sk-toggleable__content"><pre>['LATITUDE', 'LONGITUDE', 'LND_SQFOOT', 'TOT_LVG_AREA', 'SPEC_FEAT_VAL', 'RAIL_DIST', 'OCEAN_DIST', 'WATER_DIST', 'CNTR_DIST', 'SUBCNTR_DI', 'HWY_DIST', 'age', 'month_sold']</pre></div> </div></div><div class="sk-serial"><div class="sk-item sk-dashed-wrapped"><div class="sk-parallel"><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-14" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-14"><div><div>estimator: DecisionTreeRegressor</div></div></label><div class="sk-toggleable__content"><pre>DecisionTreeRegressor(random_state=12345)</pre></div> </div></div><div class="sk-serial"><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-15" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-15"><div><div>DecisionTreeRegressor</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.tree.DecisionTreeRegressor.html" rel="noreferrer" target="_blank">?<span>Documentation for DecisionTreeRegressor</span></a></div></label><div class="sk-toggleable__content"><pre>DecisionTreeRegressor(random_state=12345)</pre></div> </div></div></div></div></div></div></div></div></div></div></div></div><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-16" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-16"><div><div>RandomForestRegressor</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.ensemble.RandomForestRegressor.html" rel="noreferrer" target="_blank">?<span>Documentation for RandomForestRegressor</span></a></div></label><div class="sk-toggleable__content"><pre>RandomForestRegressor(random_state=12345)</pre></div> </div></div></div></div></div></div>
+                                 &lt;sklearn.compose._column_transformer.make_column_selector object at 0x147a8fa90&gt;)])</pre></div> </div></div><div class="sk-parallel"><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-11" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-11"><div><div>cat_impute</div></div></label><div class="sk-toggleable__content"><pre>&lt;sklearn.compose._column_transformer.make_column_selector object at 0x1550ebc70&gt;</pre></div> </div></div><div class="sk-serial"><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-12" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-12"><div><div>SimpleImputer</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.impute.SimpleImputer.html" rel="noreferrer" target="_blank">?<span>Documentation for SimpleImputer</span></a></div></label><div class="sk-toggleable__content"><pre>SimpleImputer(fill_value=-1, strategy='constant')</pre></div> </div></div></div></div></div><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-13" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-13"><div><div>num_impute</div></div></label><div class="sk-toggleable__content"><pre>&lt;sklearn.compose._column_transformer.make_column_selector object at 0x147a8fa90&gt;</pre></div> </div></div><div class="sk-serial"><div class="sk-item sk-dashed-wrapped"><div class="sk-parallel"><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-14" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-14"><div><div>estimator: DecisionTreeRegressor</div></div></label><div class="sk-toggleable__content"><pre>DecisionTreeRegressor(random_state=12345)</pre></div> </div></div><div class="sk-serial"><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-15" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-15"><div><div>DecisionTreeRegressor</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.tree.DecisionTreeRegressor.html" rel="noreferrer" target="_blank">?<span>Documentation for DecisionTreeRegressor</span></a></div></label><div class="sk-toggleable__content"><pre>DecisionTreeRegressor(random_state=12345)</pre></div> </div></div></div></div></div></div></div></div></div></div></div></div><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-16" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-16"><div><div>RandomForestRegressor</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.ensemble.RandomForestRegressor.html" rel="noreferrer" target="_blank">?<span>Documentation for RandomForestRegressor</span></a></div></label><div class="sk-toggleable__content"><pre>RandomForestRegressor(random_state=12345)</pre></div> </div></div></div></div></div></div>
 </div>
 </div>
 </div>
@@ -9500,44 +9480,30 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 }
 </style><div class="sk-top-container" id="sk-container-id-3"><div class="sk-text-repr-fallback"><pre>Pipeline(steps=[('preprocessor',
                  ColumnTransformer(transformers=[('cat_impute',
-                                                  OutOfRangeImputer(),
-                                                  ['avno60plus',
-                                                   'structure_quality']),
+                                                  SimpleImputer(fill_value=-1,
+                                                                strategy='constant'),
+                                                  &lt;sklearn.compose._column_transformer.make_column_selector object at 0x1550ebc70&gt;),
                                                  ('num_impute',
                                                   IterativeImputer(estimator=LinearRegression(),
                                                                    random_state=12345),
-                                                  ['LATITUDE', 'LONGITUDE',
-                                                   'LND_SQFOOT', 'TOT_LVG_AREA',
-                                                   'SPEC_FEAT_VAL', 'RAIL_DIST',
-                                                   'OCEAN_DIST', 'WATER_DIST',
-                                                   'CNTR_DIST', 'SUBCNTR_DI',
-                                                   'HWY_DIST', 'age',
-                                                   'month_sold'])])),
+                                                  &lt;sklearn.compose._column_transformer.make_column_selector object at 0x147a8fa90&gt;)])),
                 ('rf', RandomForestRegressor(random_state=12345))])</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br/>On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden=""><div class="sk-item sk-dashed-wrapped"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-17" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-17"><div><div>Pipeline</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.pipeline.Pipeline.html" rel="noreferrer" target="_blank">?<span>Documentation for Pipeline</span></a><span class="sk-estimator-doc-link">i<span>Not fitted</span></span></div></label><div class="sk-toggleable__content"><pre>Pipeline(steps=[('preprocessor',
                  ColumnTransformer(transformers=[('cat_impute',
-                                                  OutOfRangeImputer(),
-                                                  ['avno60plus',
-                                                   'structure_quality']),
+                                                  SimpleImputer(fill_value=-1,
+                                                                strategy='constant'),
+                                                  &lt;sklearn.compose._column_transformer.make_column_selector object at 0x1550ebc70&gt;),
                                                  ('num_impute',
                                                   IterativeImputer(estimator=LinearRegression(),
                                                                    random_state=12345),
-                                                  ['LATITUDE', 'LONGITUDE',
-                                                   'LND_SQFOOT', 'TOT_LVG_AREA',
-                                                   'SPEC_FEAT_VAL', 'RAIL_DIST',
-                                                   'OCEAN_DIST', 'WATER_DIST',
-                                                   'CNTR_DIST', 'SUBCNTR_DI',
-                                                   'HWY_DIST', 'age',
-                                                   'month_sold'])])),
-                ('rf', RandomForestRegressor(random_state=12345))])</pre></div> </div></div><div class="sk-serial"><div class="sk-item sk-dashed-wrapped"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-18" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-18"><div><div>preprocessor: ColumnTransformer</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.compose.ColumnTransformer.html" rel="noreferrer" target="_blank">?<span>Documentation for preprocessor: ColumnTransformer</span></a></div></label><div class="sk-toggleable__content"><pre>ColumnTransformer(transformers=[('cat_impute', OutOfRangeImputer(),
-                                 ['avno60plus', 'structure_quality']),
+                                                  &lt;sklearn.compose._column_transformer.make_column_selector object at 0x147a8fa90&gt;)])),
+                ('rf', RandomForestRegressor(random_state=12345))])</pre></div> </div></div><div class="sk-serial"><div class="sk-item sk-dashed-wrapped"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-18" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-18"><div><div>preprocessor: ColumnTransformer</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.compose.ColumnTransformer.html" rel="noreferrer" target="_blank">?<span>Documentation for preprocessor: ColumnTransformer</span></a></div></label><div class="sk-toggleable__content"><pre>ColumnTransformer(transformers=[('cat_impute',
+                                 SimpleImputer(fill_value=-1,
+                                               strategy='constant'),
+                                 &lt;sklearn.compose._column_transformer.make_column_selector object at 0x1550ebc70&gt;),
                                 ('num_impute',
                                  IterativeImputer(estimator=LinearRegression(),
                                                   random_state=12345),
-                                 ['LATITUDE', 'LONGITUDE', 'LND_SQFOOT',
-                                  'TOT_LVG_AREA', 'SPEC_FEAT_VAL', 'RAIL_DIST',
-                                  'OCEAN_DIST', 'WATER_DIST', 'CNTR_DIST',
-                                  'SUBCNTR_DI', 'HWY_DIST', 'age',
-                                  'month_sold'])])</pre></div> </div></div><div class="sk-parallel"><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-19" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-19"><div><div>cat_impute</div></div></label><div class="sk-toggleable__content"><pre>['avno60plus', 'structure_quality']</pre></div> </div></div><div class="sk-serial"><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-20" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-20"><div><div>OutOfRangeImputer</div></div></label><div class="sk-toggleable__content"><pre>OutOfRangeImputer()</pre></div> </div></div></div></div></div><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-21" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-21"><div><div>num_impute</div></div></label><div class="sk-toggleable__content"><pre>['LATITUDE', 'LONGITUDE', 'LND_SQFOOT', 'TOT_LVG_AREA', 'SPEC_FEAT_VAL', 'RAIL_DIST', 'OCEAN_DIST', 'WATER_DIST', 'CNTR_DIST', 'SUBCNTR_DI', 'HWY_DIST', 'age', 'month_sold']</pre></div> </div></div><div class="sk-serial"><div class="sk-item sk-dashed-wrapped"><div class="sk-parallel"><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-22" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-22"><div><div>estimator: LinearRegression</div></div></label><div class="sk-toggleable__content"><pre>LinearRegression()</pre></div> </div></div><div class="sk-serial"><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-23" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-23"><div><div>LinearRegression</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.linear_model.LinearRegression.html" rel="noreferrer" target="_blank">?<span>Documentation for LinearRegression</span></a></div></label><div class="sk-toggleable__content"><pre>LinearRegression()</pre></div> </div></div></div></div></div></div></div></div></div></div></div></div><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-24" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-24"><div><div>RandomForestRegressor</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.ensemble.RandomForestRegressor.html" rel="noreferrer" target="_blank">?<span>Documentation for RandomForestRegressor</span></a></div></label><div class="sk-toggleable__content"><pre>RandomForestRegressor(random_state=12345)</pre></div> </div></div></div></div></div></div>
+                                 &lt;sklearn.compose._column_transformer.make_column_selector object at 0x147a8fa90&gt;)])</pre></div> </div></div><div class="sk-parallel"><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-19" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-19"><div><div>cat_impute</div></div></label><div class="sk-toggleable__content"><pre>&lt;sklearn.compose._column_transformer.make_column_selector object at 0x1550ebc70&gt;</pre></div> </div></div><div class="sk-serial"><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-20" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-20"><div><div>SimpleImputer</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.impute.SimpleImputer.html" rel="noreferrer" target="_blank">?<span>Documentation for SimpleImputer</span></a></div></label><div class="sk-toggleable__content"><pre>SimpleImputer(fill_value=-1, strategy='constant')</pre></div> </div></div></div></div></div><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-21" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-21"><div><div>num_impute</div></div></label><div class="sk-toggleable__content"><pre>&lt;sklearn.compose._column_transformer.make_column_selector object at 0x147a8fa90&gt;</pre></div> </div></div><div class="sk-serial"><div class="sk-item sk-dashed-wrapped"><div class="sk-parallel"><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-22" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-22"><div><div>estimator: LinearRegression</div></div></label><div class="sk-toggleable__content"><pre>LinearRegression()</pre></div> </div></div><div class="sk-serial"><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-23" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-23"><div><div>LinearRegression</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.linear_model.LinearRegression.html" rel="noreferrer" target="_blank">?<span>Documentation for LinearRegression</span></a></div></label><div class="sk-toggleable__content"><pre>LinearRegression()</pre></div> </div></div></div></div></div></div></div></div></div></div></div></div><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-24" type="checkbox"/><label class="sk-toggleable__label sk-toggleable__label-arrow" for="sk-estimator-id-24"><div><div>RandomForestRegressor</div></div><div><a class="sk-estimator-doc-link" href="https://scikit-learn.org/1.6/modules/generated/sklearn.ensemble.RandomForestRegressor.html" rel="noreferrer" target="_blank">?<span>Documentation for RandomForestRegressor</span></a></div></label><div class="sk-toggleable__content"><pre>RandomForestRegressor(random_state=12345)</pre></div> </div></div></div></div></div></div>
 </div>
 </div>
 </div>
@@ -9558,7 +9524,7 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
@@ -9643,9 +9609,10 @@ Linear-model imputation pipeline MSE per fold: [1.07898296e+10 1.02297789e+10 9.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="3-Branches-in-pipelines">3 Branches in pipelines<a class="anchor-link" href="#3-Branches-in-pipelines">¶</a></h2><p>Pipelines can become very complex. Within a pipeline, we could be interested which imputation method works best. An elegant way to find out is to treat the imputation method as just another hyperparameter that we tune alongside other hyperparameters when we tune the pipeline. A way to do this is by using path branching.</p>
-<p>However, unlike <code>mlr3</code>, <code>sklearn</code> does not provide off-the-shelf support for pipeline branching. Here, we provide a custom implementation of <code>BranchImputer</code>, which allows us to switch between imputation methods.</p>
-<p>Set up a Pipeline that contains the following elements: 1. A <code>BranchImputer</code> (with two different imputation methods, a) histogram-based and b) learner-based using a decision tree); 2. A random forest fit on the (fully imputed) data.</p>
+<h2 id="3-Branches-in-pipelines">3 Branches in pipelines<a class="anchor-link" href="#3-Branches-in-pipelines">¶</a></h2><p>Pipelines can become very complex. Within a pipeline, we could be interested which imputation method works best. An elegant way to find out is to treat the imputation method as just another hyperparameter that we tune alongside other hyperparameters when we tune the pipeline. A way to do this is by using pipeline branching.</p>
+<p>However, unlike <code>mlr3</code>, <code>sklearn</code> does not provide off-the-shelf support for pipeline branching. To achieve the same imputation-switching effect, we can add two different imputers in the hyperparameter search space.</p>
+<p>Set up a Pipeline that contains the following elements: 1. A <code>ColumnTransformer</code> consisting of an (arbitary) imputer for numerical features and a SimpleImputer for categorical features; 2. A <code>RandomForestRegressor</code> serving as the learner.</p>
+<p>Later in the hyperparameter space, we will switch between <code>IterativeImputer</code> and <code>HistogramImputer</code> for imputing the numerical features.</p>
 </div>
 </div>
 </div>
@@ -9687,41 +9654,6 @@ Linear-model imputation pipeline MSE per fold: [1.07898296e+10 1.02297789e+10 9.
                 <span class="n">draws</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng_</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="n">bins_idx</span><span class="p">],</span> <span class="n">edges</span><span class="p">[</span><span class="n">bins_idx</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
                 <span class="n">X</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">draws</span>
         <span class="k">return</span> <span class="n">X</span>
-
-<span class="k">class</span><span class="w"> </span><span class="nc">BranchImputer</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">):</span>
-    <span class="c1"># wrapper that “branches” between the two numeric imputers + always does the same cat imputer</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"hist"</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>               <span class="c1"># "hist" or "tree"</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">max_depth</span> <span class="o">=</span> <span class="n">max_depth</span>         <span class="c1"># only for tree</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bins</span> <span class="o">=</span> <span class="n">bins</span>                   <span class="c1"># only for hist</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="c1"># choose numeric imputer</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">"hist"</span><span class="p">:</span>
-            <span class="n">num_imputer</span> <span class="o">=</span> <span class="n">HistogramImputer</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">"tree"</span><span class="p">:</span>
-            <span class="n">dt</span> <span class="o">=</span> <span class="n">DecisionTreeRegressor</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_depth</span><span class="p">,</span>
-                                       <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
-            <span class="n">num_imputer</span> <span class="o">=</span> <span class="n">IterativeImputer</span><span class="p">(</span>
-                <span class="n">estimator</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span>
-                <span class="n">initial_strategy</span><span class="o">=</span><span class="s2">"mean"</span><span class="p">,</span>
-                <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unknown method: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-
-        <span class="c1"># assemble full imputer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">impl_</span> <span class="o">=</span> <span class="n">ColumnTransformer</span><span class="p">([</span>
-            <span class="p">(</span><span class="s2">"num"</span><span class="p">,</span> <span class="n">num_imputer</span><span class="p">,</span> <span class="n">numeric_cols</span><span class="p">),</span>
-            <span class="p">(</span><span class="s2">"cat"</span><span class="p">,</span> <span class="n">OutOfRangeImputer</span><span class="p">(</span><span class="n">missing_value</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">categorical_cols</span><span class="p">),</span>
-        <span class="p">],</span> <span class="n">remainder</span><span class="o">=</span><span class="s2">"drop"</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">impl_</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">impl_</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -9740,7 +9672,10 @@ Linear-model imputation pipeline MSE per fold: [1.07898296e+10 1.02297789e+10 9.
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomizedSearchCV</span>
 
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
-    <span class="p">(</span><span class="s2">"imputer"</span><span class="p">,</span> <span class="n">BranchImputer</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">12345</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">"preprocessor"</span><span class="p">,</span> <span class="n">ColumnTransformer</span><span class="p">([</span>
+        <span class="p">(</span><span class="s2">"num"</span><span class="p">,</span> <span class="s2">"passthrough"</span><span class="p">,</span> <span class="n">numeric_selector</span><span class="p">),</span>  <span class="c1"># placeholder, will be set in param_dist</span>
+        <span class="p">(</span><span class="s2">"cat"</span><span class="p">,</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">"constant"</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">categorical_selector</span><span class="p">),</span>
+    <span class="p">],</span> <span class="n">remainder</span><span class="o">=</span><span class="s2">"drop"</span><span class="p">)),</span>
     <span class="p">(</span><span class="s2">"rf"</span><span class="p">,</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">12345</span><span class="p">))</span>
 <span class="p">])</span>
 </pre></div>
@@ -9762,8 +9697,8 @@ Linear-model imputation pipeline MSE per fold: [1.07898296e+10 1.02297789e+10 9.
 <li>The <code>max_depth</code> of the decision tree used in the model-based imputation, varied from 1 to 30.</li>
 </ol>
 <p>This allows the tuning procedure to evaluate combinations of both preprocessing and modeling strategies.</p>
-<details><summary>Hint 2:</summary>
-`BranchImputer` has a parameter like `imputer__method` that controls the branch choice.
+<details><summary>Hint 1:</summary>
+<p>Assume that you name the first component <code>ColumnTransformer</code> above as <code>"preprocessor"</code>, and in the <code>ColumnTransformer</code> you name the imputer for numerical features as <code>"num"</code>, then this <code>"num"</code> imputer will be replaced by an <code>IterativeImputer</code> when we try model-based imputation. Now, you can specify the search space for the decision tree used in the model-based imputation by <code>"preprocessor__num__estimator__max_depth": list(range(1, 31))</code>.</p>
 </details>
 </div>
 </div>
@@ -9779,14 +9714,25 @@ Linear-model imputation pipeline MSE per fold: [1.07898296e+10 1.02297789e+10 9.
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
 
 <span class="c1"># define search space</span>
-<span class="n">param_dist</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="c1"># mtry between 2 and 8</span>
-    <span class="s2">"rf__max_features"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">)),</span>
-    <span class="c1"># choose imputation method</span>
-    <span class="s2">"imputer__method"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"hist"</span><span class="p">,</span> <span class="s2">"tree"</span><span class="p">],</span>
-    <span class="c1"># max_depth for the decision‐tree imputer</span>
-    <span class="s2">"imputer__max_depth"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">31</span><span class="p">)),</span>
-<span class="p">}</span>
+<span class="n">param_dist</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="c1"># Use HistogramImputer for numerical features</span>
+        <span class="s2">"preprocessor__num"</span><span class="p">:</span> <span class="p">[</span><span class="n">HistogramImputer</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">12345</span><span class="p">)],</span>
+        <span class="s2">"rf__max_features"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">)),</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="c1"># Use IterativeImputer for numerical features  </span>
+        <span class="s2">"preprocessor__num"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="n">IterativeImputer</span><span class="p">(</span>
+                <span class="n">estimator</span><span class="o">=</span><span class="n">DecisionTreeRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">12345</span><span class="p">),</span> 
+                <span class="n">initial_strategy</span><span class="o">=</span><span class="s2">"mean"</span><span class="p">,</span> 
+                <span class="n">random_state</span><span class="o">=</span><span class="mi">12345</span>
+            <span class="p">)</span>
+        <span class="p">],</span>
+        <span class="s2">"preprocessor__num__estimator__max_depth"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">31</span><span class="p">)),</span>
+        <span class="s2">"rf__max_features"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">)),</span>
+    <span class="p">}</span>
+<span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -9843,8 +9789,9 @@ Linear-model imputation pipeline MSE per fold: [1.07898296e+10 1.02297789e+10 9.
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>Best parameters found:
-{'rf__max_features': 8, 'imputer__method': 'tree', 'imputer__max_depth': 7}
-→ 3-fold CV MSE (avg): 9860679448.50
+{'rf__max_features': 3, 'preprocessor__num__estimator__max_depth': 7, 'preprocessor__num': IterativeImputer(estimator=DecisionTreeRegressor(random_state=12345),
+                 random_state=12345)}
+→ 3-fold CV MSE (avg): 9834692119.76
 </pre>
 </div>
 </div>
