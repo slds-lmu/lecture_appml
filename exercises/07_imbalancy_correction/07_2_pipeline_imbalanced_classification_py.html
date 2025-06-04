@@ -7623,7 +7623,7 @@ Name: count, dtype: int64
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="1-Benchmarking-standard-algorithms">1 Benchmarking standard algorithms<a class="anchor-link" href="#1-Benchmarking-standard-algorithms">¶</a></h2><p>We will start by comparing two standard machine learning algorithms — a classification tree and a random forest — without taking the imbalanced class distribution into account. Inspecting some standard measures will reveal problems that will be addressed in the subsequent exercises.</p>
-<p>Start by creating a classification task with <code>"oilspill"</code> as the target variable and all other variables as features (except the ones we removed earlier). Set <code>"yes"</code> as the positive class and stratify with respect to the target variable to ensure the same class distribution in each fold.</p>
+<p>Use stratification with respect to the target variable to ensure that each fold in cross-validation maintains the original class distribution.</p>
 <p>Then, compare a classification tree with a random forest with respect to their <strong>accuracy</strong>, <strong>false positive rate (FPR)</strong>, and <strong>true positive rate (TPR)</strong>. As a validation strategy, we will use repeated (5 times) 3-fold stratified cross-validation. We only use 3 folds because we have very few positive labels, and we repeat the cross-validation because the dataset is small.</p>
 <p>Inspect the results and answer whether accuracy is a good metric for this problem.</p>
 <h3 id="Recap:-Stratification">Recap: Stratification<a class="anchor-link" href="#Recap:-Stratification">¶</a></h3><p>Stratification consists of dividing the population into subsets (called strata) within each of which an independent sample is selected. In scikit-learn, you achieve stratification by using <code>StratifiedKFold</code> or <code>RepeatedStratifiedKFold</code> as a resampling strategy, which automatically ensures that each fold maintains the original distribution of the classes.</p>
@@ -7742,7 +7742,8 @@ Accuracy: 0.963076, FPR: 0.003125, TPR: 0.224176
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="2-Selecting-a-suitable-performance-metric">2 Selecting a suitable performance metric<a class="anchor-link" href="#2-Selecting-a-suitable-performance-metric">¶</a></h2><p>When selecting a suitable performance metric, we have to take the properties of the task into consideration. The detection of a spill requires mobilizing an expensive response, and missing an event is equally expensive, causing damage to the environment. Therefore, both class labels are important.</p>
 <p>For that reason, we want to select a measure that is insensitive to changes in the class distribution in the test data. Can you modify the definition of accuracy so that it does not depend on the distribution of the target variable? Compare this new metric with the standard accuracy used in the previous exercise.</p>
-<h3 id="Understanding-the-problem">Understanding the problem<a class="anchor-link" href="#Understanding-the-problem">¶</a></h3><p>The standard accuracy can be expressed as:</p>
+<details><summary>Hint 1:</summary>
+<p>The standard accuracy can be expressed as:</p>
 <p>$$
 ACC = P(\hat{Y}=1|Y=1) \cdot P(Y=1) + P(\hat{Y}=0|Y=0) \cdot P(Y=0)
 $$</p>
@@ -7756,7 +7757,8 @@ $$</p>
 BACC = 0.5 \cdot TPR + 0.5 \cdot TNR = 0.5 \cdot TPR + 0.5 \cdot (1 - FPR)
 $$</p>
 <p>The balanced accuracy is the mean of <strong>sensitivity</strong> (TPR) and <strong>specificity</strong> (TNR).</p>
-<h3 id="Task">Task<a class="anchor-link" href="#Task">¶</a></h3><p>Compute both the <strong>standard accuracy</strong> and <strong>balanced accuracy</strong> for the classification tree and the random forest models using the same repeated stratified cross-validation as before. Compare the results and reflect on how they differ.</p>
+<p>Compute both the <strong>standard accuracy</strong> and <strong>balanced accuracy</strong> for the classification tree and the random forest models using the same repeated stratified cross-validation as before. Compare the results and reflect on how they differ.</p>
+</details>
 <details><summary>Hint 1:</summary>
 In `scikit-learn`, `balanced_accuracy` is already available as a built-in scoring metric, so you can directly include it in your `scoring` dictionary.
 </details>
