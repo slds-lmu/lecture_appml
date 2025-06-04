@@ -7971,7 +7971,6 @@ For each threshold, predict `"good"` if `probs_good &gt;= threshold`, otherwise 
 <span class="n">best_index</span> <span class="o">=</span> <span class="n">scores</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
 <span class="n">best_threshold</span> <span class="o">=</span> <span class="n">thresholds</span><span class="p">[</span><span class="n">best_index</span><span class="p">]</span>
 <span class="n">best_cost</span> <span class="o">=</span> <span class="n">scores</span><span class="p">[</span><span class="n">best_index</span><span class="p">]</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Optimal threshold: </span><span class="si">{</span><span class="n">best_threshold</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> with average cost: </span><span class="si">{</span><span class="n">best_cost</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 <span class="c1"># For comparison, compute confusion metrics for default (0.5) and best threshold.</span>
 <span class="n">pred_default</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">probs_good</span> <span class="o">&gt;=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">"good"</span><span class="p">,</span> <span class="s2">"bad"</span><span class="p">)</span>
@@ -8015,8 +8014,7 @@ For each threshold, predict `"good"` if `probs_good &gt;= threshold`, otherwise 
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Optimal threshold: 0.80 with average cost: 0.4850
-Default threshold (0.5): TPR = 0.9267, FPR = 0.6569
+<pre>Default threshold (0.5): TPR = 0.9267, FPR = 0.6569
 Default threshold (0.5) cost: 0.8533
 Best threshold (0.80): TPR = 0.4397, FPR = 0.0784
 Best threshold (0.80) cost: 0.4850
