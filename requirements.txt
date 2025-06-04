@@ -11,3 +11,4 @@ notebook
 nbconvert
 nbformat
 xgboost
+imbalanced-learn
