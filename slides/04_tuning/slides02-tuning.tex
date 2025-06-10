@@ -3,6 +3,7 @@
 \usepackage{../../style/lmu-lecture}
 % Defines macros and environments
 \input{../../style/common.tex}
+\input{../../latex-math/ml-hpo.tex}
 
 \title{Applied Machine Learning}
 % \author{LMU}
@@ -149,6 +150,92 @@
 \section{Pipelines}
 \begin{frame}{}
     \includepdf[pages={3},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-pipelines.pdf}
+\end{frame}
+
+\section{Practical Considerations}
+
+\begin{frame}{Valid-Test Curves in Hyperparameter Optimization}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.7\linewidth,trim=0 0 540 0, clip]{slides/04_tuning/figure_man/figure_1.pdf}
+        \includegraphics[width=0.7\linewidth,trim=540 0 0 0, clip]{slides/04_tuning/figure_man/figure_1.pdf}
+    \end{figure}
+    Top Left: Idea, Top Right: Meta-Overfitting, Bottom Left: Begin Overtuning, Bottom Right: Severe Overtuning
+\end{frame}
+
+\begin{frame}{Overtuning}
+
+\vfill
+
+\begin{definition}
+Given a trajectory $(\lamv_{1}, \ldots, \lamv_{T})$, we define for each time point $1 \leq t \leq T$:
+\begin{align}
+%
+\text{\emph{overtuning:}} \quad
+\mathrm{ot}_{t}(\lamv_{1}, \ldots, \lamv_{t}, \ldots, \lamv_{T})
+&= \mathrm{test}(\lams_{t}) 
+- \min_{\lams_{t^\prime} \in \{\lams_{1}, \ldots, \lams_{t}\}} \mathrm{test}(\lams_{t^\prime}) \label{eq:overtuning} \\[1ex]
+%
+\text{\emph{meta-overfitting:}} \quad
+\mathrm{of}_{t}(\lamv_{1}, \ldots, \lamv_{t}, \ldots, \lamv_{T})
+&= \mathrm{test}(\lams_{t}) - \widehat{\mathrm{val}}(\lams_{t}) \label{eq:meta-overfitting} [1ex]
+%
+\end{align}
+where $\widehat{\mathrm{test}}(\lams_{t}) \coloneqq \GEh(\inducer, \lams_t, \JJ_{test}, \rho)$ and $\widehat{\mathrm{val}}(\lams_{t}) \coloneqq \GEh(\inducer, \lams_t, \JJ, \rho)$
+\end{definition}
+
+\vfill
+
+Question: is meta-overfitting or overtuning more problematic?
+
+\vfill
+
+\end{frame}
+
+\begin{frame}{Overtuning}
+\vfill
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.9\linewidth]{slides/04_tuning/figure_man/ecdf_all.pdf}
+    \end{figure}
+\vfill
+\end{frame}
+
+\begin{frame}{Remedies against Overtuning}
+
+\vfill
+
+or recipes for better generalization performance
+
+\vfill
+
+    \begin{itemize}
+        \item More data
+        \item Cross-validation, repeated cross-validation
+        \item Bayesian optimization
+    \end{itemize}
+
+\vfill
+    
+\end{frame}
+
+\begin{frame}{Visualization}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.99\linewidth]{slides/04_tuning/figure_man/normalized_test.pdf}
+\end{figure}
+    
+\end{frame}
+
+\begin{frame}{Variance in Resampling}
+
+\vfill
+\begin{figure}
+    \centering
+    \includegraphics[width=0.99\linewidth]{slides/04_tuning/figure_man/biased_selection.png}
+\end{figure}
+\vfill
 \end{frame}
 
 \section{Recap}
