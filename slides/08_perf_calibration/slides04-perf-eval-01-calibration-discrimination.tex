@@ -486,7 +486,7 @@ A well discriminating classifier can have a bad calibration, e.g.
 
 \begin{table}[]
 \centering
-\begin{tabular}{rrrr}
+\begin{tabular}{r|rrr}
 \hline
 Obs. Nr. & truth $Y$ & $\fh_1$ & $\fh_2$ \\
 \hline
@@ -769,7 +769,7 @@ Measures only discrimination as it is based on TPR and FPR and assesses only the
 
 \vspace{0.5em}
 
-Permuting predictions (e.g., randomly assigning different predictions to observations) within each group (here: decile)
+Permuting predictions within each group (e.g., randomly assigning different predictions to observations within each decile)
 
 \begin{itemize}
 \item worsens the ROC curve /  AUC (ranking within each decile changes).
@@ -903,7 +903,7 @@ Monotonic transformations of the predicted probabilities (e.g., $\tfrac{\hat p +
 %\medskip
 %Assume:
 \begin{itemize}
-    \item $N$ instances; $p_i \in [0,1]$ predicted probabilities; $y_i \in \{0,1\}$ true labels
+    \item $N$ instances; $\hat p \in [0,1]$ predicted probabilities; $y \in \{0,1\}$ true labels
     \item Predictions are grouped into $M$ disjoint bins $B_1, \dots, B_M$
     \item $\bar{p}_m$: average predicted probability in bin $B_m$
     \item $\bar{y}_m$: average true label in bin $B_m$
@@ -911,70 +911,142 @@ Monotonic transformations of the predicted probabilities (e.g., $\tfrac{\hat p +
 
 %\medskip
 \textbf{Calibration-only Metrics}: Measure how well predicted probabilities match observed frequencies, independent of class separation.
-\begin{itemize}
-    \item \textbf{Expected Calibration Error (ECE)}: Average bin-wise gap between predicted probabilities and actual frequencies
-    \[
-    \textstyle \mathrm{ECE} = \sum_{m=1}^M \frac{|B_m|}{N} \left| \bar{y}_m - \bar{p}_m \right|
-    \]
+\begin{columns}[c, onlytextwidth]
+    \begin{column}{0.6\textwidth}
+        \begin{itemize}
+    \item \textbf{Expected Calibration Error (ECE)}: Average bin-wise gap between predicted probabilities and actual frequencies $\textstyle \mathrm{ECE} = \sum_{m=1}^M \frac{|B_m|}{N} \left| \bar{y}_m - \bar{p}_m \right|$
 
-    \item \textbf{Maximum Calibration Error (MCE)}: Largest bin-wise gap between predicted probabilities and actual frequencies
-    \[
-    \mathrm{MCE} = \max_{1 \leq m \leq M} \left| \bar{y}_m - \bar{p}_m \right|
-    \]
+    \item \textbf{Maximum Calibration Error (MCE)}: Largest bin-wise gap between predicted probabilities and actual frequencies $\mathrm{MCE} = \max_{1 \leq m \leq M} \left| \bar{y}_m - \bar{p}_m \right|$
 \end{itemize}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+        \centering
+\includegraphics[width=\textwidth]{figure_man/calibplot-2}
+    \end{column}
+\end{columns}
+
 \end{frame}
 
 
 \begin{frame}{Hypothesis Test for Calibration}
 
-\textbf{Goal}: Test if a classifier is really uncalibrated on the given data set
 
-\textbf{Approach}:
+%\textbf{Approach}:
 
 \begin{itemize}
-    \item group instances into $M$ bins based on percentiles of the predicted probabilities for the
+\item \textbf{Goal}: Test if a classifier is really uncalibrated on the given data set
+    \item Group instances into $M$ bins based on percentiles of the predicted probabilities for the
 positive class (equal-frequency binning)
 \item Compute the test statistics of the Hosmer-Lemeshow (HL) test
 
 $$H = \sum_{m=1}^{M} \left( \frac{(O_m^+ - E_m^+)^2}{E_m^+} + \frac{(O_m^- - E_m^-)^2}{E_m^-} \right)$$
 
-where 
-
 \begin{itemize}
     \item $M$ number of bins
-    \item $O_m^+$ observed positives or $O_m^-$ observed negatives per class
-    \item $E_m^+$ expected positives or $E_m^-$ expected negatives
+    \item $O_m^+$ observed positives or $O_m^-$ observed negatives in bin $m$
+    \item $E_m^+ = N_m \times \bar{p}_m$ expected positives 
+    \item $E_m^- = N_m \times (1 - \bar{p}_m)$ expected negatives in bin $m$
+    \item $N_m$ number of obs. and $\bar{p}_m$ average predictions in bin $m$
 \end{itemize}
 
 \item If $H$ is small $\Rightarrow$ observed outcomes match predicted probabilities (well-calibrated model)
 
-\item Follows a Chi-Squared distribution with $M-2$ degrees of freedom. %Calculate p-value on this
+\item Follows a Chi-Squared distribution with $M-2$ degrees of freedom %Calculate p-value on this
 \end{itemize}
     
 \end{frame}
 
+\begin{frame}{HL Test: Revisited Example}
+
+\begin{center}
+\footnotesize 
+\begin{tabular}{r|rrr}
+\hline
+Obs. Nr. & truth $Y$ & $\fh_1$ & $\fh_2$ \\
+\hline
+1 & 1 & 0.9 & 0.9 \\
+2 & 1 & 0.9 & 0.9 \\
+\hline
+3 & 0 & 0.1 & 0.7 \\
+4 & 0 & 0.1 & 0.7 \\
+\hline
+\end{tabular}
+\end{center}
+
+Group obs. by their predicted probability, creating $M=2$ bins for each model.
+
+%\begin{center}
+{%\footnotesize % Use a smaller font for the tables to ensure they fit
+\begin{columns}[T, onlytextwidth]
+    \begin{column}{0.5\textwidth}
+    \centering
+        \textbf{Model $\fh_1$ (Well-calibrated)}
+                \begin{tabular}{@{}c|cc|cc@{}}
+\hline
+            Bin ($\hat{p}$) & $O^+$ & $E^+$ & $O^-$ & $E^-$ \\
+\hline
+            0.9 & 2 & 1.8 & 0 & 0.2 \\
+            0.1 & 0 & 0.2 & 2 & 1.8 \\
+\hline
+        \end{tabular}
+        \begin{align*}
+H =& \left( \tfrac{(0-0.2)^2}{0.2} + \tfrac{(2-1.8)^2}{1.8} \right) + \\ &\left( \tfrac{(2-1.8)^2}{1.8} + \tfrac{(0-0.2)^2}{0.2} \right) = 0.44
+\end{align*}
+
+    \end{column}
+    \begin{column}{0.5\textwidth}
+    \centering
+        \textbf{Model $\fh_2$ (Poorly calibrated)}
+        %\vspace{0.5em}
+        \begin{tabular}{@{}c|cc|cc@{}}
+\hline
+            Bin ($\hat{p}$) & $O^+$ & $E^+$ & $O^-$ & $E^-$ \\
+\hline
+            0.9 & 2 & 1.8 & 0 & 0.2 \\
+            0.7 & 0 & 1.4 & 2 & 0.6 \\
+\hline
+        \end{tabular}
+                \begin{align*}
+H =& \left( \tfrac{(0-1.4)^2}{1.4} + \tfrac{(2-0.6)^2}{0.6} \right) + \\ &\left( \tfrac{(2-1.8)^2}{1.8} + \tfrac{(0-0.2)^2}{0.2} \right) = 4.89
+\end{align*}
+    \end{column}
+\end{columns}
+%\end{center}
+}
+\medskip
+
+\textbf{Conclusion:} H-L statistic for $\fh_2$ is over 10 times larger due to a large discrepancy for the $\hat{p}=0.7$ bin ($O^+=0$ vs. $E^+=1.4$). %drives the high H-value, quantifying its poor calibration.
+
+%\vfill
+%\textbf{Conclusion:} The H-L statistic for $\fh_2$ is more than 10x larger than for $\fh_1$. This confirms our earlier intuition: the large gap between observed ($O^+$) and expected ($E^+$) outcomes for $\fh_2$ indicates poor calibration.
+
+\end{frame}
+
 \begin{frame}{Calibration: Over- and Under-estimates}
 
-\textbf{Example:} Weather forecasting model that predicts the probability of rain.
+\textbf{Example:} Weather model predicting daily rain probabilities
 
 \begin{itemize}
     % \item Weather forecasters began considering calibration in the 1950s. % (Brier, 1950).
     % \item Consider a weather forecasting model that predicts the probability of rain.
 %     \item If the model consistently predicts a 70\% chance of rain, but it actually rains only 10\% of the time when it predicts a 70\% chance, it's poorly calibrated.
-    \item For all instances where a model predicts a '70\% chance of rain', it should actually have rained $\approx$ 70\% of the time (retrospectively).
-    %\item Applicable to both binary and multi-class classification.
-    \item In general, predicted probabilities for any event happening should (on average) match their observed empirical probabilities.\\
-    $\Rightarrow$ Ensures predictions can be interpreted as actual risk/probabilities.
+\item Calibration implies: predicted probabilities should (on average) match their observed frequencies \\
+    $\Rightarrow$ E.g., `70\% chance of rain' $\rightarrow$ should rain $\approx 70\%$ of the time
+    \\
+    $\Rightarrow$ Ensures predictions can be interpreted as actual risk/probabilities
     \item Consider the following predictions of a (good performing) classifier:
+    
+    % \item For all instances where a model predicts a '70\% chance of rain', it should actually have rained $\approx$ 70\% of the time (retrospectively).
+    % %\item Applicable to both binary and multi-class classification.
+    % \item In general, predicted probabilities for any event happening should (on average) match their observed empirical probabilities.\\
+    % $\Rightarrow$ Ensures predictions can be interpreted as actual risk/probabilities.
+    % \item Consider the following predictions of a (good performing) classifier:
 \end{itemize}
-
-
 \begin{columns}[c, onlytextwidth]
-    \begin{column}{0.3\textwidth}
-        \begin{center}
-        \small
+    \begin{column}{0.15\textwidth}
+        \centering
+        
 \begin{tabular}{rr}
-\hline
 $\hat{p}$ & $y$ \\
 \hline
  0.1 & 0 \\
@@ -990,14 +1062,13 @@ $\hat{p}$ & $y$ \\
  0.9 & 1 \\
 \hline
 \end{tabular}
-\end{center}
     \end{column}
-        \begin{column}{0.7\textwidth}
+        \begin{column}{0.85\textwidth}
 \begin{itemize}
-    \item '10\% chance of rain' was a slight over-estimate ($\bar{y}=0/2=0\%$).
-    \item '40\% chance of rain' was a slight under-estimate ($\bar{y}=1/2=50\%$).
-    \item '70\% chance of rain' was a slight over-estimate ($\bar{y}=2/3=67\%$).
-    \item '90\% chance of rain' was a slight under-estimate ($\bar{y}=1/1=100\%$).
+    \item `10\% chance of rain' was a slight over-estimate ($\bar{y}=0/2=0\%$).
+    \item `40\% chance of rain' was a slight under-estimate ($\bar{y}=1/2=50\%$).
+    \item `70\% chance of rain' was a slight over-estimate ($\bar{y}=2/3=67\%$).
+    \item `90\% chance of rain' was a slight under-estimate ($\bar{y}=1/1=100\%$).
 \end{itemize}
     \end{column}
 \end{columns}
@@ -1010,12 +1081,15 @@ $\hat{p}$ & $y$ \\
 \begin{frame}{Calibration: Over- and Under-estimates}
 %TODO remove the tabular example and give the graphics from this paper https://link.springer.com/article/10.1007/s10994-023-06336-7
 
-\includegraphics{figure_man/OverAndUnderConfidence.png}
-\citebutton{Filho et al. (2023).}{https://link.springer.com/article/10.1007/s10994-023-06336-7/figures/3}
+\centerline{\includegraphics{figure_man/OverAndUnderConfidence.png}}
+\centerline{\citebutton{Filho et al. (2023)}{https://link.springer.com/article/10.1007/s10994-023-06336-7/figures/3}}
 
 \begin{itemize}
-    \item \textbf{Underconfidence}: the dots should move outwards on the x-axis (i.e. the classifier should be more confident)
-    \item \textbf{Overconfidence}: the dots should move inwards on the x-axis (i.e. the classifier should be less confident)
+    \item \textbf{Underconfidence}: 
+    Predicted probabilities are too close to 0.5 and need to be expanded (classifier is generally under-estimating)
+    %dots should move outwards on the x-axis (i.e., classifier should be more confident)
+    \item \textbf{Overconfidence}: Predicted probabilities are too close to 0 or 1 and need to be compressed towards the middle (classifier is over-estimating)
+    %dots should move inwards on the x-axis (i.e,. classifier should be less confident)
 \end{itemize}
 
 %\textbf{Example:} Weather forecasting model that predicts the probability of rain.
@@ -1074,7 +1148,7 @@ $\hat{p}$ & $y$ \\
 \textbf{Goal}: Calibration Techniques
 
 \begin{itemize}
-  \item Calibrating probabilities involves \textbf{post-processing} predictions to improve their reliability.
+  \item Calibrating probabilities involves \textbf{post-processing} predictions. % to improve their reliability.
   %Calibrating probabilities means to \textbf{post-process} the predictions.% to improve the estimates and obtain more reliable probabilities.
   %\item Two popular calibration methods are the \textbf{Platt’s scaling} (parametric) and the \textbf{isotonic regression} (non-parametric).
   %\item A well calibrated classifier should classify samples such that among these samples with a predicted probability of 0.7, approximately 70\% actually belong to the positive class.
@@ -1184,7 +1258,7 @@ $\hat{p}$ & $y$ \\
 
 \begin{frame}[t]
 	\frametitle{Calibrating Probabilities}
-	\small
+	%\small
 	\begin{itemize}
 % %		
 % 		\item Consider binary classification with a probabilistic score  classifier
@@ -1213,7 +1287,7 @@ $\hat{p}$ & $y$ \\
 \begin{frame}[t]
 	\frametitle{Empirical binning}
 	% https://link.springer.com/article/10.1007/s10994-023-06336-7
-\emph{Empirical binning} partitions the scores \( s \in \mathbb{S}\) into bins \( B_1, \ldots, B_M \) and defines a (piecewise constant) calibration function \( C \) by:
+\emph{Empirical binning} partitions predicted scores \( s \in \mathbb{S}\) into bins \( B_1, \ldots, B_M \) and defines a (piecewise constant) calibration function \( C \) by:
 
 \[ 
 C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[ s^{(i)}  \in B_{J(s)}] \cdot y^{(i)}}{|B_{J(s)}|}, \, \text{ where }
@@ -1251,7 +1325,7 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[ s^{(i)}  \in B_{J(s)}] \c
 
   \begin{itemize}
     \item $\theta_0$ is the intercept, and $\theta_1$ the slope estimated by the logistic regression
-    \item requires: unbounded outputs before sigmoid/ softmax, good for Neuronal Networks, SVM, boosted trees
+    \item Requires: unbounded outputs before sigmoid/softmax, good for Neural Networks, SVM, boosted trees
 \end{itemize}
   \vfill\centering
 \includegraphics[width=0.8\textwidth]{figure/calibration_methods2.pdf}
@@ -1259,8 +1333,8 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[ s^{(i)}  \in B_{J(s)}] \c
 
 
 \begin{frame}[t]
-	\frametitle{Isotonic regression}
-    \citebutton{Kull et al., 2017 }{http://proceedings.mlr.press/v54/kull17a/kull17a.pdf}
+	\frametitle{Isotonic regression \citebutton{Kull et al., 2017 }{http://proceedings.mlr.press/v54/kull17a/kull17a.pdf}}
+    
     %TODO requires bounded or monotonic relationship with probabilities
     %TODO reference http://proceedings.mlr.press/v54/kull17a/kull17a.pdf
 	
@@ -1368,67 +1442,147 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[ s^{(i)}  \in B_{J(s)}] \c
 %Tuning prior calibration leads to better results than tuning the calibrated learner
 %CV calibration leads to better results than holdout calibration
 
-\begin{frame}{Calibration Workflow}
 
-\citebutton{Eskandar, 2023}{https://medium.com/@eskandar.sahel/applying-calibration-techniques-to-improve-probabilistic-predictions-in-machine-learning-models-c175c2e38ffc}
 
-\textbf{Question}: How to split the data for training the model and training the calibrator, so that we don't overfit the calibrator?
 
-\textbf{Given Situation}: We have already settled on a specific inducer and now want to train the model and calibrator on all our data for deployment.
+\begin{frame}{How to Split Data for Calibration? \citebutton{Eskandar, 2023}{https://medium.com/@eskandar.sahel/applying-calibration-techniques-to-improve-probabilistic-predictions-in-machine-learning-models-c175c2e38ffc}}
+\textbf{Problem:} How to avoid overfitting the calibrator during training?
 
-\textbf{Simplest Solution}: Hold out split.
-
-\includegraphics[width = \linewidth]{figure_man/CalibWorkflow1.png}
-
-\textbf{But}: We want to use ALL the data for training the model and calibrator \\ $\Rightarrow$ \textbf{Cross-validation}
-
+\vspace{0.5em}
+\textbf{Deployment scenario:} 
 \begin{itemize}
-    \item CV per fold
-    \item Pooled CV
+  \item Inducer (ML algorithm \& hyperparameters) already selected
+  \item Want to calibrate predictions of resulting model using all available data
 \end{itemize}
+\pause
+
+\vspace{0.5em}
+\textbf{Naive solution:} Use hold-out calibration set
+
+\includegraphics[width=\linewidth]{figure_man/CalibWorkflow1.png}
+
+\vspace{0.5em}
+\textbf{Limitation:} Does not utilize full dataset for training model and calibrator
+
+\vspace{0.5em}
+\visible{\textbf{Idea:} Use $k$-fold CV to use available data more efficiently}
+\end{frame}
+
+
+\begin{frame}{CV for Calibration: Per-Fold Strategy}
+%\textbf{Per-fold strategy:}
+\begin{itemize}
+  \item Fit model and calibrator on each CV fold separately
+  \item Use fold-wise models to generate (uncalibrated) predictions and fold-wise calibrators to calibrate them
+  \item Average fold-wise calibrated predictions
+\end{itemize}
+
+{\centering
+\includegraphics[width=0.9\linewidth]{figure_man/CalibWorkflow2.png}}
+
+\pause
+
+\textbf{Drawback:} Computationally inefficient (requires training $k$ models and $k$ calibrators); none are trained on full data $\Rightarrow$ pessimistic bias in calibration.
+
+\visible{\textbf{Alternative:} CV with pooled out-of-fold (OOF) predictions}
+\end{frame}
+
+
+\begin{frame}{CV for Calibration: Pooled OOF Strategy}
+%\textbf{Steps:}
+\begin{enumerate}
+  \item Fit final model on entire dataset
+  \item Perform CV and generate out-of-fold predictions from CV models
+  \item Train calibrator on pooled OOF CV predictions (uses all observations)
+  \item Deploy: predict with final model, calibrate with pooled calibrator\\
+  \item[$\Rightarrow$] \textbf{Advantage:} One final model + one calibrator, both trained on all data
+\end{enumerate}
+
+\vspace{1em}
+\centering
+\includegraphics[width=0.75\linewidth]{figure_man/CalibWorkflow3.png}
 
 \end{frame}
 
 
-\begin{frame}{Calibration Workflow}
-\textbf{Option A}: Cross-validation per fold
-\includegraphics[width = \linewidth]{figure_man/CalibWorkflow2.png}
+\begin{frame}{When Evaluation is Needed}
+\textbf{Setting:} We aim to tune hyperparameters or estimate performance, requiring an independent test set.
+%Performance metrics or hyperparameter tuning required
 
-Disadvantage:
+\vspace{0.5em}
+\textbf{Option 1:} Simple hold-out split (Train set, Calibration set, Test set)
+
+\vspace{0.5em}
+\textbf{Option 2:} Nested Cross-Validation
 \begin{itemize}
-    \item we fit multiple models and calibrators, which takes long time
-    \item non of the calibrators is fitted on all data
+  \item Outer loop: Evaluate generalization performance
+  \item Inner loop: Train model \& calibrator (per-fold or pooled OOF strategy) 
 \end{itemize}
 
-$\Rightarrow$ Pooled CV
+\centering
+\includegraphics[width=0.7\linewidth]{figure_man/CalibrationCVFold.png}
 \end{frame}
 
-\begin{frame}{Calibration Workflow}
-\textbf{Option B}: Cross-validation poolded
-\includegraphics[width = 0.7 \linewidth]{figure_man/CalibWorkflow3.png}
-\begin{itemize}
-    \item fit multiple models on CV folds
-    \item fit calibrator on pooled out-of-fold predictions and data
-    \item fit one final model on all data
-    \item put new data point through final model and calibrator (only one model and calibrator, fitted on all data)
-\end{itemize}
-\end{frame}
+% \begin{frame}{Calibration Workflow \citebutton{Eskandar, 2023}{https://medium.com/@eskandar.sahel/applying-calibration-techniques-to-improve-probabilistic-predictions-in-machine-learning-models-c175c2e38ffc}}
 
-\begin{frame}{Calibration Workflow}
+% \textbf{Question}: How to split the data for training the model and training the calibrator, so that we don't overfit the calibrator?
 
-\textbf{Question}: How to split the data for training the model and training the calibrator, so that we don't overfit the calibrator?
+% \textbf{Given Situation}: We have already settled on a specific inducer and now want to train the model and calibrator on all our data for deployment.
 
-\textbf{New Situation}: We want to tune or compute performance metrics, i.e. we also need untouched test data.
+% \textbf{Simplest Solution}: Hold out split.
 
-\textbf{Solution}:
-\begin{itemize}
-    \item Simple: Hold-out-split in train, calibrate and test (three sets)
-    \item Better: Nested Cross-validation, i.e. per-fold:
-\end{itemize}
+% \includegraphics[width = \linewidth]{figure_man/CalibWorkflow1.png}
 
-\includegraphics[width = 0.7 \linewidth]{figure_man/CalibrationCVFold.png}
+% \textbf{But}: We want to use ALL the data for training the model and calibrator \\ $\Rightarrow$ \textbf{Cross-validation}
+
+% \begin{itemize}
+%     \item CV per fold
+%     \item Pooled CV
+% \end{itemize}
+
+% \end{frame}
+
+
+% \begin{frame}{Calibration Workflow}
+% \textbf{Option A}: Cross-validation per fold
+% \includegraphics[width = \linewidth]{figure_man/CalibWorkflow2.png}
+
+% Disadvantage:
+% \begin{itemize}
+%     \item we fit multiple models and calibrators, which takes a long time
+%     \item none of the calibrators is fitted on all data
+% \end{itemize}
+
+% $\Rightarrow$ Pooled CV
+% \end{frame}
+
+% \begin{frame}{Calibration Workflow}
+% \textbf{Option B}: Cross-validation pooled
+% \includegraphics[width = 0.7 \linewidth]{figure_man/CalibWorkflow3.png}
+% \begin{itemize}
+%     \item Fit final model on all data
+%     \item Fit multiple models on CV folds
+%     \item Fit calibrator using pooled out-of-fold predictions (uses all observations) %and data
+%     \item Pass new data point through final model and calibrator\\
+%     $\rightarrow$ Only one model and calibrator, fitted on all data
+% \end{itemize}
+% \end{frame}
+
+% \begin{frame}{Calibration Workflow}
+
+% \textbf{Question}: How to split the data for training the model and training the calibrator, so that we don't overfit the calibrator?
+
+% \textbf{New Situation}: We want to tune or compute performance metrics, i.e. we also need untouched test data.
+
+% \textbf{Solution}:
+% \begin{itemize}
+%     \item Simple: Hold-out-split in train, calibrate and test (three sets)
+%     \item Better: Nested Cross-validation, i.e. per-fold:
+% \end{itemize}
+
+% \includegraphics[width = 0.7 \linewidth]{figure_man/CalibrationCVFold.png}
     
-\end{frame}
+% \end{frame}
 
 %reference for calibration data split:
 %- https://onlinelibrary.wiley.com/doi/full/10.1002/sim.9921 2 sets hold out
