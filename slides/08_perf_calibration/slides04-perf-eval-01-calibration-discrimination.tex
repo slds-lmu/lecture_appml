@@ -1256,33 +1256,53 @@ $\hat{p}$ & $y$ \\
 % \end{itemize}
 % \end{frame}
 
+% \begin{frame}[t]
+% 	\frametitle{Calibrating Probabilities}
+% 	%\small
+% 	\begin{itemize}
+% % %		
+% % 		\item Consider binary classification with a probabilistic score  classifier
+% % %		
+% % 		$$\fx = 2 \cdot \mathds{1}_{[ s(\xv) \ge c]} -1,$$
+% % %		
+% % 		leading to the prediction random variable $\yh = f(\xv).$ Let $\mathbf{S}=s(\xv)$ be the score random variable. 
+% % %		
+% % 		\item $f$ is calibrated iff $P(y=1~|~\mathbf{S}=s) = s$ for all $s\in [0,1].$
+% %		
+% 		\item Let $s(\xv)$ be the predicted (uncalibrated) score/probability of instance $\xv$ and $\mathbb{S}$ the set of possible scores produced by the classifier.
+%         \item Different \emph{post-processing} methods have been proposed for the purpose of calibration, i.e., to construct a \emph{calibration function} 
+% %		
+% 		$$C: \, \mathbb{S} \to [0,1], $$
+% 		such that $C(s(\xv))$ is well-calibrated.
+		
+% 		\item For learning a calibration function $C$, a set of \emph{calibration data} is used:
+% 		$$
+% 		\mathcal{D}_{cal} = \big\{ (s^{(1)}, y^{(1)}) , \ldots , (s^{(n)}, y^{(n)}) \big\} \subset \mathbb{S} \times \{ 0 , 1 \}
+% 		$$ 
+% 		\item This data should be different from the training data used to learn the scoring classifier. Otherwise, there is a risk of introducing a bias. 
+		
+% 	\end{itemize}
+% \end{frame}
+
 \begin{frame}[t]
-	\frametitle{Calibrating Probabilities}
-	%\small
-	\begin{itemize}
-% %		
-% 		\item Consider binary classification with a probabilistic score  classifier
-% %		
-% 		$$\fx = 2 \cdot \mathds{1}_{[ s(\xv) \ge c]} -1,$$
-% %		
-% 		leading to the prediction random variable $\yh = f(\xv).$ Let $\mathbf{S}=s(\xv)$ be the score random variable. 
-% %		
-% 		\item $f$ is calibrated iff $P(y=1~|~\mathbf{S}=s) = s$ for all $s\in [0,1].$
-%		
-		\item Let $s(\xv)$ be the predicted (uncalibrated) score/probability of instance $\xv$ and $\mathbb{S}$ the set of possible scores produced by the classifier.
-        \item Different \emph{post-processing} methods have been proposed for the purpose of calibration, i.e., to construct a \emph{calibration function} 
-%		
-		$$C: \, \mathbb{S} \to [0,1], $$
-		such that $C(s(\xv))$ is well-calibrated.
-		
-		\item For learning a calibration function $C$, a set of \emph{calibration data} is used:
-		$$
-		\mathcal{D}_{cal} = \big\{ (s^{(1)}, y^{(1)}) , \ldots , (s^{(n)}, y^{(n)}) \big\} \subset \mathbb{S} \times \{ 0 , 1 \}
-		$$ 
-		\item This data should be different from the training data used to learn the scoring classifier. Otherwise, there is a risk of introducing a bias. 
-		
-	\end{itemize}
+  \frametitle{Calibrating Probabilities}
+
+  \begin{itemize}
+    \item Let $s(\xv)$ denote the predicted (uncalibrated) score for input $\xv$
+    \item Define $\mathbb{S}$ as the set of possible scores produced by the classifier
+    \item Goal: Construct a \emph{calibration function} $C$ that maps scores $s(\xv) \in \mathbb{S}$ to calibrated probabilities $C(s(\xv)) \in [0,1]$:
+    \[
+      C: \mathbb{S} \to [0, 1], \text{such that } C(s(\xv)) \approx P(y = 1 \mid s(\xv)) \text{ (well-calibrated)}
+    \]
+    \item To learn calibrator function $C$, use a separate \emph{calibration dataset}:
+    \[
+      \mathcal{D}_{\text{cal}} = \{ (s^{(i)}, y^{(i)}) \}_{i=1}^{n} \subset \mathbb{S} \times \{0, 1\}
+    \]
+    \item Important: $\mathcal{D}_{\text{cal}}$ must be disjoint from the training data used to learn the scoring classifier to avoid bias in estimated calibration
+  \end{itemize}
+
 \end{frame}
+
 
 \begin{frame}[t]
 	\frametitle{Empirical binning}
@@ -1383,17 +1403,18 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[ s^{(i)}  \in B_{J(s)}] \c
 \begin{frame}[t]
 	\frametitle{Isotonic Regression - PAVA}
 	 PAVA iterates the following steps (simplified to avoid notational overload):
-		
-		
+
 		\begin{itemize}
-			\item[(1)] Find first violating adjacent bins $B_i$ and $B_{i+1}$ such that $C(B_i) > C(B_{i+1})$.
-			\item[(2)] Merge $B_i$ and $B_{i+1}$ into a new bin $B$. Stop if no violation occured.
-			\item[(3)] If $C(B) < C(B_{i-1})$ for the left neighbor bin $B_{i-1}$, merge also these bins and continue until no more violations are found (monotonicity).
-			\item[(4)] Continue with (1).
+        \setlength\itemsep{0pt} % or 0pt
+			\item[(1)]<1-> Find first violating adjacent bins $B_i$ and $B_{i+1}$ such that $C(B_i) > C(B_{i+1})$.
+			\item[(2)]<1-> Merge $B_i$ and $B_{i+1}$ into a new bin $B$. Stop if no violation occured.
+			\item[(3)]<2-> If $C(B) < C(B_{i-1})$ for the left neighbor bin $B_{i-1}$, merge also these bins and continue until no more violations are found (monotonicity).
+			\item[(4)]<2-> Continue with \textbf{(1)}.
 		\end{itemize}
 	
 	\begin{center}
-		\includegraphics[width=0.65\textwidth]{figure/pic-pava}
+	\includegraphics<1>[width=0.6\textwidth, trim=0px 200px 0px 0px, clip]{figure/pic-pava}
+        \includegraphics<2->[width=0.6\textwidth, trim=0px 0px 0px 0px, clip]{figure/pic-pava}
 	\end{center}
 \end{frame}
 
@@ -1506,21 +1527,21 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[ s^{(i)}  \in B_{J(s)}] \c
 
 
 \begin{frame}{When Evaluation is Needed}
-\textbf{Setting:} We aim to tune hyperparameters or estimate performance, requiring an independent test set.
+\textbf{Setting:} When the aim is to tune hyperparameters or estimate performance, we require an independent test set (besides the train and calibration set).
 %Performance metrics or hyperparameter tuning required
 
 \vspace{0.5em}
-\textbf{Option 1:} Simple hold-out split (Train set, Calibration set, Test set)
+\textbf{Option 1:} Simple hold-out split (train set, calibration set, test set)
 
 \vspace{0.5em}
 \textbf{Option 2:} Nested Cross-Validation
 \begin{itemize}
-  \item Outer loop: Evaluate generalization performance
   \item Inner loop: Train model \& calibrator (per-fold or pooled OOF strategy) 
+  \item Outer loop: Evaluate generalization performance
 \end{itemize}
 
 \centering
-\includegraphics[width=0.7\linewidth]{figure_man/CalibrationCVFold.png}
+\includegraphics[width=0.6\linewidth]{figure_man/CalibrationCVPooled.png}
 \end{frame}
 
 % \begin{frame}{Calibration Workflow \citebutton{Eskandar, 2023}{https://medium.com/@eskandar.sahel/applying-calibration-techniques-to-improve-probabilistic-predictions-in-machine-learning-models-c175c2e38ffc}}
