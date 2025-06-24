@@ -11,3 +11,5 @@ notebook
 nbconvert
 nbformat
 cma
+xgboost
+imbalanced-learn
