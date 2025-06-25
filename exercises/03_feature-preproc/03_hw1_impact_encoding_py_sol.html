@@ -3,7 +3,7 @@
 <html lang="en">
 <head><meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>04_2_feature_selection_py</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>03_hw1_impact_encoding_py</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <style type="text/css">
     pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -7517,7 +7517,7 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="Applied-Machine-Learning:-In-class-Exercise-04-2">Applied Machine Learning: In-class Exercise 04-2<a class="anchor-link" href="#Applied-Machine-Learning:-In-class-Exercise-04-2">¶</a></h1>
+<h1 id="Applied-Machine-Learning:-Homework-Exercise-03-1">Applied Machine Learning: Homework Exercise 03-1<a class="anchor-link" href="#Applied-Machine-Learning:-Homework-Exercise-03-1">¶</a></h1>
 </div>
 </div>
 </div>
@@ -7528,66 +7528,8 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Goal">Goal<a class="anchor-link" href="#Goal">¶</a></h2><p>After this exercise, you should understand and be able to perform feature selection using wrapper methods with <code>scikit-learn</code>. You should also be able to integrate various performance measures and calculate the generalization error.</p>
-<h2 id="Wrapper-Methods">Wrapper Methods<a class="anchor-link" href="#Wrapper-Methods">¶</a></h2><p>In addition to filtering, wrapper methods are another variant of feature selection. While filtering methods apply predefined criteria directly to feature values, wrapper methods evaluate different subsets of features by repeatedly training and validating a predictive model. Since models need to be repeatedly refitted, this method can be computationally expensive.</p>
-<p>For wrapper methods in Python, we will primarily use the classes from <code>sklearn.feature_selection</code>, e.g., <code>SequentialFeatureSelector</code>. This approach incrementally adds or removes features based on model performance.</p>
-<h2 id="Prerequisites">Prerequisites<a class="anchor-link" href="#Prerequisites">¶</a></h2><p>We first load the necessary Python libraries and set a fixed random seed for reproducibility.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_openml</span>
-
-
-<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">2025</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>In this exercise, we use the <code>credit-g</code> dataset (German Credit Data) and a random forest classifier (<code>RandomForestClassifier</code>).</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="s1">'credit-g'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="1-Basic-Application">1 Basic Application<a class="anchor-link" href="#1-Basic-Application">¶</a></h2><h3 id="1.1-Create-the-Framework">1.1 Create the Framework<a class="anchor-link" href="#1.1-Create-the-Framework">¶</a></h3><p>Create a feature selection setup using <code>SequentialFeatureSelector</code>. The feature selection should use 3-fold cross-validation, classification accuracy as the scoring metric, and sequentially select the best-performing subset of features from the following: <code>"age"</code>, <code>"credit_amount"</code>, <code>"credit_history"</code>, and <code>"duration"</code>.</p>
-<p>We first provide code for data preprocessing as follows:</p>
+<h2 id="Goal">Goal<a class="anchor-link" href="#Goal">¶</a></h2><p>Apply what you have learned about using pipelines for efficient pre-processing and model training on a regression problem.</p>
+<h2 id="House-Prices-in-King-county">House Prices in King county<a class="anchor-link" href="#House-Prices-in-King-county">¶</a></h2><p>In this exercise, we want to model house sale prices in King county in the state of Washington, USA.</p>
 </div>
 </div>
 </div>
@@ -7596,46 +7538,240 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">OrdinalEncoder</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_openml</span>
 
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">124</span><span class="p">)</span>
 
-<span class="c1"># For simplification, select only the desired features</span>
-<span class="n">selected_features</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"age"</span><span class="p">,</span> <span class="s2">"credit_amount"</span><span class="p">,</span> <span class="s2">"credit_history"</span><span class="p">,</span> <span class="s2">"duration"</span><span class="p">]</span>
-<span class="n">X_four_feats</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">selected_features</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="n">data_id</span><span class="o">=</span><span class="mi">42092</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="n">categorical_features</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"credit_history"</span><span class="p">,</span> <span class="p">]</span>
-<span class="n">numerical_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">feat</span> <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">selected_features</span> <span class="k">if</span> <span class="n">feat</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">categorical_features</span><span class="p">]</span>
+<span class="n">X</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[1]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
 
-<span class="c1"># This feature is ordinal, so we encode it using OrdinalEncoder</span>
-<span class="n">unique_credit_history</span> <span class="o">=</span> <span class="n">X_four_feats</span><span class="p">[</span><span class="s1">'credit_history'</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unique credit history values: </span><span class="si">{</span><span class="n">unique_credit_history</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
 
-<span class="c1"># Define the categories based on actual values in the dataset</span>
-<span class="n">credit_history_categories</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">'critical/other existing credit'</span><span class="p">,</span>  <span class="c1"># Most risky - 0</span>
-    <span class="s1">'delayed previously'</span><span class="p">,</span>              <span class="c1"># Somewhat risky - 1</span>
-    <span class="s1">'existing paid'</span><span class="p">,</span>                   <span class="c1"># Moderate - 2</span>
-    <span class="s1">'no credits/all paid'</span><span class="p">,</span>             <span class="c1"># Good - 3</span>
-    <span class="s1">'all paid'</span>                         <span class="c1"># Best - 4</span>
-<span class="p">]</span>
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>date</th>
+<th>bedrooms</th>
+<th>bathrooms</th>
+<th>sqft_living</th>
+<th>sqft_lot</th>
+<th>floors</th>
+<th>waterfront</th>
+<th>view</th>
+<th>condition</th>
+<th>grade</th>
+<th>sqft_above</th>
+<th>sqft_basement</th>
+<th>yr_built</th>
+<th>yr_renovated</th>
+<th>zipcode</th>
+<th>lat</th>
+<th>long</th>
+<th>sqft_living15</th>
+<th>sqft_lot15</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>20141013T000000</td>
+<td>3</td>
+<td>1.00</td>
+<td>1180</td>
+<td>5650</td>
+<td>1.0</td>
+<td>0</td>
+<td>0</td>
+<td>3</td>
+<td>7</td>
+<td>1180</td>
+<td>0</td>
+<td>1955</td>
+<td>0</td>
+<td>98178</td>
+<td>47.5112</td>
+<td>-122.257</td>
+<td>1340</td>
+<td>5650</td>
+</tr>
+<tr>
+<th>1</th>
+<td>20141209T000000</td>
+<td>3</td>
+<td>2.25</td>
+<td>2570</td>
+<td>7242</td>
+<td>2.0</td>
+<td>0</td>
+<td>0</td>
+<td>3</td>
+<td>7</td>
+<td>2170</td>
+<td>400</td>
+<td>1951</td>
+<td>1991</td>
+<td>98125</td>
+<td>47.7210</td>
+<td>-122.319</td>
+<td>1690</td>
+<td>7639</td>
+</tr>
+<tr>
+<th>2</th>
+<td>20150225T000000</td>
+<td>2</td>
+<td>1.00</td>
+<td>770</td>
+<td>10000</td>
+<td>1.0</td>
+<td>0</td>
+<td>0</td>
+<td>3</td>
+<td>6</td>
+<td>770</td>
+<td>0</td>
+<td>1933</td>
+<td>0</td>
+<td>98028</td>
+<td>47.7379</td>
+<td>-122.233</td>
+<td>2720</td>
+<td>8062</td>
+</tr>
+<tr>
+<th>3</th>
+<td>20141209T000000</td>
+<td>4</td>
+<td>3.00</td>
+<td>1960</td>
+<td>5000</td>
+<td>1.0</td>
+<td>0</td>
+<td>0</td>
+<td>5</td>
+<td>7</td>
+<td>1050</td>
+<td>910</td>
+<td>1965</td>
+<td>0</td>
+<td>98136</td>
+<td>47.5208</td>
+<td>-122.393</td>
+<td>1360</td>
+<td>5000</td>
+</tr>
+<tr>
+<th>4</th>
+<td>20150218T000000</td>
+<td>3</td>
+<td>2.00</td>
+<td>1680</td>
+<td>8080</td>
+<td>1.0</td>
+<td>0</td>
+<td>0</td>
+<td>3</td>
+<td>8</td>
+<td>1680</td>
+<td>0</td>
+<td>1987</td>
+<td>0</td>
+<td>98074</td>
+<td>47.6168</td>
+<td>-122.045</td>
+<td>1800</td>
+<td>7503</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>We do some simple feature pre-processing first:</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># To be consistent with mlr3data package, we need the following steps [1-4]. </span>
+<span class="c1"># These steps are not shown in the R solution, as they are done in the mlr3data.</span>
+<span class="c1"># For details please see https://github.com/mlr-org/mlr3data/blob/main/R/kc_housing.R</span>
 
-<span class="n">ordinal_encoder</span> <span class="o">=</span> <span class="n">OrdinalEncoder</span><span class="p">(</span>
-    <span class="n">categories</span><span class="o">=</span><span class="p">[</span><span class="n">credit_history_categories</span><span class="p">],</span>
-    <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span>
-<span class="p">)</span>
+<span class="c1"># 1. Convert dates from strings to datetime</span>
+<span class="n">X</span><span class="p">[</span><span class="s1">'date'</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="s1">'date'</span><span class="p">])</span>
 
-<span class="n">X_cat</span> <span class="o">=</span> <span class="n">X_four_feats</span><span class="p">[</span><span class="n">categorical_features</span><span class="p">]</span>
-<span class="n">X_cat_encoded</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-    <span class="n">ordinal_encoder</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_cat</span><span class="p">),</span>
-    <span class="n">columns</span><span class="o">=</span><span class="n">categorical_features</span><span class="p">,</span>
-    <span class="n">index</span><span class="o">=</span><span class="n">X_cat</span><span class="o">.</span><span class="n">index</span>
-<span class="p">)</span>
+<span class="c1"># 2. Replace 0 values with NA in yr_renovated</span>
+<span class="n">X</span><span class="p">[</span><span class="s1">'yr_renovated'</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="s1">'yr_renovated'</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
 
-<span class="n">X_num</span> <span class="o">=</span> <span class="n">X_four_feats</span><span class="p">[</span><span class="n">numerical_features</span><span class="p">]</span>
-<span class="n">X_four_feats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">X_num</span><span class="p">,</span> <span class="n">X_cat_encoded</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="c1"># 3. Replace 0 values with NA in sqft_basement</span>
+<span class="n">X</span><span class="p">[</span><span class="s1">'sqft_basement'</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="s1">'sqft_basement'</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+<span class="c1"># 4. Convert waterfront to category.</span>
+<span class="n">X</span><span class="p">[</span><span class="s1">'waterfront'</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="s1">'waterfront'</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">'category'</span><span class="p">)</span>
+
+<span class="c1"># Next, we do the feature preprocessing</span>
+
+<span class="c1"># Convert zipcode to category</span>
+<span class="n">X</span><span class="p">[</span><span class="s1">'zipcode'</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="s1">'zipcode'</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">'category'</span><span class="p">)</span>
+
+<span class="c1"># Transform date to numeric variable (days since earliest date)</span>
+<span class="n">min_date</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="s1">'date'</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+<span class="n">X</span><span class="p">[</span><span class="s1">'date'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="s1">'date'</span><span class="p">]</span> <span class="o">-</span> <span class="n">min_date</span><span class="p">)</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">days</span>
+
+<span class="c1"># Scale the target variable by dividing by 1000</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span>
+
+<span class="c1"># Delete columns containing NAs</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">X</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Print information about the DataFrame</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"DataFrame info:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">info</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
@@ -7648,8 +7784,32 @@ a.anchor-link {
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Unique credit history values: ['critical/other existing credit', 'existing paid', 'delayed previously', 'no credits/all paid', 'all paid']
-Categories (5, object): ['all paid', 'critical/other existing credit', 'delayed previously', 'existing paid', 'no credits/all paid']
+<pre>DataFrame info:
+&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 21613 entries, 0 to 21612
+Data columns (total 17 columns):
+ #   Column         Non-Null Count  Dtype   
+---  ------         --------------  -----   
+ 0   date           21613 non-null  int64   
+ 1   bedrooms       21613 non-null  int64   
+ 2   bathrooms      21613 non-null  float64 
+ 3   sqft_living    21613 non-null  int64   
+ 4   sqft_lot       21613 non-null  int64   
+ 5   floors         21613 non-null  float64 
+ 6   waterfront     21613 non-null  category
+ 7   view           21613 non-null  int64   
+ 8   condition      21613 non-null  int64   
+ 9   grade          21613 non-null  int64   
+ 10  sqft_above     21613 non-null  int64   
+ 11  yr_built       21613 non-null  int64   
+ 12  zipcode        21613 non-null  category
+ 13  lat            21613 non-null  float64 
+ 14  long           21613 non-null  float64 
+ 15  sqft_living15  21613 non-null  int64   
+ 16  sqft_lot15     21613 non-null  int64   
+dtypes: category(2), float64(4), int64(11)
+memory usage: 2.5 MB
+None
 </pre>
 </div>
 </div>
@@ -7662,286 +7822,7 @@ Categories (5, object): ['all paid', 'critical/other existing credit', 'delayed 
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Now please write your code to solve the given task.</p>
-<details><summary>Hint 1:</summary> 
-Use `SequentialFeatureSelector()` from `sklearn.feature_selection` and set the parameter `cv=3`. 
-</details>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="1.2-Start-the-Feature-Selection">1.2 Start the Feature Selection<a class="anchor-link" href="#1.2-Start-the-Feature-Selection">¶</a></h2><p>Start the feature selection by fitting the selector (<code>SequentialFeatureSelector</code>) to your reduced feature set (<code>X_four_feats</code>) and target (<code>y</code>). Then, identify the subset of selected features based on classification accuracy.</p>
-<details><summary>Hint 1:</summary> 
-Use the `.fit()` method of your initialized `SequentialFeatureSelector` object. 
-</details>
-<details><summary>Hint 2:</summary> 
-After fitting, use `.get_support()` or `.get_feature_names_out()` to identify which features have been selected. 
-</details>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<div style="background-color: #fff3cd; border-left: 6px solid #ffa502; padding: 1em; margin: 1em 0; border-radius: 4px;">
-<strong>⚠️ Skipped Task: 1.3 Evaluate</strong>
-<p>View the four characteristics and the accuracy from the instance archive for each of the first two batches.</p>
-<p><em>This sub-section is skipped because the <code>SequentialFeatureSelector</code> does not store search results at intermediate steps, unlike the R solution.</em></p>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="1.4-Model-Training">1.4 Model Training<a class="anchor-link" href="#1.4-Model-Training">¶</a></h2><p>Train the model with the subset of features indentified by the feature selector. Compute the accuracy on the test set.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="2-Multiple-Performance-Measures">2 Multiple Performance Measures<a class="anchor-link" href="#2-Multiple-Performance-Measures">¶</a></h2><p>To optimize multiple performance metrics, the procedure is similar to the previous step, but now multiple metrics are considered separately. Perform feature selection using random search to optimize three different metrics: classification accuracy, True Positive Rate (TPR), and True Negative Rate (TNR).</p>
-<p>Again, use the full <code>german_credit</code> dataset and perform the following steps to process the data.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># First, let's prepare the full dataset with proper encoding</span>
-<span class="c1"># Separate numerical and categorical features</span>
-<span class="n">numerical_features</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s1">'int64'</span><span class="p">,</span> <span class="s1">'float64'</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-<span class="n">categorical_features</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s1">'object'</span><span class="p">,</span> <span class="s1">'category'</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-
-<span class="c1"># Apply ordinal encoding to categorical features</span>
-<span class="n">X_cat_encoded</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
-<span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">categorical_features</span><span class="p">:</span>
-    <span class="n">enc</span> <span class="o">=</span> <span class="n">OrdinalEncoder</span><span class="p">()</span>
-    <span class="n">encoded_feature</span> <span class="o">=</span> <span class="n">enc</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">[[</span><span class="n">feature</span><span class="p">]])</span>
-    <span class="n">X_cat_encoded</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoded_feature</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
-
-<span class="c1"># Combine numerical and encoded categorical features</span>
-<span class="n">X_num</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">numerical_features</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-<span class="n">X_full</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">X_num</span><span class="p">,</span> <span class="n">X_cat_encoded</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Now, please write the code to perform the following tasks:</p>
-<ul>
-<li>Set up a random search feature selector.</li>
-<li>Perform random search independently for each performance metric (<code>accuracy</code>, <code>TPR</code>, and <code>TNR</code>) using 3-fold cross-validation.</li>
-<li>Evaluate and report the resulting feature subsets and their performances across all metrics.</li>
-</ul>
-<p>Use the provided <code>random_feature_search</code> function separately for each performance metric: <code>accuracy</code>, <code>tpr_scorer</code>, and <code>tnr_scorer</code>.</p>
-<details><summary>Hint 1:</summary>
-After selecting the best features for each metric, evaluate the performance of each subset across all three metrics to compare results comprehensively.
-</details>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">cross_val_score</span>
-
-
-<span class="k">def</span> <span class="nf">random_feature_search</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">clf</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">scorer</span><span class="p">,</span> <span class="n">n_iterations</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">min_features</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rng</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""This function is provided as a helper function to perform random search for feature selection."""</span>
-    <span class="n">rng</span> <span class="o">=</span> <span class="n">rng</span> <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-    
-    <span class="k">if</span> <span class="n">max_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">max_features</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    
-    <span class="n">all_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
-    <span class="n">best_score</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
-    <span class="n">best_features</span> <span class="o">=</span> <span class="p">[]</span>
-    
-    <span class="c1"># Try different feature subset sizes</span>
-    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_iterations</span><span class="p">):</span>
-        <span class="c1"># Randomly select number of features to use</span>
-        <span class="n">n_features</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_features</span><span class="p">,</span> <span class="n">max_features</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-        
-        <span class="c1"># Randomly select features without replacement</span>
-        <span class="n">feature_indices</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_features</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="n">n_features</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">feature_subset</span> <span class="o">=</span> <span class="p">[</span><span class="n">all_features</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">feature_indices</span><span class="p">]</span>
-        
-        <span class="c1"># Evaluate this feature subset</span>
-        <span class="n">X_subset</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">feature_subset</span><span class="p">]</span>
-        <span class="n">scores</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_subset</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="n">scorer</span><span class="p">)</span>
-        <span class="n">avg_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
-        
-        <span class="c1"># Update best if this is better</span>
-        <span class="k">if</span> <span class="n">avg_score</span> <span class="o">&gt;</span> <span class="n">best_score</span><span class="p">:</span>
-            <span class="n">best_score</span> <span class="o">=</span> <span class="n">avg_score</span>
-            <span class="n">best_features</span> <span class="o">=</span> <span class="n">feature_subset</span>
-    
-    <span class="k">return</span> <span class="n">best_features</span><span class="p">,</span> <span class="n">best_score</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Question: what is your observation?</p>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="3-Nested-Resampling">3 Nested Resampling<a class="anchor-link" href="#3-Nested-Resampling">¶</a></h2><p>Nested resampling enables finding unbiased performance estimators when feature selection is part of the modeling process. In Python with <code>scikit-learn</code>, this can be implemented by creating a custom wrapper class (e.g., <code>AutoFSelector</code>) that integrates feature selection within cross-validation.</p>
-<h3 id="3.1-Create-an-AutoFSelector-Instance">3.1 Create an AutoFSelector Instance<a class="anchor-link" href="#3.1-Create-an-AutoFSelector-Instance">¶</a></h3><p>Implement an <code>AutoFSelector</code> class that uses random search to find the subset of features resulting in the highest classification accuracy for a logistic regression model. The feature selector should perform the search using holdout validation and terminate after <code>n_evals</code> evaluations.</p>
-<p>Use the provided custom <code>AutoFSelector</code> class with logistic regression (<code>LogisticRegression</code>) as the base estimator.</p>
-<p>Note: the random search feature selection comes with large randomness. So, you may need to set <code>n_evals</code> to 20 and try multiple random seeds to get the best performance. In the solution, we use a lucky <code>random_state=543</code> for <code>AutoFSelector</code>.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">ClassifierMixin</span><span class="p">,</span> <span class="n">clone</span>
-
-
-<span class="k">class</span> <span class="nc">AutoFSelector</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">ClassifierMixin</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_estimator</span><span class="p">,</span> <span class="n">n_evals</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator</span> <span class="o">=</span> <span class="n">base_estimator</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_evals</span> <span class="o">=</span> <span class="n">n_evals</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cv</span> <span class="o">=</span> <span class="n">cv</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
-
-    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-        <span class="c1"># Ensure X is a DataFrame to ease column handling</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">X_original_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s1">'columns'</span><span class="p">):</span>
-                <span class="n">X_df</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># Create a DataFrame with default column names</span>
-                <span class="n">X_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">X_original_type</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
-            <span class="n">X_df</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            
-        <span class="bp">self</span><span class="o">.</span><span class="n">feature_names_</span> <span class="o">=</span> <span class="n">X_df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        
-        <span class="c1"># Use the existing random_feature_search function</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">selected_features_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_score_</span> <span class="o">=</span> <span class="n">random_feature_search</span><span class="p">(</span>
-            <span class="n">X_df</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> 
-            <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator</span><span class="p">,</span> 
-            <span class="n">cv</span><span class="o">=</span><span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cv</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">),</span>
-            <span class="n">scorer</span><span class="o">=</span><span class="s1">'accuracy'</span><span class="p">,</span> 
-            <span class="n">n_iterations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_evals</span><span class="p">,</span>
-            <span class="n">min_features</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
-        <span class="p">)</span>
-        
-        <span class="c1"># Create the best mask for feature selection</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">best_mask_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">feat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_features_</span> <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_names_</span><span class="p">])</span>
-        
-        <span class="c1"># Fit the final model on the selected features</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">estimator_</span> <span class="o">=</span> <span class="n">clone</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_estimator</span><span class="p">)</span>
-        <span class="n">X_selected</span> <span class="o">=</span> <span class="n">X_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_features_</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">estimator_</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_selected</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-        
-        <span class="k">return</span> <span class="bp">self</span>
-
-    <span class="k">def</span> <span class="nf">_get_feature_subset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Helper to get the selected feature subset from input X."""</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-            <span class="c1"># If X is already a DataFrame, simply select the features</span>
-            <span class="k">return</span> <span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_features_</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># If X is a numpy array, convert to DataFrame with proper column names</span>
-            <span class="n">X_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_names_</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">X_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_features_</span><span class="p">]</span>
-
-    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-        <span class="n">X_subset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_feature_subset</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_subset</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-        <span class="n">X_subset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_feature_subset</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_subset</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Now, write your code for the task.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="3.2-Benchmark">3.2 Benchmark<a class="anchor-link" href="#3.2-Benchmark">¶</a></h3><p>Compare the <code>AutoFSelector</code> (nested resampling approach) against a plain logistic regression model using a 3-fold cross-validation on the Sonar dataset.</p>
-<details><summary>Hint 1:</summary>
-Perform cross-validation separately for both the logistic regression and the `AutoFSelector`, then compute their average accuracies.
-</details>
+<h2 id="Train-test-split">Train-test split<a class="anchor-link" href="#Train-test-split">¶</a></h2><p>Before we train a model, let’s reserve some data for evaluating our model later on:</p>
 </div>
 </div>
 </div>
@@ -7950,25 +7831,237 @@ Perform cross-validation separately for both the logistic regression and the `Au
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Load the Sonar dataset from OpenML</span>
-<span class="n">X_sonar</span><span class="p">,</span> <span class="n">y_sonar</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="s1">'Sonar'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
 
-<span class="c1"># Set up 3-fold cross-validation</span>
-<span class="n">cv</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">2025</span><span class="p">)</span>
+<span class="c1"># Split the data with a 60% training ratio.</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">124</span><span class="p">)</span>
 
-<span class="c1"># Compute CV accuracy for both models.</span>
-<span class="n">score_afs</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">afs</span><span class="p">,</span> <span class="n">X_sonar</span><span class="p">,</span> <span class="n">y_sonar</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s1">'accuracy'</span><span class="p">)</span>
-<span class="n">score_lr</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">log_reg</span><span class="p">,</span> <span class="n">X_sonar</span><span class="p">,</span> <span class="n">y_sonar</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s1">'accuracy'</span><span class="p">)</span>
+<span class="c1"># Print out the shapes of the training and testing sets.</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Training set shape: </span><span class="si">{</span><span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Test set shape: </span><span class="si">{</span><span class="n">X_test</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Training set shape: (12967, 17)
+Test set shape: (8646, 17)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="XGBoost">XGBoost<a class="anchor-link" href="#XGBoost">¶</a></h2><p>XGBoost (Chen and Guestrin, 2016) is a highly performant library for gradient-boosted trees. As with some other ML algorithms, XGBoost in scikit-learn does not natively handle categorical data, meaning categorical features must be encoded as numerical variables before use.</p>
+<p>In the King County dataset, there are two categorical features: <strong>"waterfront"</strong> and <strong>"zipcode"</strong>. Categorical features can be grouped by their cardinality, which refers to the number of unique levels they contain: binary features (two levels), low-cardinality features, and high-cardinality features. There is no universal threshold defining when a feature is considered high-cardinality; such a threshold can even be tuned based on performance.</p>
+<p>Low-cardinality features, such as binary features, can typically be handled by <strong>one-hot encoding</strong>. One-hot encoding converts categorical features into a binary representation, where each possible category is represented as a separate binary feature. While theoretically, it's sufficient to create one less binary feature than levels (often called dummy or treatment encoding, particularly relevant for generalized linear models), scikit-learn's default <code>OneHotEncoder</code> usually creates a full set of binary features unless specified otherwise.</p>
+<p>For this dataset:</p>
+<ul>
+<li><strong>"waterfront"</strong> has <strong>2</strong> unique levels, making it a binary feature suitable for one-hot (or dummy) encoding.</li>
+<li><strong>"zipcode"</strong> has <strong>70</strong> unique levels, making it a very high-cardinality feature.</li>
+</ul>
+<p>High-cardinality categorical features, like <code>"zipcode"</code>, can be problematic if encoded with methods like one-hot encoding due to dimensionality explosion, and might require alternative encoding methods or preprocessing strategies.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Impact-encoding">Impact encoding<a class="anchor-link" href="#Impact-encoding">¶</a></h2><p>Impact encoding (Micci-Barreca 2001) is a good approach for handling high-cardinality features. Impact encoding converts categorical features into numeric values. The idea behind impact encoding is to use the target feature to create a mapping between the categorical feature and a numerical value that reflects its importance in predicting the target feature. Impact encoding involves the following steps:</p>
+<ol>
+<li>Group the target variable by the categorical feature.</li>
+<li>Compute the mean of the target variable for each group.</li>
+<li>Compute the global mean of the target variable.</li>
+<li>Compute the impact score for each group as the difference between the mean of the target variable for the group and the global mean of the target variable.</li>
+<li>Replace the categorical feature with the impact scores.</li>
+</ol>
+<p>Impact encoding preserves the information of the categorical feature while also creating a numerical representation that reflects its importance in predicting the target. Compared to one-hot encoding, the main advantage is that only a single numeric feature is created regardless of the number of levels of the categorical features, hence it is especially useful for high-cardinality features. As information from the target is used to compute the impact scores, the encoding process must be embedded in cross-validation to avoid leakage between training and testing data.</p>
+<p><code>sklearn</code> has implemented impact encoding in the class <code>sklearn.preprocessing.TargetEncoder</code>. Please refer to <a href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.TargetEncoder.html">the documentation</a> for more details.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">¶</a></h2><h3 id="Exercise-1:-Create-a-pipeline">Exercise 1: Create a pipeline<a class="anchor-link" href="#Exercise-1:-Create-a-pipeline">¶</a></h3><p>Create a pipeline that preprocesses each categorical variable using impact encoding. The pipeline should include hyperparameter optimization with an XGBoost model, using randomized search and mean squared error (MSE) as the performance measure. You should perform hyperparameter tuning via cross-validation with a number of folds <code>cv=2</code>.</p>
+<p>For the hyperparameter search space, define ranges informed by empirical best practices and common defaults for tuning XGBoost:</p>
+<ul>
+<li><code>learning_rate</code>: sample from a log-uniform distribution between 1e-4 and 1.</li>
+<li><code>max_depth</code>: sample integer values from 1 to 20.</li>
+<li><code>colsample_bytree</code> and <code>colsample_bylevel</code>: uniform distributions from 0.1 to 1.0.</li>
+<li><code>reg_lambda</code> and <code>reg_alpha</code>: log-uniform distributions between 0.001 and 1000.</li>
+<li><code>subsample</code>: uniform distribution from 0.1 to 1.0.</li>
+</ul>
+<p>To speed up computations, set <code>n_estimators=100</code> and enable multi-core computing (<code>n_jobs=-1</code>) in your <code>XGBRegressor</code>.</p>
+<p>Additionally, you will compare the pipeline using impact encoding with an alternative pipeline using one-hot encoding, keeping all other pipeline steps and hyperparameter tuning procedures identical. This will allow you to explore how different encoding strategies affect the model's predictive performance.</p>
+<details><summary>Hint 1:</summary>
+    Use `loguniform`, `uniform`, `randint` from `scipy.stats` for specifying the distributions in parameter search.
+</details>
+<details><summary>Hint 2:</summary>
+    Use `objective='reg:squarederror'` in `XGBRegressor`.
+</details>
+<details><summary>Hint 3:</summary>
+    Use `neg_mean_squared_error` in `RandomizedSearchCV`.
+</details>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs celltag_remove_cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
 
-<span class="n">results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
-    <span class="s2">"learner_id"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"AutoFSelector"</span><span class="p">,</span> <span class="s2">"LogisticRegression"</span><span class="p">],</span>
-    <span class="s2">"classif.acc"</span><span class="p">:</span> <span class="p">[</span><span class="n">score_afs</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">score_lr</span><span class="o">.</span><span class="n">mean</span><span class="p">()]</span>
-<span class="p">})</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Benchmark Results:"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">loguniform</span><span class="p">,</span> <span class="n">uniform</span><span class="p">,</span> <span class="n">randint</span>
+<span class="kn">from</span> <span class="nn">sklearn.compose</span> <span class="kn">import</span> <span class="n">ColumnTransformer</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">RandomizedSearchCV</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">OneHotEncoder</span><span class="p">,</span> <span class="n">TargetEncoder</span>
+<span class="kn">from</span> <span class="nn">xgboost</span> <span class="kn">import</span> <span class="n">XGBRegressor</span>
+
+
+<span class="c1"># Define the search space for the XGBoost hyperparameters</span>
+<span class="n">param_distributions</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'xgb__learning_rate'</span><span class="p">:</span> <span class="n">loguniform</span><span class="p">(</span><span class="mf">1e-4</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>         <span class="c1"># eta: from 1e-4 to 1 (log scale)</span>
+    <span class="s1">'xgb__max_depth'</span><span class="p">:</span> <span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">21</span><span class="p">),</span>                    <span class="c1"># max_depth: from 1 to 20</span>
+    <span class="s1">'xgb__colsample_bytree'</span><span class="p">:</span> <span class="n">uniform</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">),</span>          <span class="c1"># colsample_bytree: from 0.1 to 1.0</span>
+    <span class="s1">'xgb__colsample_bylevel'</span><span class="p">:</span> <span class="n">uniform</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">),</span>         <span class="c1"># colsample_bylevel: from 0.1 to 1.0</span>
+    <span class="s1">'xgb__reg_lambda'</span><span class="p">:</span> <span class="n">loguniform</span><span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="mi">1000</span><span class="p">),</span>          <span class="c1"># reg_lambda: from 0.001 to 1000 (log scale)</span>
+    <span class="s1">'xgb__reg_alpha'</span><span class="p">:</span> <span class="n">loguniform</span><span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="mi">1000</span><span class="p">),</span>           <span class="c1"># reg_alpha: from 0.001 to 1000 (log scale)</span>
+    <span class="s1">'xgb__subsample'</span><span class="p">:</span> <span class="n">uniform</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">)</span>                  <span class="c1"># subsample: from 0.1 to 1.0</span>
+<span class="p">}</span>
+
+<span class="c1"># Define categorical and numerical features</span>
+<span class="n">categorical_features</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'zipcode'</span><span class="p">,</span> <span class="s1">'waterfront'</span><span class="p">]</span>
+<span class="n">numerical_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">X_train</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">categorical_features</span><span class="p">]</span>
+
+<span class="c1"># 1. Pipeline with TargetEncoder</span>
+<span class="n">target_preprocessor</span> <span class="o">=</span> <span class="n">ColumnTransformer</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">'target_encoder'</span><span class="p">,</span> <span class="n">TargetEncoder</span><span class="p">(</span><span class="n">smooth</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">),</span> <span class="n">categorical_features</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">'passthrough'</span><span class="p">,</span> <span class="s1">'passthrough'</span><span class="p">,</span> <span class="n">numerical_features</span><span class="p">)</span>
+<span class="p">])</span>
+
+<span class="n">target_pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">'preprocessor'</span><span class="p">,</span> <span class="n">target_preprocessor</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">'xgb'</span><span class="p">,</span> <span class="n">XGBRegressor</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">objective</span><span class="o">=</span><span class="s1">'reg:squarederror'</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="p">])</span>
+
+<span class="c1"># 2. Pipeline with OneHotEncoder</span>
+<span class="n">onehot_preprocessor</span> <span class="o">=</span> <span class="n">ColumnTransformer</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">'onehot_encoder'</span><span class="p">,</span> <span class="n">OneHotEncoder</span><span class="p">(</span><span class="n">sparse_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">handle_unknown</span><span class="o">=</span><span class="s1">'ignore'</span><span class="p">),</span> <span class="n">categorical_features</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">'passthrough'</span><span class="p">,</span> <span class="s1">'passthrough'</span><span class="p">,</span> <span class="n">numerical_features</span><span class="p">)</span>
+<span class="p">])</span>
+
+<span class="n">onehot_pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">'preprocessor'</span><span class="p">,</span> <span class="n">onehot_preprocessor</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">'xgb'</span><span class="p">,</span> <span class="n">XGBRegressor</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">objective</span><span class="o">=</span><span class="s1">'reg:squarederror'</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="p">])</span>
+
+<span class="c1"># Create RandomizedSearchCV for TargetEncoder pipeline</span>
+<span class="n">target_search</span> <span class="o">=</span> <span class="n">RandomizedSearchCV</span><span class="p">(</span>
+    <span class="n">estimator</span><span class="o">=</span><span class="n">target_pipeline</span><span class="p">,</span>
+    <span class="n">param_distributions</span><span class="o">=</span><span class="n">param_distributions</span><span class="p">,</span>
+    <span class="n">n_iter</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">scoring</span><span class="o">=</span><span class="s1">'neg_mean_squared_error'</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">111</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Create RandomizedSearchCV for OneHotEncoder pipeline</span>
+<span class="n">onehot_search</span> <span class="o">=</span> <span class="n">RandomizedSearchCV</span><span class="p">(</span>
+    <span class="n">estimator</span><span class="o">=</span><span class="n">onehot_pipeline</span><span class="p">,</span>
+    <span class="n">param_distributions</span><span class="o">=</span><span class="n">param_distributions</span><span class="p">,</span>
+    <span class="n">n_iter</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">scoring</span><span class="o">=</span><span class="s1">'neg_mean_squared_error'</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">124</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Exercise-2:-Benchmark-a-pipeline">Exercise 2: Benchmark a pipeline<a class="anchor-link" href="#Exercise-2:-Benchmark-a-pipeline">¶</a></h2><p>Assess the performance of both pipelines using the untouched test set principle:</p>
+<ul>
+<li>Perform CV on your training dataset (<code>X_train</code>, <code>y_train</code>).</li>
+<li>Evaluate their predictive performance (MSE) on the separate test set (<code>X_test</code>, <code>y_test</code>).</li>
+</ul>
+<p>Finally, report and compare the optimal hyperparameters and corresponding performance metrics obtained from cross-validation and on the independent test set.</p>
+<details><summary>Hint 1:</summary>
+    Use `RandomizedSearchCV.best_score_` to see the best validation score, and use `RandomizedSearchCV.score` to run performance evaluation on the test set.
+</details>
+<details><summary>Hint 2:</summary>
+    Recall that the `RandomizedSearchCV` use negative MSE as the score in the HPO. Therefore, when printing the performances on the validation and test sets, you need to flip the sign of the score.
+</details>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell celltag_remove_cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Training model with OneHotEncoder..."</span><span class="p">)</span>
+<span class="n">onehot_search</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Training model with TargetEncoder..."</span><span class="p">)</span>
+<span class="n">target_search</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="c1"># Output results for OneHotEncoder</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">--- OneHotEncoder Results ---"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best parameters: </span><span class="si">{</span><span class="n">onehot_search</span><span class="o">.</span><span class="n">best_params_</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best CV score (MSE): </span><span class="si">{</span><span class="o">-</span><span class="n">onehot_search</span><span class="o">.</span><span class="n">best_score_</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">onehot_test_score</span> <span class="o">=</span> <span class="n">onehot_search</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Test set score (MSE): </span><span class="si">{</span><span class="o">-</span><span class="n">onehot_test_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Output results for TargetEncoder</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">--- TargetEncoder Results ---"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best parameters: </span><span class="si">{</span><span class="n">target_search</span><span class="o">.</span><span class="n">best_params_</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best CV score (MSE): </span><span class="si">{</span><span class="o">-</span><span class="n">target_search</span><span class="o">.</span><span class="n">best_score_</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">target_test_score</span> <span class="o">=</span> <span class="n">target_search</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Test set score (MSE): </span><span class="si">{</span><span class="o">-</span><span class="n">target_test_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7982,10 +8075,20 @@ Perform cross-validation separately for both the logistic regression and the `Au
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>
-Benchmark Results:
-           learner_id  classif.acc
-0       AutoFSelector     0.759834
-1  LogisticRegression     0.759696
+Training model with OneHotEncoder...
+Fitting 2 folds for each of 50 candidates, totalling 100 fits
+Training model with TargetEncoder...
+Fitting 2 folds for each of 50 candidates, totalling 100 fits
+
+--- OneHotEncoder Results ---
+Best parameters: {'xgb__colsample_bylevel': 0.9739842882294312, 'xgb__colsample_bytree': 0.2816306321316162, 'xgb__learning_rate': 0.24734640788083925, 'xgb__max_depth': 4, 'xgb__reg_alpha': 63.31327250747733, 'xgb__reg_lambda': 0.014633103639863188, 'xgb__subsample': 0.8480834882645039}
+Best CV score (MSE): 17334.5468
+Test set score (MSE): 16713.4028
+
+--- TargetEncoder Results ---
+Best parameters: {'xgb__colsample_bylevel': 0.8656327252373124, 'xgb__colsample_bytree': 0.5827666592066569, 'xgb__learning_rate': 0.07834804904588204, 'xgb__max_depth': 8, 'xgb__reg_alpha': 57.53289051844459, 'xgb__reg_lambda': 0.8489426245140799, 'xgb__subsample': 0.658346139517151}
+Best CV score (MSE): 18180.8702
+Test set score (MSE): 14889.9817
 </pre>
 </div>
 </div>
@@ -7998,21 +8101,7 @@ Benchmark Results:
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Summary">Summary<a class="anchor-link" href="#Summary">¶</a></h2><ul>
-<li>Wrapper methods calculate performance measures for various combinations of features in order to perform feature selection.</li>
-<li>They are computationally expensive since several models need to be fitted.</li>
-<li>The <code>AutoFSelector</code> inherits from the base classes <code>BaseEstimator</code> and <code>ClassifierMixin</code>, which is why it can be used like any other learner.</li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Summary">Summary<a class="anchor-link" href="#Summary">¶</a></h2><p>We learned how to apply pre-processing steps together with tuning to construct refined pipelines for benchmark experiments.</p>
 </div>
 </div>
 </div>

@@ -7669,6 +7669,37 @@ Use `SequentialFeatureSelector()` from `sklearn.feature_selection` and set the p
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs celltag_remove_cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">StratifiedKFold</span>
+<span class="kn">from</span> <span class="nn">sklearn.feature_selection</span> <span class="kn">import</span> <span class="n">SequentialFeatureSelector</span>
+
+
+<span class="n">clf</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">2025</span><span class="p">)</span>
+<span class="n">cv</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">2025</span><span class="p">)</span>
+
+<span class="n">sfs_forward</span> <span class="o">=</span> <span class="n">SequentialFeatureSelector</span><span class="p">(</span>
+    <span class="n">clf</span><span class="p">,</span> 
+    <span class="n">n_features_to_select</span><span class="o">=</span><span class="s1">'auto'</span><span class="p">,</span>
+    <span class="n">direction</span><span class="o">=</span><span class="s1">'forward'</span><span class="p">,</span>
+    <span class="n">scoring</span><span class="o">=</span><span class="s1">'accuracy'</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
@@ -7683,6 +7714,36 @@ Use the `.fit()` method of your initialized `SequentialFeatureSelector` object.
 <details><summary>Hint 2:</summary> 
 After fitting, use `.get_support()` or `.get_feature_names_out()` to identify which features have been selected. 
 </details>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell celltag_remove_cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+
+<span class="n">sfs_forward</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_four_feats</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Selected features: </span><span class="si">{</span><span class="n">sfs_forward</span><span class="o">.</span><span class="n">get_feature_names_out</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Selected features: ['duration' 'credit_history']
+</pre>
+</div>
 </div>
 </div>
 </div>
@@ -7709,6 +7770,53 @@ After fitting, use `.get_support()` or `.get_feature_names_out()` to identify wh
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="1.4-Model-Training">1.4 Model Training<a class="anchor-link" href="#1.4-Model-Training">¶</a></h2><p>Train the model with the subset of features indentified by the feature selector. Compute the accuracy on the test set.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell celltag_remove_cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="n">best_feature_set</span> <span class="o">=</span> <span class="n">sfs_forward</span><span class="o">.</span><span class="n">get_feature_names_out</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best feature set: </span><span class="si">{</span><span class="n">best_feature_set</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="n">X_best</span> <span class="o">=</span> <span class="n">sfs_forward</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_four_feats</span><span class="p">)</span>
+
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+    <span class="n">X_best</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y</span>
+<span class="p">)</span>
+
+<span class="c1"># Initialize and train the model with best features</span>
+<span class="n">final_model</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">2025</span><span class="p">)</span>
+<span class="n">final_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="n">test_accuracy</span> <span class="o">=</span> <span class="n">final_model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Test accuracy with best features: </span><span class="si">{</span><span class="n">test_accuracy</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Best feature set: ['duration' 'credit_history']
+Test accuracy with best features: 0.7000
+</pre>
+</div>
 </div>
 </div>
 </div>
@@ -7819,6 +7927,108 @@ After selecting the best features for each metric, evaluate the performance of e
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell celltag_remove_cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">recall_score</span><span class="p">,</span> <span class="n">make_scorer</span>
+
+
+<span class="k">def</span> <span class="nf">tpr_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">recall_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">pos_label</span><span class="o">=</span><span class="s2">"good"</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">tnr_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">recall_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">pos_label</span><span class="o">=</span><span class="s2">"bad"</span><span class="p">)</span>
+
+<span class="n">tpr_scorer</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">tpr_score</span><span class="p">)</span>
+<span class="n">tnr_scorer</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">tnr_score</span><span class="p">)</span>
+
+<span class="n">clf</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">2025</span><span class="p">)</span>
+<span class="n">cv</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">2025</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"2 Multiple Performance Measures. Using custom random search for feature selection with multiple metrics"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Running random feature search..."</span><span class="p">)</span>
+
+<span class="c1"># Function to evaluate feature set across all metrics</span>
+<span class="k">def</span> <span class="nf">evaluate_feature_set</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="n">X_subset</span> <span class="o">=</span> <span class="n">X_full</span><span class="p">[</span><span class="n">features</span><span class="p">]</span>
+    <span class="n">acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cross_val_score</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_subset</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s1">'accuracy'</span><span class="p">))</span>
+    <span class="n">tpr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cross_val_score</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_subset</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="n">tpr_scorer</span><span class="p">))</span>
+    <span class="n">tnr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cross_val_score</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_subset</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="n">tnr_scorer</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"features"</span><span class="p">:</span> <span class="n">features</span><span class="p">,</span>
+        <span class="s2">"features_str"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> optimized"</span><span class="p">,</span>
+        <span class="s2">"num_features"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">),</span>
+        <span class="s2">"accuracy"</span><span class="p">:</span> <span class="n">acc</span><span class="p">,</span>
+        <span class="s2">"classif.tpr"</span><span class="p">:</span> <span class="n">tpr</span><span class="p">,</span>
+        <span class="s2">"classif.tnr"</span><span class="p">:</span> <span class="n">tnr</span>
+    <span class="p">}</span>
+
+<span class="c1"># Run random search for each metric</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'Accuracy'</span><span class="p">:</span> <span class="p">(</span><span class="s1">'accuracy'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="s1">'TPR'</span><span class="p">:</span> <span class="p">(</span><span class="n">tpr_scorer</span><span class="p">,</span> <span class="s1">'TPR'</span><span class="p">),</span>
+    <span class="s1">'TNR'</span><span class="p">:</span> <span class="p">(</span><span class="n">tnr_scorer</span><span class="p">,</span> <span class="s1">'TNR'</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">best_features</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="c1"># Perform feature selection for each metric</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">scorer</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">features</span><span class="p">,</span> <span class="n">score</span> <span class="o">=</span> <span class="n">random_feature_search</span><span class="p">(</span>
+        <span class="n">X_full</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">clf</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">scorer</span><span class="p">,</span> <span class="n">n_iterations</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span>
+    <span class="p">)</span>
+    <span class="n">best_features</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">features</span>
+    
+    <span class="c1"># Evaluate this feature set across all metrics</span>
+    <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">evaluate_feature_set</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+
+<span class="n">results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Feature selection results with different optimization criteria:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">results_df</span><span class="p">[[</span><span class="s2">"features_str"</span><span class="p">,</span> <span class="s2">"num_features"</span><span class="p">,</span> <span class="s2">"accuracy"</span><span class="p">,</span> <span class="s2">"classif.tpr"</span><span class="p">,</span> <span class="s2">"classif.tnr"</span><span class="p">]])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Accuracy-optimized features:"</span><span class="p">,</span> <span class="n">best_features</span><span class="p">[</span><span class="s1">'Accuracy'</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">TPR-optimized features:"</span><span class="p">,</span> <span class="n">best_features</span><span class="p">[</span><span class="s1">'TPR'</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">TNR-optimized features:"</span><span class="p">,</span> <span class="n">best_features</span><span class="p">[</span><span class="s1">'TNR'</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>2 Multiple Performance Measures. Using custom random search for feature selection with multiple metrics
+Running random feature search...
+
+Feature selection results with different optimization criteria:
+         features_str  num_features  accuracy  classif.tpr  classif.tnr
+0  Accuracy optimized            18  0.752993     0.922851     0.356667
+1       TPR optimized             1  0.699999     1.000000     0.000000
+2       TNR optimized             9  0.731989     0.867148     0.416667
+
+Accuracy-optimized features: ['age', 'savings_status', 'property_magnitude', 'installment_commitment', 'personal_status', 'housing', 'credit_history', 'credit_amount', 'employment', 'other_payment_plans', 'checking_status', 'purpose', 'own_telephone', 'num_dependents', 'duration', 'job', 'foreign_worker', 'existing_credits']
+
+TPR-optimized features: ['own_telephone']
+
+TNR-optimized features: ['credit_amount', 'foreign_worker', 'purpose', 'checking_status', 'property_magnitude', 'other_parties', 'job', 'housing', 'duration']
+</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
@@ -7827,6 +8037,18 @@ After selecting the best features for each metric, evaluate the performance of e
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>Question: what is your observation?</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput celltag_remove_cell" data-mime-type="text/markdown">
+<p>===SOLUTION===</p>
+<p>Note that the measures can not be optimal at the same time so one has to choose according to their preferences. Here, we see different tradeoffs of sensitivity and specificity but no feature subset is dominated by another, i.e. has worse sensitivity and specificity than any other subset.</p>
 </div>
 </div>
 </div>
@@ -7928,6 +8150,40 @@ After selecting the best features for each metric, evaluate the performance of e
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>Now, write your code for the task.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs celltag_remove_cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span>
+
+
+<span class="n">log_reg</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">'scaler'</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">()),</span>
+    <span class="p">(</span><span class="s1">'classifier'</span><span class="p">,</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">2025</span><span class="p">))</span>
+<span class="p">])</span>
+
+<span class="n">afs</span> <span class="o">=</span> <span class="n">AutoFSelector</span><span class="p">(</span>
+    <span class="n">base_estimator</span><span class="o">=</span><span class="n">Pipeline</span><span class="p">([</span>
+        <span class="p">(</span><span class="s1">'scaler'</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">()),</span>
+        <span class="p">(</span><span class="s1">'classifier'</span><span class="p">,</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">2025</span><span class="p">))</span>
+    <span class="p">]),</span>
+    <span class="n">n_evals</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">543</span>
+<span class="p">)</span>
+</pre></div>
+</div>
 </div>
 </div>
 </div>

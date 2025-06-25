@@ -3,7 +3,7 @@
 <html lang="en">
 <head><meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>04_2_feature_selection_py</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>03_2_xgboost_py</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <style type="text/css">
     pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -7517,7 +7517,7 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="Applied-Machine-Learning:-In-class-Exercise-04-2">Applied Machine Learning: In-class Exercise 04-2<a class="anchor-link" href="#Applied-Machine-Learning:-In-class-Exercise-04-2">¶</a></h1>
+<h1 id="Applied-Machine-Learning:-In-class-Exercise-03-2">Applied Machine Learning: In-class Exercise 03-2<a class="anchor-link" href="#Applied-Machine-Learning:-In-class-Exercise-03-2">¶</a></h1>
 </div>
 </div>
 </div>
@@ -7528,10 +7528,9 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Goal">Goal<a class="anchor-link" href="#Goal">¶</a></h2><p>After this exercise, you should understand and be able to perform feature selection using wrapper methods with <code>scikit-learn</code>. You should also be able to integrate various performance measures and calculate the generalization error.</p>
-<h2 id="Wrapper-Methods">Wrapper Methods<a class="anchor-link" href="#Wrapper-Methods">¶</a></h2><p>In addition to filtering, wrapper methods are another variant of feature selection. While filtering methods apply predefined criteria directly to feature values, wrapper methods evaluate different subsets of features by repeatedly training and validating a predictive model. Since models need to be repeatedly refitted, this method can be computationally expensive.</p>
-<p>For wrapper methods in Python, we will primarily use the classes from <code>sklearn.feature_selection</code>, e.g., <code>SequentialFeatureSelector</code>. This approach incrementally adds or removes features based on model performance.</p>
-<h2 id="Prerequisites">Prerequisites<a class="anchor-link" href="#Prerequisites">¶</a></h2><p>We first load the necessary Python libraries and set a fixed random seed for reproducibility.</p>
+<h2 id="Goal">Goal<a class="anchor-link" href="#Goal">¶</a></h2><p>Our goal for this exercise sheet is to understand how to apply and work with XGBoost. The XGBoost algorithm has a large range of hyperparameters. We learn specifically how to tune these hyperparameters to optimize our XGBoost model for the task at hand.</p>
+<h2 id="German-Credit-Dataset">German Credit Dataset<a class="anchor-link" href="#German-Credit-Dataset">¶</a></h2><p>As in previous exercises, we use the German credit dataset of Prof. Dr. Hans Hoffman of the University of Hamburg in 1994. By using XGBoost, we want to classify people as a good or bad credit risk based on 20 personal, demographic and financial features. The dataset is available at the UCI repository as Statlog (German Credit Data) Data Set.</p>
+<h2 id="Preprocessing">Preprocessing<a class="anchor-link" href="#Preprocessing">¶</a></h2><p>To apply the XGBoost algorithm to the credit dataset, categorical features need to be converted into numeric features, e.g. using one-hot encoding. In the Python solution, we load the dataset using <code>fetch_openml</code> from scikit-learn. We then separate the features (<code>X</code>) and the target (<code>y</code>), and encode the target variable using <code>LabelEncoder</code> by mapping 'bad' to 0 and 'good' to 1. Next, we identify the categorical columns by selecting those with the object or category data type and set up a <code>ColumnTransformer</code> that applies <code>OneHotEncoder</code> to these columns while passing through the numerical features unchanged.</p>
 </div>
 </div>
 </div>
@@ -7544,11 +7543,32 @@ a.anchor-link {
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_openml</span>
+<span class="kn">from</span> <span class="nn">sklearn.compose</span> <span class="kn">import</span> <span class="n">ColumnTransformer</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">OneHotEncoder</span><span class="p">,</span> <span class="n">LabelEncoder</span>
 
 
-<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">2025</span><span class="p">)</span>
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="c1"># Load the German credit dataset from OpenML</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="s2">"credit-g"</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Encode the target variable: 'good' as 1 and 'bad' as 0</span>
+<span class="n">label_encoder</span> <span class="o">=</span> <span class="n">LabelEncoder</span><span class="p">()</span>
+<span class="n">label_encoder</span><span class="o">.</span><span class="n">fit</span><span class="p">([</span><span class="s1">'bad'</span><span class="p">,</span> <span class="s1">'good'</span><span class="p">])</span>  <span class="c1"># Explicitly define the mapping</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">label_encoder</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+<span class="c1"># Identify categorical columns (assumes object or category dtype)</span>
+<span class="n">cat_cols</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s1">'object'</span><span class="p">,</span> <span class="s1">'category'</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+<span class="c1"># Set up a ColumnTransformer to one-hot encode categorical features while passing through numerical features</span>
+<span class="n">preprocessor</span> <span class="o">=</span> <span class="n">ColumnTransformer</span><span class="p">(</span>
+    <span class="n">transformers</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">(</span><span class="s1">'cat'</span><span class="p">,</span> <span class="n">OneHotEncoder</span><span class="p">(</span><span class="n">handle_unknown</span><span class="o">=</span><span class="s1">'ignore'</span><span class="p">),</span> <span class="n">cat_cols</span><span class="p">)</span>
+    <span class="p">],</span>
+    <span class="n">remainder</span><span class="o">=</span><span class="s1">'passthrough'</span><span class="p">,</span>
+    <span class="n">force_int_remainder_cols</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7561,11 +7581,13 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>In this exercise, we use the <code>credit-g</code> dataset (German Credit Data) and a random forest classifier (<code>RandomForestClassifier</code>).</p>
+<h2 id="1-XGBoost-Learner">1 XGBoost Learner<a class="anchor-link" href="#1-XGBoost-Learner">¶</a></h2><h3 id="1.1-Initialize-an-XGBoost-Learner">1.1 Initialize an XGBoost Learner<a class="anchor-link" href="#1.1-Initialize-an-XGBoost-Learner">¶</a></h3><p>Initialize an XGBoost classifier from scikit-learn with 100 boosting rounds. Make sure that you have installed the Python package <code>xgboost</code>.</p>
+<p>In XGBoost for Python (scikit-learn API), the number of iterations (also known as boosting rounds or trees) is specified via the parameter <code>n_estimators</code>. This hyperparameter determines the total number of boosting iterations performed by the model.</p>
+<p>There is a trade-off between underfitting (not enough iterations) and overfitting (too many iterations). Therefore, it is always better to tune such a hyperparameter. In this exercise, we choose 100 iterations as we believe it provides a good upper bound. Later, we will introduce early stopping to prevent overfitting.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs celltag_remove_cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7573,7 +7595,20 @@ a.anchor-link {
 <div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="s1">'credit-g'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+
+<span class="kn">from</span> <span class="nn">xgboost</span> <span class="kn">import</span> <span class="n">XGBClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span>
+
+
+<span class="n">xgb_clf</span> <span class="o">=</span> <span class="n">XGBClassifier</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> 
+                        <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> 
+                        <span class="n">eval_metric</span><span class="o">=</span><span class="s1">'logloss'</span><span class="p">)</span>
+
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="p">[</span>
+    <span class="p">(</span><span class="s1">'preprocessor'</span><span class="p">,</span> <span class="n">preprocessor</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">'classifier'</span><span class="p">,</span> <span class="n">xgb_clf</span><span class="p">)</span>
+<span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -7586,12 +7621,17 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="1-Basic-Application">1 Basic Application<a class="anchor-link" href="#1-Basic-Application">¶</a></h2><h3 id="1.1-Create-the-Framework">1.1 Create the Framework<a class="anchor-link" href="#1.1-Create-the-Framework">¶</a></h3><p>Create a feature selection setup using <code>SequentialFeatureSelector</code>. The feature selection should use 3-fold cross-validation, classification accuracy as the scoring metric, and sequentially select the best-performing subset of features from the following: <code>"age"</code>, <code>"credit_amount"</code>, <code>"credit_history"</code>, and <code>"duration"</code>.</p>
-<p>We first provide code for data preprocessing as follows:</p>
+<h3 id="1.2-Performance-Assessment-using-Cross-validation">1.2 Performance Assessment using Cross-validation<a class="anchor-link" href="#1.2-Performance-Assessment-using-Cross-validation">¶</a></h3><p>Use 5-fold cross-validation to estimate the generalization error of the XGBoost classifier with 100 boosting iterations on the one-hot-encoded German credit dataset. Measure the learner's performance using classification accuracy.</p>
+<p>Specifically, you need to conduct three steps:</p>
+<ol>
+<li>Use <code>cross_val_score()</code> from scikit-learn with the pipeline defined above.</li>
+<li>Set the parameter <code>cv=5</code> to specify 5-fold cross-validation.</li>
+<li>Aggregate the performance scores by computing the mean accuracy.</li>
+</ol>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell celltag_remove_cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7599,43 +7639,15 @@ a.anchor-link {
 <div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">OrdinalEncoder</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
 
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">cross_val_score</span>
 
-<span class="c1"># For simplification, select only the desired features</span>
-<span class="n">selected_features</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"age"</span><span class="p">,</span> <span class="s2">"credit_amount"</span><span class="p">,</span> <span class="s2">"credit_history"</span><span class="p">,</span> <span class="s2">"duration"</span><span class="p">]</span>
-<span class="n">X_four_feats</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">selected_features</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">cv_scores</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">pipeline</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s1">'accuracy'</span><span class="p">)</span>
 
-<span class="n">categorical_features</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"credit_history"</span><span class="p">,</span> <span class="p">]</span>
-<span class="n">numerical_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">feat</span> <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">selected_features</span> <span class="k">if</span> <span class="n">feat</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">categorical_features</span><span class="p">]</span>
-
-<span class="c1"># This feature is ordinal, so we encode it using OrdinalEncoder</span>
-<span class="n">unique_credit_history</span> <span class="o">=</span> <span class="n">X_four_feats</span><span class="p">[</span><span class="s1">'credit_history'</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unique credit history values: </span><span class="si">{</span><span class="n">unique_credit_history</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-
-<span class="c1"># Define the categories based on actual values in the dataset</span>
-<span class="n">credit_history_categories</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">'critical/other existing credit'</span><span class="p">,</span>  <span class="c1"># Most risky - 0</span>
-    <span class="s1">'delayed previously'</span><span class="p">,</span>              <span class="c1"># Somewhat risky - 1</span>
-    <span class="s1">'existing paid'</span><span class="p">,</span>                   <span class="c1"># Moderate - 2</span>
-    <span class="s1">'no credits/all paid'</span><span class="p">,</span>             <span class="c1"># Good - 3</span>
-    <span class="s1">'all paid'</span>                         <span class="c1"># Best - 4</span>
-<span class="p">]</span>
-
-<span class="n">ordinal_encoder</span> <span class="o">=</span> <span class="n">OrdinalEncoder</span><span class="p">(</span>
-    <span class="n">categories</span><span class="o">=</span><span class="p">[</span><span class="n">credit_history_categories</span><span class="p">],</span>
-    <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span>
-<span class="p">)</span>
-
-<span class="n">X_cat</span> <span class="o">=</span> <span class="n">X_four_feats</span><span class="p">[</span><span class="n">categorical_features</span><span class="p">]</span>
-<span class="n">X_cat_encoded</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-    <span class="n">ordinal_encoder</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_cat</span><span class="p">),</span>
-    <span class="n">columns</span><span class="o">=</span><span class="n">categorical_features</span><span class="p">,</span>
-    <span class="n">index</span><span class="o">=</span><span class="n">X_cat</span><span class="o">.</span><span class="n">index</span>
-<span class="p">)</span>
-
-<span class="n">X_num</span> <span class="o">=</span> <span class="n">X_four_feats</span><span class="p">[</span><span class="n">numerical_features</span><span class="p">]</span>
-<span class="n">X_four_feats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">X_num</span><span class="p">,</span> <span class="n">X_cat_encoded</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="c1"># Print the cross-validation results</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Cross-validation scores: </span><span class="si">{</span><span class="n">cv_scores</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Mean CV accuracy: </span><span class="si">{</span><span class="n">cv_scores</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7648,8 +7660,8 @@ a.anchor-link {
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Unique credit history values: ['critical/other existing credit', 'existing paid', 'delayed previously', 'no credits/all paid', 'all paid']
-Categories (5, object): ['all paid', 'critical/other existing credit', 'delayed previously', 'existing paid', 'no credits/all paid']
+<pre>Cross-validation scores: [0.735 0.76  0.735 0.74  0.765]
+Mean CV accuracy: 0.7470
 </pre>
 </div>
 </div>
@@ -7662,13 +7674,780 @@ Categories (5, object): ['all paid', 'critical/other existing credit', 'delayed 
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Now please write your code to solve the given task.</p>
-<details><summary>Hint 1:</summary> 
-Use `SequentialFeatureSelector()` from `sklearn.feature_selection` and set the parameter `cv=3`. 
+<h2 id="2-Hyperparameters">2 Hyperparameters<a class="anchor-link" href="#2-Hyperparameters">¶</a></h2><h3 id="2.1-Overview-of-Hyperparameters">2.1 Overview of Hyperparameters<a class="anchor-link" href="#2.1-Overview-of-Hyperparameters">¶</a></h3><p>Apart from the number of iterations (<code>n_estimators</code>), the XGBoost classifier has several other hyperparameters which were kept to their default values in the previous exercise. Extract an overview of all hyperparameters from the initialized XGBoost classifier (previous exercise) and their default values.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell celltag_remove_cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+
+<span class="n">params</span> <span class="o">=</span> <span class="n">xgb_clf</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"XGBoost hyperparameters with the configured values:"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>XGBoost hyperparameters with the configured values:
+objective: binary:logistic
+base_score: None
+booster: None
+callbacks: None
+colsample_bylevel: None
+colsample_bynode: None
+colsample_bytree: None
+device: None
+early_stopping_rounds: None
+enable_categorical: False
+eval_metric: logloss
+feature_types: None
+feature_weights: None
+gamma: None
+grow_policy: None
+importance_type: None
+interaction_constraints: None
+learning_rate: None
+max_bin: None
+max_cat_threshold: None
+max_cat_to_onehot: None
+max_delta_step: None
+max_depth: None
+max_leaves: None
+min_child_weight: None
+missing: nan
+monotone_constraints: None
+multi_strategy: None
+n_estimators: 100
+n_jobs: None
+num_parallel_tree: None
+random_state: 42
+reg_alpha: None
+reg_lambda: None
+sampling_method: None
+scale_pos_weight: None
+subsample: None
+tree_method: None
+validate_parameters: None
+verbosity: None
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Questions-and-Answers">Questions and Answers<a class="anchor-link" href="#Questions-and-Answers">¶</a></h3><ol>
+<li>Does the learner rely on a tree or a linear booster by default?</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput celltag_remove_cell" data-mime-type="text/markdown">
+<p>===SOLUTION===</p>
+<p>The default booster in XGBoost is "gbtree", meaning it uses a tree-based booster.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<ol start="2">
+<li>Do more hyperparameters exist for the tree or the linear booster?</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput celltag_remove_cell" data-mime-type="text/markdown">
+<p>===SOLUTION===</p>
+<p>The tree booster (gbtree) has a richer set of hyperparameters (such as max_depth, min_child_weight, subsample, colsample_bytree, etc.) compared to the linear booster, which typically has fewer hyperparameters (like lambda, alpha, and lambda_bias for regularization).</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<ol start="3">
+<li>What do <code>max_depth</code>, <code>eta</code>, <code>n_estimators</code> mean and what are their default values?</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput celltag_remove_cell" data-mime-type="text/markdown">
+<p>===SOLUTION===</p>
+<p><code>max_depth</code>: Controls the maximum depth of the trees. Its default value is 6.
+<code>eta</code>: Represents the learning rate, which determines the contribution of each tree to the overall model. The default value is 0.3. In Python’s XGBoost, the number of boosting rounds is managed by the parameter <code>n_estimators</code> (analogous to nrounds in R), which we have set to 100.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<ol start="4">
+<li>Does a larger value for <code>eta</code> imply a larger value for <code>n_estimators</code>?</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput celltag_remove_cell" data-mime-type="text/markdown">
+<p>===SOLUTION===</p>
+<p>No, a larger <code>eta</code> means that each tree has a larger impact on the overall model. Consequently, if <code>eta</code> is increased, fewer boosting rounds (lower <code>n_estimators</code>) are typically needed to avoid overfitting, not more.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="2.2-Tune-Hyperparameters">2.2 Tune Hyperparameters<a class="anchor-link" href="#2.2-Tune-Hyperparameters">¶</a></h3><p>Tune the tree depth (<code>max_depth</code>) and the learning rate (<code>learning_rate</code>, alias for <code>eta</code>) of the XGBoost classifier on the German credit dataset using random search:</p>
+<ul>
+<li>Search space:<ul>
+<li><code>max_depth</code>: integer values between 1 and 8.</li>
+<li><code>learning_rate</code>: continuous values between 0.2 and 0.4. Note: in practice the learning rate is usually much smaller. The range of large learning rates here is only for an educational purpose, so that you can train the models faster on your laptop.</li>
+</ul>
+</li>
+<li>Termination criterion: Perform 20 evaluations.</li>
+<li>Performance measure: Classification error (equivalent to 1 - accuracy). Note: This dataset is imbalanced, so accuracy is not an ideal evaluation metric. For now, we'll use (1 - accuracy), but you'll later learn how to apply more advanced metrics that are better suited for imbalanced classification tasks.</li>
+<li>Resampling strategy: 3-fold cross-validation.</li>
+</ul>
+<details><summary>Hint 1:</summary>
+Use `scipy.stats.uniform` to instantiate a uniform distribution, and use it for the search space of `learning_rate`.
 </details>
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell celltag_remove_cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">uniform</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">RandomizedSearchCV</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">make_scorer</span><span class="p">,</span> <span class="n">accuracy_score</span>
+
+<span class="c1"># Define a custom scoring function: classification error = 1 - accuracy.</span>
+<span class="c1"># Setting greater_is_better=False so that lower error is better.</span>
+<span class="k">def</span> <span class="nf">classification_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+
+<span class="n">error_scorer</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">classification_error</span><span class="p">,</span> <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Define the search space.</span>
+<span class="c1"># Note: Since our pipeline names the XGBoost classifier step "classifier",</span>
+<span class="c1"># we specify the hyperparameters with the prefix "classifier__".</span>
+<span class="n">param_distributions</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"classifier__max_depth"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">)),</span>
+    <span class="s2">"classifier__learning_rate"</span><span class="p">:</span> <span class="n">uniform</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span> 
+<span class="p">}</span>
+
+<span class="c1"># Set up RandomizedSearchCV with 20 random evaluations and 3-fold cross-validation.</span>
+<span class="n">random_search</span> <span class="o">=</span> <span class="n">RandomizedSearchCV</span><span class="p">(</span>
+    <span class="n">pipeline</span><span class="p">,</span>
+    <span class="n">param_distributions</span><span class="o">=</span><span class="n">param_distributions</span><span class="p">,</span>
+    <span class="n">n_iter</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">scoring</span><span class="o">=</span><span class="n">error_scorer</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="c1"># Execute the hyperparameter tuning on the training data.</span>
+<span class="n">random_search</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Fitting 3 folds for each of 20 candidates, totalling 60 fits
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<style>#sk-container-id-1 {
+  /* Definition of color scheme common for light and dark mode */
+  --sklearn-color-text: #000;
+  --sklearn-color-text-muted: #666;
+  --sklearn-color-line: gray;
+  /* Definition of color scheme for unfitted estimators */
+  --sklearn-color-unfitted-level-0: #fff5e6;
+  --sklearn-color-unfitted-level-1: #f6e4d2;
+  --sklearn-color-unfitted-level-2: #ffe0b3;
+  --sklearn-color-unfitted-level-3: chocolate;
+  /* Definition of color scheme for fitted estimators */
+  --sklearn-color-fitted-level-0: #f0f8ff;
+  --sklearn-color-fitted-level-1: #d4ebff;
+  --sklearn-color-fitted-level-2: #b3dbfd;
+  --sklearn-color-fitted-level-3: cornflowerblue;
+
+  /* Specific color for light theme */
+  --sklearn-color-text-on-default-background: var(--sg-text-color, var(--theme-code-foreground, var(--jp-content-font-color1, black)));
+  --sklearn-color-background: var(--sg-background-color, var(--theme-background, var(--jp-layout-color0, white)));
+  --sklearn-color-border-box: var(--sg-text-color, var(--theme-code-foreground, var(--jp-content-font-color1, black)));
+  --sklearn-color-icon: #696969;
+
+  @media (prefers-color-scheme: dark) {
+    /* Redefinition of color scheme for dark theme */
+    --sklearn-color-text-on-default-background: var(--sg-text-color, var(--theme-code-foreground, var(--jp-content-font-color1, white)));
+    --sklearn-color-background: var(--sg-background-color, var(--theme-background, var(--jp-layout-color0, #111)));
+    --sklearn-color-border-box: var(--sg-text-color, var(--theme-code-foreground, var(--jp-content-font-color1, white)));
+    --sklearn-color-icon: #878787;
+  }
+}
+
+#sk-container-id-1 {
+  color: var(--sklearn-color-text);
+}
+
+#sk-container-id-1 pre {
+  padding: 0;
+}
+
+#sk-container-id-1 input.sk-hidden--visually {
+  border: 0;
+  clip: rect(1px 1px 1px 1px);
+  clip: rect(1px, 1px, 1px, 1px);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+#sk-container-id-1 div.sk-dashed-wrapped {
+  border: 1px dashed var(--sklearn-color-line);
+  margin: 0 0.4em 0.5em 0.4em;
+  box-sizing: border-box;
+  padding-bottom: 0.4em;
+  background-color: var(--sklearn-color-background);
+}
+
+#sk-container-id-1 div.sk-container {
+  /* jupyter's `normalize.less` sets `[hidden] { display: none; }`
+     but bootstrap.min.css set `[hidden] { display: none !important; }`
+     so we also need the `!important` here to be able to override the
+     default hidden behavior on the sphinx rendered scikit-learn.org.
+     See: https://github.com/scikit-learn/scikit-learn/issues/21755 */
+  display: inline-block !important;
+  position: relative;
+}
+
+#sk-container-id-1 div.sk-text-repr-fallback {
+  display: none;
+}
+
+div.sk-parallel-item,
+div.sk-serial,
+div.sk-item {
+  /* draw centered vertical line to link estimators */
+  background-image: linear-gradient(var(--sklearn-color-text-on-default-background), var(--sklearn-color-text-on-default-background));
+  background-size: 2px 100%;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+/* Parallel-specific style estimator block */
+
+#sk-container-id-1 div.sk-parallel-item::after {
+  content: "";
+  width: 100%;
+  border-bottom: 2px solid var(--sklearn-color-text-on-default-background);
+  flex-grow: 1;
+}
+
+#sk-container-id-1 div.sk-parallel {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  background-color: var(--sklearn-color-background);
+  position: relative;
+}
+
+#sk-container-id-1 div.sk-parallel-item {
+  display: flex;
+  flex-direction: column;
+}
+
+#sk-container-id-1 div.sk-parallel-item:first-child::after {
+  align-self: flex-end;
+  width: 50%;
+}
+
+#sk-container-id-1 div.sk-parallel-item:last-child::after {
+  align-self: flex-start;
+  width: 50%;
+}
+
+#sk-container-id-1 div.sk-parallel-item:only-child::after {
+  width: 0;
+}
+
+/* Serial-specific style estimator block */
+
+#sk-container-id-1 div.sk-serial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--sklearn-color-background);
+  padding-right: 1em;
+  padding-left: 1em;
+}
+
+
+/* Toggleable style: style used for estimator/Pipeline/ColumnTransformer box that is
+clickable and can be expanded/collapsed.
+- Pipeline and ColumnTransformer use this feature and define the default style
+- Estimators will overwrite some part of the style using the `sk-estimator` class
+*/
+
+/* Pipeline and ColumnTransformer style (default) */
+
+#sk-container-id-1 div.sk-toggleable {
+  /* Default theme specific background. It is overwritten whether we have a
+  specific estimator or a Pipeline/ColumnTransformer */
+  background-color: var(--sklearn-color-background);
+}
+
+/* Toggleable label */
+#sk-container-id-1 label.sk-toggleable__label {
+  cursor: pointer;
+  display: flex;
+  width: 100%;
+  margin-bottom: 0;
+  padding: 0.5em;
+  box-sizing: border-box;
+  text-align: center;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.5em;
+}
+
+#sk-container-id-1 label.sk-toggleable__label .caption {
+  font-size: 0.6rem;
+  font-weight: lighter;
+  color: var(--sklearn-color-text-muted);
+}
+
+#sk-container-id-1 label.sk-toggleable__label-arrow:before {
+  /* Arrow on the left of the label */
+  content: "▸";
+  float: left;
+  margin-right: 0.25em;
+  color: var(--sklearn-color-icon);
+}
+
+#sk-container-id-1 label.sk-toggleable__label-arrow:hover:before {
+  color: var(--sklearn-color-text);
+}
+
+/* Toggleable content - dropdown */
+
+#sk-container-id-1 div.sk-toggleable__content {
+  max-height: 0;
+  max-width: 0;
+  overflow: hidden;
+  text-align: left;
+  /* unfitted */
+  background-color: var(--sklearn-color-unfitted-level-0);
+}
+
+#sk-container-id-1 div.sk-toggleable__content.fitted {
+  /* fitted */
+  background-color: var(--sklearn-color-fitted-level-0);
+}
+
+#sk-container-id-1 div.sk-toggleable__content pre {
+  margin: 0.2em;
+  border-radius: 0.25em;
+  color: var(--sklearn-color-text);
+  /* unfitted */
+  background-color: var(--sklearn-color-unfitted-level-0);
+}
+
+#sk-container-id-1 div.sk-toggleable__content.fitted pre {
+  /* unfitted */
+  background-color: var(--sklearn-color-fitted-level-0);
+}
+
+#sk-container-id-1 input.sk-toggleable__control:checked~div.sk-toggleable__content {
+  /* Expand drop-down */
+  max-height: 200px;
+  max-width: 100%;
+  overflow: auto;
+}
+
+#sk-container-id-1 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {
+  content: "▾";
+}
+
+/* Pipeline/ColumnTransformer-specific style */
+
+#sk-container-id-1 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {
+  color: var(--sklearn-color-text);
+  background-color: var(--sklearn-color-unfitted-level-2);
+}
+
+#sk-container-id-1 div.sk-label.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
+  background-color: var(--sklearn-color-fitted-level-2);
+}
+
+/* Estimator-specific style */
+
+/* Colorize estimator box */
+#sk-container-id-1 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {
+  /* unfitted */
+  background-color: var(--sklearn-color-unfitted-level-2);
+}
+
+#sk-container-id-1 div.sk-estimator.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
+  /* fitted */
+  background-color: var(--sklearn-color-fitted-level-2);
+}
+
+#sk-container-id-1 div.sk-label label.sk-toggleable__label,
+#sk-container-id-1 div.sk-label label {
+  /* The background is the default theme color */
+  color: var(--sklearn-color-text-on-default-background);
+}
+
+/* On hover, darken the color of the background */
+#sk-container-id-1 div.sk-label:hover label.sk-toggleable__label {
+  color: var(--sklearn-color-text);
+  background-color: var(--sklearn-color-unfitted-level-2);
+}
+
+/* Label box, darken color on hover, fitted */
+#sk-container-id-1 div.sk-label.fitted:hover label.sk-toggleable__label.fitted {
+  color: var(--sklearn-color-text);
+  background-color: var(--sklearn-color-fitted-level-2);
+}
+
+/* Estimator label */
+
+#sk-container-id-1 div.sk-label label {
+  font-family: monospace;
+  font-weight: bold;
+  display: inline-block;
+  line-height: 1.2em;
+}
+
+#sk-container-id-1 div.sk-label-container {
+  text-align: center;
+}
+
+/* Estimator-specific */
+#sk-container-id-1 div.sk-estimator {
+  font-family: monospace;
+  border: 1px dotted var(--sklearn-color-border-box);
+  border-radius: 0.25em;
+  box-sizing: border-box;
+  margin-bottom: 0.5em;
+  /* unfitted */
+  background-color: var(--sklearn-color-unfitted-level-0);
+}
+
+#sk-container-id-1 div.sk-estimator.fitted {
+  /* fitted */
+  background-color: var(--sklearn-color-fitted-level-0);
+}
+
+/* on hover */
+#sk-container-id-1 div.sk-estimator:hover {
+  /* unfitted */
+  background-color: var(--sklearn-color-unfitted-level-2);
+}
+
+#sk-container-id-1 div.sk-estimator.fitted:hover {
+  /* fitted */
+  background-color: var(--sklearn-color-fitted-level-2);
+}
+
+/* Specification for estimator info (e.g. "i" and "?") */
+
+/* Common style for "i" and "?" */
+
+.sk-estimator-doc-link,
+a:link.sk-estimator-doc-link,
+a:visited.sk-estimator-doc-link {
+  float: right;
+  font-size: smaller;
+  line-height: 1em;
+  font-family: monospace;
+  background-color: var(--sklearn-color-background);
+  border-radius: 1em;
+  height: 1em;
+  width: 1em;
+  text-decoration: none !important;
+  margin-left: 0.5em;
+  text-align: center;
+  /* unfitted */
+  border: var(--sklearn-color-unfitted-level-1) 1pt solid;
+  color: var(--sklearn-color-unfitted-level-1);
+}
+
+.sk-estimator-doc-link.fitted,
+a:link.sk-estimator-doc-link.fitted,
+a:visited.sk-estimator-doc-link.fitted {
+  /* fitted */
+  border: var(--sklearn-color-fitted-level-1) 1pt solid;
+  color: var(--sklearn-color-fitted-level-1);
+}
+
+/* On hover */
+div.sk-estimator:hover .sk-estimator-doc-link:hover,
+.sk-estimator-doc-link:hover,
+div.sk-label-container:hover .sk-estimator-doc-link:hover,
+.sk-estimator-doc-link:hover {
+  /* unfitted */
+  background-color: var(--sklearn-color-unfitted-level-3);
+  color: var(--sklearn-color-background);
+  text-decoration: none;
+}
+
+div.sk-estimator.fitted:hover .sk-estimator-doc-link.fitted:hover,
+.sk-estimator-doc-link.fitted:hover,
+div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
+.sk-estimator-doc-link.fitted:hover {
+  /* fitted */
+  background-color: var(--sklearn-color-fitted-level-3);
+  color: var(--sklearn-color-background);
+  text-decoration: none;
+}
+
+/* Span, style for the box shown on hovering the info icon */
+.sk-estimator-doc-link span {
+  display: none;
+  z-index: 9999;
+  position: relative;
+  font-weight: normal;
+  right: .2ex;
+  padding: .5ex;
+  margin: .5ex;
+  width: min-content;
+  min-width: 20ex;
+  max-width: 50ex;
+  color: var(--sklearn-color-text);
+  box-shadow: 2pt 2pt 4pt #999;
+  /* unfitted */
+  background: var(--sklearn-color-unfitted-level-0);
+  border: .5pt solid var(--sklearn-color-unfitted-level-3);
+}
+
+.sk-estimator-doc-link.fitted span {
+  /* fitted */
+  background: var(--sklearn-color-fitted-level-0);
+  border: var(--sklearn-color-fitted-level-3);
+}
+
+.sk-estimator-doc-link:hover span {
+  display: block;
+}
+
+/* "?"-specific style due to the `<a>` HTML tag */
+
+#sk-container-id-1 a.estimator_doc_link {
+  float: right;
+  font-size: 1rem;
+  line-height: 1em;
+  font-family: monospace;
+  background-color: var(--sklearn-color-background);
+  border-radius: 1rem;
+  height: 1rem;
+  width: 1rem;
+  text-decoration: none;
+  /* unfitted */
+  color: var(--sklearn-color-unfitted-level-1);
+  border: var(--sklearn-color-unfitted-level-1) 1pt solid;
+}
+
+#sk-container-id-1 a.estimator_doc_link.fitted {
+  /* fitted */
+  border: var(--sklearn-color-fitted-level-1) 1pt solid;
+  color: var(--sklearn-color-fitted-level-1);
+}
+
+/* On hover */
+#sk-container-id-1 a.estimator_doc_link:hover {
+  /* unfitted */
+  background-color: var(--sklearn-color-unfitted-level-3);
+  color: var(--sklearn-color-background);
+  text-decoration: none;
+}
+
+#sk-container-id-1 a.estimator_doc_link.fitted:hover {
+  /* fitted */
+  background-color: var(--sklearn-color-fitted-level-3);
+}
+</style><div class="sk-top-container" id="sk-container-id-1"><div class="sk-text-repr-fallback"><pre>RandomizedSearchCV(cv=3,
+                   estimator=Pipeline(steps=[('preprocessor',
+                                              ColumnTransformer(force_int_remainder_cols=False,
+                                                                remainder='passthrough',
+                                                                transformers=[('cat',
+                                                                               OneHotEncoder(handle_unknown='ignore'),
+                                                                               ['checking_status',
+                                                                                'credit_history',
+                                                                                'purpose',
+                                                                                'savings_status',
+                                                                                'employment',
+                                                                                'personal_status',
+                                                                                'other_parties',
+                                                                                'property_magnitude',
+                                                                                'other_payment_plans...
+                                                            n_estimators=100,
+                                                            n_jobs=None,
+                                                            num_parallel_tree=None, ...))]),
+                   n_iter=20, n_jobs=-1,
+                   param_distributions={'classifier__learning_rate': &lt;scipy.stats._distn_infrastructure.rv_continuous_frozen object at 0x10690b670&gt;,
+                                        'classifier__max_depth': [1, 2, 3, 4, 5,
+                                                                  6, 7, 8]},
+                   random_state=42,
+                   scoring=make_scorer(classification_error, greater_is_better=False, response_method='predict'),
+                   verbose=1)</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br/>On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden=""><div class="sk-item sk-dashed-wrapped"><div class="sk-label-container"><div class="sk-label fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-1" type="checkbox"/><label class="sk-toggleable__label fitted sk-toggleable__label-arrow" for="sk-estimator-id-1"><div><div>RandomizedSearchCV</div></div><div><a class="sk-estimator-doc-link fitted" href="https://scikit-learn.org/1.6/modules/generated/sklearn.model_selection.RandomizedSearchCV.html" rel="noreferrer" target="_blank">?<span>Documentation for RandomizedSearchCV</span></a><span class="sk-estimator-doc-link fitted">i<span>Fitted</span></span></div></label><div class="sk-toggleable__content fitted"><pre>RandomizedSearchCV(cv=3,
+                   estimator=Pipeline(steps=[('preprocessor',
+                                              ColumnTransformer(force_int_remainder_cols=False,
+                                                                remainder='passthrough',
+                                                                transformers=[('cat',
+                                                                               OneHotEncoder(handle_unknown='ignore'),
+                                                                               ['checking_status',
+                                                                                'credit_history',
+                                                                                'purpose',
+                                                                                'savings_status',
+                                                                                'employment',
+                                                                                'personal_status',
+                                                                                'other_parties',
+                                                                                'property_magnitude',
+                                                                                'other_payment_plans...
+                                                            n_estimators=100,
+                                                            n_jobs=None,
+                                                            num_parallel_tree=None, ...))]),
+                   n_iter=20, n_jobs=-1,
+                   param_distributions={'classifier__learning_rate': &lt;scipy.stats._distn_infrastructure.rv_continuous_frozen object at 0x10690b670&gt;,
+                                        'classifier__max_depth': [1, 2, 3, 4, 5,
+                                                                  6, 7, 8]},
+                   random_state=42,
+                   scoring=make_scorer(classification_error, greater_is_better=False, response_method='predict'),
+                   verbose=1)</pre></div> </div></div><div class="sk-parallel"><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-2" type="checkbox"/><label class="sk-toggleable__label fitted sk-toggleable__label-arrow" for="sk-estimator-id-2"><div><div>best_estimator_: Pipeline</div></div></label><div class="sk-toggleable__content fitted"><pre>Pipeline(steps=[('preprocessor',
+                 ColumnTransformer(force_int_remainder_cols=False,
+                                   remainder='passthrough',
+                                   transformers=[('cat',
+                                                  OneHotEncoder(handle_unknown='ignore'),
+                                                  ['checking_status',
+                                                   'credit_history', 'purpose',
+                                                   'savings_status',
+                                                   'employment',
+                                                   'personal_status',
+                                                   'other_parties',
+                                                   'property_magnitude',
+                                                   'other_payment_plans',
+                                                   'housing', 'job',
+                                                   'own_telephone',...
+                               gamma=None, grow_policy=None,
+                               importance_type=None,
+                               interaction_constraints=None,
+                               learning_rate=0.32367720186661747, max_bin=None,
+                               max_cat_threshold=None, max_cat_to_onehot=None,
+                               max_delta_step=None, max_depth=4,
+                               max_leaves=None, min_child_weight=None,
+                               missing=nan, monotone_constraints=None,
+                               multi_strategy=None, n_estimators=100,
+                               n_jobs=None, num_parallel_tree=None, ...))])</pre></div> </div></div><div class="sk-serial"><div class="sk-item"><div class="sk-serial"><div class="sk-item sk-dashed-wrapped"><div class="sk-label-container"><div class="sk-label fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-3" type="checkbox"/><label class="sk-toggleable__label fitted sk-toggleable__label-arrow" for="sk-estimator-id-3"><div><div>preprocessor: ColumnTransformer</div></div><div><a class="sk-estimator-doc-link fitted" href="https://scikit-learn.org/1.6/modules/generated/sklearn.compose.ColumnTransformer.html" rel="noreferrer" target="_blank">?<span>Documentation for preprocessor: ColumnTransformer</span></a></div></label><div class="sk-toggleable__content fitted"><pre>ColumnTransformer(force_int_remainder_cols=False, remainder='passthrough',
+                  transformers=[('cat', OneHotEncoder(handle_unknown='ignore'),
+                                 ['checking_status', 'credit_history',
+                                  'purpose', 'savings_status', 'employment',
+                                  'personal_status', 'other_parties',
+                                  'property_magnitude', 'other_payment_plans',
+                                  'housing', 'job', 'own_telephone',
+                                  'foreign_worker'])])</pre></div> </div></div><div class="sk-parallel"><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-4" type="checkbox"/><label class="sk-toggleable__label fitted sk-toggleable__label-arrow" for="sk-estimator-id-4"><div><div>cat</div></div></label><div class="sk-toggleable__content fitted"><pre>['checking_status', 'credit_history', 'purpose', 'savings_status', 'employment', 'personal_status', 'other_parties', 'property_magnitude', 'other_payment_plans', 'housing', 'job', 'own_telephone', 'foreign_worker']</pre></div> </div></div><div class="sk-serial"><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-5" type="checkbox"/><label class="sk-toggleable__label fitted sk-toggleable__label-arrow" for="sk-estimator-id-5"><div><div>OneHotEncoder</div></div><div><a class="sk-estimator-doc-link fitted" href="https://scikit-learn.org/1.6/modules/generated/sklearn.preprocessing.OneHotEncoder.html" rel="noreferrer" target="_blank">?<span>Documentation for OneHotEncoder</span></a></div></label><div class="sk-toggleable__content fitted"><pre>OneHotEncoder(handle_unknown='ignore')</pre></div> </div></div></div></div></div><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-6" type="checkbox"/><label class="sk-toggleable__label fitted sk-toggleable__label-arrow" for="sk-estimator-id-6"><div><div>remainder</div></div></label><div class="sk-toggleable__content fitted"><pre>['duration', 'credit_amount', 'installment_commitment', 'residence_since', 'age', 'existing_credits', 'num_dependents']</pre></div> </div></div><div class="sk-serial"><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-7" type="checkbox"/><label class="sk-toggleable__label fitted sk-toggleable__label-arrow" for="sk-estimator-id-7"><div><div>passthrough</div></div></label><div class="sk-toggleable__content fitted"><pre>passthrough</pre></div> </div></div></div></div></div></div></div><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-8" type="checkbox"/><label class="sk-toggleable__label fitted sk-toggleable__label-arrow" for="sk-estimator-id-8"><div><div>XGBClassifier</div></div><div><a class="sk-estimator-doc-link fitted" href="https://xgboost.readthedocs.io/en/release_3.0.0/python/python_api.html#xgboost.XGBClassifier" rel="noreferrer" target="_blank">?<span>Documentation for XGBClassifier</span></a></div></label><div class="sk-toggleable__content fitted"><pre>XGBClassifier(base_score=None, booster=None, callbacks=None,
+              colsample_bylevel=None, colsample_bynode=None,
+              colsample_bytree=None, device=None, early_stopping_rounds=None,
+              enable_categorical=False, eval_metric='logloss',
+              feature_types=None, feature_weights=None, gamma=None,
+              grow_policy=None, importance_type=None,
+              interaction_constraints=None, learning_rate=0.32367720186661747,
+              max_bin=None, max_cat_threshold=None, max_cat_to_onehot=None,
+              max_delta_step=None, max_depth=4, max_leaves=None,
+              min_child_weight=None, missing=nan, monotone_constraints=None,
+              multi_strategy=None, n_estimators=100, n_jobs=None,
+              num_parallel_tree=None, ...)</pre></div> </div></div></div></div></div></div></div></div></div></div></div>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
@@ -7676,55 +8455,65 @@ Use `SequentialFeatureSelector()` from `sklearn.feature_selection` and set the p
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="1.2-Start-the-Feature-Selection">1.2 Start the Feature Selection<a class="anchor-link" href="#1.2-Start-the-Feature-Selection">¶</a></h2><p>Start the feature selection by fitting the selector (<code>SequentialFeatureSelector</code>) to your reduced feature set (<code>X_four_feats</code>) and target (<code>y</code>). Then, identify the subset of selected features based on classification accuracy.</p>
-<details><summary>Hint 1:</summary> 
-Use the `.fit()` method of your initialized `SequentialFeatureSelector` object. 
+<h3 id="2.3-Inspect-the-Best-Performing-Setup">2.3 Inspect the Best Performing Setup<a class="anchor-link" href="#2.3-Inspect-the-Best-Performing-Setup">¶</a></h3><p>Which tree depth was the best performing one?</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell celltag_remove_cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+
+<span class="c1"># Display the best hyperparameters and corresponding classification error.</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best hyperparameters: </span><span class="si">{</span><span class="n">random_search</span><span class="o">.</span><span class="n">best_params_</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="c1"># Note: The best_score_ is negative classification error (because greater_is_better=False)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best classification error: </span><span class="si">{</span><span class="o">-</span><span class="n">random_search</span><span class="o">.</span><span class="n">best_score_</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Best hyperparameters: {'classifier__learning_rate': 0.32367720186661747, 'classifier__max_depth': 4}
+Best classification error: 0.2350
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="3-Early-Stopping">3 Early Stopping<a class="anchor-link" href="#3-Early-Stopping">¶</a></h2><h3 id="3.1-Set-up-an-XGBoost-Learner-with-Early-Stopping">3.1 Set up an XGBoost Learner with Early Stopping<a class="anchor-link" href="#3.1-Set-up-an-XGBoost-Learner-with-Early-Stopping">¶</a></h3><p>Now that we've derived the best hyperparameters for <code>max_depth</code> and <code>learning_rate</code>, we can train our final model. To avoid overfitting, we perform early stopping. Early stopping halts training when the performance on a validation dataset stops improving for a specified number of iterations.</p>
+<p>Set up an XGBoost classifier with the following hyperparameters:</p>
+<ul>
+<li><code>max_depth</code> and <code>learning_rate</code> set according to the best values identified from the tuning step.</li>
+<li><code>n_estimators</code> set to 100.</li>
+<li>Early stopping set to 5 rounds (this parameter could also be tuned, but we simplify the exercise here).</li>
+</ul>
+<p>Split the <code>X</code> and <code>y</code> into a training set and a tes set, with <code>test_size=0.1</code>.</p>
+<details><summary>Hint 1:</summary>
+Since our original pipeline contains a preprocessor, we need to ensure that both the training and validation sets are preprocessed in the same way. Here we fit the preprocessor on the training subset and transform both sets.
 </details>
-<details><summary>Hint 2:</summary> 
-After fitting, use `.get_support()` or `.get_feature_names_out()` to identify which features have been selected. 
-</details>
 </div>
 </div>
 </div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<div style="background-color: #fff3cd; border-left: 6px solid #ffa502; padding: 1em; margin: 1em 0; border-radius: 4px;">
-<strong>⚠️ Skipped Task: 1.3 Evaluate</strong>
-<p>View the four characteristics and the accuracy from the instance archive for each of the first two batches.</p>
-<p><em>This sub-section is skipped because the <code>SequentialFeatureSelector</code> does not store search results at intermediate steps, unlike the R solution.</em></p>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="1.4-Model-Training">1.4 Model Training<a class="anchor-link" href="#1.4-Model-Training">¶</a></h2><p>Train the model with the subset of features indentified by the feature selector. Compute the accuracy on the test set.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="2-Multiple-Performance-Measures">2 Multiple Performance Measures<a class="anchor-link" href="#2-Multiple-Performance-Measures">¶</a></h2><p>To optimize multiple performance metrics, the procedure is similar to the previous step, but now multiple metrics are considered separately. Perform feature selection using random search to optimize three different metrics: classification accuracy, True Positive Rate (TPR), and True Negative Rate (TNR).</p>
-<p>Again, use the full <code>german_credit</code> dataset and perform the following steps to process the data.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs celltag_remove_cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7732,21 +8521,36 @@ After fitting, use `.get_support()` or `.get_feature_names_out()` to identify wh
 <div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># First, let's prepare the full dataset with proper encoding</span>
-<span class="c1"># Separate numerical and categorical features</span>
-<span class="n">numerical_features</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s1">'int64'</span><span class="p">,</span> <span class="s1">'float64'</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-<span class="n">categorical_features</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s1">'object'</span><span class="p">,</span> <span class="s1">'category'</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
 
-<span class="c1"># Apply ordinal encoding to categorical features</span>
-<span class="n">X_cat_encoded</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
-<span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">categorical_features</span><span class="p">:</span>
-    <span class="n">enc</span> <span class="o">=</span> <span class="n">OrdinalEncoder</span><span class="p">()</span>
-    <span class="n">encoded_feature</span> <span class="o">=</span> <span class="n">enc</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">[[</span><span class="n">feature</span><span class="p">]])</span>
-    <span class="n">X_cat_encoded</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoded_feature</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
 
-<span class="c1"># Combine numerical and encoded categorical features</span>
-<span class="n">X_num</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">numerical_features</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-<span class="n">X_full</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">X_num</span><span class="p">,</span> <span class="n">X_cat_encoded</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">best_max_depth</span> <span class="o">=</span> <span class="n">random_search</span><span class="o">.</span><span class="n">best_params_</span><span class="p">[</span><span class="s1">'classifier__max_depth'</span><span class="p">]</span>
+<span class="n">best_learning_rate</span> <span class="o">=</span> <span class="n">random_search</span><span class="o">.</span><span class="n">best_params_</span><span class="p">[</span><span class="s1">'classifier__learning_rate'</span><span class="p">]</span>
+
+<span class="c1"># Partition the training set (X_train, y_train) into training (90%) and early stopping (validation) sets (10%)</span>
+<span class="n">X_train_es</span><span class="p">,</span> <span class="n">X_val_es</span><span class="p">,</span> <span class="n">y_train_es</span><span class="p">,</span> <span class="n">y_val_es</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+
+<span class="c1"># Initialize a new XGBoost classifier with early stopping.</span>
+<span class="c1"># Note: n_estimators corresponds to nrounds in R.</span>
+<span class="n">xgb_es</span> <span class="o">=</span> <span class="n">XGBClassifier</span><span class="p">(</span>
+    <span class="n">n_estimators</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">max_depth</span><span class="o">=</span><span class="n">best_max_depth</span><span class="p">,</span>
+    <span class="n">learning_rate</span><span class="o">=</span><span class="n">best_learning_rate</span><span class="p">,</span>
+    <span class="n">early_stopping_rounds</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">2001</span><span class="p">,</span>
+    <span class="n">eval_metric</span><span class="o">=</span><span class="s1">'logloss'</span>
+<span class="p">)</span>
+
+<span class="c1"># Since our original pipeline contains a preprocessor, we need to ensure that both</span>
+<span class="c1"># the training and validation sets are preprocessed in the same way.</span>
+<span class="c1"># Here we fit the preprocessor on the training subset and transform both sets.</span>
+<span class="n">preprocessor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_es</span><span class="p">)</span>
+<span class="n">X_train_es_trans</span> <span class="o">=</span> <span class="n">preprocessor</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_train_es</span><span class="p">)</span>
+<span class="n">X_val_es_trans</span> <span class="o">=</span> <span class="n">preprocessor</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_val_es</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7759,20 +8563,11 @@ After fitting, use `.get_support()` or `.get_feature_names_out()` to identify wh
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Now, please write the code to perform the following tasks:</p>
-<ul>
-<li>Set up a random search feature selector.</li>
-<li>Perform random search independently for each performance metric (<code>accuracy</code>, <code>TPR</code>, and <code>TNR</code>) using 3-fold cross-validation.</li>
-<li>Evaluate and report the resulting feature subsets and their performances across all metrics.</li>
-</ul>
-<p>Use the provided <code>random_feature_search</code> function separately for each performance metric: <code>accuracy</code>, <code>tpr_scorer</code>, and <code>tnr_scorer</code>.</p>
-<details><summary>Hint 1:</summary>
-After selecting the best features for each metric, evaluate the performance of each subset across all three metrics to compare results comprehensively.
-</details>
+<h3 id="3.2-Training-on-Credit-Data">3.2 Training on Credit Data<a class="anchor-link" href="#3.2-Training-on-Credit-Data">¶</a></h3><p>Train the XGBoost classifier with early stopping from the training set obtained in the last chunk of exercise. How many iterations were conducted before the boosting algorithm stopped?</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell celltag_remove_cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7780,195 +8575,23 @@ After selecting the best features for each metric, evaluate the performance of e
 <div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">cross_val_score</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
 
+<span class="n">xgb_es</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+    <span class="n">X_train_es_trans</span><span class="p">,</span>
+    <span class="n">y_train_es</span><span class="p">,</span>
+    <span class="n">eval_set</span><span class="o">=</span><span class="p">[(</span><span class="n">X_val_es_trans</span><span class="p">,</span> <span class="n">y_val_es</span><span class="p">)],</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">random_feature_search</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">clf</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">scorer</span><span class="p">,</span> <span class="n">n_iterations</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">min_features</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rng</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""This function is provided as a helper function to perform random search for feature selection."""</span>
-    <span class="n">rng</span> <span class="o">=</span> <span class="n">rng</span> <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-    
-    <span class="k">if</span> <span class="n">max_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">max_features</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    
-    <span class="n">all_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
-    <span class="n">best_score</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
-    <span class="n">best_features</span> <span class="o">=</span> <span class="p">[]</span>
-    
-    <span class="c1"># Try different feature subset sizes</span>
-    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_iterations</span><span class="p">):</span>
-        <span class="c1"># Randomly select number of features to use</span>
-        <span class="n">n_features</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_features</span><span class="p">,</span> <span class="n">max_features</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-        
-        <span class="c1"># Randomly select features without replacement</span>
-        <span class="n">feature_indices</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_features</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="n">n_features</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">feature_subset</span> <span class="o">=</span> <span class="p">[</span><span class="n">all_features</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">feature_indices</span><span class="p">]</span>
-        
-        <span class="c1"># Evaluate this feature subset</span>
-        <span class="n">X_subset</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">feature_subset</span><span class="p">]</span>
-        <span class="n">scores</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_subset</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="n">scorer</span><span class="p">)</span>
-        <span class="n">avg_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
-        
-        <span class="c1"># Update best if this is better</span>
-        <span class="k">if</span> <span class="n">avg_score</span> <span class="o">&gt;</span> <span class="n">best_score</span><span class="p">:</span>
-            <span class="n">best_score</span> <span class="o">=</span> <span class="n">avg_score</span>
-            <span class="n">best_features</span> <span class="o">=</span> <span class="n">feature_subset</span>
-    
-    <span class="k">return</span> <span class="n">best_features</span><span class="p">,</span> <span class="n">best_score</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Question: what is your observation?</p>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="3-Nested-Resampling">3 Nested Resampling<a class="anchor-link" href="#3-Nested-Resampling">¶</a></h2><p>Nested resampling enables finding unbiased performance estimators when feature selection is part of the modeling process. In Python with <code>scikit-learn</code>, this can be implemented by creating a custom wrapper class (e.g., <code>AutoFSelector</code>) that integrates feature selection within cross-validation.</p>
-<h3 id="3.1-Create-an-AutoFSelector-Instance">3.1 Create an AutoFSelector Instance<a class="anchor-link" href="#3.1-Create-an-AutoFSelector-Instance">¶</a></h3><p>Implement an <code>AutoFSelector</code> class that uses random search to find the subset of features resulting in the highest classification accuracy for a logistic regression model. The feature selector should perform the search using holdout validation and terminate after <code>n_evals</code> evaluations.</p>
-<p>Use the provided custom <code>AutoFSelector</code> class with logistic regression (<code>LogisticRegression</code>) as the base estimator.</p>
-<p>Note: the random search feature selection comes with large randomness. So, you may need to set <code>n_evals</code> to 20 and try multiple random seeds to get the best performance. In the solution, we use a lucky <code>random_state=543</code> for <code>AutoFSelector</code>.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">ClassifierMixin</span><span class="p">,</span> <span class="n">clone</span>
+<span class="c1"># Evaluate the performance on the validation set.</span>
+<span class="n">y_val_pred</span> <span class="o">=</span> <span class="n">xgb_es</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_val_es_trans</span><span class="p">)</span>
+<span class="n">val_accuracy</span> <span class="o">=</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_val_es</span><span class="p">,</span> <span class="n">y_val_pred</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Classification error with early stopping: </span><span class="si">{</span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">val_accuracy</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-
-<span class="k">class</span> <span class="nc">AutoFSelector</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">ClassifierMixin</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_estimator</span><span class="p">,</span> <span class="n">n_evals</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator</span> <span class="o">=</span> <span class="n">base_estimator</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_evals</span> <span class="o">=</span> <span class="n">n_evals</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cv</span> <span class="o">=</span> <span class="n">cv</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
-
-    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-        <span class="c1"># Ensure X is a DataFrame to ease column handling</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">X_original_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s1">'columns'</span><span class="p">):</span>
-                <span class="n">X_df</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># Create a DataFrame with default column names</span>
-                <span class="n">X_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">X_original_type</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
-            <span class="n">X_df</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            
-        <span class="bp">self</span><span class="o">.</span><span class="n">feature_names_</span> <span class="o">=</span> <span class="n">X_df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        
-        <span class="c1"># Use the existing random_feature_search function</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">selected_features_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_score_</span> <span class="o">=</span> <span class="n">random_feature_search</span><span class="p">(</span>
-            <span class="n">X_df</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> 
-            <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator</span><span class="p">,</span> 
-            <span class="n">cv</span><span class="o">=</span><span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cv</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">),</span>
-            <span class="n">scorer</span><span class="o">=</span><span class="s1">'accuracy'</span><span class="p">,</span> 
-            <span class="n">n_iterations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_evals</span><span class="p">,</span>
-            <span class="n">min_features</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
-        <span class="p">)</span>
-        
-        <span class="c1"># Create the best mask for feature selection</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">best_mask_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">feat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_features_</span> <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_names_</span><span class="p">])</span>
-        
-        <span class="c1"># Fit the final model on the selected features</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">estimator_</span> <span class="o">=</span> <span class="n">clone</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_estimator</span><span class="p">)</span>
-        <span class="n">X_selected</span> <span class="o">=</span> <span class="n">X_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_features_</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">estimator_</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_selected</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-        
-        <span class="k">return</span> <span class="bp">self</span>
-
-    <span class="k">def</span> <span class="nf">_get_feature_subset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Helper to get the selected feature subset from input X."""</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-            <span class="c1"># If X is already a DataFrame, simply select the features</span>
-            <span class="k">return</span> <span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_features_</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># If X is a numpy array, convert to DataFrame with proper column names</span>
-            <span class="n">X_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_names_</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">X_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_features_</span><span class="p">]</span>
-
-    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-        <span class="n">X_subset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_feature_subset</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_subset</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-        <span class="n">X_subset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_feature_subset</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_subset</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Now, write your code for the task.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="3.2-Benchmark">3.2 Benchmark<a class="anchor-link" href="#3.2-Benchmark">¶</a></h3><p>Compare the <code>AutoFSelector</code> (nested resampling approach) against a plain logistic regression model using a 3-fold cross-validation on the Sonar dataset.</p>
-<details><summary>Hint 1:</summary>
-Perform cross-validation separately for both the logistic regression and the `AutoFSelector`, then compute their average accuracies.
-</details>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Load the Sonar dataset from OpenML</span>
-<span class="n">X_sonar</span><span class="p">,</span> <span class="n">y_sonar</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="s1">'Sonar'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="c1"># Set up 3-fold cross-validation</span>
-<span class="n">cv</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">2025</span><span class="p">)</span>
-
-<span class="c1"># Compute CV accuracy for both models.</span>
-<span class="n">score_afs</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">afs</span><span class="p">,</span> <span class="n">X_sonar</span><span class="p">,</span> <span class="n">y_sonar</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s1">'accuracy'</span><span class="p">)</span>
-<span class="n">score_lr</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">log_reg</span><span class="p">,</span> <span class="n">X_sonar</span><span class="p">,</span> <span class="n">y_sonar</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s1">'accuracy'</span><span class="p">)</span>
-
-<span class="n">results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
-    <span class="s2">"learner_id"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"AutoFSelector"</span><span class="p">,</span> <span class="s2">"LogisticRegression"</span><span class="p">],</span>
-    <span class="s2">"classif.acc"</span><span class="p">:</span> <span class="p">[</span><span class="n">score_afs</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">score_lr</span><span class="o">.</span><span class="n">mean</span><span class="p">()]</span>
-<span class="p">})</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Benchmark Results:"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+<span class="c1"># Store the number of iterations (trees) used by the model with early stopping</span>
+<span class="n">best_iteration</span> <span class="o">=</span> <span class="n">xgb_es</span><span class="o">.</span><span class="n">best_iteration</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Number of trees used with early stopping: </span><span class="si">{</span><span class="n">best_iteration</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7981,11 +8604,36 @@ Perform cross-validation separately for both the logistic regression and the `Au
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>
-Benchmark Results:
-           learner_id  classif.acc
-0       AutoFSelector     0.759834
-1  LogisticRegression     0.759696
+<pre>[0]	validation_0-logloss:0.55338
+[1]	validation_0-logloss:0.51626
+[2]	validation_0-logloss:0.50632
+[3]	validation_0-logloss:0.48498
+[4]	validation_0-logloss:0.46744
+[5]	validation_0-logloss:0.47045
+[6]	validation_0-logloss:0.46659
+[7]	validation_0-logloss:0.46170
+[8]	validation_0-logloss:0.44685
+[9]	validation_0-logloss:0.44670
+[10]	validation_0-logloss:0.45028
+[11]	validation_0-logloss:0.44845
+[12]	validation_0-logloss:0.44415
+[13]	validation_0-logloss:0.44018
+[14]	validation_0-logloss:0.43668
+[15]	validation_0-logloss:0.43682
+[16]	validation_0-logloss:0.43732
+[17]	validation_0-logloss:0.43450
+[18]	validation_0-logloss:0.43009
+[19]	validation_0-logloss:0.43432
+[20]	validation_0-logloss:0.43173
+[21]	validation_0-logloss:0.43376
+[22]	validation_0-logloss:0.42858
+[23]	validation_0-logloss:0.42894
+[24]	validation_0-logloss:0.43310
+[25]	validation_0-logloss:0.43090
+[26]	validation_0-logloss:0.42902
+[27]	validation_0-logloss:0.43151
+Classification error with early stopping: 0.21
+Number of trees used with early stopping: 22
 </pre>
 </div>
 </div>
@@ -7998,11 +8646,157 @@ Benchmark Results:
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Summary">Summary<a class="anchor-link" href="#Summary">¶</a></h2><ul>
-<li>Wrapper methods calculate performance measures for various combinations of features in order to perform feature selection.</li>
-<li>They are computationally expensive since several models need to be fitted.</li>
-<li>The <code>AutoFSelector</code> inherits from the base classes <code>BaseEstimator</code> and <code>ClassifierMixin</code>, which is why it can be used like any other learner.</li>
+<h2 id="4-Extra:-Nested-Resampling">4 Extra: Nested Resampling<a class="anchor-link" href="#4-Extra:-Nested-Resampling">¶</a></h2><p>To obtain an unbiased performance estimate while tuning hyperparameters and applying early stopping, conduct nested resampling with:</p>
+<ul>
+<li><strong>3-fold cross-validation</strong> for both the outer and inner resampling loops.</li>
+<li><strong>Search space</strong>:<ul>
+<li><code>max_depth</code> between 1 and 8.</li>
+<li><code>learning_rate</code> (eta) between 0.2 and 0.4.</li>
 </ul>
+</li>
+<li><strong>Random search</strong> with 20 evaluations.</li>
+<li><strong>Performance measure</strong>: classification error (<code>1 - accuracy</code>).</li>
+</ul>
+<p>Extract the performance estimate on the outer resampling folds.</p>
+<details><summary>Hint 1:</summary>
+    Note: Because early stopping in XGBoost requires a separate validation set, 
+    we wrap XGBClassifier in a custom estimator that automatically partitions the training data for early stopping. This estimator should inherit `sklearn.base.BaseEstimator` and `ClassifierMixin` and implement the required interfaces. Furthermore, in `def fit(self, X, y)`, the this class should partition the `X` and `y` (training data) into a "local" training and a "local" validation subsets. These "local" training and validation sets are further passed into `XGBClassifier.fit(X_train_local, y_train_local, eval_set=[(X_val_local, y_val_local)])` to perform the training with early stopping.
+</details>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell celltag_remove_cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#===SOLUTION===</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">ClassifierMixin</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">StratifiedKFold</span><span class="p">,</span> <span class="n">train_test_split</span>
+
+
+<span class="c1"># Custom wrapper to enable early stopping within a pipeline.</span>
+<span class="k">class</span> <span class="nc">XGBClassifierWithEarlyStopping</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">ClassifierMixin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Note: Because early stopping in XGBoost requires a separate validation set, </span>
+<span class="sd">    we wrap XGBClassifier in a custom estimator that automatically partitions the training data for early stopping.</span>
+
+<span class="sd">    However, the drawback is that the training data is split into two parts, </span>
+<span class="sd">    which means that the model is trained on less data. If you have better solutions to utilizing the inner CV validation set</span>
+<span class="sd">    for the early stopping validation set, please submit a PR.</span>
+<span class="sd">    """</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_estimators</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+                 <span class="n">early_stopping_rounds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span> <span class="o">=</span> <span class="n">n_estimators</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_depth</span> <span class="o">=</span> <span class="n">max_depth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="n">learning_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">early_stopping_rounds</span> <span class="o">=</span> <span class="n">early_stopping_rounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_size</span> <span class="o">=</span> <span class="n">test_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_</span><span class="p">:</span> <span class="n">XGBClassifier</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="c1"># Partition data for early stopping: inner training and validation splits.</span>
+        <span class="n">X_train_local</span><span class="p">,</span> <span class="n">X_val_local</span><span class="p">,</span> <span class="n">y_train_local</span><span class="p">,</span> <span class="n">y_val_local</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_size</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_</span> <span class="o">=</span> <span class="n">XGBClassifier</span><span class="p">(</span>
+            <span class="n">n_estimators</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span><span class="p">,</span>
+            <span class="n">max_depth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_depth</span><span class="p">,</span>
+            <span class="n">learning_rate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">,</span>
+            <span class="n">early_stopping_rounds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">early_stopping_rounds</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="n">eval_metric</span><span class="o">=</span><span class="s1">'logloss'</span><span class="p">,</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+            <span class="n">X_train_local</span><span class="p">,</span> <span class="n">y_train_local</span><span class="p">,</span>
+            <span class="n">eval_set</span><span class="o">=</span><span class="p">[(</span><span class="n">X_val_local</span><span class="p">,</span> <span class="n">y_val_local</span><span class="p">)],</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+<span class="c1"># Build a pipeline that applies preprocessing then the custom XGBoost classifier.</span>
+<span class="c1"># We assume the preprocessor (e.g., a ColumnTransformer for one-hot encoding) is defined earlier.</span>
+<span class="n">pipeline_es</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">'preprocessor'</span><span class="p">,</span> <span class="n">preprocessor</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">'classifier'</span><span class="p">,</span> <span class="n">XGBClassifierWithEarlyStopping</span><span class="p">(</span>
+        <span class="n">n_estimators</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">max_depth</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> 
+        <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>   
+        <span class="n">early_stopping_rounds</span><span class="o">=</span><span class="n">best_iteration</span><span class="p">,</span>
+        <span class="n">test_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+    <span class="p">))</span>
+<span class="p">])</span>
+
+<span class="c1"># Define the custom scoring: classification error = 1 - accuracy.</span>
+<span class="k">def</span> <span class="nf">classification_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+
+<span class="n">error_scorer</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">classification_error</span><span class="p">,</span> <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Define the search space for hyperparameter tuning.</span>
+<span class="n">param_distributions_nested</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"classifier__max_depth"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">)),</span>
+    <span class="s2">"classifier__learning_rate"</span><span class="p">:</span> <span class="n">uniform</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>      
+<span class="p">}</span>
+
+<span class="c1"># Inner resampling: 3-fold CV using RandomizedSearchCV with 20 evaluations.</span>
+<span class="n">inner_cv</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">random_search_nested</span> <span class="o">=</span> <span class="n">RandomizedSearchCV</span><span class="p">(</span>
+    <span class="n">pipeline_es</span><span class="p">,</span>
+    <span class="n">param_distributions</span><span class="o">=</span><span class="n">param_distributions_nested</span><span class="p">,</span>
+    <span class="n">n_iter</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>   
+    <span class="n">scoring</span><span class="o">=</span><span class="n">error_scorer</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="n">inner_cv</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Outer resampling: perform 3-fold CV over the entire dataset (X, y).</span>
+<span class="n">outer_cv</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">nested_scores</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span>
+    <span class="n">random_search_nested</span><span class="p">,</span>
+    <span class="n">X</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="n">outer_cv</span><span class="p">,</span>
+    <span class="n">scoring</span><span class="o">=</span><span class="n">error_scorer</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Since error_scorer was defined with greater_is_better=False, scores are negative.</span>
+<span class="n">mean_classification_error</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">nested_scores</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Nested CV Classification Error: </span><span class="si">{</span><span class="n">mean_classification_error</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Fitting 3 folds for each of 20 candidates, totalling 60 fits
+Fitting 3 folds for each of 20 candidates, totalling 60 fits
+Fitting 3 folds for each of 20 candidates, totalling 60 fits
+Nested CV Classification Error: 0.2580
+</pre>
+</div>
 </div>
 </div>
 </div>
@@ -8013,6 +8807,31 @@ Benchmark Results:
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>Question: How is the classification error compared to the previous experiment without nested sampling?</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput celltag_remove_cell" data-mime-type="text/markdown">
+<p>===SOLUTION===</p>
+<p>We obtain a higher classification error than we received without nested resampling.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Summary">Summary<a class="anchor-link" href="#Summary">¶</a></h2><p>In this exercise sheet, we learned how to apply a XGBoost learner to the credit data set By using resampling, we estimated the performance. XGBoost has a lot of hyperparameters and we only had a closer look on two of them. We also saw how early stopping could be facilitated which should help to avoid overfitting of the XGBoost model.</p>
+<p>Interestingly, we obtained best results, when we used 100 iterations, without tuning or early stopping. However, performance differences were quite small - if we set a different seed, we might see a different ranking. Furthermore, we could extend our tuning search space such that more hyperparameters are considered to increase overall performance of the learner for the task at hand. Of course, this also requires more budget for the tuning (e.g., more evaluations of random search).</p>
 </div>
 </div>
 </div>
