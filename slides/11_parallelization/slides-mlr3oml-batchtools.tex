@@ -97,7 +97,7 @@ belowskip = -1.2 \baselineskip,
 \item Access OpenML from within R
 \item Quick intro to batchtools}
 
-\lecturechapter{Large-scale ML Experiments - mlr3oml and batchtools}
+\lecturechapter{Intro to mlr3oml and batchtools}
 \lecture{Applied Machine Learning}
 
 
@@ -277,38 +277,38 @@ belowskip = -1.2 \baselineskip,
 
 \end{frame}
 
-\begin{frame}{OpenML - The Project}
-\href{https://www.openml.org}{\underline{OpenML.org}} is not only a data repository, it is a collaborative ML platform for sharing individual \textbf{components} involved in benchmark experiments.
-%(e.g., comparing ML algorithms w.r.t. performance/time on different datasets.)
-%data, ML tasks, algorithms, and results of benchmark experiments.
-% (different ML tasks can be performed on the same data, classification, regression, clustering, ...)
+% \begin{frame}{OpenML - The Project}
+% \href{https://www.openml.org}{\underline{OpenML.org}} is not only a data repository, it is a collaborative ML platform for sharing individual \textbf{components} involved in benchmark experiments.
+% %(e.g., comparing ML algorithms w.r.t. performance/time on different datasets.)
+% %data, ML tasks, algorithms, and results of benchmark experiments.
+% % (different ML tasks can be performed on the same data, classification, regression, clustering, ...)
 
-\textbf{Benchmarking:} compare algorithms w.r.t. performance/runtime on datasets.
+% \textbf{Benchmarking:} compare algorithms w.r.t. performance/runtime on datasets.
 
-OpenML relies on 4 \textbf{basic components} (just like benchmark experiments):
-\only<1>{
-\begin{center}
-\begin{figure}
-% Editable source: https://docs.google.com/presentation/d/1Gbae9fzuTjnfxCuTKIodM0assSDwLOxy7tzIv6y6cxc/edit?usp=sharing
-\includegraphics[page=1, width=\textwidth]{figure/oml_overview.pdf}
-\end{figure}
-\end{center}
-}
-\only<2>{
-\begin{center}
-\begin{figure}
-\includegraphics[page=2, width=\textwidth]{figure/oml_overview.pdf}
-\end{figure}
-\end{center}
-}
-\only<3>{
-\begin{center}
-\begin{figure}
-\includegraphics[page=3, width=\textwidth]{figure/oml_overview.pdf}
-\end{figure}
-\end{center}
-}
-\end{frame}
+% OpenML relies on 4 \textbf{basic components} (just like benchmark experiments):
+% \only<1>{
+% \begin{center}
+% \begin{figure}
+% % Editable source: https://docs.google.com/presentation/d/1Gbae9fzuTjnfxCuTKIodM0assSDwLOxy7tzIv6y6cxc/edit?usp=sharing
+% \includegraphics[page=1, width=\textwidth]{figure/oml_overview.pdf}
+% \end{figure}
+% \end{center}
+% }
+% \only<2>{
+% \begin{center}
+% \begin{figure}
+% \includegraphics[page=2, width=\textwidth]{figure/oml_overview.pdf}
+% \end{figure}
+% \end{center}
+% }
+% \only<3>{
+% \begin{center}
+% \begin{figure}
+% \includegraphics[page=3, width=\textwidth]{figure/oml_overview.pdf}
+% \end{figure}
+% \end{center}
+% }
+% \end{frame}
 
 
 \begin{frame}[fragile]
@@ -627,194 +627,280 @@ resamplings = as_resamplings(otasks)
 % \end{frame}
 
 %\section{Batch Computing}
-\begin{frame}[fragile]{Naive batch computing}
-  Computing on multicore machines (non-cluster):
-  \begin{itemize}
-    \item Write a standalone script(s) that run your jobs and save results at the end.
-    \item Parameters must be hard-coded or retrieved through the command line.
-    \item Login on a machine via SSH.
-    \item Start job(s) with \texttt{R CMD BATCH myscript1.R}, combine this with nohup, screen, or tmux to avoid termination of the R session after logging out.
-    \item Start remaining jobs when resources get available (argh...).
-    \item Check manually for completion/errors (argh again...).
-    \item Write a script to collect results.
-  \end{itemize}
+% \begin{frame}[fragile]{Naive batch computing}
+%   Computing on multicore machines (non-cluster):
+%   \begin{itemize}
+%     \item Write a standalone script(s) that run your jobs and save results at the end.
+%     \item Parameters must be hard-coded or retrieved through the command line.
+%     \item Login on a machine via SSH.
+%     \item Start job(s) with \texttt{R CMD BATCH myscript1.R}, combine this with nohup, screen, or tmux to avoid termination of the R session after logging out.
+%     \item Start remaining jobs when resources get available (argh...).
+%     \item Check manually for completion/errors (argh again...).
+%     \item Write a script to collect results.
+%   \end{itemize}
   
-  Drawbacks:
+%   Drawbacks:
   
-  \begin{itemize}
-      \item No automation, resource management, or fair share.
-      \item Not easily extensible or scalable.
-      \item Challenges in ensuring seeding and reproducibility across different CPUs.
-      \item Difficult to debug parallel problems.
-  \end{itemize}
+%   \begin{itemize}
+%       \item No automation, resource management, or fair share.
+%       \item Not easily extensible or scalable.
+%       \item Challenges in ensuring seeding and reproducibility across different CPUs.
+%       \item Difficult to debug parallel problems.
+%   \end{itemize}
   
-\end{frame}
+% \end{frame}
 
-%\section{HPC Clusters}
-% \begin{frame}[fragile]{High Performance Computing (HPC) clusters}
+% %\section{HPC Clusters}
+% % \begin{frame}[fragile]{High Performance Computing (HPC) clusters}
+% %   \includegraphics{figure/hpc.png}
+% %   \begin{itemize}
+% %     \item User logs into the gateway server (master or head node).
+% %     \item Network of multiple nodes, managed by scheduler.
+% %     \item Scheduler orchestrates computation and organizes queues to fairly distribute computation times among users.
+% %     \item Nodes usually share a file system.
+% %   \end{itemize}
+% % \end{frame}
+% \begin{frame}[fragile]{High Performance Computing (HPC) Clusters}
 %   \includegraphics{figure/hpc.png}
 %   \begin{itemize}
-%     \item User logs into the gateway server (master or head node).
-%     \item Network of multiple nodes, managed by scheduler.
-%     \item Scheduler orchestrates computation and organizes queues to fairly distribute computation times among users.
-%     \item Nodes usually share a file system.
+%     \item Users log into the gateway server (master or head node).
+%     \item The cluster consists of a network of multiple nodes managed by a scheduler.
+%     \item The scheduler orchestrates computations and organizes queues to fairly distribute computation time among users.
+%     \item Nodes typically share a common file system.
 %   \end{itemize}
 % \end{frame}
-\begin{frame}[fragile]{High Performance Computing (HPC) Clusters}
-  \includegraphics{figure/hpc.png}
-  \begin{itemize}
-    \item Users log into the gateway server (master or head node).
-    \item The cluster consists of a network of multiple nodes managed by a scheduler.
-    \item The scheduler orchestrates computations and organizes queues to fairly distribute computation time among users.
-    \item Nodes typically share a common file system.
-  \end{itemize}
+
+% \begin{frame}[fragile]{Manual Workflow on a HPC Cluster}
+% \begin{itemize}
+% \item \textbf{Resource Specification}:
+% \begin{itemize}
+% \item Specify CPUs, tasks, runtime, and memory
+% \item Choose cluster/partition
+% \item Command to execute (e.g., \texttt{R CMD BATCH <myscript.R>})
+% \end{itemize}
+% \item \textbf{Manual Tasks}:
+% \begin{itemize}
+% \item Pass specs via CLI tools or shell scripts
+% \item Check job status with CLI tools (e.g., \texttt{squeue})
+% \item Write scripts to collect results
+% \end{itemize}
+% \item \textbf{Usual Workflow}:
+% \begin{itemize}
+% \item Unroll \texttt{R} loops for single iteration scripts
+% \item Generate \texttt{R} scripts and job description files for each iteration
+% \item Submit jobs and check for results or logs
+% \item Combine scattered result files
+% \end{itemize}
+% \item \textbf{Handling Issues}:
+% \begin{itemize}
+% \item Fix bugs by killing and resubmitting jobs
+% \item Resubmit jobs hitting wall time with weaker constraints
+% \item Restart from scratch for new datasets or parameters
+% \end{itemize}
+% \end{itemize}
+% \end{frame}
+
+% % %\section{Batch System Workflow}
+% % \begin{frame}[fragile]{Manual working on a (HPC) CLUSTER}
+% %   You have to specify:
+% %   \begin{itemize}
+% %     \item Resource specifications (number CPUs, number of tasks, expected runtime, and memory)
+% %     \item Which cluster/partition to use
+% %     \item Command to execute (e.g., \texttt{R CMD BATCH <myscript.R>})
+% %   \end{itemize}
+% %   You have to manually:
+% %   \begin{itemize}
+% %     \item Pass specs to CLI tools, either directly as arguments or encoded in a shell script
+% %     \item Check the status of jobs via CLI tools (e.g., \texttt{squeue})
+% %     \item Write a script to collect results
+% %   \end{itemize}
+% % \end{frame}
+
+% % \begin{frame}[fragile]{Usual workflow on a (HPC) CLUSTER}
+% %   \begin{itemize}
+% %     \item Unroll your \texttt{R} loop(s) so that your script computes a single iteration.
+% %     \item Write a script that writes \texttt{R} scripts for each iteration setting the iteration counter(s) at the beginning.
+% %     \item Write a script that writes job description files for each \texttt{R} script.
+% %     \item Write a script that submits your job description files.
+% %     \item Crawl through file system checking for the existence of results or log files.
+% %     \item Write a script that combines your scattered result files.
+% %   \end{itemize}
+% % \end{frame}
+
+% % \begin{frame}[fragile]{Handling Issues in a (HPC) CLUSTER}
+% %   \begin{itemize}
+% %     \item Found a bug in your code? Write a script that kills all running jobs, fix the bug, submit everything again.
+% %     \item Some jobs have hit the wall time? Write a script that finds out which jobs you need to resubmit with weaker constraints.
+% %     \item Want to try your model on another data set or using other parameters? Eventually start from scratch, it might get ugly.
+% %   \end{itemize}
+% % \end{frame}
+
+% %\section{Conclusions}
+% % \begin{frame}[fragile]{Conclusions and further remarks}
+% %   \begin{itemize}
+% %     \item Clusters are pretty fast!
+% %     \item Many statistical tasks are embarrassingly parallel
+% %   \end{itemize}
+% %   \textbf{But:}
+% %   \begin{itemize}
+% %     \item Job description files needed
+% %     \item We cannot control when jobs are started.
+% %     \item Jobs cannot really communicate, except by writing stuff on disk (or we have to allocate multiple cores and use something like MPI).
+% %     \item Requesting many nodes at once increases time spent in queue.
+% %     \item Auxiliary scripts to create files and submit jobs necessary.
+% %     \item Functions to collect results can get complicated and lengthy.
+% %     \item If some jobs fail (e.g., singularities), debugging is awful.
+% %   \end{itemize}
+% % \end{frame}
+
+% % \begin{frame}[fragile]{batchtools}
+% %   \begin{itemize}
+% %     \item Basic infrastructure to communicate with a high-performance cluster
+% %     \item Tailored around Map-Reduce paradigm
+% %     \item Can be incorporated into other packages
+% %     \item Supported via \texttt{parallelMap} and \texttt{BiocParallel}
+% %     \item Additional abstraction for \enquote{applying algorithms on problems}
+% %     \item Assists the user in conducting comprehensive computer experiments
+% %     \item Successor package (and combination) of \texttt{BatchJobs} and \texttt{BatchExperiments}.
+% %   \end{itemize}
+% % \end{frame}
+
+% % \begin{frame}[fragile]{batchtools features}
+% %   \begin{itemize}
+% %     \item Basic infrastructure to communicate with batch systems from within \texttt{R}
+% %     \item Complete control over the batch system from within \texttt{R}: submit, supervise, kill
+% %     \item Persistent state of computation for experiments
+% %     \item \texttt{R} code independent from the underlying batch system
+% %     \item Reproducibility in distributed environments, even if the architecture changes
+% %     \item Convenient result collection capabilities
+% %     \item Debugging tools
+% %   \end{itemize}
+% % \end{frame}
+
+% \begin{frame}[fragile]{batchtools Overview}
+% \begin{itemize}
+% \item Provides infrastructure to communicate with high-performance clusters.
+% \item Built around the Map-Reduce paradigm for scalable and efficient processing.
+% %\item Can be integrated into other packages.%, supported by \texttt{parallelMap} and \texttt{BiocParallel}.
+% \item Facilitates applying algorithms on problems and conducting experiments.
+% \item Offers complete control over batch systems: \\
+% submit, supervise, and kill jobs from within \texttt{R}.
+% \item Maintains computation state, ensuring resumable experiments.
+% \item Ensures reproducibility across different architectures.
+% %\item Successor of \texttt{BatchJobs} and \texttt{BatchExperiments}, with enhanced debugging and result collection tools.
+% \item Installation, documentation, vignettes, issue tracker, development version:
+% \begin{center}
+% \url{https://github.com/mllg/batchtools}
+% \end{center}
+% \item \textbf{Paper:}
+% \begin{quote}
+% Lang, Michel, Bernd Bischl, and Dirk Surmann. \textit{batchtools: Tools for R to work on batch systems}. The Journal of Open Source Software 2.10 (2017).
+% \end{quote}
+% \end{itemize}
+% \end{frame}
+
+\begin{frame}[fragile]{Naive Batch Computing (Non-Cluster)}
+\textbf{Workflow on multicore machines:}
+\begin{itemize}
+  \item Write standalone script(s) to run jobs and save outputs.
+  \item Hard-code parameters or pass via Command-Line Interface (CLI).
+  \item Log in via SSH; run with \texttt{R CMD BATCH myscript.R}.
+  \item Use \texttt{nohup}, \texttt{screen}, or \texttt{tmux} to persist after logout.
+  \item Manually start jobs when CPUs free up.
+  \item Check completion and errors by hand.
+  \item Write scripts to merge results.
+\end{itemize}
+
+\vspace{1em}
+\textbf{Drawbacks:}
+\begin{itemize}
+  \item No resource management, automation, or fair scheduling.
+  \item Poor scalability; hard to debug parallel issues.
+  \item No guarantees for reproducibility (e.g., seeding).
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{High-Performance Computing (HPC) Clusters}
+\includegraphics[width=0.8\textwidth]{figure/hpc.png}
+\vspace{1em}
+\begin{itemize}
+  \item Users access a gateway server (head node).
+  \item Cluster = multiple nodes managed by a scheduler (e.g., SLURM).
+  \item Scheduler assigns jobs to nodes via a queuing system.
+  \item Nodes share a common file system.
+\end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]{Manual Workflow on a HPC Cluster}
+\textbf{Resource Specification:}
 \begin{itemize}
-\item \textbf{Resource Specification}:
-\begin{itemize}
-\item Specify CPUs, tasks, runtime, and memory
-\item Choose cluster/partition
-\item Command to execute (e.g., \texttt{R CMD BATCH <myscript.R>})
+  \item Define CPU count, memory, runtime, partition.
+  \item Set command (e.g., \texttt{R CMD BATCH script.R}).
 \end{itemize}
-\item \textbf{Manual Tasks}:
+
+\textbf{Manual Tasks:}
 \begin{itemize}
-\item Pass specs via CLI tools or shell scripts
-\item Check job status with CLI tools (e.g., \texttt{squeue})
-\item Write scripts to collect results
+  \item Submit jobs via CLI or shell scripts.
+  \item Monitor with tools like \texttt{squeue}.
+  \item Write aggregation scripts for results.
 \end{itemize}
-\item \textbf{Usual Workflow}:
+
+\textbf{Typical Workflow:}
 \begin{itemize}
-\item Unroll \texttt{R} loops for single iteration scripts
-\item Generate \texttt{R} scripts and job description files for each iteration
-\item Submit jobs and check for results or logs
-\item Combine scattered result files
+  \item Unroll \texttt{R} loops into single-iteration scripts.
+  \item Auto-generate job and script files per task.
+  \item Submit jobs; crawl logs and outputs.
 \end{itemize}
-\item \textbf{Handling Issues}:
+
+\textbf{Handling Issues:}
 \begin{itemize}
-\item Fix bugs by killing and resubmitting jobs
-\item Resubmit jobs hitting wall time with weaker constraints
-\item Restart from scratch for new datasets or parameters
-\end{itemize}
+  \item Kill + resubmit on failure.
+  \item Adjust resources on wall-time hits.
+  \item Full rerun for changes in data or params.
 \end{itemize}
 \end{frame}
-
-% %\section{Batch System Workflow}
-% \begin{frame}[fragile]{Manual working on a (HPC) CLUSTER}
-%   You have to specify:
-%   \begin{itemize}
-%     \item Resource specifications (number CPUs, number of tasks, expected runtime, and memory)
-%     \item Which cluster/partition to use
-%     \item Command to execute (e.g., \texttt{R CMD BATCH <myscript.R>})
-%   \end{itemize}
-%   You have to manually:
-%   \begin{itemize}
-%     \item Pass specs to CLI tools, either directly as arguments or encoded in a shell script
-%     \item Check the status of jobs via CLI tools (e.g., \texttt{squeue})
-%     \item Write a script to collect results
-%   \end{itemize}
-% \end{frame}
-
-% \begin{frame}[fragile]{Usual workflow on a (HPC) CLUSTER}
-%   \begin{itemize}
-%     \item Unroll your \texttt{R} loop(s) so that your script computes a single iteration.
-%     \item Write a script that writes \texttt{R} scripts for each iteration setting the iteration counter(s) at the beginning.
-%     \item Write a script that writes job description files for each \texttt{R} script.
-%     \item Write a script that submits your job description files.
-%     \item Crawl through file system checking for the existence of results or log files.
-%     \item Write a script that combines your scattered result files.
-%   \end{itemize}
-% \end{frame}
-
-% \begin{frame}[fragile]{Handling Issues in a (HPC) CLUSTER}
-%   \begin{itemize}
-%     \item Found a bug in your code? Write a script that kills all running jobs, fix the bug, submit everything again.
-%     \item Some jobs have hit the wall time? Write a script that finds out which jobs you need to resubmit with weaker constraints.
-%     \item Want to try your model on another data set or using other parameters? Eventually start from scratch, it might get ugly.
-%   \end{itemize}
-% \end{frame}
-
-%\section{Conclusions}
-% \begin{frame}[fragile]{Conclusions and further remarks}
-%   \begin{itemize}
-%     \item Clusters are pretty fast!
-%     \item Many statistical tasks are embarrassingly parallel
-%   \end{itemize}
-%   \textbf{But:}
-%   \begin{itemize}
-%     \item Job description files needed
-%     \item We cannot control when jobs are started.
-%     \item Jobs cannot really communicate, except by writing stuff on disk (or we have to allocate multiple cores and use something like MPI).
-%     \item Requesting many nodes at once increases time spent in queue.
-%     \item Auxiliary scripts to create files and submit jobs necessary.
-%     \item Functions to collect results can get complicated and lengthy.
-%     \item If some jobs fail (e.g., singularities), debugging is awful.
-%   \end{itemize}
-% \end{frame}
-
-% \begin{frame}[fragile]{batchtools}
-%   \begin{itemize}
-%     \item Basic infrastructure to communicate with a high-performance cluster
-%     \item Tailored around Map-Reduce paradigm
-%     \item Can be incorporated into other packages
-%     \item Supported via \texttt{parallelMap} and \texttt{BiocParallel}
-%     \item Additional abstraction for \enquote{applying algorithms on problems}
-%     \item Assists the user in conducting comprehensive computer experiments
-%     \item Successor package (and combination) of \texttt{BatchJobs} and \texttt{BatchExperiments}.
-%   \end{itemize}
-% \end{frame}
-
-% \begin{frame}[fragile]{batchtools features}
-%   \begin{itemize}
-%     \item Basic infrastructure to communicate with batch systems from within \texttt{R}
-%     \item Complete control over the batch system from within \texttt{R}: submit, supervise, kill
-%     \item Persistent state of computation for experiments
-%     \item \texttt{R} code independent from the underlying batch system
-%     \item Reproducibility in distributed environments, even if the architecture changes
-%     \item Convenient result collection capabilities
-%     \item Debugging tools
-%   \end{itemize}
-% \end{frame}
 
 \begin{frame}[fragile]{batchtools Overview}
 \begin{itemize}
-\item Provides infrastructure to communicate with high-performance clusters.
-\item Built around the Map-Reduce paradigm for scalable and efficient processing.
-%\item Can be integrated into other packages.%, supported by \texttt{parallelMap} and \texttt{BiocParallel}.
-\item Facilitates applying algorithms on problems and conducting experiments.
-\item Offers complete control over batch systems: \\
-submit, supervise, and kill jobs from within \texttt{R}.
-\item Maintains computation state, ensuring resumable experiments.
-\item Ensures reproducibility across different architectures.
-%\item Successor of \texttt{BatchJobs} and \texttt{BatchExperiments}, with enhanced debugging and result collection tools.
-\item Installation, documentation, vignettes, issue tracker, development version:
-\begin{center}
-\url{https://github.com/mllg/batchtools}
-\end{center}
-\item \textbf{Paper:}
-\begin{quote}
-Lang, Michel, Bernd Bischl, and Dirk Surmann. \textit{batchtools: Tools for R to work on batch systems}. The Journal of Open Source Software 2.10 (2017).
-\end{quote}
+  \item R package for structured access to batch systems.
+  \item Built around Map-Reduce: apply algorithms to many problems.
+  \item Full control from R: submit, monitor, kill jobs.
+  \item Persistent state: resume and audit large experiments.
+  %\item Reproducible across hardware and architectures.
+  \item Convenient debugging and result collection.
+  \item Supports reproducibility across hardware and job schedulers.
+\item Supports multiple execution backends:
+\begin{itemize}
+  \item \textbf{Interactive:} Run jobs directly in the current \texttt{R} session
+  \item \textbf{Multicore:} Parallel execution on local CPU cores
+  \item \textbf{SSH:} Offload jobs to remote machines via SSH
+  \item \textbf{HPC schedulers:} SLURM, Torque/PBS, Load Sharing Facility (LSF), etc. %, Sun Grid Engine%, LoadLeveler
 \end{itemize}
+\end{itemize}
+
+\vspace{0.5em}
+\textbf{Project Page:} \url{https://github.com/mllg/batchtools}
+
+\vspace{0.5em}
+\textbf{Paper:} \url{https://doi.org/10.21105/joss.00135}
 \end{frame}
 
 
-\begin{frame}[fragile]{Supported Systems}
-  \begin{itemize}
-    \item Torque/PBS: Manages job scheduling and execution on clusters.
-    \item SLURM: Schedules and manages jobs on HPC clusters.
-    \item Load Sharing Facility (LSF): Distributes jobs across a network of computers.    
-    \item Sun Grid Engine: Distributed resource management for computing tasks.
-    \item LoadLeveler: Schedules and manages batch jobs on a cluster (IBM).
-  \end{itemize}
-  Other modes:
-  \begin{itemize}
-    \item Interactive: Executes jobs in the current interactive \texttt{R} session.
-    \item Multicore: Executes jobs using multiple CPU cores on a local machine.
-    \item SSH: Distributes computing tasks across machines accessible via SSH.
-  \end{itemize}
-\end{frame}
+% \begin{frame}[fragile]{Supported Systems}
+%   \begin{itemize}
+%     \item Torque/PBS: Manages job scheduling and execution on clusters.
+%     \item SLURM: Schedules and manages jobs on HPC clusters.
+%     \item Load Sharing Facility (LSF): Distributes jobs across a network of computers.    
+%     \item Sun Grid Engine: Distributed resource management for computing tasks.
+%     \item LoadLeveler: Schedules and manages batch jobs on a cluster (IBM).
+%   \end{itemize}
+%   Other modes:
+%   \begin{itemize}
+%     \item Interactive: Executes jobs in the current interactive \texttt{R} session.
+%     \item Multicore: Executes jobs using multiple CPU cores on a local machine.
+%     \item SSH: Distributes computing tasks across machines accessible via SSH.
+%   \end{itemize}
+% \end{frame}
 
 
 % \begin{frame}[fragile]{Supported Systems}

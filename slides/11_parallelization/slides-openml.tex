@@ -89,24 +89,61 @@ Datasets
 We mainly focus on datasets and tasks
 \end{vbframe}
 
-\begin{vbframe}{OpenML: Networked Science for ML}
-\vfill
-\begin{quote}
-"Move data out of our labs and minds, into online tools that help us organize the information, and reuse it in unexpected new ways."
-\hfill \href{https://www.amazon.com/Reinventing-Discovery-New-Networked-Science/dp/0691148902}{\beamergotobutton{M. Nielsen}}
-\end{quote}
-\vfill
-\textbf{OpenML} is an open platform for sharing and reusing machine learning artifacts:
-\begin{itemize}
-    \item \textbf{Datasets}: Annotated with meta-data and versioned
-    \item \textbf{Tasks}: Standardized problem definitions (with train-test splits in supervised ML)
-    \item \textbf{Flows}: Serialized learners including hyperparameter spaces
-    \item \textbf{Runs}: Execution records (flow + task + performance)
-    \item \textbf{Collections}: Groupings of datasets, tasks, or runs
-\end{itemize}
-\vfill
-\textit{Goal: Reproducibility, transparency, and large-scale collaboration in ML.}
-\end{vbframe}
+% \begin{vbframe}{OpenML: Networked Science for ML}
+% \vfill
+% \begin{quote}
+% "Move data out of our labs and minds, into online tools that help us organize the information, and reuse it in unexpected new ways."
+% \hfill \href{https://www.amazon.com/Reinventing-Discovery-New-Networked-Science/dp/0691148902}{\beamergotobutton{M. Nielsen}}
+% \end{quote}
+% \vfill
+% \textbf{OpenML} is an open platform for sharing and reusing machine learning artifacts:
+% \begin{itemize}
+%     \item \textbf{Datasets}: Annotated with meta-data and versioned
+%     \item \textbf{Tasks}: Standardized problem definitions (with train-test splits in supervised ML)
+%     \item \textbf{Flows}: Serialized learners including hyperparameter spaces
+%     \item \textbf{Runs}: Execution records (flow + task + performance)
+%     \item \textbf{Collections}: Groupings of datasets, tasks, or runs
+% \end{itemize}
+% \vfill
+% \textit{Goal: Reproducibility, transparency, and large-scale collaboration in ML.}
+% \end{vbframe}
+
+
+\begin{frame}{OpenML - The Project}
+\href{https://www.openml.org}{\underline{OpenML.org}} is not only a data repository, it is a collaborative ML platform for sharing individual \textbf{components} involved in benchmark experiments.
+%(e.g., comparing ML algorithms w.r.t. performance/time on different datasets.)
+%data, ML tasks, algorithms, and results of benchmark experiments.
+% (different ML tasks can be performed on the same data, classification, regression, clustering, ...)
+
+\textbf{Benchmarking:} compare algorithms w.r.t. performance/runtime on datasets.
+
+\textbf{Goal:} Reproducibility, transparency, and large-scale collaboration in ML.
+
+OpenML relies on 4 \textbf{basic components} (just like benchmark experiments):
+\only<1>{
+\begin{center}
+\begin{figure}
+% Editable source: https://docs.google.com/presentation/d/1Gbae9fzuTjnfxCuTKIodM0assSDwLOxy7tzIv6y6cxc/edit?usp=sharing
+\includegraphics[page=1, width=\textwidth]{figure/oml_overview.pdf}
+\end{figure}
+\end{center}
+}
+\only<2>{
+\begin{center}
+\begin{figure}
+\includegraphics[page=2, width=\textwidth]{figure/oml_overview.pdf}
+\end{figure}
+\end{center}
+}
+\only<3>{
+\begin{center}
+\begin{figure}
+\includegraphics[page=3, width=\textwidth]{figure/oml_overview.pdf}
+\end{figure}
+\end{center}
+\textbf{Note:} \textit{OpenML also supports \textbf{collections} of tasks and runs}
+}
+\end{frame}
 
 \begin{vbframe}{OpenML Datasets}
 \begin{itemize}
