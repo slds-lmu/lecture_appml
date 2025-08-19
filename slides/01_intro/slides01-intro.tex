@@ -3,13 +3,15 @@
 otes=noshow, aspectratio=169, xcolor=table]{beamer}
 % alternatively combining latex files with subfile package https://tex.stackexchange.com/a/155883/26830 (however, page numbering and some other stuff does not work well)
 
+\input{../../style/preamble.tex}
+
 % deactivate beamer navigation
 %\setbeamertemplate{navigation symbols}{}
 %\usepackage{geometry}
 %\geometry{papersize={180mm, 135mm}, top=-1.5mm} % 210mm, 297mm
 
 % set path of iml lecture here, e.g., relative to the current dir
-\usepackage[nospeakermargin]{../../style/lmu-lecture-2}
+% \usepackage[nospeakermargin]{../../style/lmu-lecture-2}
 \usepackage{pax}
 \setbeamertemplate{frametitle}{\expandafter\uppercase\expandafter\insertframetitle}
 %\useoutertheme{metropolis}
@@ -49,18 +51,32 @@ otes=noshow, aspectratio=169, xcolor=table]{beamer}
 \begin{document}
 
 %\newcommand{\titlefigure}{figure/performance_vs_interpretability}
-\newcommand{\learninggoals}{
-\item Basics of mlr3: \\Train, Predict, Evaluate
+% \newcommand{\learninggoals}{
+% \item Basics of mlr3: \\Train, Predict, Evaluate
+% \item Resampling in mlr3
+% \item Benchmarking in mlr3}
+
+% \lecturechapter{Applied Machine Learning}
+% \lecture{Applied Machine Learning}
+
+
+\titlemeta{
+Applied Machine Learning}{
+Machine Learning in R}{
+figure/performance_vs_interpretability
+}{
+item Basics of mlr3: \\Train, Predict, Evaluate
 \item Resampling in mlr3
 \item Benchmarking in mlr3}
 
+%\newcommand{\titlefigure}{figure/performance_vs_interpretability}
+% \newcommand{\learninggoals}{
+% \item Basics of mlr3: \\Train, Predict, Evaluate
+% \item Resampling in mlr3
+% \item Benchmarking in mlr3}
+
 \lecturechapter{Applied Machine Learning}
 \lecture{Applied Machine Learning}
-
-
-
-\section{Introduction to mlr3}
-\subsection{Motivation and R6}
 \includepdf[pages={7-8, 10-18}]{../mlr3slides/mlr3-intro.pdf}
 
 \subsection{Data and Tasks}
