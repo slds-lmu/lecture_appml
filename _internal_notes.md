@@ -1,3 +1,18 @@
+# Steps AppML
+1. Downloaded [`update-service.sh`](https://github.com/slds-lmu/lecture_service/blob/main/service/scripts/update-service.sh), placed in `scripts/` and run `bash update-service.sh` (using WSL)
+2. Converted [logo](style/logos/applied.png) to pdf and names `logo.pdf`
+
+
+## Folder sources
+SL - 1) feature-selection
+AdvML - 1) multitarget, 2) fairness, 3) imbalanced-learning
+
+## ToDo
+
+[] Take into account for \href{https://arxiv.org/abs/2404.19494}{\beamergotobutton{REF}}
+
+
+
 - Moodle [Course](https://moodle.lmu.de/course/view.php?id=39034)
 - mlr3slides dir can be treated as an "image dir"
 - 05_feature-preproc has pdfs where you need to create a corresponidng tex file (based on an Rmd file, you find it here https://github.com/Essential-Data-Science/eds/tree/master/material/rmd_chapters) -> you need to store the R code separately, create the figures and include them in tex
@@ -42,3 +57,4 @@ But also sematically
 
 Hayk Tarkhanyan, [01-Aug-25 3:32 PM]
 Convert all absolute files to relatice
+
