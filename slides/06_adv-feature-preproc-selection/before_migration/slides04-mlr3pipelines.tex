@@ -1,0 +1,76 @@
+
+\documentclass[11pt,compress,t,n
+otes=noshow, aspectratio=169, xcolor=table]{beamer}
+% alternatively combining latex files with subfile package https://tex.stackexchange.com/a/155883/26830 (however, page numbering and some other stuff does not work well)
+
+% deactivate beamer navigation
+%\setbeamertemplate{navigation symbols}{}
+%\usepackage{geometry}
+%\geometry{papersize={180mm, 135mm}, top=-1.5mm} % 210mm, 297mm
+
+% set path of iml lecture here, e.g., relative to the current dir
+\usepackage[nospeakermargin]{../../style/lmu-lecture-2}
+\usepackage{pax}
+\setbeamertemplate{frametitle}{\expandafter\uppercase\expandafter\insertframetitle}
+%\useoutertheme{metropolis}
+% remove section slides
+\AtBeginSection[]
+{
+	\begin{frame}<beamer>
+		\frametitle{Advanced Machine Learning}
+		\tableofcontents[currentsection]
+	\end{frame}
+}
+% includepdf slides, pagecommad will set counter for framenumber
+\usepackage{pdfpages}
+\includepdfset{trim=0mm 0mm 0mm 0mm, pagecommand={\global\setcounter{framenumber}{\value{page}}}}
+% trim=0mm 6mm 0mm 0mm, offset=0 15,
+% add footer:
+\usepackage{framed, color}
+\usepackage{xcolor}
+%\iffalse
+\setbeamertemplate{footline}[text line]{%
+	\noindent\hspace*{\dimexpr-\oddsidemargin-1in\relax}%
+	\colorbox{white}{
+		\makebox[\dimexpr\paperwidth-2\fboxsep\relax]{
+			\color{black}
+			\begin{minipage}[c][2ex][c]{0.5\linewidth}
+				\secname
+			\end{minipage}
+			\hfill\begin{minipage}[c][2ex][c]{0.5\linewidth}
+				\flushright
+				\insertframenumber{}~/~\inserttotalframenumber~~
+			\end{minipage}
+	}}%
+	\hspace*{-\paperwidth}
+}
+%\fi
+
+\begin{document}
+
+%\newcommand{\titlefigure}{figure/empty}
+\newcommand{\learninggoals}{
+\item Nonlinear Pipelines
+\item Targeting Columns}
+
+\lecturechapter{Applied Machine Learning}
+\lecture{Applied Machine Learning}
+
+
+
+\section{Overview of PipeOps}
+\includepdf[pages={59-60, 17-18}]{../mlr3slides/mlr3pipelines.pdf}
+\section{Nonlinear Pipelines}
+\includepdf[pages={38-40, 47-51}]{../mlr3slides/mlr3pipelines.pdf}
+\section{Targeting Columns}
+\includepdf[pages={53-56}]{../mlr3slides/mlr3pipelines.pdf}
+
+\section{Complex ML Pipelines and AutoML}
+\includepdf[pages={65-66, 69-71}]{../mlr3slides/mlr3pipelines.pdf}
+
+\section{Summary}
+\includepdf[pages={76, 73}]{../mlr3slides/mlr3pipelines.pdf}
+
+
+\endlecture
+\end{document}

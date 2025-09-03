@@ -7,11 +7,44 @@
 SL - 1) feature-selection
 AdvML - 1) multitarget, 2) fairness, 3) imbalanced-learning
 
+## Chunks
+
+[] 01_intro
+[] 03_lifecycle
+-  [] Split into 2 chunks
+[] 04_tuning
+[] 05_feature-preproc
+[] 06 adv-fea..
+[] 07 imputation
+[] 08_perf_calibr
+ - [] Split into 2 chunks
+ - [] Text overflow issue
+[] 09_imbalancy_corr
+[] 10_ensembles-stacking
+[] 11_parallelization
+[] 12_perf_bench
+[x] 12_time_series
+[] fairness
+[] feature_selection
+[] imbalanced_learning
+[] multittarget
+
+
+## Per Chunk
+
+### 12 time series
+1. title figure is missing
+2. You may want to change the subtitle
+3. Some slides have too little text (e.g. simple baseline)
+4. Sometimes maybe section-name slides are redundant (e.g. "wrap-up" slide which is followed by only "key-takeaways" slide)
+5. Overall it's 18 slides (including section-name slides) but quite compact, I don't think it makes sense to split it into 2 parts 
+
+
 ## ToDo
 
 [] Take into account for \href{https://arxiv.org/abs/2404.19494}{\beamergotobutton{REF}}
 [] PDF insert - is not left alligned
-
+[] Fix absolute path
 
 - Moodle [Course](https://moodle.lmu.de/course/view.php?id=39034)
 - mlr3slides dir can be treated as an "image dir"

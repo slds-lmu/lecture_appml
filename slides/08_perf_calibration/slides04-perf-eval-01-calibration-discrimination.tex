@@ -1,9 +1,11 @@
-\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
 
 
-\usepackage[nospeakermargin]{../../style/lmu-lecture-2}
-% Defines macros and environments
-\input{../../style/common.tex}
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+
 \usepackage{etoolbox}
 \makeatletter
 \newlength{\parboxtodim}
@@ -12,16 +14,23 @@
   {\ifx\relax#2\else\setlength{\parboxtodim}{#2}\fi\hsize}
   {}{}
 \makeatother
+
 \begin{document}
 
-\newcommand{\titlefigure}{figure/calibrationplot}
-\newcommand{\learninggoals}{
+\title{Applied Machine Learning}
+
+\titlemeta{
+Performance evaluation:
+}{
+Calibration versus Discrimination
+}{
+figure/calibrationplot
+}{
 \item Understand difference between calibration and discrimination
 \item How to diagnose calibration
-\item How to calibrate probabilities}
+\item How to calibrate probabilities
+}
 
-\lecturechapter{Calibration versus Discrimination}
-\lecture{Applied Machine Learning}
 
 % scikitlearn calibration 
 % https://scikit-learn.org/stable/modules/calibration.html
@@ -146,7 +155,7 @@ Consider the true positive $Y=1$, true negative $Y=0$, and predicted label $\hat
 
 \textbf{Discrimination}: Ability of $\hat Y$ to well-separate positive/negative instances.\\
   $\Rightarrow$ Confusion matrix-based measures are discrimination measures, e.g., $FPR = P(\hat Y = 1 | Y = 0$), $TPR = P(\hat Y = 1 | Y = 1)$, AUC.
-\includegraphics[width = 0.9 \linewidth]{slides/01_intro/figure_man/ConfusionMatrix.png}
+\includegraphics[width = 0.9 \linewidth]{figure_man/ConfusionMatrix.png}
 \end{frame}
 
 % in der graphic FPR TPR ergaenzen
@@ -1082,7 +1091,10 @@ $\hat{p}$ & $y$ \\
 %TODO remove the tabular example and give the graphics from this paper https://link.springer.com/article/10.1007/s10994-023-06336-7
 
 \centerline{\includegraphics{figure_man/OverAndUnderConfidence.png}}
-\centerline{\citebutton{Filho et al. (2023)}{https://link.springer.com/article/10.1007/s10994-023-06336-7/figures/3}}
+\centerline{% OLD
+%\citebutton{Filho et al. (2023)}{https://link.springer.com/article/10.1007/s10994-023-06336-7/figures/3}
+% NEW
+\furtherreading{FILHO2023}}
 
 \begin{itemize}
     \item \textbf{Underconfidence}: 
@@ -1333,7 +1345,10 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[ s^{(i)}  \in B_{J(s)}] \c
 
 \begin{frame}[t]
 	\frametitle{Platt scaling
-    \citebutton{Niculescu-Mizil et al., 2005}{https://www.cs.cornell.edu/~alexn/papers/calibration.icml05.crc.rev3.pdf} }
+    % OLD
+%\citebutton{Niculescu-Mizil et al., 2005}{https://www.cs.cornell.edu/~alexn/papers/calibration.icml05.crc.rev3.pdf}
+% NEW
+\furtherreading{MIZIL2005} }
 
     %TODO requires: unbounded outputs before sigmoid/ softmax, good for Neuronal Networks, SVM, boosted trees
     %TODO reference Alexandru Niculescu-Mizil and Rich Caruana. “Predicting Good Probabilities with Supervised Learning.” In Proceedings of the 22nd International Conference on Machine Learning (ICML), 2005.
@@ -1353,7 +1368,10 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[ s^{(i)}  \in B_{J(s)}] \c
 
 
 \begin{frame}[t]
-	\frametitle{Isotonic regression \citebutton{Kull et al., 2017 }{http://proceedings.mlr.press/v54/kull17a/kull17a.pdf}}
+	\frametitle{Isotonic regression % OLD
+%\citebutton{Kull et al., 2017 }{http://proceedings.mlr.press/v54/kull17a/kull17a.pdf}
+% NEW
+\furtherreading{KULL2017}}
     
     %TODO requires bounded or monotonic relationship with probabilities
     %TODO reference http://proceedings.mlr.press/v54/kull17a/kull17a.pdf
@@ -1466,7 +1484,10 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[ s^{(i)}  \in B_{J(s)}] \c
 
 
 
-\begin{frame}{How to Split Data for Calibration? \citebutton{Eskandar, 2023}{https://medium.com/@eskandar.sahel/applying-calibration-techniques-to-improve-probabilistic-predictions-in-machine-learning-models-c175c2e38ffc}}
+\begin{frame}{How to Split Data for Calibration?  \furtherreading{ESKANDAR2023}}% OLD
+%\citebutton{Eskandar, 2023}{https://medium.com/@eskandar.sahel/applying-calibration-techniques-to-improve-probabilistic-predictions-in-machine-learning-models-c175c2e38ffc}
+
+
 \textbf{Problem:} How to avoid overfitting the calibrator during training?
 
 \vspace{0.5em}
@@ -1544,7 +1565,10 @@ C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[ s^{(i)}  \in B_{J(s)}] \c
 \includegraphics[width=0.6\linewidth]{figure_man/CalibrationCVPooled.png}
 \end{frame}
 
-% \begin{frame}{Calibration Workflow \citebutton{Eskandar, 2023}{https://medium.com/@eskandar.sahel/applying-calibration-techniques-to-improve-probabilistic-predictions-in-machine-learning-models-c175c2e38ffc}}
+% \begin{frame}{Calibration Workflow % OLD
+%\citebutton{Eskandar, 2023}{https://medium.com/@eskandar.sahel/applying-calibration-techniques-to-improve-probabilistic-predictions-in-machine-learning-models-c175c2e38ffc}
+% NEW
+% \furtherreading{Eskandar2023}}
 
 % \textbf{Question}: How to split the data for training the model and training the calibrator, so that we don't overfit the calibrator?
 

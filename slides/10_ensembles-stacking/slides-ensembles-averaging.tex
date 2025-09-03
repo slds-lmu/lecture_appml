@@ -1,6 +1,14 @@
-\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+% OLD
+%\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+% NEW
+\documentclass[10pt,compress,t,notes=noshow, xcolor=table]{beamer}
 
-\usepackage{../../style/lmu-lecture}
+% OLD
+%\usepackage{../../style/lmu-lecture}
+% NEW
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
 \usepackage[algo2e]{algorithm2e} % Defines macros and environments
 \input{../../style/common.tex}
 
@@ -11,15 +19,31 @@
 \date{}
 
 \begin{document}
-\newcommand{\titlefigure}{slides/10_ensembles-stacking/figure/bagging_better.png}
-\newcommand{\learninggoals}{
+% OLD
+%\newcommand{\titlefigure}{slides/10_ensembles-stacking/figure/bagging_better.png}
+%\newcommand{\learninggoals}{
+%\item What is Ensembling?
+%\item Bagging and Boosting Recap
+%\item Model Averaging
+%}
+%
+%\lecturechapter{Ensembling Part I}
+%\lecture{Applied Machine Learning}
+% NEW
+\titlemeta{
+PLACEHOLDER
+}{
+Ensembling Part I
+}{
+slides/10_ensembles-stacking/figure/bagging_better.png
+}{
+
 \item What is Ensembling?
 \item Bagging and Boosting Recap
 \item Model Averaging
+
 }
 
-\lecturechapter{Ensembling Part I}
-\lecture{Applied Machine Learning}
 
 % FIXME: math and alphabets are totally messed up because we use way to many different fonts and styles in lectures
 

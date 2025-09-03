@@ -1,5 +1,13 @@
-\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
-\usepackage{../../style/lmu-lecture}
+% OLD
+%\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+% NEW
+\documentclass[10pt,compress,t,notes=noshow, xcolor=table]{beamer}
+% OLD
+%\usepackage{../../style/lmu-lecture}
+% NEW
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
 % Defines macros and environments
 \input{../../style/common.tex}
 \newcommand{\Dtestm}{\mathcal{D}_{\text{test}, m}}
@@ -11,14 +19,29 @@
 \begin{document}
 
 
-\newcommand{\titlefigure}{figure/normal_densities}
-\newcommand{\learninggoals}{
+% OLD
+%\newcommand{\titlefigure}{figure/normal_densities}
+%\newcommand{\learninggoals}{
+%\item What questions can we answer with benchmarks?
+%\item What value do hypothesis tests add?
+%\item Benchmarking scenarios and relevant tests}
+%
+%\lecturechapter{Model Selection \& Hypothesis Testing}
+%\lecture{Applied Machine Learning}
+% NEW
+\titlemeta{
+PLACEHOLDER
+}{
+Model Selection \& Hypothesis Testing
+}{
+figure/normal_densities
+}{
+
 \item What questions can we answer with benchmarks?
 \item What value do hypothesis tests add?
-\item Benchmarking scenarios and relevant tests}
+\item Benchmarking scenarios and relevant tests
+}
 
-\lecturechapter{Model Selection \& Hypothesis Testing}
-\lecture{Applied Machine Learning}
 
 \begin{frame}{Model evaluation, Model selection and Algorithm selection}
 \vfill

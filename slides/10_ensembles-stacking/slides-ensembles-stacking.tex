@@ -1,6 +1,14 @@
-\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+% OLD
+%\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+% NEW
+\documentclass[10pt,compress,t,notes=noshow, xcolor=table]{beamer}
 
-\usepackage{../../style/lmu-lecture}
+% OLD
+%\usepackage{../../style/lmu-lecture}
+% NEW
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
 \usepackage[algo2e]{algorithm2e} % Defines macros and environments
 \input{../../style/common.tex}
 
@@ -11,13 +19,27 @@
 \date{}
 
 \begin{document}
-\newcommand{\titlefigure}{slides/10_ensembles-stacking/figure/stacking_better.png}
-\newcommand{\learninggoals}{
-\item What is Stacking?
-\item How can we stack multiple layers?}
+% OLD
+%\newcommand{\titlefigure}{slides/10_ensembles-stacking/figure/stacking_better.png}
+%\newcommand{\learninggoals}{
+%\item What is Stacking?
+%\item How can we stack multiple layers?}
+%
+%\lecturechapter{Ensembling Part II}
+%\lecture{Applied Machine Learning}
+% NEW
+\titlemeta{
+PLACEHOLDER
+}{
+Ensembling Part II
+}{
+slides/10_ensembles-stacking/figure/stacking_better.png
+}{
 
-\lecturechapter{Ensembling Part II}
-\lecture{Applied Machine Learning}
+\item What is Stacking?
+\item How can we stack multiple layers?
+}
+
 
 \begin{vbframe}{Stacking}
 Also called stacked generalization (\href{https://www.sciencedirect.com/science/article/abs/pii/S0893608005800231}{\beamergotobutton{Wolpert (1992)}}): train multiple base models (level 0) on the same data and use their predictions as input features for a level 1 model that makes the final ensemble prediction $\rightarrow$ heterogeneous ensembling

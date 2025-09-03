@@ -1,8 +1,13 @@
-\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+% OLD
+%\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+% NEW
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
 
-\usepackage{../../style/lmu-lecture}
+% NEW
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
 % Defines macros and environments
-\input{../../style/common.tex}
 \input{../../latex-math/ml-hpo.tex}
 
 \title{Applied Machine Learning}
@@ -10,16 +15,24 @@
 %\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
 \date{}
 
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
+
 \begin{document}
 
-\newcommand{\titlefigure}{figure/performance_vs_interpretability}
-\newcommand{\learninggoals}{
+% NEW
+\titlemeta{
+PLACEHOLDER
+}{
+Applied Hyperparameter Tuning
+}{
+figure/performance_vs_interpretability
+}{
 \item The Hyperparameter Optimization Problem
 \item Grid Search, Random Search and Bayesian optimization
-\item The Untouched Test Set Principle}
+\item The Untouched Test Set Principle
+}
 
-\lecturechapter{Applied Hyperparameter Tuning}
-\lecture{Applied Machine Learning}
 
 \section{Hyperparameter Tuning}
 
@@ -157,8 +170,8 @@
 \begin{frame}{Valid-Test Curves in Hyperparameter Optimization}
     \begin{figure}
         \centering
-        \includegraphics[width=0.7\linewidth,trim=0 0 540 0, clip]{slides/04_tuning/figure_man/figure_1.pdf}
-        \includegraphics[width=0.7\linewidth,trim=540 0 0 0, clip]{slides/04_tuning/figure_man/figure_1.pdf}
+        \includegraphics[width=0.7\linewidth,trim=0 0 540 0, clip]{figure_man/figure_1.pdf}
+        \includegraphics[width=0.7\linewidth,trim=540 0 0 0, clip]{figure_man/figure_1.pdf}
     \end{figure}
     Top Left: Idea, Top Right: Meta-Overfitting, Bottom Left: Begin Overtuning, Bottom Right: Severe Overtuning
 \end{frame}
@@ -196,7 +209,7 @@ Question: is meta-overfitting or overtuning more problematic?
 \vfill
     \begin{figure}
         \centering
-        \includegraphics[width=0.9\linewidth]{slides/04_tuning/figure_man/ecdf_all.pdf}
+        \includegraphics[width=0.9\linewidth]{figure_man/ecdf_all.pdf}
     \end{figure}
 \vfill
 \end{frame}
@@ -223,7 +236,7 @@ or recipes for better generalization performance
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.99\linewidth]{slides/04_tuning/figure_man/normalized_test.pdf}
+    \includegraphics[width=0.99\linewidth]{figure_man/normalized_test.pdf}
 \end{figure}
     
 \end{frame}
@@ -233,7 +246,7 @@ or recipes for better generalization performance
 \vfill
 \begin{figure}
     \centering
-    \includegraphics[width=0.99\linewidth]{slides/04_tuning/figure_man/biased_selection.png}
+    \includegraphics[width=0.99\linewidth]{figure_man/biased_selection.png}
 \end{figure}
 \vfill
 \end{frame}

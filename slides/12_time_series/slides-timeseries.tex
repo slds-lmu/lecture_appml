@@ -1,8 +1,13 @@
-\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
 
-\usepackage{../../style/lmu-lecture}
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
 \usepackage[algo2e]{algorithm2e} % Defines macros and environments
-\input{../../style/common.tex}
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
 
 
 \title{Applied Machine Learning}
@@ -11,27 +16,27 @@
 \date{}
 
 \begin{document}
+
 % TODO add a title figure
-%\newcommand{\titlefigure}{}
-\newcommand{\learninggoals}{
+\titlemeta{
+Time Series:
+}{
+Definition, feature engineering, cross-validation
+}{
+figure_man/empty
+}{
 \item What is a time series?
 \item Important definitions
 \item Feature engineering for time series
-\item Time series cross-validation}
-
-\lecturechapter{Time Series}
-\lecture{Applied Machine Learning}
-
-% Title slide
-\begin{vbframe}
-  \titlepage
-\end{vbframe}
+\item Time series cross-validation
+}
 
 
 \begin{vbframe}{Running Example: The Bike Sharing Dataset}
 \vfill
 Hourly bike rental data from Washington D.C.
 \vfill
+\small % otherwise the last column does not fit
 \begin{tabular}{llllrrrrlr}
 \toprule
  & holiday & workingday & weather & temp & feel\_temp & humidity & windspeed & datetime & count \\
@@ -62,8 +67,8 @@ Question: how to feed this to a standard ML model?
         \item Experiment or elapsed time - Each timestamp is a measure of time relative to a particular start time (e.g., the diameter of a cookie baking each second since being placed in the oven), starting from 0.
     \end{itemize}
     \item \textbf{Exogenous variable / covariate}: external feature $x^{(j)}_t$ influencing $y_t$
-    \item \textbf{Trend}: long‐term increase or decrease
-    \item \textbf{Seasonality}: systematic, calendar‐related patterns
+    \item \textbf{Trend}: long-term increase or decrease
+    \item \textbf{Seasonality}: systematic, calendar-related patterns
     \item \textbf{Stationarity} (briefly): distribution of $y_t$ does not change over time
   \end{itemize}
 \end{vbframe}
@@ -106,9 +111,9 @@ Question: how to feed this to a standard ML model?
 \end{vbframe}
 
 % =========================================================
-\section{Time‐Series Cross‐Validation}
+\section{Time-Series Cross-Validation}
 % ---------------------------------------------------------
-\begin{vbframe}{Chronology‐Aware Splits}
+\begin{vbframe}{Chronology-Aware Splits}
   \begin{figure}[h]
     \centering
         \begin{tikzpicture}[x=0.45cm,y=0.8cm]
@@ -116,7 +121,7 @@ Question: how to feed this to a standard ML model?
       \definecolor{train}{RGB}{166,206,227}  % light blue
       \definecolor{val}{RGB}{253,180,98}     % light orange
 
-      % Helper macro  {window index}{y‐offset}{train start}{val start}{val end}
+      % Helper macro  {window index}{y-offset}{train start}{val start}{val end}
       \newcommand{\window}[5]{%
         % Train rectangle
         \fill[train] (#3,#2) rectangle (#4,#2+0.5);
@@ -149,7 +154,7 @@ Question: how to feed this to a standard ML model?
   \end{figure}
   \begin{itemize}
     \item \textbf{Expanding window}: grow train set, roll validation forward
-    \item \textbf{Sliding window}: fixed‐width train and validation segments
+    \item \textbf{Sliding window}: fixed-width train and validation segments
     \item Validation window should match the application forecasting windows
   \end{itemize}
 \end{vbframe}
@@ -179,7 +184,7 @@ Question: how to feed this to a standard ML model?
 \end{vbframe}
 
 \begin{vbframe}{Simple Baseline}
-\pause
+% \pause
 \large
 \vfill
   $y_{t+1} = y_t$
@@ -192,12 +197,12 @@ Question: how to feed this to a standard ML model?
 \begin{vbframe}{Calendar Features}
   \vfill
   \begin{itemize}
-    \item Day‐of‐Week, Day‐of‐Month, Week Number, Month, Quarter
-    \item Boolean flags: public holidays, weekend, promotion days, end‐of‐month
+    \item Day-of-Week, Day-of-Month, Week Number, Month, Quarter
+    \item Boolean flags: public holidays, weekend, promotion days, end-of-month
   \end{itemize}
   \vspace{0.4cm}
   \begin{block}{Why?}
-    Capture human or process‐driven periodicity.
+    Capture human or process-driven periodicity.
   \end{block}
   \vfill
   \pause
@@ -210,13 +215,13 @@ Question: how to feed this to a standard ML model?
   \[\text{sin}(2\pi \tfrac{hour}{24}),\; \text{cos}(2\pi \tfrac{hour}{24})\]
   \vfill
   \begin{itemize}
-    \item Converts periodic integers (hour 0–23, month 1–12) into continuous space
+    \item Converts periodic integers (hour 0-23, month 1-12) into continuous space
     \item Eliminates artificial jump between 23 \(\rightarrow\) 0
   \end{itemize}
   \vfill
 \end{vbframe}
 
-\begin{frame}{Cyclic Encoding Visualization (Hour 0–23)}
+\begin{frame}{Cyclic Encoding Visualization (Hour 0-23)}
   \begin{figure}
     \centering
     \begin{tikzpicture}[scale=2]
@@ -235,11 +240,11 @@ Question: how to feed this to a standard ML model?
   \end{figure}
 \end{frame}
 
-\begin{vbframe}{Lagged \& Auto‐Regressive Features}
+\begin{vbframe}{Lagged \& Auto-Regressive Features}
   \vfill
   \begin{itemize}
     \item Plain lags: $y_{t-1},\;y_{t-7},\;y_{t-14}$
-    \item Multi‐step: include future‐known covariates (e.g., planned price)
+    \item Multi-step: include future-known covariates (e.g., planned price)
     \item Combine with calendar features for interactions
   \end{itemize}
   \vfill
@@ -273,19 +278,19 @@ Question: how to feed this to a standard ML model?
   \begin{itemize}
     \item Lag $\times$ Holiday flag
     \item Weather $\times$ Weekend indicator
-    \item Captures non‐linear, conditional effects
+    \item Captures non-linear, conditional effects
   \end{itemize}
   \vfill
 \end{vbframe}
 
 % =========================================================
-\section{Wrap‐Up}
+\section{Wrap-Up}
 % ---------------------------------------------------------
 \begin{vbframe}{Key Takeaways}
   \vfill
   \begin{itemize}
-    \item Feature engineering often outweighs model complexity in time‐series ML.
-    \item Use chronology‐aware CV to obtain honest performance estimates.
+    \item Feature engineering often outweighs model complexity in time-series ML.
+    \item Use chronology-aware CV to obtain honest performance estimates.
     \item Always benchmark against a naive or seasonal naive baseline.
   \end{itemize}
   \vfill

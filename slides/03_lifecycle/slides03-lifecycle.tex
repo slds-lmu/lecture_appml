@@ -1,9 +1,10 @@
-\documentclass[10pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+\documentclass[10pt,compress,t,notes=noshow, xcolor=table]{beamer}
 
 
-\usepackage[nospeakermargin]{../../style/lmu-lecture-2}
-% Defines macros and environments
-\input{../../style/common.tex}
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
 \usepackage{etoolbox}
 \makeatletter
 \newlength{\parboxtodim}
@@ -12,16 +13,36 @@
   {\ifx\relax#2\else\setlength{\parboxtodim}{#2}\fi\hsize}
   {}{}
 \makeatother
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
 \begin{document}
 
-\newcommand{\titlefigure}{figure_man/DSLifecycle1}
-\newcommand{\learninggoals}{
+% OLD
+%\newcommand{\titlefigure}{figure_man/DSLifecycle1}
+%\newcommand{\learninggoals}{
+%  \item Know phases of data science lifecycle
+%  \item Identify essential concepts, tools, and methods for each phase
+%  \item Plan an end-to-end ML workflow with attention to constraints and dependencies}
+%
+%\lecturechapter{The Data Science Lifecycle}
+%\lecture{Applied Machine Learning}
+% NEW
+
+\title{Applied Machine Learning}
+
+\titlemeta{
+The Data Science Lifecycle
+}{
+Main phases
+}{
+figure_man/DSLifecycle1
+}{
   \item Know phases of data science lifecycle
   \item Identify essential concepts, tools, and methods for each phase
-  \item Plan an end-to-end ML workflow with attention to constraints and dependencies}
+  \item Plan an end-to-end ML workflow with attention to constraints and dependencies
+}
 
-\lecturechapter{The Data Science Lifecycle}
-\lecture{Applied Machine Learning}
 % \begin{frame}[plain]
 % \titlepage
 % \end{frame}
@@ -43,7 +64,7 @@
 
 % \end{frame}
 
-\begin{frame}{The Data Science Lifecycle \citebutton{CRISP-DM}{https://en.wikipedia.org/wiki/Cross-industry_standard_process_for_data_mining}}
+\begin{frame}{The Data Science Lifecycle \furtherreading{CRISP}}
 \phantomsection\label{the-data-science-lifecycle-1}
 \textbf{Lifecycle Management}: Process of managing a (product) lifecycle from inception, through engineering, design and manufacturing to deployment and eventual disposal.
 
@@ -81,18 +102,18 @@ A widely used framework that formalizes the iterative process of turning data in
 \phantomsection\label{requirements-analysis}
 \textbf{Key question}: What is the end goal of the project?
 \begin{itemize}
-\tightlist
+% \tightlist
 \item
   Define the intended \textbf{output}:
   \begin{itemize}
-  \tightlist
+  % \tightlist
       \item Report, dashboard, or interactive tool?
       \item Scalable pipeline for production use?
   \end{itemize}
 \pause
 \item Identify constraints% (--> Summarized in \textbf{Service Level Agreements})
     \begin{itemize}
-      \tightlist
+      % \tightlist
       \item
         Ethical: Avoid sensitive data use (e.g., address may proxy ethnicity)
       \item
@@ -112,14 +133,14 @@ A widely used framework that formalizes the iterative process of turning data in
 
 \textbf{1. ML Applicability: Is ML justified?}
 \begin{itemize}
-  \tightlist
+  % \tightlist
   \item Explore non-ML baselines first (rules, heuristics, simple analytics)
   \item Use ML only if it adds clear value over simpler/existing alternatives
 \end{itemize}
 \pause
 \textbf{2. Problem Framing: How to frame the task?}
 \begin{itemize}
-  \tightlist
+  % \tightlist
   \item \emph{Imbalanced data:} classification vs.\ anomaly detection?
   \item \emph{Pred. maintenance:} failure probability (classif.) vs.\ remaining lifetime (regr.)?
   \item Select the ML task that aligns with your KPI and data characteristics
@@ -253,11 +274,11 @@ A widely used framework that formalizes the iterative process of turning data in
 \phantomsection\label{kpi-metrics-slide}
 \vspace{-0.5em}
 \begin{itemize}
-  \tightlist
+  % \tightlist
   %-----------------------------------------------------------
   \item<1-> \textbf{How to translate key performance indicators (KPIs) to metrics?}
 \begin{itemize}
-  \tightlist
+  % \tightlist
   \item \textbf{Spam detection}: Job application flagged as spam = unacceptable\\
       $\Rightarrow$ Occasional inbox spam is fine $\Rightarrow$ minimize FP $\Rightarrow$ maximize \textbf{precision}
   \item \textbf{Airport security}:  Weapon flagged as laptop = unacceptable\\
@@ -273,7 +294,7 @@ A widely used framework that formalizes the iterative process of turning data in
   %-----------------------------------------------------------
   \item<2-> \textbf{Multiple objectives:} What if improving one metric worsens another?
     \begin{itemize}
-      \tightlist
+      % \tightlist
       \item \textit{Scalarization}: Combine into one score (e.g.,\ $F_1$)
       \item \textit{Pareto/frontier}: Analyze trade-off without collapsing (e.g., ROC curve)
     \end{itemize}
@@ -395,7 +416,7 @@ A widely used framework that formalizes the iterative process of turning data in
 % be aware of \textbf{data leakage}
 % \begin{itemize}
 % \tightlist
-%     \item Target Leakage: When features that won’t be available at prediction time contain information about the target variable.
+%     \item Target Leakage: When features that won't be available at prediction time contain information about the target variable.
 %     \begin{itemize}
 %     \tightlist
 %         \item Example: Using "Total Sales in Next Month" as a predictor when trying to forecast sales.
@@ -499,7 +520,7 @@ A widely used framework that formalizes the iterative process of turning data in
 
   \begin{column}{0.60\textwidth}
     \begin{itemize}
-      \tightlist
+      % \tightlist
       \item \textbf{Internal vs. External:} External feeds may change format or be discontinued
       \item \textbf{Structured vs. Unstructured:} Tables vs.\ free-text, images, audio, etc.
       \item \textbf{Databases vs. Files:} DBs offer querying, consistency and security
@@ -511,7 +532,7 @@ A widely used framework that formalizes the iterative process of turning data in
 \textbf{Data Versioning:}
 
 \begin{itemize}
-\tightlist
+% \tightlist
 \item Data can evolve - use version control for data, like \texttt{git} for code  
 \item Tools: \texttt{DVC} (Data Version Control), \texttt{Pachyderm}
 \end{itemize}
@@ -535,13 +556,13 @@ A widely used framework that formalizes the iterative process of turning data in
 
 
 
-\begin{frame}{Datasheets \citebutton{Gebru et al., 2018}{https://arxiv.org/abs/1803.09010}}
+\begin{frame}{Datasheets \furtherreading{GEBRU2018}}
 \phantomsection\label{datasheets}
 
-\emph{Datasheets} summarize key metadata about a dataset’s content, structure, provenance, and known limitations to support informed and responsible use.
+\emph{Datasheets} summarize key metadata about a dataset's content, structure, provenance, and known limitations to support informed and responsible use.
 
   \begin{itemize}
-  \tightlist
+  % \tightlist
     \item Why and how was the data collected?
     \item What are its limitations and ethical concerns?
     \item For which tasks is it suitable or unsuitable?
@@ -779,7 +800,7 @@ A widely used framework that formalizes the iterative process of turning data in
 \textbf{Feature Engineering} transforms raw data into informative input variables for modeling.
 
 \begin{itemize}
-\tightlist
+% \tightlist
   \item \textbf{Transformation}: Scaling, log-transform, one-hot encoding
   \item \textbf{Selection}: Wrapper and filter methods, model-based importance
   \item \textbf{Dimensionality Reduction}: PCA, t-SNE
@@ -788,7 +809,7 @@ A widely used framework that formalizes the iterative process of turning data in
 
 \textbf{Best Practices:}
 \begin{itemize}
-\tightlist
+% \tightlist
   \item Avoid overengineering: irrelevant features introduce noise
   \item Fit transformations \textbf{only on training data}; reuse parameters for test data
   \item Prevent leakage: never use test data in feature construction
@@ -804,17 +825,17 @@ A widely used framework that formalizes the iterative process of turning data in
 \vspace{0.5em}
 Treat model training like a scientific experiment:
 \begin{itemize}
-\tightlist
+% \tightlist
   \item \textbf{Track all inputs precisely:}
     \begin{itemize}
-    \tightlist
+    % \tightlist
       \item Dataset version
       \item Algorithm and hyperparameters
       \item Code version (e.g., Git commit/tag)
     \end{itemize}
   \item \textbf{Proceed iteratively:}
     \begin{itemize}
-    \tightlist
+    % \tightlist
       \item \emph{Start simple} – build a fast, interpretable baseline
       \item Gradually increase model complexity and validate each improvement
     \end{itemize}
@@ -847,13 +868,13 @@ Treat model training like a scientific experiment:
 
 \vspace{0.5em}
 \begin{itemize}
-\tightlist
+% \tightlist
   \item How do you track the exact configuration of a model experiment?
   \item How do you record small changes between experiments?
   \item Store in plain text (e.g., \texttt{.yaml}, \texttt{.json}) for readability and version control
 \item Recommended tool: structured configuration managers
     \begin{itemize}
-    \tightlist
+    % \tightlist
       \item \textbf{Python}: \href{https://hydra.cc}{Hydra} - structured, hierarchical configuration management
       \item \textbf{R}: \href{https://cran.r-project.org/package=config}{config} - environment-based YAML setup
     \end{itemize}
@@ -892,7 +913,7 @@ Treat model training like a scientific experiment:
 
 \vspace{0.5em}
 \begin{itemize}
-\tightlist
+% \tightlist
   \item Select models based on predefined \textbf{metrics} (e.g., accuracy, AUC, RMSE)
   \item Use the \textbf{validation or test set} in line with your validation strategy
   \item Assess \textbf{robustness}: How does the model respond to noise, perturbations, or adversarial inputs?\\
@@ -931,21 +952,27 @@ Treat model training like a scientific experiment:
 \vspace{0.5em}
 To understand and trust your model, apply methods from \textbf{Interpretable Machine Learning (IML)}:
 \begin{itemize}
-\tightlist
+% \tightlist
   \item \textbf{Feature Importance}: Which features drive predictions globally?
   \item \textbf{Effects \& Interactions}: Visualize marginal effects and feature interactions %(e.g., ALE, PDP)
   \item \textbf{Local Explanations}: Explain individual predictions %(e.g., LIME, SHAP)
   \item \textbf{Bias Detection}: Reveal fairness issues and unintended discrimination
     \begin{itemize}
-    \tightlist
-      \item Example: Amazon's 2018 hiring tool penalized resumes with “women’s” due to biased training data \citebutton{The Guardian, 2018}{https://www.theguardian.com/technology/2018/oct/10/amazon-hiring-ai-gender-bias-recruiting-engine}
+    % \tightlist
+      \item Example: Amazon's 2018 hiring tool penalized resumes with “women's” due to biased training data % OLD
+%\citebutton{The Guardian, 2018}{https://www.theguardian.com/technology/2018/oct/10/amazon-hiring-ai-gender-bias-recruiting-engine}
+% NEW
+\furtherreading{GUARDIAN2018}
     \end{itemize}
 \end{itemize}
 \end{frame}
 
 
 \begin{frame}{Model Cards  for
-  Model Reporting \citebutton{Mitchell et al. 2019}{https://arxiv.org/pdf/1810.03993.pdf}}
+  Model Reporting % OLD
+%\citebutton{Mitchell et al. 2019}{https://arxiv.org/pdf/1810.03993.pdf}
+% NEW
+\furtherreading{MITCHELL2019}}
 \phantomsection\label{model-cards}
 %https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
 %\includegraphics[width = \linewidth, trim=0 60 0 0, clip]{figure_man/Modelling7.png}
@@ -1008,12 +1035,12 @@ To understand and trust your model, apply methods from \textbf{Interpretable Mac
 
 
 \begin{itemize}
-\tightlist
+% \tightlist
   \item Model Governance includes \textbf{people, processes, and technologies} needed to manage and protect your ML models.
     \item Ensures long-term maintainability and adaptation as requirements evolve.
   \item Two extremes must be avoided:
     \begin{itemize}
-    \tightlist
+    % \tightlist
       \item \textbf{Repression}: too many rules, rigid standards, excessive control
       \item \textbf{Chaos}: too much speed, freedom, creativity, and unstructured change
     \end{itemize}
@@ -1073,17 +1100,17 @@ Technical Debt in ML Systems}
 
 \vspace{0.5em}
 \begin{itemize}
-\tightlist
+% \tightlist
   \item Common deployment strategies:
     \begin{itemize}
-    \tightlist
+    % \tightlist
       \item \textbf{One-off}: Manually trained and deployed once; no regular updates
       \item \textbf{Batch}: Periodically retrained on recent data (e.g., weekly updates)
       \item \textbf{Real-time}: Continuously updated on streaming data; often latency-critical
     \end{itemize}
   \item For frequent updates, establish model \textbf{versioning and lifecycle tracking}
     \begin{itemize}
-    \tightlist
+    % \tightlist
       \item Tools like \href{https://mlflow.org/}{MLflow} provide version control and a model registry
     \end{itemize}
 \end{itemize}
@@ -1172,18 +1199,18 @@ Technical Debt in ML Systems}
 \textbf{Monitoring} ensures that deployed models work reliably and flags issues in production:
 
 \begin{itemize}
-\tightlist
+% \tightlist
   \item \textbf{Pipeline Failures}: Bugs in data ingestion or transformation logic
   \item \textbf{Data Drift}: Changes in input distribution
     \begin{itemize}
-    \tightlist
+    % \tightlist
       \item Example: An image classifier trained on summer data fails when images contain winter snow
       \item Also affects evolving targets (e.g., new categories or value ranges)
       \item \textbf{Remedy}: Label sufficient new data and retrain the model
     \end{itemize}
   \item \textbf{Concept Drift}: Changes in the meaning of labels
     \begin{itemize}
-    \tightlist
+    % \tightlist
       \item Example: Redefining “high blood pressure” from 140mmHg to 135mmHg
       \item \textbf{Remedy}: Relabel historical data and retrain
     \end{itemize}
@@ -1197,7 +1224,7 @@ Technical Debt in ML Systems}
 \textbf{Handover:} At project completion, engage users and transfer responsibilities:
 
 \begin{itemize}
-\tightlist
+% \tightlist
   \item \textbf{System Validation}: Confirm with stakeholders that the solution meet their needs
   \item \textbf{Project Handover}: Transfer system ownership to the production team
 \end{itemize}
@@ -1205,15 +1232,15 @@ Technical Debt in ML Systems}
 \textbf{Feedback loops} occur when model outputs influence future inputs:
 
 \begin{itemize}
-\tightlist
+% \tightlist
   \item \textbf{Direct Loops}: A model affects the data it later learns from
     \begin{itemize}
-    \tightlist
+    % \tightlist
       \item Example: Netflix recommends certain movies, then only learns from user responses to those
     \end{itemize}
   \item \textbf{Hidden Loops}: Multiple models indirectly affect each other via the environment
     \begin{itemize}
-    \tightlist
+    % \tightlist
       \item Example: Flash crashes triggered by interacting trading algorithms amplifying market reactions
     \end{itemize}
 \end{itemize}
@@ -1224,7 +1251,7 @@ Technical Debt in ML Systems}
 %TODO graphics with overview over steps
 \begin{frame}{Step 1: Understand the Problem Statement}
 \begin{itemize}
-  \item \textbf{Clarify Objectives \& Business Impact}: Determine whether it’s a classification or regression task, the domain context, and what “success” looks like.
+  \item \textbf{Clarify Objectives \& Business Impact}: Determine whether it's a classification or regression task, the domain context, and what “success” looks like.
   \item \textbf{Target Variable}: Understand how the target is defined and distributed.
   \item \textbf{Constraints \& Permissions}: External data limits, privacy, or regulatory issues.
   \item \textbf{Action Points}:
@@ -1391,7 +1418,7 @@ Technical Debt in ML Systems}
   \item \textbf{Action Points}:
     \begin{itemize}
       \item Document and share your findings.
-      \item Adapt others’ ideas carefully—validate them on your own splits.
+      \item Adapt others' ideas carefully—validate them on your own splits.
       \item Engage with peers for new tools and techniques.
     \end{itemize}
 \end{itemize}
@@ -1402,7 +1429,7 @@ Technical Debt in ML Systems}
   \item \textbf{Start Simple, Iterate}: Build a solid baseline before adding complexity.
   \item \textbf{Prioritize Validation}: A robust validation strategy prevents nasty surprises.
   \item \textbf{Log Everything}: Document transformations, parameters, and model versions.
-  \item \textbf{Aim for Generalizable Solutions}: Don’t just chase leaderboard scores, keep your focus on reproducibility and reliability.
+  \item \textbf{Aim for Generalizable Solutions}: Don't just chase leaderboard scores, keep your focus on reproducibility and reliability.
 \end{itemize}
 \end{frame}
 

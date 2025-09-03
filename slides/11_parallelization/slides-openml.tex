@@ -1,6 +1,14 @@
-\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+% OLD
+%\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+% NEW
+\documentclass[10pt,compress,t,notes=noshow, xcolor=table]{beamer}
 
-\usepackage{../../style/lmu-lecture}
+% OLD
+%\usepackage{../../style/lmu-lecture}
+% NEW
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
 \usepackage[algo2e]{algorithm2e} % Defines macros and environments
 \input{../../style/common.tex}
 
@@ -11,13 +19,27 @@
 \date{}
 
 \begin{document}
-\newcommand{\titlefigure}{figure/OpenML.png}
-\newcommand{\learninggoals}{
-\item Why Benchmarking?
-\item What is OpenML?}
+% OLD
+%\newcommand{\titlefigure}{figure/OpenML.png}
+%\newcommand{\learninggoals}{
+%\item Why Benchmarking?
+%\item What is OpenML?}
+%
+%\lecturechapter{Large-Scale Benchmarking \& OpenML}
+%\lecture{Applied Machine Learning}
+% NEW
+\titlemeta{
+PLACEHOLDER
+}{
+Large-Scale Benchmarking \& OpenML
+}{
+figure/OpenML.png
+}{
 
-\lecturechapter{Large-Scale Benchmarking \& OpenML}
-\lecture{Applied Machine Learning}
+\item Why Benchmarking?
+\item What is OpenML?
+}
+
 
 \begin{vbframe}{Why Benchmarking}
 \vfill
