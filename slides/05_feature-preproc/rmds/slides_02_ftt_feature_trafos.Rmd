@@ -1,0 +1,96 @@
+## Feature Transformations
+
+```{r, include=FALSE}
+library(mlr)
+library(mlrCPO)
+library(ggplot2)
+library(dplyr)
+
+root = rprojroot::find_root(rprojroot::is_git_root)
+ap = adjust_path(getwd())
+
+data = readr::read_csv(paste0(root, "/data/ames_housing_extended.csv"))
+colnames(data)[1] = "X1"
+data = data[, ! grepl(pattern = "energy_t", x = names(data))]
+```
+
+-   **Normalization:** The feature is transformed to have a mean of 0 and standard deviation of 1
+    $$
+    z^{(i)} = \frac{x^{(i)} - \operatorname{mean}(x)}{\operatorname{sd}(x)}
+    $$
+    Or use **robust** versions (median, IQR)
+
+-   **Box-Cox Transformation:** Stabilizes variance, makes the data more normal distribution-like
+    $$
+    z^{(i)} = \left\{\begin{array}{cc}
+    \frac{\left(x^{(i)}\right)^\lambda - 1}{\lambda} & \ \ \text{if} \ \ \lambda \neq 0 \\
+    \log(x^{(i)}) & \ \ \text{if} \ \ \lambda = 0 \\
+    \end{array}\right.
+    $$
+    
+
+## Feature Transformations
+
+To illustrate the effect of transforming the features we evaluate a k-NN learner without scaling, with normalization, and with a Box-Cox transformation:
+
+```{r, echo=FALSE, warnings=FALSE, message=FALSE, fig.width=8, fig.height=4, out.width="0.7\\textwidth"}
+data_new = data
+names(data_new) = make.names(names(data_new))
+
+task = data_new %>%
+  dplyr::select(-X1, -Fence, -Pool.QC, -Misc.Feature, -Alley) %>%
+  select_if(is.numeric) %>%
+  na.omit() %>%
+  makeRegrTask(id = "Ames Housing", data = ., target = "SalePrice") %>%
+  removeConstantFeatures()
+
+lrn_kknn_no_scale = makeLearner("regr.kknn", scale = FALSE)
+lrn_kknn_no_scale$id = "No Scaling"
+lrn_kknn_scale = mlrCPO::cpoScale() %>>% makeLearner("regr.kknn", scale = FALSE)
+lrn_kknn_scale$id = "Normalize Features"
+lrn_kknn_boxcox = makePreprocWrapperCaret(lrn_kknn_no_scale, ppc.BoxCox = TRUE)
+lrn_kknn_boxcox$id = "Box-Cox Trafo"
+
+set.seed(31415)
+bmr = benchmark(learners = list(lrn_kknn_no_scale, lrn_kknn_scale, lrn_kknn_boxcox),
+  tasks = task, resamplings = cv10, measures = mae)
+plotBMRBoxplots(bmr, pretty.names = FALSE)
+```
+
+
+## Other Common Transformations
+
+- Polynomials: $x_j \longrightarrow x_j, x_j^2, x_j^3, ...$
+
+- Interactions: $x_j, x_k \longrightarrow x_j, x_k, x_j \times x_k$
+
+- Basis expansions: BSplines, TPB, ...
+
+- Fourier expansions
+
+These transformations are used to improve simple models, e.g. linear regression, and most likely will __not__ improve complex machine learning models.
+
+## Feature Transformations - Other Data Types
+
+Feature transformations allow handling a variety of data types: 
+
+- __Dates__:
+  - Time since X
+  - Birthday --> age
+  - Extract month, day of the week, ...
+
+- __Other__:
+  - Use outputs of neural networks (images, text)
+  - Bag-of-words (text)
+  - Statistics (time-series)
+
+
+## Feature Transformations - Summary
+
+- Transformations of the target variable can make modelling highly skewed data easier 
+
+- Scaling single features can lead to better results
+
+- For some learners, e.g. tree-based methods scaling has no effect!
+
+- Feature transformations can further improve models - use domain knowledge!

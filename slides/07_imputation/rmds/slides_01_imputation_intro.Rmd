@@ -1,0 +1,91 @@
+## Motivating Example
+```{r, include = FALSE}
+# enable caching for this document
+knitr::opts_chunk$set(cache = TRUE)
+library(magrittr)
+library(ggplot2)
+library(tibble)
+library(tidyverse)
+
+root = rprojroot::find_root(rprojroot::is_git_root)
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+- Assume each feature in your dataset has 2 % missing values.
+- The missing values are randomly distributed over the observations.
+- How many rows can be used if all observations that contain at least a missing value is dropped?
+
+```{r, echo=FALSE, fig.align="center", fig.width=6, fig.height=3, out.width="0.6\\textwidth"}
+library(ggplot2)
+
+n_cols = 200L
+
+# p = 0.02
+
+
+# simDF = function (n_feats, n_cols, p) {
+#   cols = list()
+
+#   for (i in seq_len(n_cols)) {
+#     cols[[i]] = rnorm(n_feats)
+#     cols[[i]][sample(n_feats, size = n_feats * p, replace = FALSE)] = NA
+#   }
+
+#   df = do.call(cbind, cols)
+#   return (df)
+# }
+
+# sim = 50L
+# ratios = numeric(sim)
+# for (i in seq_len(sim)) {
+#   ratios[i] = sum(! complete.cases(simDF(n_feats, n_cols, p))) / n_feats
+# }
+
+# boxplot(ratios)
+
+# mean(ratios)
+# 1 - pbinom(q = 0, size = n_cols, p = p)
+
+
+df_probs = lapply(c(0.01, 0.02, 0.05, 0.1), FUN = function (p) {
+  n_feats = seq_len(n_cols)
+  na_prob = 1 - pbinom(q = 0, size = n_feats, p = p)
+
+  return (data.frame(n_feats = n_feats, na_prob = na_prob, prob = p))
+})
+df_plots = do.call(rbind, df_probs)
+df_plots$prob = paste0(df_plots$prob * 100, " %")
+
+ggplot(data = df_plots, aes(x = n_feats, y = na_prob, color = prob)) +
+  geom_line() +
+  xlab("Number of Features") +
+  ylab("Percentage of\nNon-Usable Observations") +
+  labs(color = "Percentage of missing\nobservations per\nfeature")
+```
+
+With 100 features and 2 % missing values only 13 % of our data can be used.
+
+## Visualizing Missing Values
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.align="center", out.width="\\textwidth"}
+library(naniar)
+data = readr::read_csv(paste0(root, "/data/ames_housing_extended.csv"))
+colnames(data)[1] = "X1"
+data = select(data, -X1, -matches("energy"))
+vis_miss(data) + theme(axis.text.x = element_text(angle = 90, size = 10))
+```
+
+## Possible Ways to Deal With Missing Values
+
+
+-   Remove observations that contain missing values. \
+    __But:__ Could lead to a very small dataset.
+
+-   Remove features that contain mostly missing values. \
+    __But:__ Can lose (important) information.
+
+-   Use models that can handle missing values, e.g., (most) tree-based methods \
+    __But:__ Restriction in model choice.
+
+- __Imputation__ \
+    $\rightarrow$ Replace missing values with *plausible* values.
