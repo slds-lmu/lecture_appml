@@ -9,28 +9,28 @@ AdvML - 1) multitarget, 2) fairness, 3) imbalanced-learning
 
 ## Chunks
 
-[] 01_intro
-[] 03_lifecycle
--  [] Split into 2 chunks
-[] 04_tuning
+[x] 01_intro (1 -> 4 chunks)
+[x] 03_lifecycle (1 -> 2 chunks)
+[x] 04_tuning (2 -> 4) (I have not included the i2ml .tex-s) 
 [] 05_feature-preproc
 [] 06 adv-fea..
 [] 07 imputation
 [] 08_perf_calibr
  - [] Split into 2 chunks
- - [] Text overflow issue
 [] 09_imbalancy_corr
-[] 10_ensembles-stacking
+[x] 10_ensembles-stacking (forward pass / prediction is an empty slide)
 [] 11_parallelization
-[] 12_perf_bench
+[x] 12_perf_bench (didn't split perf-eval-04 - it had 3 scenarios and a conclusion, having them in separate files seemed unnatural (+ the files would be too small)) + (I was unable to find the lift plot (`figure/lift_chart.png`) referenced at `slides04-perf-eval-05-practical`)
 [x] 12_time_series
 [] fairness
-[] feature_selection
+[x] feature_selection
 [] imbalanced_learning
 [] multittarget
 
 
 ## Per Chunk
+
+
 
 ### 12 time series
 1. title figure is missing
@@ -45,6 +45,9 @@ AdvML - 1) multitarget, 2) fairness, 3) imbalanced-learning
 [] Take into account for \href{https://arxiv.org/abs/2404.19494}{\beamergotobutton{REF}}
 [] PDF insert - is not left alligned
 [] Fix absolute path
+[] Fill in PLACEHOLDERs
+[] Some pdfs don't fully fit, but are okay
+[] texts go over the footer line
 
 - Moodle [Course](https://moodle.lmu.de/course/view.php?id=39034)
 - mlr3slides dir can be treated as an "image dir"

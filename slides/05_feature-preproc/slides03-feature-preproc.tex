@@ -3,44 +3,24 @@
 % NEW
 \documentclass[10pt,compress,t,notes=noshow, xcolor=table]{beamer}
 
-\usepackage[nospeakermargin]{../../style/lmu-lecture-2}
 % Defines macros and environments
-\input{../../style/common.tex}
-\usepackage{pax}
-\setbeamertemplate{frametitle}{\expandafter\uppercase\expandafter\insertframetitle}
-%\useoutertheme{metropolis}
-% remove section slides
-\AtBeginSection[]
-{
-	\begin{frame}<beamer>
-		\frametitle{Advanced Machine Learning}
-		\tableofcontents[currentsection]
-	\end{frame}
-}
 % includepdf slides, pagecommad will set counter for framenumber
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
+
 \usepackage{pdfpages}
 \includepdfset{trim=0mm 0mm 0mm 0mm, pagecommand={\global\setcounter{framenumber}{\value{page}}}}
 % trim=0mm 6mm 0mm 0mm, offset=0 15,
 % add footer:
 \usepackage{framed, color}
 \usepackage{xcolor}
-%\iffalse
-\setbeamertemplate{footline}[text line]{%
-	\noindent\hspace*{\dimexpr-\oddsidemargin-1in\relax}%
-	\colorbox{white}{
-		\makebox[\dimexpr\paperwidth-2\fboxsep\relax]{
-			\color{black}
-			\begin{minipage}[c][2ex][c]{0.5\linewidth}
-				\secname
-			\end{minipage}
-			\hfill\begin{minipage}[c][2ex][c]{0.5\linewidth}
-				\flushright
-				\insertframenumber{}~/~\inserttotalframenumber~~
-			\end{minipage}
-	}}%
-	\hspace*{-\paperwidth}
-}
-%\fi
+
+
 \title{Applied Machine Learning}
 % \author{LMU}
 %\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
@@ -48,16 +28,6 @@
 
 \begin{document}
 
-% OLD
-%\newcommand{\titlefigure}{figure/empty}
-%\newcommand{\learninggoals}{
-%\item Categorical Encoding: \newline One-Hot and Target/Impact Encoding
-%\item Feature Transformations: \newline Normalization and Box-Cox Transformation
-%\item Intro to mlr3pipelines}
-%
-%\lecturechapter{Feature Engineering}
-%\lecture{Applied Machine Learning}
-% NEW
 \titlemeta{
 PLACEHOLDER
 }{
@@ -65,7 +35,6 @@ Feature Engineering
 }{
 figure/empty
 }{
-
 \item Categorical Encoding: \newline One-Hot and Target/Impact Encoding
 \item Feature Transformations: \newline Normalization and Box-Cox Transformation
 \item Intro to mlr3pipelines

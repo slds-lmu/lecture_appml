@@ -1,21 +1,23 @@
-% OLD
-%\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
-% NEW
-\documentclass[10pt,compress,t,notes=noshow, xcolor=table]{beamer}
-% OLD
-%\usepackage{../../style/lmu-lecture}
-% NEW
+
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+
 \input{../../style/preamble}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
+\input{../../latex-math/ml-eval}
 % Defines macros and environments
-\input{../../style/common.tex}
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
 
 \usepackage{multicol}
 
 \newcommand{\Dtestm}{\mathcal{D}_{\text{test}, m}}
 % lowr case c vector used only here, was undefined, not in latex-math
 \newcommand{\cv}{\mathbf{c}}
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
 \title{Applied Machine Learning}
 % \author{LMU}
 %\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
@@ -23,30 +25,16 @@
 
 \begin{document}
 
-
-% OLD
-%\newcommand{\titlefigure}{figure/imbalanced_data_plot_title}
-%\newcommand{\learninggoals}{
-%  \item Know what an imbalanced data set is
-%  \item Understand disadvantage of accuracy on imbalanced data
-%  \item Know techniques for handling imbalanced data sets
-%}
-%
-%\lecturechapter{Dealing with Imbalanced Data}
-%\lecture{Applied Machine Learning}
-% NEW
 \titlemeta{
-PLACEHOLDER
+Imbalanced Data:
 }{
-Dealing with Imbalanced Data
+Problem and handling techniques
 }{
 figure/imbalanced_data_plot_title
 }{
-
   \item Know what an imbalanced data set is
   \item Understand disadvantage of accuracy on imbalanced data
   \item Know techniques for handling imbalanced data sets
-
 }
 
 

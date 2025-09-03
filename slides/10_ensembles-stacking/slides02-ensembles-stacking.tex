@@ -1,16 +1,13 @@
-% OLD
-%\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
-% NEW
-\documentclass[10pt,compress,t,notes=noshow, xcolor=table]{beamer}
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
 
-% OLD
-%\usepackage{../../style/lmu-lecture}
-% NEW
 \input{../../style/preamble}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
+\input{../../latex-math/ml-ensembles}
+\input{../../latex-math/ml-eval}
+
+
 \usepackage[algo2e]{algorithm2e} % Defines macros and environments
-\input{../../style/common.tex}
 
 
 \title{Applied Machine Learning}
@@ -19,30 +16,21 @@
 \date{}
 
 \begin{document}
-% OLD
-%\newcommand{\titlefigure}{slides/10_ensembles-stacking/figure/stacking_better.png}
-%\newcommand{\learninggoals}{
-%\item What is Stacking?
-%\item How can we stack multiple layers?}
-%
-%\lecturechapter{Ensembling Part II}
-%\lecture{Applied Machine Learning}
-% NEW
-\titlemeta{
-PLACEHOLDER
-}{
-Ensembling Part II
-}{
-slides/10_ensembles-stacking/figure/stacking_better.png
-}{
 
+\titlemeta{
+Ensembling:
+}{
+Stacking
+}{
+figure/stacking_better.png
+}{
 \item What is Stacking?
 \item How can we stack multiple layers?
 }
 
 
 \begin{vbframe}{Stacking}
-Also called stacked generalization (\href{https://www.sciencedirect.com/science/article/abs/pii/S0893608005800231}{\beamergotobutton{Wolpert (1992)}}): train multiple base models (level 0) on the same data and use their predictions as input features for a level 1 model that makes the final ensemble prediction $\rightarrow$ heterogeneous ensembling
+Also called stacked generalization (\furtherreading{WOLPERT1992}): train multiple base models (level 0) on the same data and use their predictions as input features for a level 1 model that makes the final ensemble prediction $\rightarrow$ heterogeneous ensembling
 \vspace{1em}
 \begin{columns}
     \begin{column}{0.5\textwidth}
@@ -51,7 +39,7 @@ Also called stacked generalization (\href{https://www.sciencedirect.com/science/
             \centering
             % New version from
             % https://docs.google.com/presentation/d/1gaeW1LefW3vQi3aoEiZEoSUaEyXfmQ9-U_1WoGKfGNM/edit#slide=id.g2e833da9e7c_0_143
-            \includegraphics[width=0.9\textwidth]{slides/10_ensembles-stacking/figure/stacking_better.png}
+            \includegraphics[width=0.9\textwidth]{figure/stacking_better.png}
             %\caption{Caption}
             % Old version from 
             % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
@@ -118,7 +106,7 @@ NB: We can either drop the original features or keep them when learning the leve
             \centering
             % New version from 
             % https://docs.google.com/presentation/d/1gaeW1LefW3vQi3aoEiZEoSUaEyXfmQ9-U_1WoGKfGNM/edit#slide=id.g2e833da9e7c_0_143
-            \includegraphics[width=0.7\textwidth]{slides/10_ensembles-stacking/figure/stacking_cv_better.png}
+            \includegraphics[width=0.7\textwidth]{figure/stacking_cv_better.png}
             % Old version from
             %\caption{Caption}
             % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
@@ -184,7 +172,7 @@ Now: Also train multiple models at level 1, use predictions to train final level
 %        \vspace{-1em}
 %        \begin{figure}
 %            \centering
-%            \includegraphics[width=0.9\textwidth]{slides/10_ensembles-stacking/figure/stacking.png}
+%            \includegraphics[width=0.9\textwidth]{figure/stacking.png}
 %            %\caption{Caption}
 %            % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
 %            \label{fig:stacking_multi}
@@ -226,7 +214,7 @@ Popular choices of level 1 or level 2 models in stacking include:
 \vfill
 Higher-level training data:
 \begin{itemize}
-    \item Probabilities instead of class labels (see \href{https://dl.acm.org/doi/10.5555/1622859.1622868}{\beamergotobutton{Ting and Witten, 1999}})
+    \item Probabilities instead of class labels (see \furtherreading{TINGWITTEN1999})
     \item Include original dataset $\Xmat$ or not?
 \end{itemize}
 \vfill
@@ -294,14 +282,14 @@ What other methods do the following level-1 classifiers recover?
         \vspace{-1em}
         \begin{figure}
             \centering
-            \includegraphics[width=\textwidth]{slides/10_ensembles-stacking/figure/AG.png}
+            \includegraphics[width=\textwidth]{figure/AG.png}
             \caption*{\url{https://auto.gluon.ai/}}
             \label{fig:auto_gluon}
         \end{figure}
         \vspace{1em}
         \begin{figure}
             \centering
-            \includegraphics[width=\textwidth]{slides/10_ensembles-stacking/figure/ALMB.png}
+            \includegraphics[width=\textwidth]{figure/ALMB.png}
             \caption{AutoGluon Performance on AMLB 1h binary classification.}
             \label{fig:auto_gluon_almb}
         \end{figure}
