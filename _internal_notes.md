@@ -1,7 +1,5 @@
-# Steps AppML
-1. Downloaded [`update-service.sh`](https://github.com/slds-lmu/lecture_service/blob/main/service/scripts/update-service.sh), placed in `scripts/` and run `bash update-service.sh` (using WSL)
-2. Converted [logo](style/logos/applied.png) to pdf and names `logo.pdf`
-
+##  To Do
+[Algorithm2e](https://ctan.org/pkg/algorithm2e?lang=en) package is requiered for some slides but is missing from `lecture_service`
 
 ## Folder sources
 SL - 1) feature-selection
@@ -25,9 +23,6 @@ AdvML - 1) multitarget, 2) fairness, 3) imbalanced-learning
 [x] feature_selection
 [x] multitarget (in `attic`)
 
-## ToDo
-
-[] Take into account for \href{https://arxiv.org/abs/2404.19494}{\beamergotobutton{REF}}
-[] Some pdfs don't fully fit, but are okay
-[] texts go over the footer line
-
+## Note
+- Occasionally embedded PDFs / texts don't fully fit and overlap with the footer line. I have not touched them because I'm not sure how/whether you would like me to handle them (e. g. reduce the font size, make embedded pdf smaller, paraphrase the text). Let me know if there is anything I needed to do regarding this.
+- Additional notes can be found in the directories for separate chunks.
