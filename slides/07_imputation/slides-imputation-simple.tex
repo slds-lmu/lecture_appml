@@ -1,0 +1,220 @@
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+\title{Applied Machine Learning}
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\begin{document}
+
+\titlemeta{
+Imputation:
+}{
+Introduction and Simple Methods
+}{
+figure_man/fe_imputation_simple.pdf
+}{
+\item Understanding missing data mechanisms
+\item Simple imputation strategies
+}
+
+
+% \section{Imputation}
+% Content adapted from texs_equivalent_to_rmds/slides-01-imputation-intro.tex (pages 1-2 equivalent from pdf_chapters/slides_01_imputation_intro.pdf)
+\begin{frame}{Motivating Example}
+
+    \begin{itemize}
+        \item Assume each feature in your dataset has 2\% missing values.
+        \item The missing values are randomly distributed over the observations.
+        \item How many rows can be used if all observations that contain at least a missing value is dropped?
+    \end{itemize}
+    
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{figure/missing_values_plot}
+    \end{center}
+    
+    With 100 features and 2\% missing values only 13\% of our data can be used.
+
+\end{frame}
+
+\begin{frame}{Visualizing Missing Values}
+
+    \begin{center}
+        \includegraphics[width=\textwidth]{figure/missing_values_visualization}
+    \end{center}
+
+\end{frame}
+\begin{frame}{Why is data missing? \furtherreading{LEMORVAN2024}}
+    \vfill
+    \begin{itemize}
+        \item faulty measurements
+        \item unanswered questionnaire items
+        \item unreported data
+    \end{itemize}
+    \vfill
+\end{frame}
+\begin{frame}{Missingness mechanisms}
+    \vfill
+    \begin{itemize}
+        \item MCAR (Missing Completely At Random)
+        \begin{itemize}
+            \item Data is missing independently of missing or observed values
+        \end{itemize}
+        \item MAR (Missing At Random)
+        \begin{itemize}
+            \item Missingness depends only on observed values
+        \end{itemize}
+        \item MNAR (Missing Not At Random)
+        \begin{itemize}
+            \item Missingness depends on observed and missing values
+        \end{itemize}
+    \end{itemize}    
+    \vfill
+    \pause
+    Which one is most realistic to assume in the real world?
+    \vfill
+\end{frame}
+\begin{frame}{Missingness mechanisms - Examples}
+    \vfill
+    \begin{itemize}
+        \item MCAR (Missing Completely At Random)
+        \begin{itemize}
+            \item Participants skip a page of a questionaire because they flip two pages at once
+        \end{itemize}
+        \item MAR (Missing At Random)
+        \begin{itemize}
+            \item Certain medical examinations are conducted more often for certain patient groups (age groups, different gender)
+            \item Certain demographic groups are less likely to fill in surveys about depression (but demographic groups is often fully observable, e.g., gender)
+        \end{itemize}
+        \item MNAR (Missing Not At Random)
+        \begin{itemize}
+            \item Missingness depends on observed and missing values
+        \end{itemize}
+    \end{itemize}    
+    \vfill
+\end{frame}
+% Content adapted from texs_equivalent_to_rmds/slides-01-imputation-intro.tex (page 3 equivalent from pdf_chapters/slides_01_imputation_intro.pdf)
+\begin{frame}{Possible Ways to Deal With Missing Values}
+
+    \begin{itemize}
+        \item Remove observations that contain missing values. \\
+              \textbf{But:} Could lead to a very small dataset.
+        
+        \item Remove features that contain mostly missing values. \\
+              \textbf{But:} Can lose (important) information.
+        
+        \item Use models that can handle missing values, e.g., (most) tree-based methods \\
+              \textbf{But:} Restriction in model choice.
+        
+        \item \textbf{Imputation} \\
+              $\rightarrow$ Replace missing values with \textit{plausible} values.
+    \end{itemize}
+
+\end{frame}
+\begin{frame}{Reasons to impute missing values}
+    \vfill
+    \begin{itemize}
+        \item Prediction
+        \begin{itemize}
+            \item Goal: allow for maximal predictive performance
+        \end{itemize}
+        \item Inference
+        \begin{itemize}
+            \item Goal: estimate parameters such as mean and variance of the variable distribution
+            \item Not part of this lecture
+        \end{itemize}
+    \end{itemize}
+    \vfill
+    $\rightarrow$ 
+    \begin{itemize}
+        \item Imputation depends on the goal
+        \item Imputation needs to be benchmarked wrt the downstream task
+    \end{itemize}
+    \vfill
+\end{frame}
+
+% Content adapted from texs_equivalent_to_rmds/slides-02-imputation-simple.tex (pages 1-2 equivalent from pdf_chapters/slides_02_imputation_simple.pdf)
+\begin{frame}{Simple Imputation Methods}
+
+    A very simple imputation strategy is to replace missing values with univariate statistics, e.g. mean or median, of the feature:
+    
+    \begin{center}
+        \includegraphics[width=\textwidth]{figure_man/fe_imputation_simple.pdf}
+    \end{center}
+
+\end{frame}
+
+\begin{frame}{Simple Imputation Methods}
+
+    The statistic used to impute the missing values has to match the type of the feature:
+    
+    \begin{itemize}
+        \item Numeric features: mean, median, quantiles, mode, ...
+        \item Categorical features: mode, ...
+    \end{itemize}
+    
+    Alternatively missing values can be encoded with new values
+    
+    \begin{itemize}
+        \item Numeric features: \texttt{2*max}, ...
+        \item Categorical features: \texttt{\_\_MISS\_\_}, ...
+    \end{itemize}
+
+\end{frame}
+\begin{frame}{Imputation Notes}
+\begin{itemize}
+    \item  To ensure that the information regarding which values were imputed is not lost, we can add a binary indicator variable.
+        \begin{itemize}
+            \item Provides additional information in MNAR
+        \end{itemize}
+    \item Domain knowledge is highly important: Missing Credit can mean that the individual has 0 debt.
+    \item Encoding numeric values with out-of-range values has been shown to work well in practice for complex ML models.
+        \begin{itemize}
+            \item This is especially useful for tree-based methods, as it allows separating observations with missing values in a feature.
+            \item But using out-of-range imputation when estimating global effects (e.g. in linear models) can skew the results
+        \end{itemize}
+\end{itemize}    
+\end{frame}
+
+% Content adapted from texs_equivalent_to_rmds/slides-02-imputation-simple.tex (pages 4-6 equivalent from pdf_chapters/slides_02_imputation_simple.pdf)
+\begin{frame}{Disadvantage of Constant Imputation}
+
+    By imputing a feature with one value we shift the distribution of that feature towards a single value.
+    
+    \begin{center}
+        \includegraphics[width=0.7\textwidth]{figure/imputation_distribution_comparison}
+    \end{center}
+
+\end{frame}
+
+\begin{frame}{Imputation by Sampling}
+
+    A way out of this problem is to sample values to replace each missing observation from
+    
+    \begin{itemize}
+        \item the empirical distribution or histogram, for a numeric feature.
+        \item the relative frequencies of levels, for a categorical feature.
+    \end{itemize}
+    
+    This ensures that the distribution of the features does not change much.
+
+\end{frame}
+
+\begin{frame}{Benchmark of Simple Imputation}
+
+    To illustrate the effect of imputation on the performance we evaluate a linear model on the Ames housing dataset.
+    Evaluation is done with a 10-fold cross-validation:
+    
+    \begin{center}
+        \includegraphics[width=0.7\textwidth]{figure/imputation_benchmark_comparison}
+    \end{center}
+
+\end{frame}
+
+\endlecture
+\end{document}

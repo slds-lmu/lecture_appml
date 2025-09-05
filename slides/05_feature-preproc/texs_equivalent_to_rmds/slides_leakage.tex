@@ -1,0 +1,68 @@
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+\newcommand{\titlefigure}{data_leakage_title.png}
+\newcommand{\learninggoals}{
+  \item Understand the concept of train-test leakage
+  \item Recognize common sources of data leakage
+  \item Learn to implement proper preprocessing pipelines
+  \item Know how to avoid overly optimistic performance estimates
+}
+
+\title{Feature Engineering: Train-Test Leakage}
+\date{}
+
+\begin{document}
+
+\lecturechapter{Train-Test Leakage}
+\lecture{Applied Machine Learning}
+
+% Set style/preamble.tex as framework
+
+\sloppy
+
+% ------------------------------------------------------------------------------
+% LECTURE CONTENT
+% ------------------------------------------------------------------------------
+
+% Train-Test Leakage
+
+\begin{vbframe}{Train-Test Leakage}
+
+\begin{itemize}
+\item Ultimately we are interested in predicting on future data!
+
+\item We can not use 'knowledge' about future (test) data during training.
+
+\item Requires clearly separating train and test data in order to avoid overoptimistic conclusions:
+
+\item \textbf{Examples:}
+
+  \begin{itemize}
+  \item Using knowledge about which features are relevant in test data
+  
+  \item Scaling based on statistics of the test data 
+  
+  \item Missing patterns in the test data not present in training data
+  \end{itemize}
+\end{itemize}
+
+\end{vbframe}
+
+% Train-Test Leakage
+
+\begin{vbframe}{Train-Test Leakage}
+
+\vfill
+
+\begin{center}
+\includegraphics[width=\textwidth]{figure/pipe_action.png}
+\end{center}
+
+\vfill
+
+\end{vbframe}
+
+\endlecture
+\end{document}

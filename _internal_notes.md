@@ -13,24 +13,21 @@ AdvML - 1) multitarget, 2) fairness, 3) imbalanced-learning
 [x] 03_lifecycle (1 -> 2 chunks)
 [x] 04_tuning (2 -> 4) (I have not included the i2ml .tex-s) 
 [] 05_feature-preproc
-[] 06 adv-fea..
-[] 07 imputation
-[] 08_perf_calibr
- - [] Split into 2 chunks
-[] 09_imbalancy_corr
+[] 06 adv-feature-selection
+- [] slides04-adv-feature-preproc.tex 
+[x] 07 imputation (1 -> 2 chunks, Rmds translated)
+[x] 08_perf_calibr (1 -> 2 chunks)
+[x] 09_imbalancy_corr (1 -> 3 chunks)
 [x] 10_ensembles-stacking (forward pass / prediction is an empty slide)
-[] 11_parallelization
+[x] 11_parallelization (2 -> 3 chunks)
 [x] 12_perf_bench (didn't split perf-eval-04 - it had 3 scenarios and a conclusion, having them in separate files seemed unnatural (+ the files would be too small)) + (I was unable to find the lift plot (`figure/lift_chart.png`) referenced at `slides04-perf-eval-05-practical`)
 [x] 12_time_series
 [] fairness
 [x] feature_selection
-[] imbalanced_learning
 [] multittarget
 
 
 ## Per Chunk
-
-
 
 ### 12 time series
 1. title figure is missing
