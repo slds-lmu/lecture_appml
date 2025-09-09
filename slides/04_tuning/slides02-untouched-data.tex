@@ -9,6 +9,7 @@
 \input{../../latex-math/ml-eval.tex}
 
 \usepackage{pdfpages}
+\includepdfset{trim=0 10pt 0 0, pagecommand={\global\setcounter{framenumber}{\value{page}}}, offset=0 5pt, clip=true, noautoscale=true}
 
 \title{Applied Machine Learning}
 % \author{LMU}
@@ -34,12 +35,12 @@ figure_man/empty
 
 \section{The Untouched Test Set Principle}
 
-\includepdf[pages={3-5},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-nested-nestedintro.pdf}
+\includepdf[pages={3-5}]{i2ml/slides-nested-nestedintro.pdf}
 
-\includepdf[pages={2-7},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-nested-nestedresampling.pdf}
+\includepdf[pages={2-7}]{i2ml/slides-nested-nestedresampling.pdf}
 
 \section{Pipelines}
-\includepdf[pages={3},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-pipelines.pdf}
+\includepdf[pages={3}]{i2ml/slides-tuning-pipelines.pdf}
 
 \section{Practical Considerations}
 

@@ -12,6 +12,7 @@
 \input{../../latex-math/ml-eval.tex}
 
 \usepackage{pdfpages}
+\includepdfset{trim=0 10pt 0 0, pagecommand={\global\setcounter{framenumber}{\value{page}}}, offset=0 5pt, clip=true, noautoscale=true}
 
 \title{Applied Machine Learning}
 % \author{LMU}
@@ -37,11 +38,11 @@ figure_man/empty
 
 \section{Hyperparameter Tuning}
 
-\includepdf[pages={2-9},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-intro.pdf}
+\includepdf[pages={2-9}]{i2ml/slides-tuning-intro.pdf}
 
 \section{Hyperparameter Tuning Algorithms}
 
-\includepdf[pages={2,4,6,7},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-basicalgos.pdf}
+\includepdf[pages={2,4,6,7}]{i2ml/slides-tuning-basicalgos.pdf}
 
 \begin{frame}{Summary}
     \begin{table}[]
@@ -59,9 +60,9 @@ figure_man/empty
     \end{table}
 \end{frame}
 
-\includepdf[pages={2,4,5,10},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-advanced.pdf}
+\includepdf[pages={2,4,5,10}]{i2ml/slides-tuning-advanced.pdf}
 
-\includepdf[pages={6},trim=0 20 0 0,clip,width=490pt,offset=20pt 0pt,pagecommand={}]{i2ml/slides-tuning-practical.pdf}
+\includepdf[pages={6}]{i2ml/slides-tuning-practical.pdf}
 
 \endlecture
 \end{document}
