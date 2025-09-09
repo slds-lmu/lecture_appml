@@ -1,0 +1,712 @@
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+\input{../../latex-math/ml-eval}
+% Defines macros and environments
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
+
+\usepackage{multicol}
+
+\newcommand{\Dtestm}{\mathcal{D}_{\text{test}, m}}
+% lowr case c vector used only here, was undefined, not in latex-math
+\newcommand{\cv}{\mathbf{c}}
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
+\title{Applied Machine Learning}
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\begin{document}
+
+\titlemeta{
+Imbalanced Data:
+}{
+Cost-Sensitive Learning  
+}{
+figure/threshold_adjusting.png
+}{
+  \item Understand cost-sensitive learning principles
+  \item Apply cost matrices to imbalanced classification problems
+  \item Implement threshold tuning
+}
+
+% https://github.com/slds-lmu/lecture_advml/blob/main/slides/imbalanced-learning/slides-imbalanced-learning-cost-sensitive-learning-1.tex
+% https://github.com/slds-lmu/lecture_advml/blob/main/slides/imbalanced-learning/slides-imbalanced-learning-cost-sensitive-learning-2.tex
+% https://github.com/slds-lmu/lecture_advml/blob/main/slides/imbalanced-learning/slides-imbalanced-learning-cost-sensitive-learning-3.tex
+
+\section{Cost-Sensitive Learning}
+
+\begin{frame}{Cost-Sensitive learning: In a Nutshell}
+	%	
+	\scriptsize{
+
+		\begin{itemize}
+		
+    		\item Cost-sensitive learning: 
+                \begin{itemize}
+                    \scriptsize
+                    \item Classical learning: data sets are balanced, and all errors have equal costs
+                    \item We now assume given, unequal cost
+                    \item And try to minimize them in expectation
+
+                \end{itemize}
+    		
+    		\item Applications:
+      
+    		\begin{itemize}
+    			\scriptsize	
+    			\item Medicine --- Misdiagnosing as healthy vs. having a disease
+    			\item (Extreme) Weather prediction ---  Incorrectly predicting that no hurricane occurs 
+    			\item Credit granting --- Lending to a risky client vs. not lending to a trustworthy client.
+    		\end{itemize}
+         
+		
+		\end{itemize}
+        \vspace{15pt}
+
+        \begin{minipage}{0.49\textwidth}
+            \begin{table}[]
+                \centering
+                \begin{tabular}{p{1cm}c|cc}
+                    & &\multicolumn{2}{c}{Truth} \\
+                    & & Default & Pays Back  \\
+                    \hline
+                    \multirow{2}{*}{\parbox{1cm}{Pred.}} & Default & 0 & $ 10 $\\
+                    & Pays Back & $1000$ & $0$   \\
+                \end{tabular}
+            \end{table}
+        \end{minipage}
+        \hfill
+        \begin{minipage}{0.49\textwidth}
+            \begin{itemize}
+                \scriptsize
+                \item In these examples, \textbf{the costs of a false negative is much higher than the costs of a false positive}.
+                \vspace{15pt}
+                
+                \item In some applications, the costs are \textbf{unknown} $\leadsto$ need to be specified by experts, or be learnt.
+            \end{itemize}   
+        \end{minipage}
+		
+	}
+\end{frame}
+
+\begin{frame}{Cost matrix}
+%	
+%	
+	\begin{itemize}
+%		
+		\item Input: cost matrix $\mathbf{C}$ 
+	\end{itemize}
+	%	
+	\begin{center}
+		\tiny
+		\begin{tabular}{cc|>{\centering\arraybackslash}p{8em}>{\centering\arraybackslash}p{8em}>{\centering\arraybackslash}p{5em}>{\centering\arraybackslash}p{8em}}
+			& & \multicolumn{4}{c}{\bfseries True Class $y$} \\
+			&  & $1$ & $2$ & $\ldots$ & $g$  \\
+			\hline
+			\bfseries Classification     & $1$ & $C(1,1)$  &  $C(1,2)$  & $\ldots$ &  $C(1,g)$ \\
+			& $2$ &  $C(2,1)$  &  $C(2,2)$  & $\ldots$ & $C(2,g)$  \\
+            $\yh$ & & & & & \\
+			& $\vdots$ & $\vdots$ & $\vdots$ & $\ldots$ & $\vdots$ \\
+			& $g$ & $C(g,1)$ & $C(g,2)$  & $\ldots$ &  $C(g,g)$\\
+		\end{tabular}
+	\end{center}
+	%	
+	\begin{itemize}
+		%		
+		\item $C(j,k)$ is the cost of classifying class $k$ as $j,$ 
+  \item 0-1-loss would simply be: $C(j,k) = \mathds{1}_{[ j \neq k ]}$
+		
+		\item $\mathbf{C}$ designed by experts with domain knowledge
+		\begin{enumerate}
+            \item Too low costs: not enough change in model, still costly errors
+            \item Too high costs: might never predict costly classes
+		\end{enumerate}
+		
+	\end{itemize}
+
+
+\end{frame}
+
+
+\begin{frame}{Cost matrix for Imbalanced Learning}
+		\begin{itemize}			
+	 
+			\item Common heuristic for imbalanced data sets: 
+	
+			\begin{itemize}
+                \item $C(j,k) = \frac{n_j}{n_k}$ with $n_k  \ll n_j$,\\
+                misclassifying a minority class $k$ as a majority class $j$
+		
+				\item $C(j,k) = 1$ with $n_j \ll n_k$,\\
+    misclassifying a majority class $k$ as a minority class $j$
+			
+				\item 0 for a correct classification 
+			
+			\end{itemize}
+\vspace{1cm}
+    		\item Imbalanced binary classification: \\
+            \begin{table}[]
+                \centering
+                \begin{tabular}{cc|cc}
+                    & &\multicolumn{2}{c}{True class} \\
+                    & & $y=1$ & $y=-1$  \\
+                    \hline
+                    \multirow{2}{*}{\parbox{0.5cm}{Pred. class}}& $\hat y$ = 1     & $0$                & $ 1 $\\
+                    & $\hat y$ = -1 & $ \frac{n_-}{n_+} $              &  $0$   \\
+                \end{tabular}
+            \end{table}
+    		
+
+            \item So: much higher costs for FNs
+        \end{itemize}
+		
+\end{frame}
+
+\begin{frame}{Minimum expected Cost Principle}
+
+
+		\begin{itemize}
+		
+			\item Suppose we have:
+            \begin{itemize}
+                \item a cost matrix $\mathbf{C}$
+                
+                \item knowledge of the true posterior $p(\cdot ~|~ \xv)$
+            \end{itemize}
+
+            % \item How to classify given $\xv$: 
+            % \begin{itemize}
+            %     \footnotesize
+            %     \item Compute cost for classifying $\xv$ as $i$. (infeasible to directly compute.)
+            %     \vspace{10pt}
+                
+            %     \item $\leadsto$ Marginalize over ``true'' class $j$.
+            %     \vspace{10pt}
+            % \end{itemize}
+
+			\item Predict class j with smallest expected costs when marginalizing over true classes:
+   %, where the expected costs of a class $i\in\{1,\ldots,g\}$ is
+	
+			$$ 	\E_{K \sim p(\cdot ~|~ \xv)}( C(j,K) ) = \sumkg p(k ~|~ \xv) C(j,k)	$$
+	
+		\end{itemize}
+
+    \begin{itemize}
+        \item If we trust a probabilistic classifier, we can convert its scores to labels:
+        % $f$ which uses a probabilistic score function $\pi:\Xspace \to [0,1]^g$ with $\pi(\xv) = (\pi(\xv)_1,\ldots,\pi(\xv)_g)^\top$ and $\sum_{j=1}^g \pi(\xv)_j = 1$ for the classification, then one can easily modify $h$ to take the expected costs into account:
+		$$  \hx := \argminlim_{j=1,\ldots,g} \sumkg 	\pikx C(j,k). $$
+ 
+%        \item For $\xv$, making prediction $i$ means \textbf{acting as if $i$ is the true class of $\xv$.}
+        
+        \item Can be better to take a less probable class \furtherreading{ELKAN2001}
+
+        % \item Now consider: 
+        % \begin{itemize}
+        %     \footnotesize
+        %     \item If we learnt a binary classifier: $p(1 ~|~ \xv) = \pi(\xv)_1$ and $p(-1 ~|~ \xv) = \pi(\xv)_2$,
+        %     \item Under what condition should we predict $\xv$ as class $1$?
+        % \end{itemize}
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Optimal Threshold for Binary Case 1/2}
+    \begin{itemize}
+            \item Optimal decisions do not change if 
+            \begin{itemize}
+                \item $\mathbf{C}$ is multiplied by positive constant
+                \item $\mathbf{C}$ is added with constant shift
+            \end{itemize}
+
+            \item Scale and shift $\mathbf{C}$ to get simpler $\mathbf{C}^\prime$: 
+            \begin{table}[]
+                \centering
+                    \begin{tabular}{cc|cc}
+        			& &\multicolumn{2}{c}{True class} \\
+        			& & $y=1$ & $y=-1$  \\
+        			\hline
+        			\multirow{2}{*}{\parbox{0.5cm}{Pred.  class}} & $\hat y$ = 1 & $C^\prime(1,1)$ & $1$ \\
+        			& $\hat y$ = -1 & $C^\prime(-1, 1)$ & 0\\
+                \end{tabular}
+            \end{table}
+            where 
+            \begin{itemize}
+                \item $C^\prime (-1, 1) = \frac{C(-1, 1) - C(-1, -1)}{C(1, -1) - C(-1, -1)}$
+                \item $C^\prime (1, 1) = \frac{C(1, 1) - C(-1, -1)}{C(1, -1) - C(-1,-1)}$
+            \end{itemize}
+    \end{itemize}
+\end{frame}
+\begin{frame}{Optimal Threshold for Binary Case 2/2}
+            \begin{itemize}
+            \item We predict $\xv$ as class $1$ if 
+            \begin{align*}
+                \E_{K \sim p(\cdot ~|~ \xv)}( C^\prime(1,K) )  \leq \E_{K \sim p(\cdot ~|~ \xv)}( C^\prime(-1,K) ) \\
+            \end{align*}
+
+			\item Let's unroll the expected value and use $\mathbf{C}^\prime$:
+            % need this footnotsize operation, otherwise the first line will be very long.
+            \footnotesize{
+    			\begin{align*}	
+                    & p(-1 ~|~ \xv ) C^\prime(1,-1)  + 	p(1 ~|~ \xv ) C^\prime(1,1) \leq  p(-1 ~|~ \xv ) C^\prime(-1,-1)  + 	p(1 ~|~ \xv ) C^\prime(-1,1)  \\ 
+                    &\Rightarrow [1 - p(1 ~|~ \xv)] \cdot 1 + p(1 ~|~ \xv) C^\prime(1, 1) \leq p(1 ~|~ \xv) C^\prime(-1, 1) \\
+                    &\Rightarrow p(1 ~|~ \xv) \geq \frac{1}{C^\prime(-1, 1) - C^\prime(1, 1) + 1} \\
+                    &\Rightarrow p(1 ~|~ \xv) \geq \frac{C(1, -1) - C(-1, -1)}{C(-1, 1) - C(1, 1) + C(1, -1) - C(-1, -1)} = c^*
+    			\end{align*}
+            }
+		
+            \item If even $C(1, 1) = C(-1, -1) = 0 $, we get:
+            \begin{align*}
+                p(1 ~|~ \xv) \geq \frac{C(1, -1)}{C(-1, 1) + C(1, -1)} = c^{*}
+            \end{align*}	
+            
+            \item Optimal threshold $c^*$ for probabilistic classifier 
+            
+            $$   \hx := 2 \cdot \mathds{1}_{[ \pi(\xv) \geq c^*]} -1 $$
+							
+		\end{itemize}
+\end{frame}
+
+
+
+%\begin{frame}{MetaCost: Example}
+%	%	
+%	\small{
+%		\begin{itemize}
+%			%		
+%			\item We compare C4.5 (decision tree) with MetaCost using C4.5 for the \href{http://staffwww.itn.liu.se/~aidvi/courses/06/dm/
+%				labs/heart-c.arff}{heart data set}  in \href{ http://www.cs.waikato.ac.nz/ml/weka/}{Weka}. 
+%			%		
+%			\item The cost matrix $\mathbf{C}$ is 
+%			
+%			\begin{center}
+%				\begin{tabular}{cc|cc}
+%					& &\multicolumn{2}{c}{True class} \\
+%					& & $y=1$ & $y=-1$  \\
+%					\hline
+%					\multirow{2}{*}{\parbox{0.3cm}{Pred.  class}}& $\hat y$ = 1     & $0$                & $ 1 $\\
+%					& $\hat y$ = -1 & $ 4 $              &  $0$   \\
+%				\end{tabular}
+%			\end{center}
+%		
+%			\item The resulting confusion matrices are 
+%			
+%						
+%			\begin{center}
+%				\begin{tabular}{cc|cc}
+%					& &\multicolumn{2}{c}{True class} \\
+%					& MetaCost & $y=1$ & $y=-1$  \\
+%					\hline
+%					\multirow{2}{*}{\parbox{0.3cm}{Pred.  class}}& $\hat y$ = 1     & $104$                & $ 21 $\\
+%					& $\hat y$ = -1 & $ 61 $              &  $117$   \\
+%				\end{tabular}
+%							\begin{tabular}{cc|cc}
+%				& &\multicolumn{2}{c}{True class} \\
+%				& C4.5 & $y=1$ & $y=-1$  \\
+%				\hline
+%				\multirow{2}{*}{\parbox{0.3cm}{Pred.  class}}& $\hat y$ = 1     & $138$                & $ 40 $\\
+%				& $\hat y$ = -1 & $ 27$              &  $98$   \\
+%			\end{tabular}
+%			\end{center}
+%		
+%		
+%			%		
+%			\item The total cost of MetaCost is 145, while C4.5 has total costs of 187. However, MetaCost has $0.729$ correct classifications and C4.5 has $0.779.$ 
+%			
+%			%		
+%		\end{itemize}
+%		%
+%	}
+%	%	
+%\end{frame}
+
+
+
+%\begin{frame}{Cost-Sensitive Decision Trees}
+%	%	
+%	\small{
+%		\begin{itemize}
+%			%		
+%			\item 
+%			%		
+%		\end{itemize}
+%		%
+%	}
+%	%	
+%\end{frame}
+
+\begin{frame}{Empirical Thresholding: binary case}
+    \begin{itemize}
+        \item Theoretical threshold from MECP not always best, due to e.g. wrong model class, finite data, etc.
+        \item Simply measure costs on data with different thresholds
+        \item Then pick best threshold \furtherreading{SHENG2006}:
+        \begin{figure}[h]
+            \centering
+            \includegraphics[width=0.95\textwidth]{figure/threshold_adjusting.png}
+        \end{figure}
+
+        %\item The optimal threshold $T^{*}$ corresponds to the point with the smallest $M_C$.
+
+        \item What if two equal local minima? We prefer the one with wider span %(e.g. $T_2$ in the 3rd subfigure). Because it is less sensitive to small changes in $T$.
+
+        \item Do this on validation data / over cross-val to avoid overfitting!
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Empirical Thresholding: binary case}
+    \begin{itemize}
+        \item Example: German Credit task
+        \footnotesize{
+        \begin{center}
+                            \begin{tabular}{cc|cc}
+        			& &\multicolumn{2}{c}{True class} \\
+        			& & $y=$ good & $y=$ bad  \\
+        			\hline
+        			\multirow{2}{*}{\parbox{0.3cm}{Pred.  class}} & $\hat y$ = good & 0 & 3 \\
+        			& $\hat y$ = bad & 1 & 0\\
+                \end{tabular}
+        \end{center}
+        }
+        \item Theoretical: $C(good,bad)/(C(bad,good)+C(good,bad))=3/4=c^{*}$ 
+
+        \item Empirical version with 3-CV: For XGBoost, empirical minimum deviates substantially from theoretical version
+
+                \begin{figure}[h]
+            \centering
+            \includegraphics[width=0.95\textwidth]{figure_man/threshold_plots.pdf}
+        \end{figure}
+
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Empirical Thresholding: Multiclass}
+    \begin{itemize}
+ %        \item It is also possible to perform threshold adjusting in multi-class classifcation.
+        
+  %      \item Here, we present a simple approach for classifiers that output scores $\pi(\xv) = (\pi(\xv)_1,\ldots,\pi(\xv)_g)^\top$ in multi-class classification:
+        
+            \item In the standard setting, we predict class $h(\xv) = \argmaxlim_{k} \pikx$.
+            
+            \item Let's use $g$ thresholds $c_k$ now 
+            
+            \item Re-scale scores $ \mathbf{s} = (\frac{\pi(\xv)_1}{c_1},\ldots, \frac{\pi(\xv)_g}{ c_g})^\top$, 
+            \item Predict class $\argmaxlim_k \pikx $.
+
+            \item Compute empirical costs over cross-validation
+
+            \item Optimize over $g$ (actually: $g-1$) dimensional threshold vector $(c_1, \ldots, c_g)^T$ to produce minimal costs
+
+    \end{itemize}
+\end{frame}
+
+%\begin{frame}{MetaCost: Overview}
+%
+%        \begin{itemize}
+%            \item Model-agnostic wrapper technique                      
+%            \item General idea: 
+%                \begin{enumerate}
+%                \small
+%                    \item Relabel train obs with their low expected cost classes
+%                   
+%                    \item Apply classifier to relabeled data
+%                \end{enumerate} 
+%                \item Example German Credit task:
+%                                \begin{figure}[h]
+%            \centering
+%            \includegraphics[width=0.5\textwidth]{figure_man/relabeling_viz.pdf}
+%        \end{figure}
+%                \item Relabeled instances colored red\
+%                \item Relabeling from good to bad more common because of costs
+%        \end{itemize}
+%
+%\end{frame}
+
+
+%\begin{frame}{MetaCost: Algorithm}
+%	
+%		
+%% 	The procedure of MetaCost is divided into three phases:
+%			%			
+%		% \begin{minipage}{0.59\textwidth} 
+%		% 		\begin{itemize}
+%		% 			\item \textcolor{teal}{Bagging --- Train $B$ times on bootstrapped data}
+%  %    				\item \textcolor{blue}{Relabel --- Predict $\xi$ with classifiers that had it OOB and average}
+%
+%  %                       \item \textcolor{blue}{ Relabel --- Get new class by MECP}
+%		% 			\item \textcolor{orange}{Cost-sens ---  Train on relabeled data}
+%		% 		\end{itemize}
+%		
+%		% \end{minipage}
+%			\begin{algorithmic}
+%				
+%				\scriptsize
+%
+%				\State \textbf{Input:} 
+%				$\D = \{(\xi,\yi)\}_{i=1}^n$ training data, $B$ number of bagging iterations,
+%				$\pix$ probabilistic classifier,
+%				$\mathbf{C}$ cost matrix, empty dataset $\tilde D = \emptyset$ \\
+%				 \textcolor{teal}{\# Bagging: Classifier is trained on different bootstrap samples.
+%\For{$b=1,\ldots,B$}
+%    \State $\D_b \leftarrow $ Bootstrap version of $\D$
+%    \State $\pi_b \leftarrow $ train classifier on $\D_b$ 
+%\EndFor 
+%\\
+%\textcolor{blue}{\# Relabeling: Find classifiers for which $\xi$ is OOB and compute $\pi_b$ by averaging over predictions.
+%Determine new label $\tilde y^{(i)}$ w.r.t. to the cost minimal class.
+%\For{$i=1,\ldots,n$}
+% 	 \State $\tilde M \leftarrow \bigcup_{m: \xi \notin \D_m} \{m\}$ 
+%\EndFor
+%% \For{$i=1, \ldots n$}
+%    \For{$j=1,\ldots,g$} 
+%        \State $\pi_j(\xi)  \leftarrow \frac{1}{|\tilde M| } \sum_{m \in \tilde M}   \pi_j(\xi~|~ f_m)$ for each $i$ 
+%    \EndFor
+%% \EndFor
+%\For{$i=1,\ldots,n$}
+%\State $\tilde y^{(i)} \leftarrow \argmin_{k} \sum_{j=1}^g \pi_j(\xi) C(k,j) $
+%\State $\tilde D \leftarrow \tilde D \cup \{(\xi,\tilde y^{(i)})\} $
+%\EndFor}}  
+%\\
+%\textcolor{orange}{\# Cost Sensitivity: Train on relabeled data.\\
+%$f_{meta} \leftarrow$ train $f$ on $\tilde D$}
+%\end{algorithmic}
+%
+%\end{frame}
+
+%%%
+% reference: https://www.csie.ntu.edu.tw/~htlin/talk/doc/csovo.acml14.handout.pdf
+
+\begin{frame}{Binary Instance-specific cost Learning}
+    \begin{itemize}
+        \item Assumes instance-specific costs for every observation:  $\D^{(n)} = \{(\xi, \cv^{(i)})\}_{i=1}^n$, where $(\xi, \cv^{(i)}) \in \mathbb{R}^p \times \mathbb{R}^2$.
+
+        \item Define ``true class'' as cost minimal class
+        
+        \item Define observation weights: $|\cv^{(i)}[1] - \cv^{(i)}[0]|$
+        % Consider four instances, where $\cv^{(i)}[0]$ and $\cv^{(i)}[1]$ denote the instance-wise cost of classifying an example as 0 or 1 respectively, $\yi$ the true label and 
+
+        \begin{center}
+            \begin{tabular}{cc|cccc}\
+        			& & $\cv^{(i)}[0]$ & $\cv^{(i)}[1]$ & $\yi$ & $w^{(i)}$ \\
+        			\hline & $\xv^{(1)}$ & 1 & 1 & 0 & 0\\
+        			& $\xv^{(2)}$ & 1 & 2 & 0 & 1\\
+        			& $\xv^{(3)}$ & 7 & 3 & 1 & 4\\
+            \end{tabular}
+        \end{center}
+
+        \item Now solve weighted ERM:
+        \begin{equation*}
+            \mathcal{R}_{emp}(\boldsymbol{\theta}) = \sum_{i=1}^{n}w^{(i)} \Lxyit
+        \end{equation*}
+        
+        \item NB: Instances with equal costs are effectively ignored.
+        \end{itemize}
+            
+\end{frame}
+
+\begin{frame}{Multiclass Costs}
+    \begin{itemize}
+
+        \item Consider $g > 2$. Vanilla CSL is special case of instance specific,\\use $\cv^{(i)}$ same for all $\xi$ of the same class
+        %straightforward to see that class-specific cost-sensitive learning is a special case of instance-specific cost learning: 
+        
+        %\item Now consider a multiclass label space $\mathcal{Y}=\{1,2,3\}$. For class-specific cost sensitive learning, we may define the following cost matrix: 
+        %\end{center}
+        \vspace{5pt}
+        
+        \item For two $\xi$ with $y=2$ and $y = 3$: %instances of class 2 and 3 respectively, we have that
+                \vspace{5pt}
+
+                \begin{center}
+                            \begin{tabular}{cc|cccc}\
+        			& & $\cv^{(i)}[1]$ & $\cv^{(i)}[2]$ & $\cv^{(i)}[3]$ & $\yi$ \\
+        			\hline & $\xv^{(1)}$ & \textcolor{blue}{1} & \textcolor{blue}{0} & \textcolor{blue}{1} & \textcolor{blue}{2}\\
+        			& $\xv^{(2)}$ & \textcolor{green}{3} & \textcolor{green}{1} & \textcolor{green}{0} & \textcolor{green}{3}\\
+                        & $\xv^{(3)}$ & \textcolor{blue}{1} & \textcolor{blue}{0} & \textcolor{blue}{1} & \textcolor{blue}{2}\\
+                \end{tabular}
+        \end{center}
+
+        \item Set $\cv^{(i)}[\yi] = 0$, i.e. zero-cost for correct prediction.
+        \vspace{5pt}
+        
+   %     \item Is the multiclass case restricted to class-specific cost sensitive learning? Of course not! Binary instance-specific cost learning can easily be generalized to the multiclass case. 
+            
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{CSOVO}
+    
+
+    \begin{itemize}
+        \item Let $\D^{(n)} = \{(\xi, \cv^{(i)})\}_{i=1}^n$, $(\xi, \cv^{(i)}) \in \mathbb{R}^p \times \mathbb{R}^g$.  
+        \item Example:
+       % Consider instance-specific costs for three observations of the form $(\xi, \yi, \cv^{(i)})$, with some label space $\mathcal{Y}=\{1, 2, \ldots, g\}$:
+
+        \begin{center}
+            \begin{tabular}{cc|ccc}\
+        	& & $\cv^{(i)}[1]$ & $\cv^{(i)}[2]$ & $\cv^{(i)}[3]$  \\
+        	\hline & $\xv^{(1)}$ & 0 & 2 & 3\\
+        	& $\xv^{(2)}$ & 1 & 0 & 1\\
+                 & $\xv^{(3)}$ & 2 & 0 & 3\\
+            \end{tabular}
+        \end{center}
+        
+        %\item Now: How to perform cost-sensitive learning when $g > 2$?
+        
+        \item Idea: Reduction principle to binary case (weighted fit) by one-versus-one (OVO). 
+        %we have learnt cost-sensitive learning for the binary case. $\leadsto$ Convert the problem to 
+        
+        
+        \item For class $j$ vs. $k$:
+        %, consider two problems:
+        \begin{itemize}
+            \item How to deal with the label $\yi$? $\yi$ can be neither $j$ nor $k$.
+            \vspace{5pt}
+            
+            \item How to deal with the costs $\cv^{(i)}[j]$ and $\cv^{(i)}[k]$?
+            
+        \end{itemize}
+            
+    \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{CSOVO}
+    \begin{itemize}
+        \item When training a binary classifier $f^{(j, k)}$ for class $j$ vs. $k$,
+        \begin{itemize}
+            \item Choose cost min class from pair $\argmin_{l \in \{j, k\}} \cv^{(i)}[l]$ as ground truth 
+            
+            \item Sample weight is simply diff between the 2 costs      $|\cv^{(i)}[j] - \cv^{(i)}[k]|$
+
+            %\item After cost transformation, the misclassification costs across classes are equal to 1. $\leadsto$ Sample-wise weighted binary classification problem.
+        \end{itemize}
+        
+        \item Example continued:
+\begin{center}
+    \footnotesize
+                            \begin{tabular}{cc|ccc|ccc}\
+        			& & $\cv^{(i)}[1]$ & $\cv^{(i)}[2]$ & $\cv^{(i)}[3]$ & $\cv^{(i)}[1 \ \text{vs} \ 2]$ & $\tilde{y}^{( i)}[1 \ \text{vs} \ 2]$ & $w^{(i)}[1 \ \text{vs} \ 2]$\\
+        			\hline & $\xv^{(1)}$ & 0 & 2 & 3 & 0/2 & 1 & 2\\
+        			& $\xv^{(2)}$ & 1 & 0 & 1 & 1/0 & 2 & 1 \\
+                 	& $\xv^{(3)}$ & 2 & 0 & 3 & 2/0 & 2 & 2\\
+                \end{tabular}
+
+                \begin{tabular}{cc|ccc|ccc}
+        			& & $\cv^{(i)}[1]$ & $\cv^{(i)}[2]$ & $\cv^{(i)}[3]$ & $\cv^{(i)}[2 \ \text{vs} \ 3]$ & $\tilde{y}^{( i)}[2 \ \text{vs} \ 3]$ & $w^{(i)}[2 \ \text{vs} \ 3]$\\
+        			\hline & $\xv^{(1)}$ & 0 & 2 & 3 & 2/3 & 2 & 1\\
+        			& $\xv^{(2)}$ & 1 & 0 & 1 & 0/1 & 2 & 1\\
+                 	& $\xv^{(3)}$ & 2 & 0 & 3 & 0/3 & 2 & 3\\
+                \end{tabular}
+\end{center}
+
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}{CSOVO}
+    \begin{itemize}
+    \item Example continued
+    \begin{center}  
+        \footnotesize{
+            \begin{tabular}{cc|ccc|ccc}
+                & & $\cv^{(i)}[1]$ & $\cv^{(i)}[2]$ & $\cv^{(i)}[3]$ & $\cv^{(i)}[1 \ \text{vs} \ 3]$ & $\tilde{y}^{( i)}[1 \ \text{vs} \ 3]$ & $w^{(i)}[1 \ \text{vs} \ 3]$\\
+                \hline & $\xv^{(1)}$ & 0 & 2 & 3 & 0/3 & 1 & 3\\
+                & $\xv^{(2)}$ & 1 & 0 & 1 & -/- & - & 0 \\
+                & $\xv^{(3)}$ & 2 & 0 & 3 & 2/3 & 1 & 1\\
+            \end{tabular}
+        }
+    \end{center}
+
+    \item Wrap everything up:
+    \begin{enumerate}
+        \item For class $j$ vs. $k$, transform all $(\xi, \cv^{(i)})$ to $(\xi, \argmin_{l \in \{j, k\}} \cv^{(i)}[l])$ with sample-wise weight $|\cv^{(i)}[j] - \cv^{(i)}[k]|$.
+        
+        \item Train a weighted binary classifier $f^{(j, k)}$ using the above
+        
+        \item Repeat step 1 and 2 for different $(j, k)$.
+        
+        \item Predict using the votes from all $f^{(j, k)}$.
+    \end{enumerate}
+
+    \item Theoretical guarantee:\\ 
+    test costs of final classifier $\leq 2\sum_{j < k}$ test cost of $f^{(j, k)}$. 
+    \end{itemize}
+\end{frame}
+
+
+%\begin{frame}{MetaCost: Example}
+%	%	
+%	\small{
+%		\begin{itemize}
+%			%		
+%			\item We compare C4.5 (decision tree) with MetaCost using C4.5 for the \href{http://staffwww.itn.liu.se/~aidvi/courses/06/dm/
+%				labs/heart-c.arff}{heart data set}  in \href{ http://www.cs.waikato.ac.nz/ml/weka/}{Weka}. 
+%			%		
+%			\item The cost matrix $\mathbf{C}$ is 
+%			
+%			\begin{center}
+%				\begin{tabular}{cc|cc}
+%					& &\multicolumn{2}{c}{True class} \\
+%					& & $y=1$ & $y=-1$  \\
+%					\hline
+%					\multirow{2}{*}{\parbox{0.3cm}{Pred.  class}}& $\hat y$ = 1     & $0$                & $ 1 $\\
+%					& $\hat y$ = -1 & $ 4 $              &  $0$   \\
+%				\end{tabular}
+%			\end{center}
+%		
+%			\item The resulting confusion matrices are 
+%			
+%						
+%			\begin{center}
+%				\begin{tabular}{cc|cc}
+%					& &\multicolumn{2}{c}{True class} \\
+%					& MetaCost & $y=1$ & $y=-1$  \\
+%					\hline
+%					\multirow{2}{*}{\parbox{0.3cm}{Pred.  class}}& $\hat y$ = 1     & $104$                & $ 21 $\\
+%					& $\hat y$ = -1 & $ 61 $              &  $117$   \\
+%				\end{tabular}
+%							\begin{tabular}{cc|cc}
+%				& &\multicolumn{2}{c}{True class} \\
+%				& C4.5 & $y=1$ & $y=-1$  \\
+%				\hline
+%				\multirow{2}{*}{\parbox{0.3cm}{Pred.  class}}& $\hat y$ = 1     & $138$                & $ 40 $\\
+%				& $\hat y$ = -1 & $ 27$              &  $98$   \\
+%			\end{tabular}
+%			\end{center}
+%		
+%		
+%			%		
+%			\item The total cost of MetaCost is 145, while C4.5 has total costs of 187. However, MetaCost has $0.729$ correct classifications and C4.5 has $0.779.$ 
+%			
+%			%		
+%		\end{itemize}
+%		%
+%	}
+%	%	
+%\end{frame}
+
+
+
+%\begin{frame}{Cost-Sensitive Decision Trees}
+%	%	
+%	\small{
+%		\begin{itemize}
+%			%		
+%			\item 
+%			%		
+%		\end{itemize}
+%		%
+%	}
+%	%	
+%\end{frame}
+
+\endlecture
+\end{document}
