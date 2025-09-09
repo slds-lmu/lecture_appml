@@ -1,0 +1,66 @@
+% Target Transformation
+
+\begin{vbframe}{Target Transformation}
+
+Sometimes, using the raw target or features is not enough to build an adequate model.
+For example, the linear model requires a normally distributed target variable.
+But the house prices do not seems to be normal distributed.
+A linear model trained on that target overestimates the target variable:
+
+\vfill
+
+\begin{center}
+\includegraphics[width = 0.7\textwidth]{figure/ames_target_distribution.pdf}
+\end{center}
+
+\vfill
+
+\end{vbframe}
+
+% Target Transformation - Log transformation
+
+\begin{vbframe}{Target Transformation}
+
+A common trick for skewed distributions is to model the log-transformation:
+
+\vfill
+
+\begin{center}
+\includegraphics[width = 0.7\textwidth]{figure/ames_log_target_distribution.pdf}
+\end{center}
+
+\vfill
+
+\end{vbframe}
+
+% Target Transformation - Benchmarking
+
+\begin{vbframe}{Target Transformation}
+
+Benchmarking the logarithmic transformation against the raw data yields a significant improvement of the mean absolute error:
+
+\vfill
+
+\begin{center}
+\includegraphics[width = 0.7\textwidth]{figure/target_transformation_benchmark.pdf}
+\end{center}
+
+\vfill
+
+\end{vbframe}
+
+% Target Transformation - Other methods
+
+\begin{vbframe}{Target Transformation}
+
+Nevertheless, there are also methods that are able to deal with skewed data:
+
+\vfill
+
+\begin{center}
+\includegraphics[width = 0.7\textwidth]{figure/transformation_comparison_algorithms.pdf}
+\end{center}
+
+\vfill
+
+\end{vbframe}

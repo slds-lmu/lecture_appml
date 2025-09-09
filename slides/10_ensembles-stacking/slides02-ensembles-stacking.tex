@@ -1,0 +1,309 @@
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+\input{../../latex-math/ml-ensembles}
+\input{../../latex-math/ml-eval}
+
+% algorithmicx (algpseudocode) is already loaded in preamble
+
+
+\title{Applied Machine Learning}
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\begin{document}
+
+\titlemeta{
+Ensembling:
+}{
+Stacking
+}{
+figure/stacking_better.png
+}{
+\item What is Stacking?
+\item How can we stack multiple layers?
+}
+
+
+\begin{vbframe}{Stacking}
+Also called stacked generalization (\furtherreading{WOLPERT1992}): train multiple base models (level 0) on the same data and use their predictions as input features for a level 1 model that makes the final ensemble prediction $\rightarrow$ heterogeneous ensembling
+\vspace{1em}
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+        \vspace{-1em}
+        \begin{figure}
+            \centering
+            % New version from
+            % https://docs.google.com/presentation/d/1gaeW1LefW3vQi3aoEiZEoSUaEyXfmQ9-U_1WoGKfGNM/edit#slide=id.g2e833da9e7c_0_143
+            \includegraphics[width=0.9\textwidth]{figure/stacking_better.png}
+            %\caption{Caption}
+            % Old version from 
+            % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
+            \label{fig:stacking}
+        \end{figure}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+        Steps:
+        \begin{enumerate}
+            \item Base model training (level 0)
+            \item Collect predictions
+            \item level 1 model training
+        \end{enumerate}
+    \end{column}
+\end{columns}
+\vspace{1em}
+
+In contrast to model averaging, stacking already combines predictions during training.
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Stacking}
+\footnotesize
+\textbf{Algorithm:} Single Layer Stacking
+\begin{algorithmic}
+    \Require Training data $\D = \Dset$
+    \Ensure Stacked Ensemble $\fM$
+    
+    \State
+    \State \textbf{Step 1: Learn level 0 base models}
+    \For{$m \leftarrow 1$ to $M$}
+        \State Fit base model $\bl[m]$ on $\D$
+    \EndFor
+    
+    \State
+    \State \textbf{Step 2: Construct new dataset $\D^\prime$ from $\D$}
+    \For{$i \leftarrow 1$ to $n$}
+        \State Add $(\xv^{\prime(i)}, y^{(i)})$ to new dataset, where $\xv^{\prime(i)} = (\bl[1](\xv^{(i)}), \ldots, \bl[M](\xv^{(i)}))$
+    \EndFor
+    
+    \State
+    \State \textbf{Step 3: Fit level 1 model $\fM$ on $\D^\prime$}
+    
+    \State \Return $\fM$
+\end{algorithmic}
+NB: We can either drop the original features or keep them when learning the level 1 model.
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Stacking Cross-validated}
+
+\begin{columns}
+    \begin{column}{0.6\textwidth}
+        \vspace{-1em}
+        \begin{figure}
+            \centering
+            % New version from 
+            % https://docs.google.com/presentation/d/1gaeW1LefW3vQi3aoEiZEoSUaEyXfmQ9-U_1WoGKfGNM/edit#slide=id.g2e833da9e7c_0_143
+            \includegraphics[width=0.7\textwidth]{figure/stacking_cv_better.png}
+            % Old version from
+            %\caption{Caption}
+            % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
+            \label{fig:stacking_cv}
+        \end{figure}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+        Using cross-validated predictions of the base models
+        \begin{itemize}
+            \item improve generalization
+            \item reduce overfitting
+            \item enhances base model diversity
+            \item minimizes information leakage
+        \end{itemize}
+        \vspace{1em}
+        NB: Stacking with a simple hold-out split instead of cross-validation is known as \emph{blending}.
+    \end{column}
+\end{columns}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Stacking Cross-validated}
+\footnotesize
+\textbf{Algorithm:} Single Layer Stacking with Cross-Validation
+\begin{algorithmic}
+    \Require Training data $\D = \Dset$, number of folds $K$
+    \Ensure Stacked Ensemble $\fM$
+    
+    \For{$k \leftarrow 1$ to $K$}
+        \State \textbf{Step 1: Learn level 0 base models}
+        \For{$m \leftarrow 1$ to $M$}
+            \State Fit base model $\bl[m]$ on $\D_{\mathrm{train}}^{(k)}$
+        \EndFor
+        \State
+        \State \textbf{Step 2: Add out-of-fold predictions to new dataset $\D^\prime$}
+        \ForAll{$(\xv^{(i)}, y^{(i)}) \in \D_{\mathrm{test}}^{(k)}$}
+            \State Add $(\xv^{\prime(i)}, y^{(i)})$ to new dataset, where $\xv^{\prime(i)} = (\blxi[1], \ldots, \blxi[M])$
+        \EndFor
+    \EndFor
+
+    \State
+    \State \textbf{Step 3: Fit level 1 model $\fM$ on $\D^\prime$}
+    
+    \State \Return $\fM$
+\end{algorithmic}
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Multilevel Stacking}
+\vfill
+So far: train level 0 base models, use predictions to train the level 1 model.\\
+Now: Also train multiple models at level 1, use predictions to train final level 2 model 
+\vfill
+%\begin{columns}
+%    \begin{column}{0.5\textwidth}
+%        \vspace{-1em}
+%        \begin{figure}
+%            \centering
+%            \includegraphics[width=0.9\textwidth]{figure/stacking.png}
+%            %\caption{Caption}
+%            % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
+%            \label{fig:stacking_multi}
+%        \end{figure}
+%    \end{column}
+%    \begin{column}{0.5\textwidth}
+%        Steps:
+%        \begin{enumerate}
+%            \item level 0 base model training
+%            \item Collect predictions of level 0 base models
+%            \item level 1 model training 
+%            \item Collect predictions of level 1 models
+%            \item level 2 final model training
+%        \end{enumerate}
+%    \end{column}
+%\end{columns}
+\begin{enumerate}
+    \item level 0 base model training
+    \item Collect predictions of level 0 base models
+    \item level 1 model training 
+    \item Collect predictions of level 1 models
+    \item level 2 final model training
+\end{enumerate}
+\vfill
+NB: In principle we can repeat this training of multiple models at the $l$-th level indefinitely creating deep stacked ensembles.
+\vfill
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Higher Level Models}
+\vfill
+Popular choices of level 1 or level 2 models in stacking include:
+\begin{itemize}
+    \item linear / logistic regression 
+    %\item random forest (especially in the case of multilevel stacking)
+    \item GES (average the predictions of the models at the previous level)
+\end{itemize}
+\vfill
+Higher-level training data:
+\begin{itemize}
+    \item Probabilities instead of class labels (see \furtherreading{TINGWITTEN1999})
+    \item Include original dataset $\Xmat$ or not?
+\end{itemize}
+\vfill
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Forward Pass / Prediction}
+% \vspace{-1.5em}
+\textbf{Algorithm:} Prediction Using Single Layer Stacking
+\begin{algorithmic}
+    \State
+    \Require Training data $\D = \Dset$, Test data $\Xmat$
+    \Ensure Predictions $\yv$
+
+    \State \textbf{Step 1: Fit level-0 on the whole training data set}
+    \For{$m \leftarrow 1$ to $M$}
+        \State Fit level-0 model $\bl[m]$ on $\D$
+    \EndFor
+    
+    \State
+    \State \textbf{Step 2: Make predictions with every level-0 model}
+    \For{$m \leftarrow 1$ to $M$}
+        \State Predict with base model: $\yv^m = \sbl[m](\Xmat)$
+    \EndFor
+    
+    \State
+    \State \textbf{Step 3: Construct new dataset $\Xmat^\prime$}
+    \For{$i \leftarrow 1$ to $n$}
+        \State $\Xmat^{\prime{i}} = [\xi[i]_1, \dots, \xi[i]_d, \xv^{\prime{(i)}}_1, \dots, \xv^{\prime{(i)}}_M] $
+    \EndFor
+    
+    \State
+    \State \textbf{Step 4: Make predictions with level 1 model $\fM$ on $\Xmat^\prime$}
+    
+    \State \Return $\fM(\Xmat)$
+\end{algorithmic}
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Two questions}
+
+\vfill
+What other methods do the following level-1 classifiers recover?
+\vfill
+\begin{itemize}
+    \item Fit the level-1 training data with a linear model that only depends on one feature, and that feature is chosen such that $\rho$, our metrics of interest, is optimized.
+    \item The level-1 model is a linear model that assign equal weight $w_{m} = \frac{1}{M}$ to every input feature.
+\end{itemize}
+\vfill
+    
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{AutoGluon}
+\begin{columns}
+    \begin{column}{0.4\textwidth}
+        \vspace{-1em}
+        \begin{figure}
+            \centering
+            \includegraphics[width=\textwidth]{figure/AG.png}
+            \caption*{\url{https://auto.gluon.ai/}}
+            \label{fig:auto_gluon}
+        \end{figure}
+        \vspace{1em}
+        \begin{figure}
+            \centering
+            \includegraphics[width=\textwidth]{figure/ALMB.png}
+            \caption{AutoGluon Performance on AMLB 1h binary classification.}
+            \label{fig:auto_gluon_almb}
+        \end{figure}
+    \end{column}
+    \begin{column}{0.6\textwidth}
+        \begin{itemize}
+            \item The de-facto most popular and successful AutoML system
+            \item Developed and maintained by Amazon
+            \item Can also work with multimodal and time-series data
+            \item Does not use HPO to find well performing models
+            \begin{itemize}
+                \item Instead, uses a set of default configurations for different learners
+            \end{itemize}
+            \item Employs multi-layer stacking using the same set of default models in higher layers as for the base layer
+            \item Uses greedy ensemble selection to combine the predictions of the last layer
+        \end{itemize}
+    \end{column}
+\end{columns}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+%\begin{vbframe}{Further Reading}
+%
+%\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\endlecture
+\end{document}

@@ -1,0 +1,132 @@
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+\newcommand{\titlefigure}{target_encoding_title.png}
+\newcommand{\learninggoals}{
+  \item Understand target encoding for high-cardinality categorical features
+  \item Learn to address overfitting and leakage issues
+  \item Know regularization techniques for target encoding
+  \item Recognize when target encoding is preferred over one-hot
+}
+
+\title{Feature Engineering: Target Encoding}
+\date{}
+
+\begin{document}
+
+\lecturechapter{Target Encoding}
+\lecture{Applied Machine Learning}
+
+\sloppy
+
+% ------------------------------------------------------------------------------
+% LECTURE CONTENT
+% ------------------------------------------------------------------------------
+
+% Target Encoding
+
+\begin{vbframe}{Target Encoding}
+
+Developed to solve limitations of dummy encoding for high cardinality categorical features.
+
+\textbf{Goal}: Each categorical feature $x$ should be encoded in a single numeric feature $\tilde x$.
+
+Basic definition for regression by Micci-Barreca (2001):
+
+$$\tilde x = \frac{\sum_{i:x=l}y^{(i)}}{N_l}, \quad l=1,\dots,k,$$
+
+where $N_l$ is the number of observations of the $l$'th level of feature $x$.
+
+\end{vbframe}
+
+% Target Encoding - Example
+
+\begin{vbframe}{Target Encoding - Example}
+
+\vfill
+
+\begin{center}
+\includegraphics[width = 0.8\textwidth]{figure/foundation_counts_table.pdf}
+\end{center}
+
+\vfill
+
+Encoding for wooden foundation:
+
+\vfill
+
+\begin{center}
+\includegraphics[width = 0.8\textwidth]{figure/wood_foundation_examples.pdf}
+\end{center}
+
+\vfill
+
+$$\frac{164000 + 145500 + 143000 + 250000 + 202000}{5} = 180900$$
+
+\end{vbframe}
+
+% Target Encoding - Example
+
+\begin{vbframe}{Target Encoding - Example}
+
+For all foundation types:
+
+\vfill
+
+\begin{center}
+\includegraphics[width = 0.8\textwidth]{figure/foundation_encoding_table.pdf}
+\end{center}
+
+\vfill
+
+This mapping is calculated on training data and later applied to test data.
+
+\end{vbframe}
+
+% Target Encoding for Classification
+
+\begin{vbframe}{Target Encoding for Classification}
+
+Extending encoding to binary classification is straightforward, instead of the average target value the relative frequency of the positive class is used
+
+Multi-class classification extends this by creating one feature for each target class in the same way as binary classification.
+
+\end{vbframe}
+
+% Target Encoding - Issues
+
+\begin{vbframe}{Target Encoding - Issues}
+
+\textbf{Problem:} Target encoding can assign extreme values to rarely occurring levels.
+
+\textbf{Solution:} Encoding as weighted sum between global average target value and encoding value of level.
+
+$$\tilde x = \lambda_l\frac{\sum_{i:x=l}y^{(i)}}{N_l} + (1-\lambda_l)\frac{\sum_{i=1}^n y^{(i)}}{n}, \quad l=1,\dots,k.$$
+
+$\lambda_l$ can be parameterized and tuned, but optimally, tuning must be done for each feature and level separately (most likely infeasible!).
+
+Simple solution: Set $\lambda_l=\frac{N_l}{N_l+\epsilon}$ with regularization parameter $\epsilon$.
+
+This shrinks small levels stronger to the global mean target value than large classes.
+
+\end{vbframe}
+
+% Target Encoding - Issues
+
+\begin{vbframe}{Target Encoding - Issues}
+
+\textbf{Problem:} Label leakage! Information of $y^{(i)}$ is used to calculate $\tilde x$. This can cause overfitting issues, especially for rarely occurring classes.
+
+\textbf{Solution:} Use internal cross-validation to calculate $\tilde x$.
+
+It is unclear how serious this problem is in practice.
+
+But: calculation of $\tilde x$ is very cheap, so it doesn't hurt.
+
+An alternative is to add some noise $\tilde x^{(i)} + N(0,\sigma_\epsilon)$ to the encoded samples.
+
+\end{vbframe}
+
+\endlecture
+\end{document}

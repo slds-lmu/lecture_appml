@@ -1,0 +1,265 @@
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+\title{Applied Machine Learning}
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
+
+\begin{document}
+
+\titlemeta{
+Feature Selection:
+}{
+Wrapper Methods
+}{
+figure_man/empty
+}{
+    \item Objective Functions
+    \item Greedy Forward Search
+    \item Greedy Backward Search
+}
+
+
+% \section{Wrapper}
+
+% for pages 5-9
+% Find GFS visualization here: https://github.com/slds-lmu/lecture_sl/blob/f449ededa986978ceeb8e3a36d4ffc69ed8c7476/slides/feature-selection/rscr/fs-wrappers-visualization.R#L163
+
+
+% \includepdf[pages={2},trim=0 20 0 0,clip,width=490pt,offset=0pt 10pt,pagecommand={}]{sl/slides-fs-wrapper.pdf} 
+% 2-9
+\begin{vbframe}{Introduction}
+
+    \begin{itemize}
+      \item Wrapper methods emerge from the idea that different sets of features can be optimal for different learners
+      %\item Use the learner itself to assess the quality of the feature sets
+      %\item Evaluation on a test set or resampling techniques are used
+      \item Wrapper is a discrete search strategy for $S$, where objective criterion is test error of learner as function of $S$. Criterion can also be calculated on train set, approximating test error (AIC, BIC)
+    \end{itemize}
+    $\Rightarrow$ Use the learner to assess the quality of the feature sets
+\vspace{-0.1cm}
+    \begin{center}
+     \includegraphics[width = 0.3\textwidth]{sl/feature-selection/figure/searchspace_binary.png}\\
+     \scriptsize{Hasse diagram illustrating search space. Knots are connected if Hamming distance = 1 \\(Source: Wikipedia)}
+    \end{center}
+
+
+\end{vbframe}
+
+
+% \begin{vbframe}{Introduction}
+
+%     Wrappers have the following components:
+
+
+%     \begin{itemize}
+%       \item A set of starting values
+%       \item Operators to create new points out of the given ones
+%       \item A termination criterion
+%     \end{itemize}
+
+
+%     \begin{figure}
+%       \includegraphics[width=8cm]{figure_man/varsel_space.png}
+%       % \caption{Space of all feature sets for 4 features.
+%       % The indicated relationships between the sets insinuate a greedy search strategy which either adds or removes a feature.}
+%       % Übersetzung von:
+%       % Raum aller Feature-Mengen bei 4 Features. Die eingezeichnete Nachbarschaftsbeziehung unterstellt eine Art ,,gierige'' Suchstrategie, bei der wir entweder ein Feature hinzufügen oder entfernen.}
+%     \end{figure}
+
+
+%   \end{vbframe}
+
+  \begin{vbframe}{Objective function}
+
+    %\small
+
+    Given $p$ features, \textbf{best-subset selection problem} is to find subset $S \subseteq \{ 1, \dots p \}$ optimizing objective $\Psi: \Omega \rightarrow \R$:
+    \vspace{-0.15cm}
+    %measuring the learner's generalization performance. The solution $S^*$ to the problem is
+    $$S^{*}  \in \argmin_{{S \in \Omega}} \{ \Psi(S) \}$$
+    %
+    \vspace{-0.8cm}
+    \begin{itemize}
+    \setlength{\itemsep}{0.8em}
+     \item $\Omega$  = search space of all feature subsets $S\subseteq\{ 1, \dots, p \}$. Usually we encode this by
+      %(i.e., $\Omega \subseteq \mathcal{P}(\{ 1, \dots, p \})$, $\mathcal{P}$ denoting the power set)
+      bit vectors, i.e., $\Omega = \{0, 1\}^p$ (1 = feat. selected)
+      %It will be clear from the context which variant we refer to.
+     \item Objective $\Psi$ can be different functions, e.g., AIC/BIC for LM or cross-validated performance of a learner
+     \item Poses a discrete combinatorial optimization problem over search space of size = $2^p$, i.e., grows exponentially in $p$ (power set)%as it is the power set of $\{1,\ldots,p\}$
+      %also known as $L_0$ regularization.
+     \item Unfortunately can not be solved efficiently in general (NP hard; see, e.g., \furtherreading{NATARAJAN1995SPARSE})
+     \item Can avoid searching entire space by employing efficient search strategies, traversing search space in a ``smart" way %that finds performant feature subsets
+
+    \end{itemize}
+
+  \end{vbframe}
+
+
+%  \begin{vbframe}{How difficult is best-subset selection?}
+
+%     \begin{itemize}
+%     \setlength{\itemsep}{1em}
+%       \item Size of search space = $2^p$, i.e., grows exponentially in $p$ as it is the power set of $\{1,\ldots,p\}$
+%       \item Finding best subset is discrete combinatorial optimization problem.
+%       %also known as $L_0$ regularization.
+%      \item It can be shown that this problem unfortunately can not be solved efficiently in general (NP hard; see, e.g., \furtherreading{NATARAJAN1995SPARSE})
+%      \item We can avoid having to search the entire space by employing efficient search strategies, moving through the search space in a smart way that finds performant feature subsets
+%      %\item By employing efficient search strategories, we can avoid searching the entire space.
+%     %\item Of course this does not mean that we have to search the entire space, since there are more efficient search strategies.
+%     %  \item Formally spoken: One can show that the problem is NP-hard!
+%     %  \item This means that the problem cannot be solved in polynomial (P) time: ${\mathcal{O}} (p^c)$, where $c \in \N$ indicates the degree o the polynom.
+%     % \end{blocki}
+%     %
+%     % \framebreak
+%     %
+%     % \begin{blocki}{How difficult is it to solve the introduced optimization problem, hence, to find the optimal feature set?}
+%     %  \item More precisely, the proof demonstrates that this problem cannot be approximated within any constant, unless P = NP.
+%     %
+%     %   The latter means, that if you find an algorithm that solves a more difficult class of problems (than this optimization problem) in polynomial time, this implies that you found how to solve all easier problems (including our optimization problem) in polynomial time.
+%     % \item \textbf{Attention}: This does not imply that it is useless trying to construct strategies which work in practice!
+%     %\item Thus our problem now consists of moving through the search space in a smart and efficient way, thereby finding a particularly good set of features.
+%     \end{itemize}
+%   \end{vbframe}
+
+% \begin{frame}{Greedy forward search}
+
+%     \begin{blocki}{}
+%       \item Let $S \subset \{1, \dots, p \}$, where $\{1, \dots p \}$ are feature indices
+%       \item Start with the empty feature set $S = \emptyset$
+%       \item For a given set $S$, generate all $S_j = S \cup \{j\}$ with $j \notin S$.
+%       \item Evaluate the classifier on all $S_j$ and use the best $S_j$
+%       \item Iterate over this procedure
+%       \item Terminate if:
+%         \begin{enumerate}
+%           \item the performance measure doesn't improve enough
+%           \item a maximum number of features is used
+%           \item a given performance value is reached
+%         \end{enumerate}
+%     \end{blocki}
+
+%     \end{frame}
+
+\begin{frame}{Greedy forward search}
+Let $S \subset \{1, \dots, p \}$ be subset of feature indices.
+\vspace{-0.01cm}
+    \begin{enumerate}
+      %\item Let $S \subset \{1, \dots, p \}$, where $\{1, \dots p \}$ are feature indices
+      \item Start with the empty feature set $S = \emptyset$
+      \item For a given set $S$, generate all $S_j = S \cup \{j\}$ with $j \notin S$.
+      \item Evaluate the classifier on all $S_j$ and use the best $S_j$
+      \end{enumerate}
+    %\vspace{-0.2cm}
+    \textbf{Example} GFS on a subset of bike sharing data with features windspeed, temp., humidity and feeling temp. Node value is RMSE.
+    \begin{center}
+    \includegraphics[width = 0.45\textwidth]{sl/feature-selection/figure/fs-wrappers-powerset-tree-1.png}
+    \end{center}
+
+\end{frame}
+    %\framebreak
+
+\begin{frame}[noframenumbering]{Visualization of GFS}
+\begin{enumerate}
+    \setcounter{enumi}{3}
+    \item Iterate over this procedure
+\end{enumerate}
+    \begin{center}
+      \includegraphics[width = 0.65\textwidth]{sl/feature-selection/figure/fs-wrappers-powerset-tree-2.png}
+      \end{center}
+      %\framebreak
+\end{frame}
+
+\begin{frame}[noframenumbering]{Visualization of GFS}
+\begin{enumerate}
+    \setcounter{enumi}{3}
+    \item Iterate over this procedure
+\end{enumerate}
+
+    \begin{center}
+      \includegraphics[width = 0.65\textwidth]{sl/feature-selection/figure/fs-wrappers-powerset-tree-3.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}[noframenumbering]{Visualization of GFS}
+    \begin{center}
+      \includegraphics[width = 0.6\textwidth]{sl/feature-selection/figure/fs-wrappers-powerset-tree-4.png}
+      \end{center}
+      \vspace{-0.2cm}
+ \begin{enumerate}
+     \setcounter{enumi}{4}
+     \item Terminate if performance does not improve further or max. number of features is used
+ \end{enumerate}
+\end{frame}
+
+%\begin{frame}[noframenumbering]{Visualization of GFS}
+%    \begin{center}
+%    \includegraphics[width = 0.65\textwidth]{figure/fs-wrappers-powerset-all-4.png}
+%    \end{center}
+%  \end{frame}
+
+
+\begin{vbframe}{Greedy backward search}
+
+    \begin{blocki}{}
+      \item Start with the full index set of features $S = \{1, \ldots, p\}$.
+      \item For a given set $S$ generate all
+
+      $S_j = S \setminus\{j\}$ with $j \in S$.
+      \item Evaluate the classifier on all $S_j$\
+        and use the best $S_j$.
+      \item Iterate over this procedure.
+      \item Terminate if:
+        \begin{itemize}
+          \item the performance drops drastically, or
+          \item falls below given threshold.
+        \end{itemize}
+      \end{blocki}
+
+      \begin{itemize}
+          \item GFS is much faster and generates sparser feature selections
+          \item GBS much more costly and slower, but sometimes slightly better.
+      \end{itemize}
+
+  \end{vbframe}
+
+  \begin{frame}{Visualization of GBS}
+    %\begin{enumerate}
+    %\setcounter{enumi}{3}
+    %\item Iterate over this procedure
+    %\end{enumerate}
+    \textbf{Example} Greedy Backward Search on bike sharing data
+    \begin{center}
+      \includegraphics[width = 0.65\textwidth]{sl/feature-selection/figure/fs-wrappers-backwards-powerset-tree-4.png}
+      \end{center}
+      %\framebreak
+\end{frame}
+
+
+
+\begin{frame}{Advantages and Disadvantages}
+    Advantages
+    \begin{itemize}
+        \item Inducer-agnostic
+        \item Any performance measure can be used
+        \item Optimizes the desired performance measure directly
+    \end{itemize}
+    Disadvantages
+    \begin{itemize}
+        \item Expensive
+        \item Does not scale well with the number of features
+        \item Does (in general) not use additional info about model structure
+        \item Nested resampling becomes necessary
+    \end{itemize}
+    
+\end{frame}
+
+\endlecture
+\end{document}

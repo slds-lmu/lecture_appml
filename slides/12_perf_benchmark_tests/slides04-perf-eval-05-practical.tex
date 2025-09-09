@@ -1,15 +1,33 @@
-\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
 
-\usepackage{../../style/lmu-lecture}
-% Defines macros and environments
-\input{../../style/common.tex}
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
 
 \title{Applied Machine Learning}
 % \author{LMU}
 %\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+
+
 \date{}
 
 \begin{document}
+
+
+\titlemeta{
+Practical Performance Evaluation
+}{
+Lift Charts \& Calibration Curves
+}{
+figure/empty
+}{
+\item How to visualize model performance beyond standard metrics?
+\item What are lift charts and how do we interpret them?
+\item How do we assess probability calibration?
+}
+
 
 \begin{frame}{Lift Charts}
 
@@ -39,7 +57,9 @@
 \begin{column}{0.5\textwidth}
 \begin{figure}
     \centering
-    \includegraphics[width = \textwidth]{figure/lift_chart.png}
+    % \includegraphics[width = \textwidth]{figure/lift_chart.png}
+    \includegraphics[width = \textwidth]{figure/empty.png}
+
     \caption{Lift chart from Applied Predictive Modeling (Max Kuhn).}
 \end{figure}
 \end{column}

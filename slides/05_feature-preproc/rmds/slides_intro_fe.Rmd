@@ -1,0 +1,63 @@
+## Machine Learning Workflow
+
+```{r include=FALSE, cache=FALSE}
+library(knitr)
+root = rprojroot::find_root(rprojroot::is_git_root)
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+```{r,echo=FALSE}
+include_graphics(ap("ml-workflow-big.png"))
+```
+
+## Machine Learning Pipelines
+
+```{r,echo=FALSE}
+include_graphics(ap("automl2.png"))
+```
+
+Choose pipeline structure and optimize pipeline parameters w.r.t. the estimated prediction error, on an independent test set, or measured by cross-validation.
+
+## Important types of Feature Engineering
+
+Feature engineering is on the intersection of __data cleaning__, __feature creation__ and __feature selection__.
+
+The goal is to solve common difficulties in data science projects, like
+
+- skewed/_weird_ feature distributions,
+- (high cardinality) categorical features,
+- functional (temporal) features,
+- missing observations,
+- high dimensional data,
+- ...
+
+and __improve model performance__.
+
+## Why Feature Engineering is Important
+
+```{r, echo=FALSE, message = FALSE, fig.height = 4.5}
+library(ggplot2)
+d = data.frame(
+  Method = factor(1:4, labels = c("Linear Regression", "Gradient Boosting", "Linear Regression w. Feat. Eng.", "Gradient Boosting w. Feat. Eng.")),
+  Error = c(25.5, 10, 11, 9.8)
+)
+
+ggplot(data = d) + geom_bar(aes(x = Method, y = Error), stat = "identity") + theme_minimal() + theme(axis.text.x = element_text(angle = 15, hjust = 1))
+```
+
+Choice between a simple __interpretable__ model with feature engineering or a complex model without.
+
+## Feature Engineering and Deep Learning
+
+One argument for deep learning is often the idea of _"automatic feature engineering"_, i.e., that no further preprocessing steps are necessary.
+
+
+__This is mainly true for special types of data like__
+
+- Images
+- Texts
+- Curves/Sequences
+
+Many feature engineering problems for regular __tabular__ data are not solved by deep learning.
+
+Furthermore, choosing the architecture and learning hyperparameters poses its own new challenges.

@@ -1,8 +1,11 @@
-\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
 
-\usepackage{../../style/lmu-lecture}
-\usepackage[algo2e]{algorithm2e} % Defines macros and environments
-\input{../../style/common.tex}
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
 
 
 \title{Applied Machine Learning}
@@ -11,13 +14,19 @@
 \date{}
 
 \begin{document}
-\newcommand{\titlefigure}{figure/OpenML.png}
-\newcommand{\learninggoals}{
-\item Why Benchmarking?
-\item What is OpenML?}
 
-\lecturechapter{Large-Scale Benchmarking \& OpenML}
-\lecture{Applied Machine Learning}
+
+\titlemeta{
+Benchmarking:
+}{
+Large-Scale Benchmarking \& OpenML
+}{
+figure/OpenML.png
+}{
+\item Why Benchmarking?
+\item What is OpenML?
+}
+
 
 \begin{vbframe}{Why Benchmarking}
 \vfill
@@ -109,8 +118,8 @@ We mainly focus on datasets and tasks
 % \end{vbframe}
 
 
-\begin{frame}{OpenML - The Project}
-\href{https://www.openml.org}{\underline{OpenML.org}} is not only a data repository, it is a collaborative ML platform for sharing individual \textbf{components} involved in benchmark experiments.
+\begin{frame}{OpenML - The Project \furtherreading{OPENML}}
+\furtherreading{OPENML} is not only a data repository, it is a collaborative ML platform for sharing individual \textbf{components} involved in benchmark experiments.
 %(e.g., comparing ML algorithms w.r.t. performance/time on different datasets.)
 %data, ML tasks, algorithms, and results of benchmark experiments.
 % (different ML tasks can be performed on the same data, classification, regression, clustering, ...)
@@ -222,8 +231,7 @@ OpenML relies on 4 \textbf{basic components} (just like benchmark experiments):
 \vfill
 \end{vbframe}
 
-\begin{vbframe}{Example I: OpenML-CC18 (Classification)}
-\beamergotobutton{\href{https://datasets-benchmarks-proceedings.neurips.cc/paper/2021/hash/c7e1249ffc03eb9ded908c236bd1996d-Abstract-round2.html}{Bischl et al. (NeurIPS 2021)}}
+\begin{vbframe}{Example I: OpenML-CC18 (Classification) \furtherreading{BISCHL2021}}
 \vfill
 Standardized benchmark suite for evaluating supervised classification algorithms.
 \vspace{0.5em}
@@ -242,8 +250,7 @@ Standardized benchmark suite for evaluating supervised classification algorithms
 \vfill
 \end{vbframe}
 
-\begin{vbframe}{Example II: OpenML-CTR23 (Regression)}
-\beamergotobutton{\href{https://openreview.net/forum?id=HebAOoMm94}{Fischer et al. (NeurIPS 2023)}}
+\begin{vbframe}{Example II: OpenML-CTR23 (Regression) \furtherreading{FISCHER2023}}
 \vfill
 Extension of CC18 selection principles to regression tasks.
 \vspace{0.5em}
@@ -260,8 +267,7 @@ Extension of CC18 selection principles to regression tasks.
 \vfill
 \end{vbframe}
 
-\begin{vbframe}{Example III: AutoML Benchmark Suite (AMLB)}
-\beamergotobutton{\href{https://www.jmlr.org/papers/v25/22-0493.html}{Gijsbers et al. (JMLR 2024)}}
+\begin{vbframe}{Example III: AutoML Benchmark Suite (AMLB) \furtherreading{GIJSBERS2024}}
 \vfill
 Designed to evaluate modern AutoML systems on realistic and diverse problems.
 \vspace{0.5em}

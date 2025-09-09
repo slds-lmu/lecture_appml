@@ -1,0 +1,129 @@
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+\title{Applied Machine Learning}
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
+
+\begin{document}
+
+\titlemeta{
+Feature Selection:
+}{
+Further Techniques
+}{
+figure_man/empty
+}{
+    \item Embedded Feature Selection
+    \item Domain Knowledge
+    \item Multi-objective Optimization
+    \item Boruta Algorithm
+}
+
+% \section{Further Selection Techniques}
+
+\begin{frame}{Embedded feature selection}
+    \begin{itemize}
+        \item Select features during the learning process
+        \item Explicitly -- via regularization
+        \begin{itemize}
+            \item LASSO/L1
+            \item Requires a solver that can set weights to zero
+        \end{itemize}
+        \item Implicitly -- by construction of the algorithm
+        \begin{itemize}
+            \item Decision-tree based algorithms
+            \item Can ignore irrelevant features by not selecting them (no guarantee, though)
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+% ID columns, identical columns
+\begin{frame}{Domain Knowledge}
+\begin{itemize}
+    \item ID columns
+    \begin{itemize}
+        \item Often ordered, can leak time information
+        \item If they identify a person etc, replace by features describing that person
+        \item Contains no information that can generalize
+    \end{itemize}
+    \item Duplicate features
+    \begin{itemize}
+        \item Cause issues for (linear) models
+        \item Slow down learning
+        \item Reduce model interpretability
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Multi-objective optimization of features}
+    \begin{itemize}
+        \item Optimize two competing Objectives:
+        \begin{enumerate}
+            \item goodness-of-fit
+            \item number of variable
+        \end{enumerate}
+        \item Use global optimization algorithm
+        \begin{itemize}
+            \item Evolutionary Algorithm
+            \item Sparse Bayesian optimization
+        \end{itemize}
+    \end{itemize}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.4\textwidth]{figure/liu-aistats23a.png}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Boruta (1)}
+    \begin{itemize}
+        \item All-relevant feature selection
+        \newline Goal: find all features that have affect the prediction
+        \newline $\rightarrow$ Can include redundant features
+        \item Idea: use \emph{shadow variables} to contrast existing features against
+        \item Method: Extend a feature scoring to an iterative testing mechanism
+    \end{itemize}
+    \vfill
+    \href{https://cran.r-project.org/web/packages/Boruta/vignettes/inahurry.pdf}{Boruta for those in a Hurry by Miron B. Krusa}
+\end{frame}
+
+% TODO make pseudocode
+\begin{frame}{Boruta (2)}
+    \vfill
+    \begin{enumerate}
+        \item Create a copy of each feature, shuffle these copies
+        \item Fit a random forest on the new dataset
+        \item An attribute is deemed important, if its feature importance is higher than the maximal importance of all randomised attributes
+        \item Repeat steps 1-3 for $N$ iterations
+        \item Execute SHT with the null hypothesis that the importance of a feature is equal to the maximal importance of all randomised attributes
+        \item Repeat steps 1-5 until the feature set is stable
+    \end{enumerate}
+    \vfill
+\end{frame}
+
+\section{Wrap-up}
+
+\begin{frame}{Takeaways}
+    \vfill
+    \begin{itemize}
+        \item There can be multiple goals in feature selection:
+        \begin{itemize}
+            \item Single Feature Selection
+            \item Multiple Feature Selection
+            \item All-relevant Feature Selection
+        \end{itemize}
+        \item Important step for good prediction quality and fast models
+        \item Different feature selection methods have different goals and use different mechanisms $\rightarrow$ model selection problem
+    \end{itemize}
+    \vfill
+\end{frame}
+
+\endlecture
+\end{document}

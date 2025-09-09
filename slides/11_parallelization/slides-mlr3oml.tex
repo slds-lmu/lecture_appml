@@ -1,0 +1,529 @@
+\documentclass[10pt,compress,t,notes=noshow, xcolor=table]{beamer}
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+% Defines macros and environments
+
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{verbatim}
+
+\usepackage{listings}
+
+% \lstset{
+%   basicstyle=\ttfamily\small,
+%   columns=fullflexible,
+%   keepspaces=true,
+% }
+
+\lstset{
+language=R,
+basicstyle=\scriptsize\ttfamily,
+commentstyle=\ttfamily\color{gray},
+backgroundcolor=\color{white},
+%backgroundcolor=\color{light-gray}
+showspaces=false,
+showstringspaces=false,
+showtabs=false,
+frame=single,
+%tabsize=3,
+xleftmargin=1cm,
+columns=fullflexible,
+keepspaces=true,
+captionpos=b,
+breaklines=false,
+breakatwhitespace=false,
+title=\lstname,
+escapeinside={},
+keywordstyle={},
+morekeywords={}, 
+belowskip = -1.2 \baselineskip,
+}
+%\verb|basicstyle=\ttfamily, columns=fullflexible, keepspaces=true|
+%\usepackage[usenames,dvipsnames]{xcolor}
+% \definecolor{backgroundCol}{rgb}{0.97,0.97,0.97}
+% \definecolor{commentstyleCol}{rgb}{0.678,0.584,0.686}
+% \definecolor{keywordstyleCol}{rgb}{0.737,0.353,0.396}
+% \definecolor{stringstyleCol}{rgb}{0.192,0.494,0.8}
+% \definecolor{NumCol}{rgb}{0.686,0.059,0.569}
+% \definecolor{basicstyleCol}{rgb}{0.345, 0.345, 0.345}       
+% \lstset{ 
+%   language=R,                     % the language of the code
+%   basicstyle=\scriptsize  \ttfamily \color{basicstyleCol}, % the size of the fonts that are used for the code
+%   %numbers=left,                   % where to put the line-numbers
+% %  numberstyle=\color{green},  % the style that is used for the line-numbers
+%   stepnumber=1,                   % the step between two line-numbers. If it is 1, each line
+%                                   % will be numbered
+%   numbersep=5pt,                  % how far the line-numbers are from the code
+%   backgroundcolor=\color{backgroundCol},  % choose the background color. You must add \usepackage{color}
+%   showspaces=false,               % show spaces adding particular underscores
+%   showstringspaces=false,         % underline spaces within strings
+%   showtabs=false,                 % show tabs within strings adding particular underscores
+%   %frame=single,                   % adds a frame around the code
+%   %rulecolor=\color{white},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+%   tabsize=2,                      % sets default tabsize to 2 spaces
+%   captionpos=b,                   % sets the caption-position to bottom
+%   breaklines=true,                % sets automatic line breaking
+%   breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+%   keywordstyle=\color{keywordstyleCol},      % keyword style
+%   commentstyle=\color{commentstyleCol},   % comment style
+%   stringstyle=\color{stringstyleCol},      % string literal style
+%   literate=%
+%    *{0}{{{\color{NumCol}0}}}1
+%     {1}{{{\color{NumCol}1}}}1
+%     {2}{{{\color{NumCol}2}}}1
+%     {3}{{{\color{NumCol}3}}}1
+%     {4}{{{\color{NumCol}4}}}1
+%     {5}{{{\color{NumCol}5}}}1
+%     {6}{{{\color{NumCol}6}}}1
+%     {7}{{{\color{NumCol}7}}}1
+%     {8}{{{\color{NumCol}8}}}1
+%     {9}{{{\color{NumCol}9}}}1
+% } 
+
+\title{Applied Machine Learning}
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\begin{document}
+\titlemeta{
+Data Access:
+}{
+mlr3oml package
+}{
+figure/empty
+}{
+\item Access OpenML from within R
+\item Download datasets and tasks
+\item Convert OpenML objects to mlr3
+\item Use benchmark suites and collections
+}
+
+
+
+% %\section{Efficiency: Parallelization}
+% \begin{frame}[fragile]{Efficiency: Parallelization}
+%   \begin{itemize}
+%     \item Parallelization minimizes effective computation time by distributing CPU time to many cores.
+%     \item Speedups are theoretically linear to the number of independently run processes.
+%     \item Debugging parallel code is especially hard.
+%     \item Coding discipline is even more important to minimize errors and frustration.
+%   \end{itemize}
+% \end{frame}
+
+% %\section{Easily Parallelizable Tasks}
+% \begin{frame}[fragile]{What can be easily parallelized?}
+%   \begin{itemize}
+%     \item Independent replications
+%     \item Resampling, cross-validation
+%     \item Model averaging
+%     \item Parameter variations in simulations \ldots
+%     \item "Single program, multiple data"
+%     \item Everything expressible as a loop of independent iterations (if you can write it with \texttt{(l|m|)apply}, you are fine)
+%   \end{itemize}
+%   \textbf{Many statistical problems are "embarrassingly parallel"}
+% \end{frame}
+
+% %\section{Performance Improvement}
+% \begin{frame}[fragile]{Ideal performance improvement}
+%   \begin{itemize}
+%     \item p processors should be p times faster than one processor.
+%     \item Note: This is rarely possible in practice.
+%     \item For more theory, look up Amdahl's law and Gustafson's law.
+%   \end{itemize}
+%   \begin{table}
+%     \centering
+%     \begin{tabular}{|c|c|}
+%       \hline
+%       Single processor & 30 Processors \\
+%       \hline
+%       1 minute & 2 seconds \\
+%       1 hour & 2 minutes \\
+%       1 day & 1 hour \\
+%       1 month & 1 day \\
+%       1 year & 2 weeks \\
+%       \hline
+%     \end{tabular}
+%   \end{table}
+% \end{frame}
+
+% %\section{Programming Requirements}
+% \begin{frame}[fragile]{Ideal Programming Requirements}
+%   \begin{itemize}
+%     \item Minimal effort for simple problems
+%     \item Use existing high-level (i.e., R) code
+%     \item Ability to test code in a sequential setting
+%     \item Debugging parallel problems possible
+%     \item Seeding / Reproducibility (with different CPU settings)
+%     \item Scale up to larger systems with minimal effort
+%   \end{itemize}
+%   \textit{As often: Cannot have your cake and eat it, too...}
+% \end{frame}
+
+% %\section{Batch Computing}
+% \begin{frame}[fragile]{Naive batch computing}
+%   Computing on multicore machines (non-cluster):
+%   \begin{itemize}
+%     \item Write standalone script(s) that run your jobs and save results at the end.
+%     \item Parameters must be hard-coded or retrieved through the command line.
+%     \item Login on a machine per SSH.
+%     \item Start job(s) with \texttt{R CMD BATCH myscript1.R}, combine this with nohup, screen, or tmux.
+%     \item Start remaining jobs when resources get available (argh...).
+%     \item Check manually for completion / errors (argh again...).
+%     \item Write a script to collect results.
+%   \end{itemize}
+%   No automation, no resource management or fair share, neither easily extensible nor scalable.
+% \end{frame}
+
+% %\section{HPC Clusters}
+% \begin{frame}[fragile]{High Performance Computing (HPC) clusters}
+%   \includegraphics{figure/hpc.png}
+%   \begin{itemize}
+%     \item User logs into the gateway server (master or head node).
+%     \item Network of multiple nodes, managed by scheduler.
+%     \item Scheduler orchestrates computation and organizes queues to fairly distribute computation times among users.
+%     \item Nodes usually share a file system.
+%   \end{itemize}
+% \end{frame}
+
+% %\section{Batch System Workflow}
+% \begin{frame}[fragile]{Manual working on a batch system}
+%   You have to specify:
+%   \begin{itemize}
+%     \item Resource specifications (number CPUs, number of tasks, expected runtime, and memory)
+%     \item Which cluster/partition to use
+%     \item Command to execute (e.g., \texttt{R CMD BATCH <myscript.R>})
+%   \end{itemize}
+%   You have to manually:
+%   \begin{itemize}
+%     \item Pass specs to CLI tools, either directly as arguments or encoded in a shell script
+%     \item Check the status of jobs via CLI tools (e.g., \texttt{squeue})
+%     \item Write a script to collect results
+%   \end{itemize}
+% \end{frame}
+
+% \begin{frame}[fragile]{Usual workflow on a batch system}
+%   \begin{itemize}
+%     \item Unroll your \texttt{R} loop(s) so that your script computes a single iteration.
+%     \item Write a script that writes \texttt{R} scripts for each iteration setting the iteration counter(s) at the beginning.
+%     \item Write a script that writes job description files for each \texttt{R} script.
+%     \item Write a script that submits your job description files.
+%     \item Crawl through file system checking for the existence of results or log files.
+%     \item Write a script that combines your scattered result files.
+%   \end{itemize}
+% \end{frame}
+
+% \begin{frame}[fragile]{Handling Issues in Batch Systems}
+%   \begin{itemize}
+%     \item Found a bug in your code? Write a script that kills all running jobs, fix the bug, submit everything again.
+%     \item Some jobs have hit the wall time? Write a script that finds out which jobs you need to resubmit with weaker constraints.
+%     \item Want to try your model on another data set or using other parameters? Eventually start from scratch, it might get ugly.
+%   \end{itemize}
+% \end{frame}
+
+% %\section{Conclusions}
+% \begin{frame}[fragile]{Conclusions and further remarks}
+%   \begin{itemize}
+%     \item Clusters are pretty fast!
+%     \item Many statistical tasks are embarrassingly parallel
+%   \end{itemize}
+%   \textbf{But:}
+%   \begin{itemize}
+%     \item Job description files needed
+%     \item We cannot control when jobs are started.
+%     \item Jobs cannot really communicate, except by writing stuff on disk (or we have to allocate multiple cores and use something like MPI).
+%     \item Requesting many nodes at once increases time spent in queue.
+%     \item Auxiliary scripts to create files and submit jobs necessary.
+%     \item Functions to collect results can get complicated and lengthy.
+%     \item If some jobs fail (e.g., singularities), debugging is awful.
+%   \end{itemize}
+% \end{frame}
+
+% \begin{frame}[fragile]{OpenML in R}
+%   \begin{itemize}
+%     \item \texttt{list_oml_}
+%   \end{itemize}
+% \end{frame}
+
+% \section{The mlr3oml Package}
+\begin{frame}[fragile]
+\frametitle{What is mlr3oml?}
+
+% \begin{itemize}
+%   \item Benchmark experiments require high-quality datasets and tasks for meaningful conclusions.
+%   \item \textbf{OpenML}: An open-source platform for sharing machine learning research data, algorithms, and results.
+%   \item Ensures data is \textbf{FAIR} (Findable, Accessible, Interoperable, Reusable).
+% \end{itemize}
+
+\begin{itemize}
+  \item Benchmark experiments require high-quality data for meaningful conclusions.
+  \item \textbf{OpenML.org}: Open-source platform for sharing entities of ML experiments.
+  \item \texttt{mlr3oml} is an R package providing an interface to OpenML (via  REST API).\\
+  $\Rightarrow$ Query, download, and publish data, tasks, and task collections.\\
+  $\Rightarrow$ Experiment results of others can also be queried and downloaded.
+\end{itemize}
+
+\textbf{API Key Usage in} \texttt{mlr3oml}:
+\begin{itemize}
+  \item Download operations work without an API key, but may be rate limited.
+  \item Uploading to OpenML requires an API key.
+  \item Obtain API key by creating an account on \url{OpenML.org} and specify in R:
+  \begin{itemize}
+    \item Set environment variable \texttt{OPENMLAPIKEY}
+    \item Use R option \texttt{mlr3oml.api\_key} (takes precedence), e.g.:\\
+    \texttt{options(mlr3oml.api\_key="c1994bdb7ecb3c6f3c8f3b35f4b47f1f")}
+  \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+% \begin{frame}{OpenML - The Project}
+% \href{https://www.openml.org}{\underline{OpenML.org}} is not only a data repository, it is a collaborative ML platform for sharing individual \textbf{components} involved in benchmark experiments.
+% %(e.g., comparing ML algorithms w.r.t. performance/time on different datasets.)
+% %data, ML tasks, algorithms, and results of benchmark experiments.
+% % (different ML tasks can be performed on the same data, classification, regression, clustering, ...)
+
+% \textbf{Benchmarking:} compare algorithms w.r.t. performance/runtime on datasets.
+
+% OpenML relies on 4 \textbf{basic components} (just like benchmark experiments):
+% \only<1>{
+% \begin{center}
+% \begin{figure}
+% % Editable source: https://docs.google.com/presentation/d/1Gbae9fzuTjnfxCuTKIodM0assSDwLOxy7tzIv6y6cxc/edit?usp=sharing
+% \includegraphics[page=1, width=\textwidth]{figure/oml_overview.pdf}
+% \end{figure}
+% \end{center}
+% }
+% \only<2>{
+% \begin{center}
+% \begin{figure}
+% \includegraphics[page=2, width=\textwidth]{figure/oml_overview.pdf}
+% \end{figure}
+% \end{center}
+% }
+% \only<3>{
+% \begin{center}
+% \begin{figure}
+% \includegraphics[page=3, width=\textwidth]{figure/oml_overview.pdf}
+% \end{figure}
+% \end{center}
+% }
+% \end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Overview mlr3oml}
+\begin{itemize}
+\item \texttt{mlr3oml} supports five OpenML object types (for downloading):
+\begin{itemize}
+\item \texttt{OMLData}: Represents datasets.
+\item \texttt{OMLTask}: Represents tasks (problem specifications).
+\item \texttt{OMLFlow}: Represents machine learning flows (pipelines).
+\item \texttt{OMLRun}: Represents the execution of flows on tasks.
+\item \texttt{OMLCollection}: Represents collections of tasks or runs.
+\end{itemize}
+$\Rightarrow$ Each object can be converted to its corresponding \texttt{mlr3} object.
+\end{itemize}
+\begin{itemize}
+\item Find OpenML objects using \texttt{list\_oml\_*()} functions
+\item Upload datasets, create tasks, and collections (requires API key):
+\begin{itemize}
+\item \texttt{publish\_data()} - Upload dataset
+\item \texttt{publish\_task()} - Create task
+\item \texttt{publish\_collection()} - Create collection
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Listing Data}
+Example of filtering datasets by properties:
+\begin{lstlisting}[language=R]
+library(mlr3oml)
+odatasets = list_oml_data(
+  number_features = c(10, 20),
+  number_instances = c(45000, 50000),
+  number_classes = 2
+)
+odatasets[1:5, c(1,2,9)]
+##    data_id                        name NumberOfFeatures
+##      <int>                      <char>            <int>
+## 1:     179                       adult               15
+## 2:    1461              bank-marketing               17
+## 3:    1590                       adult               15
+## 4:   43898                       adult               15
+## 5:   44234 Bank_marketing_data_set_UCI               17
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Downloading Data}
+\begin{itemize}
+  \item Download metadata with \texttt{odt(id = 1590)} or \texttt{OMLData\$new(id = 1590)}.
+  \item Query metadata (number of rows, columns, etc.) without loading the entire data:
+\end{itemize}
+\begin{lstlisting}[language=R]
+odata = odt(id = 1590)
+class(odata)
+## [1] "OMLData"   "OMLObject" "R6"   
+odata$nrow
+## [1] 48842
+odata$ncol
+## [1] 15
+\end{lstlisting}
+
+\begin{itemize}
+  \item Download and store data by accessing the \texttt{\$data} field:
+\end{itemize}
+\begin{lstlisting}[language=R]
+odata$data[1:5, 1:5]
+##      age workclass fnlwgt    education education.num
+##    <int>    <fctr>  <int>       <fctr>         <int>
+## 1:    25   Private 226802         11th             7
+## 2:    38   Private  89814      HS-grad             9
+## 3:    28 Local-gov 336951   Assoc-acdm            12
+## 4:    44   Private 160323 Some-college            10
+## 5:    18      <NA> 103497 Some-college            10
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Convert Data to mlr3 Tasks}
+\begin{itemize}
+  \item \texttt{mlr3oml} Cache: 
+  \begin{itemize}
+      \item Data is cached in memory after first access.
+      \item Option to cache permanently by setting\\ \texttt{options(mlr3oml.cache = tempfile())}.
+  \end{itemize} 
+  \item Convert data to \texttt{mlr3} tasks for seamless integration:
+\end{itemize}
+\begin{lstlisting}[language=R]
+library(mlr3)
+tsk_adult = as_task_classif(odata$data, target = "class")
+tsk_adult
+## <TaskClassif:odata$data> (48842 x 15)
+## * Target: class
+## * Properties: twoclass
+## * Features (14):
+##   - fct (8): education, marital.status, native.country, occupation, race, 
+##     relationship, sex, workclass
+##   - int (6): age, capital.gain, capital.loss, education.num, fnlwgt, 
+##     hours.per.week
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Listing Tasks}
+\begin{itemize}
+  \item OpenML tasks specify target variable, train-test splits, etc.
+  \item Example of filtering tasks:
+\end{itemize}
+\begin{lstlisting}[language=R]
+adult_tasks = list_oml_tasks(data_id = 1590)
+adult_tasks[task_type == "Supervised Classification", ]
+##    task_id                 task_type data_id
+##      <int>                    <char>   <int>
+## 1:    7592 Supervised Classification    1590
+## 2:   14947 Supervised Classification    1590
+## 3:  126025 Supervised Classification    1590
+## 4:  146154 Supervised Classification    1590
+## 5:  146598 Supervised Classification    1590
+## 6:  168878 Supervised Classification    1590
+## 7:  233099 Supervised Classification    1590
+## 8:  359983 Supervised Classification    1590
+## 9:  361515 Supervised Classification    1590
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Downloading Tasks and Convert to MLR3}
+\begin{itemize}
+  \item Load task with ID 359983 and examine data and splits:
+\end{itemize}
+\begin{lstlisting}[language=R]
+otask = otsk(id = 359983) # alternative: OMLTask$new(id = 359983)
+otask$data # downloads the data
+otask$task_splits # downloads the resampling information
+##           type rowid repeat.  fold
+##         <fctr> <int>   <int> <int>
+##      1:  TRAIN 32427       0     0
+##      2:  TRAIN 13077       0     0
+##     ---                           
+## 488419:   TEST 25263       0     9
+## 488420:   TEST 43381       0     9
+\end{lstlisting}
+
+\begin{itemize}
+  \item Convert to \texttt{mlr3}:
+\end{itemize}
+\begin{lstlisting}[language=R]
+as_task(otask) # creates mlr3 task
+as_resampling(otask) # creates mlr3 resampling object
+## <ResamplingCustom>: Custom Splits
+## * Iterations: 10
+## * Instantiated: TRUE
+## * Parameters: list()
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Task Collections and Benchmark Suites}
+\begin{itemize}
+  \item Bundle tasks for benchmark suites, e.g., CC-18 benchmark suite with ID 99:
+\end{itemize}
+\begin{lstlisting}[language=R]
+otask_collection = ocl(id = 99)
+otask_collection$task_ids[1:5]
+\end{lstlisting}
+\begin{itemize}
+  \item Downloads and defines tasks and resamplings from task collection:
+\end{itemize}
+\begin{lstlisting}[language=R]
+tasks = as_tasks(otask_collection)
+resamplings = as_resamplings(otask_collection)
+\end{lstlisting}
+
+\begin{itemize}
+  \item Example to obtain only a subset from the collection:
+\end{itemize}
+\begin{lstlisting}[language=R]
+binary_cc18 = list_oml_tasks(
+  limit = 6,
+  task_id = otask_collection$task_ids,
+  number_classes = 2
+)
+otasks = lapply(binary_cc18$task_id, otsk)
+tasks = as_tasks(otasks)
+resamplings = as_resamplings(otasks)
+\end{lstlisting}
+\end{frame}
+
+% \begin{frame}[fragile]
+% \frametitle{Benchmarking Setup}
+% \begin{itemize}
+%   \item Use \texttt{benchmark\_grid()} to set up large experiments:
+% \end{itemize}
+% \begin{lstlisting}[language=R]
+% large_design = benchmark_grid(tasks, learners, resamplings, paired = TRUE)
+% large_design[1:6]
+% \end{lstlisting}
+% \end{frame}
+
+% \begin{frame}[fragile]
+% \frametitle{Summary}
+% \begin{itemize}
+%   \item \texttt{mlr3oml} provides robust tools for accessing and utilizing OpenML datasets and tasks.
+%   \item Facilitates large-scale benchmarking and reproducible research.
+% \end{itemize}
+% \end{frame}
+
+
+\endlecture
+\end{document}
