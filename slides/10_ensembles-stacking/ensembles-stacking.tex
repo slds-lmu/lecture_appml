@@ -1,12 +1,8 @@
-\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
 
-\input{../../style/preamble}
-\input{../../latex-math/basic-math}
-\input{../../latex-math/basic-ml}
-\input{../../latex-math/ml-ensembles}
-\input{../../latex-math/ml-eval}
-
-% algorithmicx (algpseudocode) is already loaded in preamble
+\usepackage{../../style/lmu-lecture}
+\usepackage[algo2e]{algorithm2e} % Defines macros and environments
+\input{../../style/common.tex}
 
 
 \title{Applied Machine Learning}
@@ -15,21 +11,16 @@
 \date{}
 
 \begin{document}
-
-\titlemeta{
-Ensembling:
-}{
-Stacking
-}{
-figure/stacking_better.png
-}{
+\newcommand{\titlefigure}{slides/10_ensembles-stacking/figure/stacking_better.png}
+\newcommand{\learninggoals}{
 \item What is Stacking?
-\item How can we stack multiple layers?
-}
+\item How can we stack multiple layers?}
 
+\lecturechapter{Ensembling Part II}
+\lecture{Applied Machine Learning}
 
 \begin{vbframe}{Stacking}
-Also called stacked generalization (\furtherreading{WOLPERT1992}): train multiple base models (level 0) on the same data and use their predictions as input features for a level 1 model that makes the final ensemble prediction $\rightarrow$ heterogeneous ensembling
+Also called stacked generalization (\href{https://www.sciencedirect.com/science/article/abs/pii/S0893608005800231}{\beamergotobutton{Wolpert (1992)}}): train multiple base models (level 0) on the same data and use their predictions as input features for a level 1 model that makes the final ensemble prediction $\rightarrow$ heterogeneous ensembling
 \vspace{1em}
 \begin{columns}
     \begin{column}{0.5\textwidth}
@@ -38,7 +29,7 @@ Also called stacked generalization (\furtherreading{WOLPERT1992}): train multipl
             \centering
             % New version from
             % https://docs.google.com/presentation/d/1gaeW1LefW3vQi3aoEiZEoSUaEyXfmQ9-U_1WoGKfGNM/edit#slide=id.g2e833da9e7c_0_143
-            \includegraphics[width=0.9\textwidth]{figure/stacking_better.png}
+            \includegraphics[width=0.9\textwidth]{slides/10_ensembles-stacking/figure/stacking_better.png}
             %\caption{Caption}
             % Old version from 
             % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
@@ -64,28 +55,32 @@ In contrast to model averaging, stacking already combines predictions during tra
 
 \begin{vbframe}{Stacking}
 \footnotesize
-\textbf{Algorithm:} Single Layer Stacking
-\begin{algorithmic}
-    \Require Training data $\D = \Dset$
-    \Ensure Stacked Ensemble $\fM$
+\begin{algorithm}[H]
+    \SetAlgoLined
+    \caption{Single Layer Stacking}
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+
+    \Input{Training data $\D = \Dset$}
+    \Output{Stacked Ensemble $\fM$}
     
-    \State
-    \State \textbf{Step 1: Learn level 0 base models}
-    \For{$m \leftarrow 1$ to $M$}
-        \State Fit base model $\bl[m]$ on $\D$
-    \EndFor
+    \BlankLine
+    \textbf{Step 1: Learn level 0 base models}\;\\
+    \For{$m \leftarrow 1$ \KwTo $M$}{
+        Fit base model $\bl[m]$ on $\D$\;
+    }
     
-    \State
-    \State \textbf{Step 2: Construct new dataset $\D^\prime$ from $\D$}
-    \For{$i \leftarrow 1$ to $n$}
-        \State Add $(\xv^{\prime(i)}, y^{(i)})$ to new dataset, where $\xv^{\prime(i)} = (\bl[1](\xv^{(i)}), \ldots, \bl[M](\xv^{(i)}))$
-    \EndFor
+    \BlankLine
+    \textbf{Step 2: Construct new dataset $\D^\prime$ from $\D$}\;\\
+    \For{$i \leftarrow 1$ \KwTo $n$}{
+        Add $(\xv^{\prime(i)}, y^{(i)})$ to new dataset, where $\xv^{\prime(i)} = (\bl[1](\xv^{(i)}), \ldots, \bl[M](\xv^{(i)}))$\;
+    }
     
-    \State
-    \State \textbf{Step 3: Fit level 1 model $\fM$ on $\D^\prime$}
+    \BlankLine
+    \textbf{Step 3: Fit level 1 model $\fM$ on $\D^\prime$}\;
     
-    \State \Return $\fM$
-\end{algorithmic}
+    \KwRet $\fM$\;
+\end{algorithm}
 NB: We can either drop the original features or keep them when learning the level 1 model.
 
 \end{vbframe}
@@ -101,7 +96,7 @@ NB: We can either drop the original features or keep them when learning the leve
             \centering
             % New version from 
             % https://docs.google.com/presentation/d/1gaeW1LefW3vQi3aoEiZEoSUaEyXfmQ9-U_1WoGKfGNM/edit#slide=id.g2e833da9e7c_0_143
-            \includegraphics[width=0.7\textwidth]{figure/stacking_cv_better.png}
+            \includegraphics[width=0.7\textwidth]{slides/10_ensembles-stacking/figure/stacking_cv_better.png}
             % Old version from
             %\caption{Caption}
             % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
@@ -126,28 +121,32 @@ NB: We can either drop the original features or keep them when learning the leve
 
 \begin{vbframe}{Stacking Cross-validated}
 \footnotesize
-\textbf{Algorithm:} Single Layer Stacking with Cross-Validation
-\begin{algorithmic}
-    \Require Training data $\D = \Dset$, number of folds $K$
-    \Ensure Stacked Ensemble $\fM$
-    
-    \For{$k \leftarrow 1$ to $K$}
-        \State \textbf{Step 1: Learn level 0 base models}
-        \For{$m \leftarrow 1$ to $M$}
-            \State Fit base model $\bl[m]$ on $\D_{\mathrm{train}}^{(k)}$
-        \EndFor
-        \State
-        \State \textbf{Step 2: Add out-of-fold predictions to new dataset $\D^\prime$}
-        \ForAll{$(\xv^{(i)}, y^{(i)}) \in \D_{\mathrm{test}}^{(k)}$}
-            \State Add $(\xv^{\prime(i)}, y^{(i)})$ to new dataset, where $\xv^{\prime(i)} = (\blxi[1], \ldots, \blxi[M])$
-        \EndFor
-    \EndFor
+\begin{algorithm}[H]
+    \SetAlgoLined
+    \caption{Single Layer Stacking with Cross-Validation}
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
 
-    \State
-    \State \textbf{Step 3: Fit level 1 model $\fM$ on $\D^\prime$}
+    \Input{Training data $\D = \Dset$, number of folds $K$}
+    \Output{Stacked Ensemble $\fM$}
     
-    \State \Return $\fM$
-\end{algorithmic}
+    \For{$k \leftarrow 1$ \KwTo $K$}{
+        \textbf{Step 1: Learn level 0 base models}\;
+        \For{$m \leftarrow 1$ \KwTo $M$}{
+            Fit base model $\bl[m]$ on $\D_{\mathrm{train}}^{(k)}$\;
+        }
+        \BlankLine
+        \textbf{Step 2: Add out-of-fold predictions to new dataset $\D^\prime$}\;\\
+        \ForEach{$(\xv^{(i)}, y^{(i)}) \in \D_{\mathrm{test}}^{(k)}$}{
+            Add $(\xv^{\prime(i)}, y^{(i)})$ to new dataset, where $\xv^{\prime(i)} = (\blxi[1], \ldots, \blxi[M])$\;
+        }
+    }
+
+    \BlankLine
+    \textbf{Step 3: Fit level 1 model $\fM$ on $\D^\prime$}\;
+    
+    \KwRet $\fM$\;
+\end{algorithm}
 
 \end{vbframe}
 
@@ -163,7 +162,7 @@ Now: Also train multiple models at level 1, use predictions to train final level
 %        \vspace{-1em}
 %        \begin{figure}
 %            \centering
-%            \includegraphics[width=0.9\textwidth]{figure/stacking.png}
+%            \includegraphics[width=0.9\textwidth]{slides/10_ensembles-stacking/figure/stacking.png}
 %            %\caption{Caption}
 %            % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
 %            \label{fig:stacking_multi}
@@ -205,7 +204,7 @@ Popular choices of level 1 or level 2 models in stacking include:
 \vfill
 Higher-level training data:
 \begin{itemize}
-    \item Probabilities instead of class labels (see \furtherreading{TINGWITTEN1999})
+    \item Probabilities instead of class labels (see \href{https://dl.acm.org/doi/10.5555/1622859.1622868}{\beamergotobutton{Ting and Witten, 1999}})
     \item Include original dataset $\Xmat$ or not?
 \end{itemize}
 \vfill
@@ -214,35 +213,39 @@ Higher-level training data:
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Forward Pass / Prediction}
-% \vspace{-1.5em}
-\textbf{Algorithm:} Prediction Using Single Layer Stacking
-\begin{algorithmic}
-    \State
-    \Require Training data $\D = \Dset$, Test data $\Xmat$
-    \Ensure Predictions $\yv$
+\vspace{-1.5em}
+\begin{algorithm}[H]
+    \SetAlgoLined
+    \caption{Prediction Using Single Layer Stacking}
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
 
-    \State \textbf{Step 1: Fit level-0 on the whole training data set}
-    \For{$m \leftarrow 1$ to $M$}
-        \State Fit level-0 model $\bl[m]$ on $\D$
-    \EndFor
+    \BlankLine
+    \Input{Training data $\D = \Dset$, Test data $\Xmat$}
+    \Output{Predictions $\yv$}
+
+    \textbf{Step 1: Fit level-0 on the whole training data set}\;\\
+    \For{$m \leftarrow 1$ \KwTo $M$}{
+        Fit level-0 model $\bl[m]$ on $\D$\;
+    }
     
-    \State
-    \State \textbf{Step 2: Make predictions with every level-0 model}
-    \For{$m \leftarrow 1$ to $M$}
-        \State Predict with base model: $\yv^m = \sbl[m](\Xmat)$
-    \EndFor
+    \BlankLine
+    \textbf{Step 2: Make predictions with every level-0 model}\;\\
+    \For{$m \leftarrow 1$ \KwTo $M$}{
+        Predict with base model: $\yv^m = \sbl[m](\Xmat)$;
+    }
     
-    \State
-    \State \textbf{Step 3: Construct new dataset $\Xmat^\prime$}
-    \For{$i \leftarrow 1$ to $n$}
-        \State $\Xmat^{\prime{i}} = [\xi[i]_1, \dots, \xi[i]_d, \xv^{\prime{(i)}}_1, \dots, \xv^{\prime{(i)}}_M] $
-    \EndFor
+    \BlankLine
+    \textbf{Step 3: Construct new dataset $\Xmat^\prime$}\;\\
+    \For{$i \leftarrow 1$ \KwTo $n$}{
+        $\Xmat^{\prime{i}} = [\xi[i]_1, \dots, \xi[i]_d, \xv^{\prime{(i)}}_1, \dots, \xv^{\prime{(i)}}_M] $\;
+    }
     
-    \State
-    \State \textbf{Step 4: Make predictions with level 1 model $\fM$ on $\Xmat^\prime$}
+    \BlankLine
+    \textbf{Step 4: Make predictions with level 1 model $\fM$ on $\Xmat^\prime$}\;
     
-    \State \Return $\fM(\Xmat)$
-\end{algorithmic}
+    \KwRet $\fM(\Xmat)$\;
+\end{algorithm}
 
 \end{vbframe}
 
@@ -269,14 +272,14 @@ What other methods do the following level-1 classifiers recover?
         \vspace{-1em}
         \begin{figure}
             \centering
-            \includegraphics[width=\textwidth]{figure/AG.png}
+            \includegraphics[width=\textwidth]{slides/10_ensembles-stacking/figure/AG.png}
             \caption*{\url{https://auto.gluon.ai/}}
             \label{fig:auto_gluon}
         \end{figure}
         \vspace{1em}
         \begin{figure}
             \centering
-            \includegraphics[width=\textwidth]{figure/ALMB.png}
+            \includegraphics[width=\textwidth]{slides/10_ensembles-stacking/figure/ALMB.png}
             \caption{AutoGluon Performance on AMLB 1h binary classification.}
             \label{fig:auto_gluon_almb}
         \end{figure}

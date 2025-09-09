@@ -1,13 +1,8 @@
-% OLD
-%\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
-% NEW
-\documentclass[10pt,compress,t,notes=noshow, xcolor=table]{beamer}
+\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
 
-\input{../../style/preamble}
-\input{../../latex-math/basic-math}
-\input{../../latex-math/basic-ml}
-\input{../../latex-math/ml-ensembles}
-\input{../../latex-math/ml-eval}
+\usepackage{../../style/lmu-lecture}
+\usepackage[algo2e]{algorithm2e} % Defines macros and environments
+\input{../../style/common.tex}
 
 
 \title{Applied Machine Learning}
@@ -16,21 +11,15 @@
 \date{}
 
 \begin{document}
-
-\titlemeta{
-Ensembling:
-}{
-Intro, Model Averaging
-}{
-figure/bagging_better.png
-}{
-
+\newcommand{\titlefigure}{slides/10_ensembles-stacking/figure/bagging_better.png}
+\newcommand{\learninggoals}{
 \item What is Ensembling?
 \item Bagging and Boosting Recap
 \item Model Averaging
-
 }
 
+\lecturechapter{Ensembling Part I}
+\lecture{Applied Machine Learning}
 
 % FIXME: math and alphabets are totally messed up because we use way to many different fonts and styles in lectures
 
@@ -44,7 +33,7 @@ figure/bagging_better.png
         \vspace{-1em}
         \begin{figure}
             \centering
-            \includegraphics[width=0.75\textwidth]{figure/Ensembling.pdf}
+            \includegraphics[width=0.75\textwidth]{slides/10_ensembles-stacking/figure/Ensembling.pdf}
             %\caption{Caption}
             \label{fig:ensembling}
         \end{figure}
@@ -74,7 +63,7 @@ figure/bagging_better.png
             \centering
             % New version from 
             % https://docs.google.com/presentation/d/1gaeW1LefW3vQi3aoEiZEoSUaEyXfmQ9-U_1WoGKfGNM/edit#slide=id.g2e833da9e7c_0_143
-            \includegraphics{figure/bagging_better.png}
+            \includegraphics{slides/10_ensembles-stacking/figure/bagging_better.png}
             %\caption{Caption}
             % Old version from
             % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07_ensembles__notes.pdf
@@ -101,7 +90,7 @@ Popular use case: Construction of RF using trees as base models
 Bias vs. variance: Error = Variance + Bias + Noise
 \begin{figure}
     \centering
-    \includegraphics[width=0.5\textwidth]{figure_man/bagging_variance_bias_tree.png}
+    \includegraphics[width=0.5\textwidth]{slides/10_ensembles-stacking/figure_man/bagging_variance_bias_tree.png}
     %\caption{Caption}
     \label{fig:bagging_tree}
 \end{figure}
@@ -117,7 +106,7 @@ Bias vs. variance bagging: Variance reduction through averaging; Bias of model i
         \vspace{-1em}
         \begin{figure}
             \centering
-            \includegraphics{figure_man/bagging_variance_bias_tree.png}
+            \includegraphics{slides/10_ensembles-stacking/figure_man/bagging_variance_bias_tree.png}
             %\caption{Caption}
             \label{fig:bagging_tree2}
         \end{figure}
@@ -126,7 +115,7 @@ Bias vs. variance bagging: Variance reduction through averaging; Bias of model i
         \vspace{-1em}
         \begin{figure}
             \centering
-            \includegraphics{figure_man/bagging_variance_bias_100_trees.png}
+            \includegraphics{slides/10_ensembles-stacking/figure_man/bagging_variance_bias_100_trees.png}
             %\caption{Caption}
             \label{fig:bagging_trees}
         \end{figure}
@@ -180,7 +169,7 @@ Combine predictions of multiple (different) models to make a final prediction $\
             \centering
             % New version from
             % https://docs.google.com/presentation/d/1gaeW1LefW3vQi3aoEiZEoSUaEyXfmQ9-U_1WoGKfGNM/edit#slide=id.g2e833da9e7c_0_143
-            \includegraphics[width=0.7\textwidth]{figure/voting_better.png}
+            \includegraphics[width=0.7\textwidth]{slides/10_ensembles-stacking/figure/voting_better.png}
             %\caption{Caption}
             % Old version from
             % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07_ensembles__notes.pdf
@@ -219,7 +208,7 @@ Assign weights $\w = (w_{1}, \ldots, w_{M}), \text{usually: } 0 \le w_{m} \le 1,
 $\fMwx = \frac{1}{M} \sum_{m = 1}^{M} w_{m} \cdot \sblx[m]$\\
 \begin{figure}
     \centering
-    \includegraphics[width=0.375\textwidth]{figure/Weighted_Model_Averaging.pdf}
+    \includegraphics[width=0.375\textwidth]{slides/10_ensembles-stacking/figure/Weighted_Model_Averaging.pdf}
     %\caption{Caption}
     \label{fig:weighted_model_averaging}
 \end{figure}
@@ -280,7 +269,7 @@ In practice, we use black box optimization, greedy ensemble selection, or a line
 Assume a set of $M$ different models obtained from data $\D$ using a resampling $\JJ$.\\
 We now want to optimize the weights used in weighted model averaging.\\
 \vfill
-Greedy ensemble selection (GES, see \furtherreading{CARUANA2004}) is one of the most popular methods to do so:\\\
+Greedy ensemble selection (GES, see \href{https://www.cs.cornell.edu/~alexn/papers/shotgun.icml04.revised.rev2.pdf}{\beamergotobutton{Caruana et al., 2004}}) is one of the most popular methods to do so:\\\
 \begin{enumerate}
     \item Start with the empty ensemble
     \item Add the base model that maximizes the ensembles' performance metric on a hillclimb (validation) set
@@ -348,7 +337,7 @@ NB: Optimizing weights can (and often does) overfit to the validation data; espe
 
 \begin{vbframe}{Closing}
 \vfill
-Why does ensembling work? \furtherreading{DIETTERICH2000}
+Why does ensembling work? \href{https://link.springer.com/content/pdf/10.1007/3-540-45014-9_1.pdf?pdf}{\beamergotobutton{Dietterich (2000)}}
 \begin{itemize}
     \item Statistical Problem
     \item Computational Problem

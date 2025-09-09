@@ -1,17 +1,8 @@
-
-\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
-
-\input{../../style/preamble}
-\input{../../latex-math/basic-math}
-\input{../../latex-math/basic-ml}
-\input{../../latex-math/ml-eval}
-
-\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
-
-
+\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+\usepackage{../../style/lmu-lecture}
+% Defines macros and environments
+\input{../../style/common.tex}
 \newcommand{\Dtestm}{\mathcal{D}_{\text{test}, m}}
-\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
-
 \title{Applied Machine Learning}
 % \author{LMU}
 %\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
@@ -20,19 +11,14 @@
 \begin{document}
 
 
-\titlemeta{
-Performance Evaluation:
-}{
-Model Selection \& Hypothesis Testing
-}{
-figure/normal_densities
-}{
-
+\newcommand{\titlefigure}{figure/normal_densities}
+\newcommand{\learninggoals}{
 \item What questions can we answer with benchmarks?
 \item What value do hypothesis tests add?
-\item Benchmarking scenarios and relevant tests
-}
+\item Benchmarking scenarios and relevant tests}
 
+\lecturechapter{Model Selection \& Hypothesis Testing}
+\lecture{Applied Machine Learning}
 
 \begin{frame}{Model evaluation, Model selection and Algorithm selection}
 \vfill
