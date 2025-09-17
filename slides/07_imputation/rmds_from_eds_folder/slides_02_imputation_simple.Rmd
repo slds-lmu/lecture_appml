@@ -1,0 +1,92 @@
+## Simple Imputation Methods
+
+```{r include=FALSE, cache=FALSE}
+library(mlr)
+library(ggplot2)
+
+root = rprojroot::find_root(rprojroot::is_git_root)
+ap = adjust_path(getwd())
+
+data = readr::read_csv(paste0(root, "/data/ames_housing_extended.csv"))
+colnames(data)[1] = "X1"
+data = data[, ! grepl(pattern = "energy_t", x = names(data))]
+```
+
+A very simple imputation strategy is to replace missing values with univariate statistics, e.g. mean or median, of the feature:
+
+```{r, echo=FALSE, out.width="\\textwidth"}
+# source: https://drive.google.com/open?id=1jfvUneKosopIw5cyAaiUL2MlZCp2k4v8y0wwrYAJD3Y
+knitr::include_graphics(ap("fe_imputation_simple.pdf"))
+```
+
+## Simple Imputation Methods
+
+The statistic used to impute the missing values has to match the type of the feature:
+
+-   Numeric features: mean, median, quantiles, mode, ...
+-   Categorical features: mode, ...
+
+Alternatively missing values can be encoded with new values
+
+- Numeric features: `2*max`, ...
+- Categorical features: `__MISS__`, ...
+
+
+
+## Imputation - Notes
+
+- To ensure that the information regarding which values were imputed is not lost, we can add a binary indicator variable.
+
+- Domain knowledge is highly important: Missing *Credit* can mean that the individual has $0$ debt. 
+
+- Encoding numeric values with *out-of-range* values has been shown to work well in practice for complex ML models.
+  - This is especially useful for tree-based methods, as it allows separating observations with missing values in a feature.
+  - But using *out-of-range* imputation when estimating global effects (e.g. in linear models) can skew the results 
+
+## Disadvantage of constant Imputation
+
+By imputing a feature with one value we shift the distribution of that feature towards a single value.
+
+```{r, echo=FALSE, fig.align="center", fig.width=6, fig.height=4, out.width="0.7\\textwidth", warnings=FALSE}
+# impute_var = "Garage Yr Blt"
+impute_var = "Lot Frontage"
+x = data[[impute_var]]
+y_mean = y_med = x
+y_mean[is.na(y_mean)] = mean(x, na.rm = TRUE)
+y_med[is.na(y_med)] = quantile(x, 0.5, na.rm = TRUE)
+
+df_plot = data.frame(value = c(x, y_mean, y_med), technique = rep(c("No imputation", "Imputing with mean", "Imputing with median"), each = length(x)))
+
+ggplot(data = df_plot, aes(x = value, fill = technique)) +
+  geom_histogram(position = position_dodge(), bins = 40) +
+  # geom_rug(aes(color = technique), alpha = 0.1) +
+  xlab(impute_var) +
+  ylab("Density") +
+  labs(fill = "")
+```
+
+## Imputation by Sampling
+
+A way out of this problem is to sample values to replace each missing observation from
+
+- the empirical distribution or histogram, for a numeric feature.
+- the relative frequencies of levels, for a categorical feature.
+
+This ensures that the distribution of the features does not change much.
+
+## Benchmark of Simple Imputation
+
+To illustrate the effect of imputation on the performance we evaluate a linear model on the Ames housing dataset.
+Evaluation is done with a 10-fold cross-validation:
+
+```{r, echo=FALSE, warnings=FALSE, message=FALSE, fig.width=6, fig.height=4, out.width="0.7\\textwidth"}
+# Code to generate df_plot: figure/plot_impute.R
+load(ap("plot_impute.rds"))
+
+df_plot = df_plot[! df_plot$technique %in% c("CART", "Random Forest"),]
+
+ggplot(data = df_plot, aes(technique, perf)) +
+  geom_boxplot() +
+  xlab("Imputation Technique") +
+  ylab("MAE")
+```

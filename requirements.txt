@@ -1,0 +1,15 @@
+# Dependencies of the exercise solutions in Python.
+numpy
+scipy
+pandas
+seaborn
+scikit-learn
+scikit-optimize
+statsmodels
+matplotlib
+notebook
+nbconvert
+nbformat
+cma
+xgboost
+imbalanced-learn

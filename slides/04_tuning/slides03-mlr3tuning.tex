@@ -1,0 +1,44 @@
+
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+% alternatively combining latex files with subfile package https://tex.stackexchange.com/a/155883/26830 (however, page numbering and some other stuff does not work well)
+
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+\title{Interpretable Machine Learning}
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
+
+% includepdf slides, pagecommad will set counter for framenumber
+\usepackage{pdfpages}
+\includepdfset{trim=0mm 0mm 0mm 0mm, pagecommand={\global\setcounter{framenumber}{\value{page}}}, offset=-25mm 0, clip=true, noautoscale=true}
+% trim=0mm 6mm 0mm 0mm, offset=0 15,
+
+
+\begin{document}
+
+
+\titlemeta{
+MLR3 Tuning
+}{
+Introduction \& Basic Concepts
+}{
+figure_man/empty
+}{
+\item Recap of hyperparameter tuning fundamentals
+\item Introduction to mlr3tuning package
+\item Basic tuning workflows and setup
+}
+
+
+\section{Recap: Tuning}
+\includepdf[pages={3, 8, 11, 13, 15, 16, 18}]{../mlr3slides/mlr3tuning.pdf}
+
+\section{Intro to mlr3tuning}
+\includepdf[pages={4, 19-21, 24, 29-33, 35-39}]{../mlr3slides/mlr3tuning.pdf}
+
+\endlecture
+\end{document}

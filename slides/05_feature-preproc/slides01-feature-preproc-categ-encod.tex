@@ -1,0 +1,324 @@
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+
+\title{Applied Machine Learning}
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\begin{document}
+
+\titlemeta{
+Feature Engineering:  
+}{
+Categorical Encoding
+}{
+figure_man/empty
+}{
+\item One-Hot Encoding
+\item Target/Impact Encoding
+}
+
+% \section{Introduction to Feature Engineering}
+
+% Important types of Feature Engineering
+
+\begin{vbframe}{Important types of Feature Engineering}
+
+Feature engineering is on the intersection of \textbf{data cleaning}, \textbf{feature creation} and \textbf{feature selection}.
+
+\lz
+
+The goal is to solve common difficulties in data science projects, like
+
+\begin{itemize}
+\item skewed/\textit{weird} feature distributions,
+\item (high cardinality) categorical features,
+\item functional (temporal) features,
+\item missing observations,
+\item high dimensional data,
+\item ...
+\end{itemize}
+
+and \textbf{improve model performance}.
+
+\end{vbframe}
+
+% Train-Test Leakage
+
+\begin{vbframe}{Train-Test Leakage}
+
+\begin{itemize}
+\item Ultimately we are interested in predicting on future data!
+
+\item We can not use 'knowledge' about future (test) data during training.
+
+\item Requires clearly separating train and test data in order to avoid overoptimistic conclusions:
+
+\item \textbf{Examples:}
+
+  \begin{itemize}
+  \item Using knowledge about which features are relevant in test data
+  
+  \item Scaling based on statistics of the test data 
+  
+  \item Missing patterns in the test data not present in training data
+  \end{itemize}
+\end{itemize}
+
+\end{vbframe}
+
+% Train-Test Leakage
+
+\begin{vbframe}{Train-Test Leakage}
+
+\vfill
+
+\begin{center}
+\includegraphics[width=\textwidth]{figure_man/pipe_action.png}
+\end{center}
+
+\vfill
+
+\end{vbframe}
+
+% Ames Housing Data Set
+
+\begin{vbframe}{Ames Housing Data Set}
+
+Ames is a small city in Iowa, USA.
+
+It describes the sale of individual residential properties from 2006 to 2010.
+
+The data was collected by Dean De Cock as an more complex alternative to the often used Boston Housing dataset.
+
+It contains 2930 observations and
+
+\begin{itemize}
+\item 23 categorical features,
+\item 23 ordered categorical features,
+\item 12 integer features,
+\item 20 continuous features,
+\item 1 functional feature describing power usage of houses over a day.
+\end{itemize}
+
+\textbf{Note:} This is a slightly changed dataset from the original one.
+
+\end{vbframe}
+
+% Ames Housing Data Set - Target
+
+\begin{frame}{Ames Housing Data Set - Target}
+
+The goal is to predict the selling price based on these features
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{figure/ames_target_distrib.pdf}
+\end{figure}
+
+
+\end{frame}
+
+\section{Handling of Categorical Features}
+
+\begin{vbframe}{Categorical Features}
+
+A categorical feature is a feature with a finite number of discrete (unordered) \textit{levels} $c_1, \dots, c_k$, e.g., \textit{House.Style=2Story}$\stackrel{?}{>}$\textit{SFoyer}.
+
+\begin{itemize}
+\item Categorical features are very common in practical applications.
+
+\item Except for few machine learning algorithms like tree-based methods, categorical features have to be encoded in a preprocessing step.
+\end{itemize}
+
+\textit{Encoding} is the creation of a fully numeric representation from a categorical feature.
+
+\begin{itemize}
+\item Choosing the optimal encoding can be a challenge, especially when the number of levels $k$ becomes very large.
+\end{itemize}
+
+\end{vbframe}
+
+\begin{vbframe}{One-Hot Encoding}
+
+\begin{itemize}
+\item Convert each categorical feature to $k$ binary ($1/0$) features, where $k$ is the number of unique levels.
+
+\item One-Hot encoding does not loose any information of the feature and many models can correctly handle binary features.
+
+\item Given a categorical feature $x_j$ with levels $c_1,\dots, c_k$, the new features are
+$$\tilde x_{j,c} = \I(x_j)_{c} \quad c = c_1,\dots,c_k.$$
+\end{itemize}
+
+\textbf{One-Hot encoding is often the go-to choice for the encoding of categorical features!}
+
+\end{vbframe}
+
+\begin{vbframe}{One-Hot Encoding: Example}
+
+Original slice of the dataset:
+
+
+\begin{center}
+\includegraphics[width = 0.85\textwidth]{figure/categorical_original_table.pdf}
+\end{center}
+
+
+One-Hot Encoded:
+
+\begin{center}
+\includegraphics[width = 0.85\textwidth]{figure/categorical_onehot_table.pdf}
+\end{center}
+
+
+\end{vbframe}
+
+\begin{vbframe}{Dummy Encoding}
+
+\begin{itemize}
+\item Dummy encoding is very similar to one-hot encoding with the difference that only $k-1$ binary features are created.
+
+\item A \textit{reference} category is defined as all binary features being $0$, i.e.,
+$$\tilde x_{j,1} = 0, \dots, \tilde x_{j,k-1} = 0.$$
+
+\item Each feature $\tilde x_{j,1}$ represents the \textit{deviation} from the reference category.
+
+\item While using a reference category is required for stability and interpretability in statistical models like (generalized) linear models, it is not necessary, rarely done in ML and can even have negative influence on the performance.
+\end{itemize}
+
+\end{vbframe}
+
+
+\begin{vbframe}{One-Hot Encoding: Limitations}
+
+\begin{itemize}
+\item One-Hot encoding can become extremely inefficient when number of levels becomes too large, as one additional feature is introduced for every level.
+
+\item Assume a categorical feature with $k=4000$ levels, by using dummy encoding 4000 new features are added to the dataset.
+
+\item These additional features are very sparse.
+
+\item Handling such \textit{high-cardinality categorical features} is a challenge, possible solutions are
+    \begin{itemize}
+    \item specialized methods such as \textit{factorization machines},
+    \item \textbf{target/impact encoding},
+    \item clustering feature levels or
+    \item feature hashing.
+    \end{itemize}
+\end{itemize}
+
+\end{vbframe}
+
+% Target Encoding
+
+\begin{vbframe}{Target Encoding}
+
+Developed to solve limitations of dummy encoding for high cardinality categorical features.
+
+\textbf{Goal}: Each categorical feature $x$ should be encoded in a single numeric feature $\tilde x$.
+
+Basic definition for regression by Micci-Barreca (2001):
+
+$$\tilde x = \frac{\sum_{i:x=l}y^{(i)}}{N_l}, \quad l=1,\dots,k,$$
+
+where $N_l$ is the number of observations of the $l$'th level of feature $x$.
+
+\end{vbframe}
+
+% Target Encoding - Example
+
+\begin{vbframe}{Target Encoding - Example}
+
+
+\includegraphics[width = 0.85\textwidth]{figure/foundation_counts_table.pdf}
+
+
+Encoding for wooden foundation:
+
+
+\includegraphics[width = 0.85\textwidth]{figure/wood_foundation_examples.pdf}
+
+\[
+\dfrac{164000 + 145500 + 143000 + 250000 + 202000}{5} = 180900
+\]
+
+
+\end{vbframe}
+
+% Target Encoding - Example
+
+\begin{vbframe}{Target Encoding - Example}
+
+For all foundation types:
+
+\vfill
+
+\begin{center}
+\includegraphics[width = \textwidth]{figure/foundation_encoding_table.pdf}
+\end{center}
+
+\vfill
+
+This mapping is calculated on training data and later applied to test
+data.
+
+
+\end{vbframe}
+
+% Target Encoding for Classification
+
+\begin{vbframe}{Target Encoding for Classification}
+
+\begin{itemize}
+    \item Extending encoding to binary classification is straightforward,
+ instead of the average target value the relative frequency of the
+ positive class is used
+    \item Multi-class classification extends this by creating one feature for
+ each target class in the same way as binary classification.
+
+\end{itemize}
+\end{vbframe}
+
+% Target Encoding - Issues
+
+\begin{vbframe}{Target Encoding - Issues}
+
+\textbf{Problem:} Target encoding can assign extreme values to rarely occurring levels.
+
+\textbf{Solution:} Encoding as weighted sum between global average target value and encoding value of level.
+
+$$\tilde x = \lambda_l\frac{\sum_{i:x=l}y^{(i)}}{N_l} + (1-\lambda_l)\frac{\sum_{i=1}^n y^{(i)}}{n}, \quad l=1,\dots,k.$$
+
+\begin{itemize}
+    \item $\lambda_l$ can be parameterized and tuned, but optimally, tuning must be done for each feature and level separately (most likely infeasible!).
+    \item Simple solution: Set $\lambda_l=\frac{N_l}{N_l+\epsilon}$ with regularization parameter $\epsilon$.
+    \item This shrinks small levels stronger to the global mean target value than large classes.
+\end{itemize}
+
+
+
+\end{vbframe}
+
+% Target Encoding - Issues
+
+\begin{vbframe}{Target Encoding - Issues}
+
+\textbf{Problem:} Label leakage! Information of $y^{(i)}$ is used to calculate $\tilde x$. This can cause overfitting issues, especially for rarely occurring classes.
+
+\textbf{Solution:} Use internal cross-validation to calculate $\tilde x$.
+
+\begin{itemize}
+    \item It is unclear how serious this problem is in practice.
+    \item But: calculation of $\tilde x$ is very cheap, so it doesn't hurt.
+    \item An alternative is to add some noise $\tilde x^{(i)} + N(0,\sigma_\epsilon)$ to the encoded samples.
+\end{itemize}
+
+\end{vbframe}
+
+\endlecture
+\end{document}

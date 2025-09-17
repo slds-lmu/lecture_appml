@@ -1,0 +1,51 @@
+## Model-Based Imputation
+
+Instead of imputing a single value or sampling values it is desirable to take advantage of structure and correlation between features.
+
+```{r include=FALSE, cache=FALSE}
+library(mlr)
+library(ggplot2)
+# library(dplyr)
+
+root = rprojroot::find_root(rprojroot::is_git_root)
+ap = adjust_path(paste0(getwd(), "/figure"))
+
+data = readr::read_csv(paste0(root, "/data/ames_housing_extended.csv"))
+colnames(data)[1] = "X1"
+data = data[, ! grepl(pattern = "energy_t", x = names(data))]
+```
+
+```{r, echo=FALSE, out.width="\\textwidth"}
+# source: https://drive.google.com/open?id=1jzJ7FkSC3-OK_ESzPAen-p67SJyx6GjaIGttX2_9RT8
+knitr::include_graphics(ap("fe_imputation_models.pdf"))
+```
+
+## Model-Based Imputation: Drawbacks
+
+- Choice of surrogate model has high influence on the imputation:
+
+```{r, echo=FALSE, fig.width=4, fig.height=3, out.width="0.4\\textwidth"}
+set.seed(618)
+x = runif(n = 100, min = 0, max = 10)
+y = 2 + 2 * x * sin(x) + 2 * x + rnorm(100, mean = 0, sd = 2)
+
+mod = lm(y ~ x)
+x_new = c(2, 5, 8, 8.5, 9)
+pred_new = predict(mod, newdata = data.frame(x = x_new))
+
+df_plot = data.frame(x = x, y = y)
+df_new_points = data.frame(x = x_new, y = pred_new)
+
+ggplot() +
+  geom_point(data = df_plot, aes(x = x, y  = y)) +
+  geom_smooth(data = df_plot, aes(x = x, y = y), method = "lm", se = FALSE,
+    color = "red") +
+  geom_point(data = df_new_points, aes(x = x, y = y), color = "red", size = 3) +
+  xlab("Feature used for imputation") +
+  ylab("Feature to impute")
+```
+
+- Surrogate model should handle missing values itself, otherwise imputation *loop* may be necessary.
+
+- Surrogate model hyperparameters can be tuned and can be different for each feature to impute.
+

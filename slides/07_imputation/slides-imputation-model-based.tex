@@ -1,0 +1,192 @@
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+\title{Applied Machine Learning}
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\begin{document}
+
+\titlemeta{
+Imputation:
+}{
+Advanced Methods and Pitfalls
+}{
+figure_man/fe_imputation_models_first_slide
+}{
+\item Based imputation strategies
+\item Practical considerations for missing values
+}
+
+
+% Content adapted from texs_equivalent_to_rmds/slides-03-imputation-models.tex (pages 1-last equivalent from pdf_chapters/slides_03_imputation_models.pdf)
+\begin{frame}{Model-Based Imputation}
+
+    Instead of imputing a single value or sampling values it is desirable to take advantage of structure and correlation between features.
+    
+    \begin{center}
+        \includegraphics[width=\textwidth]{figure_man/fe_imputation_models_first_slide}
+    \end{center}
+
+\end{frame}
+
+\begin{frame}{Model-Based Imputation: Drawbacks}
+
+    \begin{itemize}
+        \item Choice of surrogate model has high influence on the imputation:
+    \end{itemize}
+    
+    \begin{center}
+        \includegraphics[width=0.4\textwidth]{figure/surrogate_model_influence}
+    \end{center}
+    
+    \begin{itemize}
+        \item Surrogate model should handle missing values itself, otherwise imputation \textit{loop} may be necessary.
+        
+        \item Surrogate model hyperparameters can be tuned and can be different for each feature to impute.
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}{A tale of failed imputation}
+\vfill
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-17.png}
+    \caption{Figure from \furtherreading{CARUANA2024} example starting at 43'31}
+\end{figure}
+\vfill
+\end{frame}
+
+\begin{frame}{A tale of failed imputation 2}
+\vfill
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-27.png}
+    \caption{Figure from \furtherreading{CARUANA2024} example starting at 43'31}
+\end{figure}
+\vfill    
+\end{frame}
+
+\begin{frame}{A tale of failed imputation 3}
+\vfill
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-34.png}
+    \caption{Figure from \furtherreading{CARUANA2024} example starting at 43'31}
+\end{figure}
+\vfill
+\end{frame}
+
+\begin{frame}{A tale of failed imputation 4}
+\vfill
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-41.png}
+    \caption{Figure from \furtherreading{CARUANA2024} example starting at 43'31}
+\end{figure}
+\vfill
+\end{frame}
+
+\begin{frame}{A tale of failed imputation 5}
+\vfill
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{figure_man/Screenshot from 2025-06-03 22-39-01.png}
+    \caption{Figure from \furtherreading{CARUANA2024} example starting at 43'31}
+\end{figure}
+\vfill
+\end{frame}
+
+\begin{frame}{Tests for missingness mechanisms}
+\vfill
+MAR vs MCAR
+\begin{itemize}
+    \vfill
+    \item Little's test
+    \item Logistic regression for missingness
+    \begin{enumerate}
+        \item For each column, create a new classification task: predict if the value is missing or not
+        \item Use the remaining columns as features
+        \item Fit logistic regression
+        \item Examine coefficients and p-values
+    \end{enumerate}
+    \vfill
+\end{itemize}
+MNAR: no test available
+\vfill
+\end{frame}
+
+% \begin{frame}{Censored data: special missingness mechanisms}
+%     \small
+%     \begin{itemize}
+%         \item Left censoring – a data point is below a certain value but it is unknown by how much.
+%         \item Interval censoring – a data point is somewhere on an interval between two values.
+%         \item Right censoring – a data point is above a certain value but it is unknown by how much.
+%         \item Type I censoring occurs if an experiment has a set number of subjects or items and stops the experiment at a predetermined time, at which point any subjects remaining are right-censored.
+%         \item Type II censoring occurs if an experiment has a set number of subjects or items and stops the experiment when a predetermined number are observed to have failed; the remaining subjects are then right-censored.
+%         \item Random (or non-informative) censoring is when each subject has a censoring time that is statistically independent of their failure time. The observed value is the minimum of the censoring and failure times; subjects whose failure time is greater than their censoring time are right-censored.
+%     \end{itemize}
+% \end{frame}
+
+\begin{frame}{Censoring Mechanism}
+\small
+\begin{itemize}
+    \item \textbf{Left censoring:} True value below a threshold; exact value unknown.
+    \item \textbf{Interval censoring:} True value lies within a known interval.
+    \item \textbf{Right censoring:} True value above a threshold; exact value unknown.
+    \pause
+    \item \textbf{Type I censoring:} Experiment ends at pre-specified time; remaining subjects are right-censored.
+    \item \textbf{Type II censoring:} Experiment ends after a fixed number of failures; remaining subjects are right-censored.
+    \item \textbf{Random (non-informative) censoring:} Censoring times independent of failure times; observe minimum of failure and censoring time.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Takeaways of a recent benchmark}
+
+Imputation for prediction: beware of diminishing return. Le Morvan and Varoquaux, ICLR 2025 \furtherreading{LEMORVAN2024}
+
+\begin{itemize}
+    \item Better imputation performance does not result in better prediction performance for MNAR (w/o missingness indicator)
+    \item Better imputation might be irrelevant b/c information is available in other features, unimportant, even with imputation it might be hard to learn a good downstream model
+    \item More expressive models have less (relative) benefit from imputation
+    \item Best on average: missForest + XGBoost + masking
+    \item Open Questions:
+    \begin{itemize}
+        \item performance of random draws
+        \item performance of multiple imputation
+        \item impact of performance on explainability and calibration
+        \item performance of models that can learn directly with missing value (advanced transformer architectures)
+    \end{itemize}
+\end{itemize}
+    
+\end{frame}
+
+\begin{frame}{Takeaways}
+    \vfill
+    \begin{itemize}
+        \item There exist different reasons for missing data
+        \item There exist different missingness mechanisms
+        \item Different downstream tasks ask for different imputation strategies
+        \item Different data modalities ask for different imputation strategies
+        \item Understanding the data generating process helps deciding on the imputation strategy
+        \item Common imputation strategies:
+        \begin{itemize}
+            \item Constant value: mean, median
+            \item Imputation by sampling
+            \item Missingness indicator
+            \item Model-based
+        \end{itemize}
+        $\rightarrow$ imputation selection is a CASH problem
+    \end{itemize}
+    \vfill
+\end{frame}
+
+\endlecture
+\end{document}

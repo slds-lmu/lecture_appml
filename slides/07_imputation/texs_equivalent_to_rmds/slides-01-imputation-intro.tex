@@ -1,0 +1,70 @@
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+
+\title{Applied Machine Learning}
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\begin{document} 
+
+\titlemeta{
+Imputation:
+}{
+Introduction
+}{
+figure/missing_values_plot
+}{
+\item Motivating example
+\item Visualizing missing values
+\item Approaches to handle missing data
+}
+
+\begin{frame}{Motivating Example}
+
+    \begin{itemize}
+        \item Assume each feature in your dataset has 2\% missing values.
+        \item The missing values are randomly distributed over the observations.
+        \item How many rows can be used if all observations that contain at least a missing value is dropped?
+    \end{itemize}
+    
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{figure/missing_values_plot}
+    \end{center}
+    
+    With 100 features and 2\% missing values only 13\% of our data can be used.
+
+\end{frame}
+
+\begin{frame}{Visualizing Missing Values}
+
+    \begin{center}
+        \includegraphics[width=\textwidth]{figure/missing_values_visualization}
+    \end{center}
+
+\end{frame}
+
+\begin{frame}{Possible Ways to Deal With Missing Values}
+
+    \begin{itemize}
+        \item Remove observations that contain missing values. \\
+              \textbf{But:} Could lead to a very small dataset.
+        
+        \item Remove features that contain mostly missing values. \\
+              \textbf{But:} Can lose (important) information.
+        
+        \item Use models that can handle missing values, e.g., (most) tree-based methods \\
+              \textbf{But:} Restriction in model choice.
+        
+        \item \textbf{Imputation} \\
+              $\rightarrow$ Replace missing values with \textit{plausible} values.
+    \end{itemize}
+
+\end{frame}
+
+\endlecture
+\end{document}

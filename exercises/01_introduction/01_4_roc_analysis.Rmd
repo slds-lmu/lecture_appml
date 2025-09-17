@@ -1,0 +1,444 @@
+---
+title: "Applied Machine Learning"
+subtitle: "In-class exercise 01-4"
+output:
+  prettydoc::html_pretty:
+    theme: hpstr
+    toc: yes
+    toc_depth: 2
+    css: ../_template/prettydoc-hpstr.css
+    self_contained: yes
+---
+
+```{r, include=FALSE}
+sys.source("setup.R", envir = knitr::knit_global())
+set.seed(123)
+```
+
+# Goal
+
+In this exercise, we will create a machine learning model that predicts the credit risk of an individual (e.g., the probability of being a `good` or `bad` credit applicant for the bank). Our goal is not to obtain an optimal classifier for this task, but to learn how to get a better
+understanding of the  predictions made by this model. This means looking at its sensitivity (ability to correctly identify positives) and specificity (ability to correctly identify negatives). The sensitivity is also known as the true positive rate (TPR) and the specificity is equal to (1 - FPR), where FPR is the false positive rate. We will also cover how to obtain different response predictions from a probabilistic
+model by modifying the threshold. We will inspect this relationship via the ROC curve and discuss its properties.
+
+
+# 1 Training a classification tree on the german credit task
+
+First load the pre-defined German credit task and set the positive class to `"good"`.
+Train a random forest on 2/3 of the data (training data) and make probabilistic predictions on the remaining 1/3 (test data).
+
+<details>
+<summary>**Hint 1:**</summary>
+- Create the German credit task using `tsk()` and set the positive class by modifying e.g. `task$positive`.
+- Create a learner using `lrn()` and make sure to specify the `predict_type` so that the learner will predict probabilities instead of classes.
+- When calling the methods `$train()` and `$predict()` of the learner, you can pass an argument `row_ids` to specify which observations should be used for the train and test data. 
+- You can generate random train-test splits using, e.g., the `partition()` function.
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+```{r, eval = FALSE}
+library(mlr3verse)
+
+task = tsk(...)
+task$positive = ...
+learner = lrn(..., predict_type = ...)
+ids = partition(...)
+learner$train(..., row_ids = ...)
+pred = learner$predict(..., row_ids = ...)
+```
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+
+<details>
+  <summary>**Click me:**</summary>
+```{r, eval = show.solution}
+library(mlr3verse)
+task = tsk("german_credit")
+task$positive = "good"
+learner = lrn("classif.ranger", predict_type = "prob")
+ids = partition(task)
+str(ids)
+learner$train(task, row_ids = ids$train)
+pred = learner$predict(task, row_ids = ids$test)
+pred
+```
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+# 2 Confusion matrices
+
+Inspect and save the confusion matrix of the predictions made in the previous exercise.
+Manually calculate the FPR and TPR using the values from the confusion matrix.
+Can you think of another way to compute the TPR and FPR using `mlr3` instead of manually computing them using the confusion matrix?
+
+<details>
+  <summary>**Recap**</summary>
+A confusion matrix is a special kind of contingency table with two
+dimensions "actual" and "predicted" to summarize the ground truth classes (truth) vs. the predicted classes of a classifier (response).
+
+Binary classifiers can be understood as first predicting a score (possibly a probability) and then classifying all instances with a score greater than a certain threshold $t$ as positive and all others as negative. This means that one can obtain different class predictions using different threshold values $t$.
+</details>
+
+<details>
+  <summary>**Hint 1:**</summary>
+A prediction object has a field `$confusion`.
+Since `good` was used as the positive class here, the TPR is $P(\hat{Y} = good | Y = good)$ and the FPR is $P(\hat{Y} = good | Y = bad)$ (where $\hat{Y}$ refers to the predicted response of the classifier and $Y$ to the ground truth class labels). Instead of manually computing the TPR and FPR, there are appropriate performance measures implemented in `mlr3` that you could use.
+</details>
+
+<details>
+  <summary>**Hint 2:**</summary>
+You need to replace `...` in the code below to access the appropriate columns and rows, e.g., `confusion1[1, 1]` is the element in the first row and first column of the confusion matrix and tells you how many observations with ground truth $Y = good$ were classified into the class $\hat{Y} = good$ by the learner.
+```{r, eval = FALSE}
+confusion1 = pred$confusion
+
+TPR1 =  confusion1[...] / sum(confusion1[...])
+TPR1
+FPR1 = confusion1[...] / sum(confusion1[...])
+FPR1
+```
+
+The names of the TPR and FPR performance measures implemented in `mlr3` can be found by looking at `as.data.table(mlr_measures)`. You can use the code below and pass the names of the `mlr3` measures in a vector to compute both the TPR and FPR: 
+```{r, eval = FALSE}
+pred$score(msrs(...))
+```
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+  <summary>**Click me:**</summary>
+```{r, eval = show.solution}
+# Create confusion matrix
+confusion1 = pred$confusion
+confusion1
+
+# TPR/FPR
+TPR1 = confusion1[1, 1] / sum(confusion1[, 1])
+TPR1
+FPR1 = confusion1[1, 2] / sum(confusion1[, 2])
+FPR1
+```
+
+Instead of manually computing the TPR and FPR, you could also just use 
+```{r, eval = show.solution}
+pred$score(msrs(c("classif.tpr", "classif.fpr")))
+```
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+# 3 Asymmetric costs
+
+In some scenarios, mispredicting a positive class instance as negative has other consequences as mispredicting a negative class instance as positive. Think about which type of error is worse for the given task and obtain new predictions (without retraining the model) that takes this into account.
+
+Then calculate the FPR and TPR and compare it with the results from the previous exercise.
+
+<details>
+<summary>**Hint 1:**</summary>
+A prediction object has the method `$set_threshold()` that can be used to set a custom threshold and which will update the predicted classes according to the selected threshold value.
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+```{r, eval = FALSE}
+pred$set_threshold(...)
+confusion2 = pred$confusion
+TPR2 =  confusion2[...] / sum(...)
+FPR2 = confusion2[...] / sum(...)
+
+TPR2 - TPR1
+FPR2 - FPR1
+```
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>**Click me:**</summary>
+
+The error of making a false positive - in this case classifying someone who is not creditworthy ($Y = bad$)
+as creditworthy ($\hat Y = good$) - is likely considerably higher than classifying someone who is creditworthy as not creditworthy. 
+In the first scenario, the company may lose all the money that was not paid back duly. In the letter case, it only misses out on the profit.
+
+We can take this fact into account by using a higher threshold to predict the positive class (`good`), i.e., being more conservative in classifying a good credit risk.
+For illustration purposes, we will use the threshold $0.7$ which is higher than the default threshold $0.5$.
+
+```{r, eval = show.solution}
+pred$set_threshold(0.7)
+pred
+```
+We can then access the updated confusion matrix and calculate the new FPR and TPR as before.
+
+```{r, eval = show.solution}
+confusion2 = pred$confusion
+TPR2 =  confusion2[1, 1] / sum(confusion2[, 1])
+FPR2 = confusion2[1, 2] / sum(confusion2[, 2])
+```
+
+When comparing it with the previous values, we observe a lower TPR and FPR.
+
+```{r, eval = show.solution}
+TPR2 - TPR1
+FPR2 - FPR1
+```
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+# 4 ROC curve
+
+In the previous two exercises, we have calculated the FPR and TPR for two thresholds.
+Now visualize the FPR and TPR for all possible thresholds. This gives us the ROC curve.
+
+<details>
+<summary>**Recap**</summary>
+The receiver operating characteristic (ROC) displays the sensitivity and specificity for all
+possible thresholds.
+</details>
+
+
+<details>
+<summary>**Hint 1:**</summary>
+You can use `autoplot()` on the prediction object and set the `type` argument to produce a ROC curve. 
+You can open the help page of `autoplot` for a prediction object using `?mlr3viz::autoplot.PredictionClassif`.
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+```{r, eval = FALSE}
+autoplot(pred, type = ...)
+```
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>**Click me:**</summary>
+```{r, eval = show.solution}
+autoplot(pred, type = "roc")
+```
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+
+# 5 ROC Comparison
+
+In this exercise, we will explore how to compare to learners by looking at their ROC curve.
+
+The basis for this exercise will be a benchmark experiment that
+compares a classification tree with a random forest on the german credit task.
+
+Because we are now not only focused on the analysis of a given prediction, but on the
+comparison of two learners, we selected a 10-fold cross-validation to reduce the
+uncertainty of this comparison.
+
+Conduct the benchmark experiment and show both ROC curves in one plot.
+Which learner learner performs better in this case?
+
+<details>
+<summary>**Hint 1:**</summary>
+Use `benchmark_grid()` to create the experiment design and execute it using `benchmark()`.
+You can also apply the function `autoplot()` to benchmark results.
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+```{r, eval = FALSE}
+resampling = rsmp(..)
+learners = lrns(...)
+design = benchmark_grid(...)
+bmr = benchmark(...)
+autoplot(..., show_cb = FALSE)
+```
+
+</details>
+
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>**Click me:**</summary>
+We create and execute the benchmark experiment in the usual fashion.
+
+```{r, eval = show.solution}
+resampling = rsmp("cv", folds = 10)
+learners = list(
+  lrn("classif.rpart", predict_type = "prob"),
+  lrn("classif.ranger", predict_type = "prob")
+)
+design = benchmark_grid(task, learners, resampling)
+bmr = benchmark(design)
+```
+
+Now we proceed with showing the ROC curve. The grey area indicated the uncertainty, as we
+obtain a different ROC curve for each fold.
+
+```{r, eval = show.solution}
+autoplot(bmr, type = "roc", show_cb = FALSE) 
+```
+
+The random forest is clearly better, as for virtually every specificity it has a higher
+sensitivity.
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+
+# 6 Area under the curve
+
+In the previous exercise we have learned how to compare to learners using the ROC curve.
+Although the random forest was dominating the classification tree in this specific case,
+the more common case is that the ROC curves of two models are crossing, making a comparison
+in the sense of $>$ / $<$ impossible.
+
+The area under the curve tries to solve this problem by summarizing the ROC curve by its area
+under the curve (normalized to 1), which allows for a scalar comparison.
+
+Compare the AUC for the benchmark result.
+
+<details>
+<summary>**Hint 1:**</summary>
+You can use the `autoplot()` function and use the AUC as performance measure in the `measure` argument.
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+```{r, eval = FALSE}
+autoplot(bmr, measure = msr(...))
+```
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>**Click me:**</summary>
+```{r, eval = show.solution}
+autoplot(bmr, measure = msr("classif.auc"))
+```
+
+As expected, the AUC for the random forest is higher than the AUC for the classification tree.
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+# 7 Threshold plots
+
+Another useful way to think about the performance of a classifier is to visualize the relationship of a performance metric over varying thresholds, for example, the TPR and FPR across all possible thresholds.
+
+Compare the TPR and FPR across all thresholds for the random forest prediction object from the first exercise.
+Find the threshold at which TPR is optimal while the FPR is at most 50%.
+
+<details>
+<summary>**Hint 1:**</summary>
+You can use the `autoplot()` function and use `"threshold"` in the `type` argument.
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+```{r, eval = FALSE}
+# TPR:
+autoplot(pred, type = "threshold", ...)
+# FPR:
+autoplot(pred, type = "threshold", ...)
+```
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>**Click me:**</summary>
+```{r, eval = show.solution}
+# TPR:
+autoplot(pred, type = "threshold", measure = msr("classif.tpr"))
+# FPR:
+autoplot(pred, type = "threshold", measure = msr("classif.fpr"))
+```
+
+At a threshold of approximately 0.55, we get the maximum TPR (approx. 0.92) while the FPR is just under 0.50.
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+# 8 Precision-Recall curves
+
+We can also interpret precision and recall together. Precision quantifies the proportion of predicted positives that are actually positives, and recall is just another name for TPR. A precision-recall curve of a model plots both values for all possible thresholds. In situations with highly imbalanced class frequencies, the ROC curve can be misleading. Plot the precision-recall curves for the two learners we evaluated in the benchmark.
+
+<details>
+<summary>**Hint 1:**</summary>
+You can use the `autoplot()` function and use `"prc"` in the `type` argument.
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>**Click me:**</summary>
+```{r, eval = show.solution}
+autoplot(bmr, type = "prc")
+```
+
+Similarly to the ROC curve, the random forest dominates the decision tree: For a given recall rate, it achieves higher precision.
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+# Summary
+
+In this exercise we improved our understanding of the performance of binary classifiers
+by the means of the confusion matrix and a focus on different error types.
+We have seen how we can analyze and compare classifiers using the ROC and AUC.

@@ -1,0 +1,1163 @@
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+
+\usepackage{etoolbox}
+\makeatletter
+\newlength{\parboxtodim}
+\patchcmd{\@iiiparbox}
+  {\hsize}
+  {\ifx\relax#2\else\setlength{\parboxtodim}{#2}\fi\hsize}
+  {}{}
+\makeatother
+
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
+\begin{document}
+
+\title{Applied Machine Learning}
+
+\titlemeta{
+Performance Evaluation:
+}{
+Calibration versus Discrimination
+}{
+figure/calibrationplot
+}{
+\item Understand difference between calibration and discrimination
+\item How to diagnose calibration with plots and metrics
+\item When calibration matters and types of miscalibration
+}
+
+
+
+% scikitlearn calibration 
+% https://scikit-learn.org/stable/modules/calibration.html
+
+% \begin{frame}
+%     \frametitle{Calibration Methods}
+%     \framesubtitle{Introduction to Calibration}
+    
+%     \begin{itemize}
+%         \item \textbf{Calibration:} The process of refining predicted probabilities to align with observed frequencies.
+%         \item Necessary when model probabilities do not accurately reflect true probabilities.
+%         \item Commonly used in classification tasks such as binary or multiclass classification.
+%     \end{itemize}
+% \end{frame}
+
+% \begin{frame}
+%     \frametitle{Platt Scaling}
+    
+%     Platt scaling is a logistic regression approach to calibrate predicted probabilities.
+    
+%     \begin{align*}
+%         &\text{For binary classification:}\\
+%         &\text{Model Output: } f(x) \\
+%         &\text{Platt's Scaling: } P(y=1|x) = \frac{1}{1 + e^{a \cdot f(x) + b}}
+%     \end{align*}
+    
+%     \begin{itemize}
+%         \item Example: Logistic regression is trained on model predictions to estimate $a$ and $b$.
+%     \end{itemize}
+% \end{frame}
+
+% \begin{frame}
+%     \frametitle{Isotonic Regression}
+    
+%     Isotonic regression fits a non-decreasing function to calibrate predicted probabilities.
+    
+%     \begin{align*}
+%         &\text{For binary classification:}\\
+%         &\text{Model Output: } f(x) \\
+%         &\text{Isotonic Regression: } P(y=1|x) = g(f(x))
+%     \end{align*}
+    
+%     \begin{itemize}
+%         \item Example: Piecewise constant function is fitted to map model predictions to calibrated probabilities.
+%     \end{itemize}
+% \end{frame}
+
+% \begin{frame}
+%     \frametitle{Beta Calibration}
+    
+%     Beta calibration is a method based on a parametric family of transformations.
+    
+%     \begin{align*}
+%         &\text{For binary classification:}\\
+%         &\text{Model Output: } f(x) \\
+%         &\text{Beta Calibration: } P(y=1|x) = \frac{f(x)^{\alpha}}{f(x)^{\alpha} + (1 - f(x))^{\beta}}
+%     \end{align*}
+    
+%     \begin{itemize}
+%         \item Example: Parameters $\alpha$ and $\beta$ are learned through cross-validation or maximum likelihood estimation.
+%     \end{itemize}
+% \end{frame}
+
+% \begin{frame}{History of Calibration}
+% \begin{itemize}
+%     \item Weather forecasters began considering calibration in the 1950s. % (Brier, 1950).
+%     \item For all instances where a model predicts a '70\% chance of rain', it should actually have rained 70\% of the time (retrospectively).
+%     %\item Applicable to both binary and multi-class classification.
+%     \item In general, predicted probabilities for any event happening should (on average) match their observed empirical probabilities.\\
+%     $\Rightarrow$ Ensures predictions can be interpreted as actual risk/probabilities.
+%     %\item 
+% \end{itemize}
+% \end{frame}
+
+% \begin{frame}{Performance Metrics Basics}
+% %TODO remove second bullet point?
+% %TODO do we only need performance metrics related to confusion matrix? Do we want to give the confusion matrix?
+
+% \begin{itemize}
+%     \item Stakeholders must understand metrics relevant to the use case. The model should only optimize what is needed.
+%     \item Choose performance metrics according to needs of the use case:
+%     \begin{itemize}
+%         \item Consider outlier sensitivity (e.g., MAE instead of MSE)
+%         \item Address class imbalance (e.g., F1 score instead of accuracy)
+%         %, PR-AUC vs. ROC-AUC)
+%         \item Account for different misclassification costs (e.g., weighted FP/FN)
+%         %\item Discrimination vs. calibration (predicting the correct class vs. interpreting predicted probabilities as actual risk) %\newline
+%         %$\Rightarrow$ Confusion matrix-based metrics vs. proper scoring rules
+%         \item Distinguish discrimination (correctly separating classes) 
+%         and calibration (matching predicted to actual probabilities). 
+%         \newline
+%         $\Rightarrow$ Confusion matrix metrics for discrete classes (e.g., F1 score) vs.\ proper scoring rules for predicted probabilities (e.g., Brier score).
+%     \end{itemize}
+    
+
+% \end{itemize}
+% \end{frame}
+
+\begin{frame}{Performance Metrics and Use Case Needs}
+
+\begin{itemize}
+    \item \textbf{Match metric to task:} Optimize what reflects success in your application
+    \item \textbf{Robustness to outliers:} Use \emph{MAE} (instead of \emph{MSE}) when occasional large errors should not dominate the metric; use \emph{MSE} if they should
+    \item \textbf{Class imbalance:} Use F1-score instead of accuracy
+    \item \textbf{Unequal error costs:} Apply cost-weighted metrics for asymmetric penalties (i.e., weighting FP and FN differently)
+    \item \textbf{Prediction type matters:}
+    \begin{itemize}
+        \item \emph{Discrete predictions:} Use confusion-matrix metrics (e.g., \emph{F1 score})\\
+        $\rightarrow$ Focus on \textbf{discrimination} (how well classes are separated)
+        \item \emph{Probabilistic predictions:} Use proper scoring rules (e.g., \emph{Brier score})\\
+        $\rightarrow$ Consider \textbf{calibration} (matching predicted to actual probabilities)
+    \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Discrimination}
+Consider the true positive $Y=1$, true negative $Y=0$, and predicted label $\hat Y$. 
+
+\smallskip
+
+\textbf{Discrimination}: Ability of $\hat Y$ to well-separate positive/negative instances.\\
+  $\Rightarrow$ Confusion matrix-based measures are discrimination measures, e.g., $FPR = P(\hat Y = 1 | Y = 0$), $TPR = P(\hat Y = 1 | Y = 1)$, AUC.
+\includegraphics[width = 0.9 \linewidth]{figure_man/ConfusionMatrix.png}
+\end{frame}
+
+% in der graphic FPR TPR ergaenzen
+
+\begin{frame}{Calibration}
+Consider the true positive $Y=1$, true negative $Y=0$, and predicted label $\hat Y$. 
+
+\smallskip
+
+\textbf{Calibration}: When the predicted probabilities $\hat{p}$ closely agree with the observed proportion for $Y = 1$ (for any reasonable grouping).
+\begin{itemize}
+    \item<1-> \textbf{Calibration in the large}: Observed vs. predicted prob. in \textit{full sample}.
+    \only<1> {\centering\includegraphics[page=3, width=0.75\textwidth]{figure_man/calibration_large_vs_small.pdf}}
+    \item<2-> \textbf{Calibration in the small}: Observed vs. predicted prob. in \textit{subsets}.
+    
+  \only<2> {\centering\includegraphics[page=4, width=0.75\textwidth]{figure_man/calibration_large_vs_small.pdf}}
+\end{itemize}
+\end{frame}
+
+
+
+
+% \begin{frame}{Calibration versus Discrimination}
+
+% \begin{itemize}
+% \setlength\itemsep{1em}
+%     \item Calibration indicates the agreement between estimated probabilities and observed class frequencies.
+%     \item Discrimination is a model's ability to correctly separate observations into specific groups (depends on the selected threshold).
+%     \item Models can over-/underestimate probabilities (poor calibration) and still separate classes (good discrimination) or vice versa.
+%       \item Poor calibration occurs with imbalanced classes or when the learner lacks a probabilistic framework (e.g., $k$-NN, trees).
+%   % \begin{itemize}
+%   %   \item The learner has no probabilistic framework in the first place (e.g.,
+%   %   $k$-NN or trees).
+%   %   \item Classes are imbalanced.
+%   % \end{itemize}
+%   \item We distinguish between two different notions of calibration:
+%   \begin{itemize}
+%     \item \textbf{Calibration in the large} is a property of the 
+%     \textit{full} sample.\\
+%     $\rightarrow$ Observed class-1 frequency in full sample versus average overall predicted class-1 probability.
+%     \item \textbf{Calibration in the small} is a property of \textit{subsets}.\\
+%     $\rightarrow$ Observed likelihood in subset versus average predicted class-1 probability in that subset.
+%   \end{itemize}
+%     % \item Consider a model that predicts a patient's disease risk, where a patient is classified as a high-risk patient if disease risk exceeds 20\%. Patient A has a true risk of 5\% while patient B has a true risk of 30\%. The model predicts roughly the same risk with 19\% for A and 21\% for B. It is poorly calibrated but still separates both patients accurately into low-risk and high-risk groups (good discrimination).
+    
+% \end{itemize}
+
+% \end{frame}
+
+% \begin{frame}{Calibration in the Large}
+%     % https://docs.google.com/presentation/d/1Drnq0Av_5KLfnwbRLnp-Tklgxc93C7BT_UXRCydtoes/edit#slide=id.p
+    
+%     %Compares observed probability (e.g. proportion of positive instances) with the average predicted probability in the \textit{full sample}.
+%     \includegraphics[page=3, width=0.6\textwidth]{figure_man/calibration_large_vs_small.pdf}
+%     \includegraphics[page=4, width=0.6\textwidth]{figure_man/calibration_large_vs_small.pdf}
+% \end{frame}
+
+% \begin{frame}{Calibration in the Small}
+%     Compares observed proportion of positive instances  with the average predicted probability in each subset (often constructed by deciles).
+%     \makebox[\linewidth]{\includegraphics[page=2, width=\textwidth]{figure/calibration_large_vs_small.pdf}}
+% \end{frame}
+
+% \begin{frame}{Why and When Is Calibration Important?}
+
+%     \begin{itemize}
+%         \item Reasoning / interpretation of predicted probabilities as actual risks.
+%         \item If you are interested in the computed probability reflecting observed frequencies, you need good calibration.
+%         %\item Assume a bank decides how much credit to grant to a customer.
+%         %\item The bank needs a fairly accurate probability of default for each customer. The higher the default probability, the lower the loan.
+%         %\item Given 1000 customers with a 40\% chance of default predicted by a well-calibrated model, we expect to see roughly 400 defaults in this customer group in our data set, etc.
+%         %\item Accurate probabilities are necessary to ensure accurate forecasts of gains and losses of the bank.
+%         %\item On the macroeconomic level, regulatory requirements demand accurate probabilities in bank models to ensure healthiness of the financial system as a whole.
+
+
+%    \item \textbf{Example: Medical Diagnosis}
+
+% \begin{itemize}
+%     \item In medicine, a well-calibrated model is crucial for decision-making.
+%     \item If a diagnostic test predicts 90\% probability of a disease, but only 50\% of patients with that predicted probability have the disease, it's poorly calibrated.
+%     \item Poor calibration can lead to misdiagnosis, unnecessary medical procedures, or delayed treatment, impacting patient outcomes.
+% \end{itemize}
+%     \end{itemize}
+% \end{frame}
+
+
+% ------------------------------------------------------------------------------
+
+% \begin{vbframe}{Discrimination}
+
+% \begin{itemize}
+%   \item Consider, again, the binary classification case.
+%   \item \textbf{Discrimination} is the ability of a classifier to perfectly 
+%   separate the population into positive and negative instances.
+%   \begin{itemize}
+%     \item The classifier is said to discriminate well if predictions differ 
+%     strongly across classes -- e.g., predicted probabilities for the negative 
+%     (positive) class are all close to zero (one).
+%     \item Measures of discrimination: e.g., AUC, sensitivity, specificity.
+%   \end{itemize}
+% \end{itemize}
+
+% \begin{center}
+%   \includegraphics[width = 0.7\textwidth]{figure_man/placeholder_discrimination}
+% \end{center}
+
+% \end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+% \begin{frame}{Calibration}
+
+% \begin{itemize}
+%   \item 
+%   % \textbf{Calibration}, on the other hand, assesses the concordance of 
+%   % predicted probabilities with the observed outcome (for any reasonable
+%   % grouping). \\
+%   For scoring classifiers, evaluating 
+%   calibrations requires transformation of scores to posterior probabilities 
+%   first.
+%   \item Predictions of a well-calibrated classifier follow approximately the 
+%   same distribution as the true data labels.
+%   \item Poor calibration occurs with imbalanced classes or when the learner 
+%   lacks a probabilistic framework (e.g., $k$-NN, trees).
+%   % \begin{itemize}
+%   %   \item The learner has no probabilistic framework in the first place (e.g.,
+%   %   $k$-NN or trees).
+%   %   \item Classes are imbalanced.
+%   % \end{itemize}
+%   \item We distinguish two different notions of calibration:
+%   \begin{itemize}
+%     \item \textbf{Calibration in the large} is a property of the 
+%     \textit{full} sample.\\
+%     $\rightarrow$ Observed class-1 frequency in full sample vs average overall 
+%     predicted class-1 probability.
+%     \item \textbf{Calibration in the small} is a property of \textit{subsets}.\\
+%     $\rightarrow$ Observed likelihood in subset vs average predicted class-1 
+%     probability in that subset.
+%   \end{itemize}
+% \end{itemize}
+
+% We consider data with a binary outcome $y$.
+% \begin{itemize}
+%   \item \textbf{Calibration:} When the predicted probabilities closely agree
+%     with the observed outcome (for any reasonable grouping).
+%   \begin{itemize}
+%     \item \textbf{Calibration in the large} is a property of the \textit{full sample}.
+%     It compares the observed probability in the full sample  (e.g. proportion of observations for which $y=1$)
+% <!-- (e.g., 10% if 10 of 100 individuals have the outcome being predicted, e.g. $y=1$) -->
+%     with the average predicted probability in the full sample.
+%     \item \textbf{Calibration in the small} is a property of \textit{subsets} of the sample.
+%     It compares the observed probability in each subset with the average
+%     predicted probability in that subset.
+%   \end{itemize}
+%   \item \textbf{Discrimination:} Ability to perfectly separate the population into $y=0$ and $y=1$.
+%     Measures of discrimination are, for example, AUC, sensitivity, specificity.
+% \end{itemize}
+
+% \end{frame}
+
+% ------------------------------------------------------------------------------
+
+% \begin{frame}{Example}
+
+% %<!-- http://www.uphs.upenn.edu/dgimhsr/documents/predictionrules.sp12.pdf -->
+%  % \begin{table}[]
+%  %    \scriptsize
+%  %    \centering
+%  %    \begin{tabular}{rrrrr}
+%  %      \hline
+%  %      ID & truth & prediction $f_1$ & prediction $f_2$ & prediction $f_3$ \\
+%  %      \hline
+%  %      1 & 1 & 0.9 & 0.6 & 0.9 \\
+%  %      2 & 1 & 0.9 & 0.6 & 0.9 \\
+%  %      3 & 1 & 0.9 & 0.4 & 0.9 \\
+%  %      4 & 0 & 0.1 & 0.4 & 0.7 \\
+%  %      5 & 0 & 0.1 & 0.4 & 0.7 \\
+%  %      6 & 0 & 0.1 & 0.6 & 0.7 \\ \hline
+%  %      avg. class-1 prob. & 50\%  & 50\%  & 50\% & 80\% \\
+%  %      \hline
+%  %    \end{tabular}
+%  %  \end{table}
+%  \begin{table}[]
+%     \scriptsize
+%     \centering
+%     \begin{tabular}{rrrrr}
+%       \hline
+%       ID & truth & prediction $f_1$ & prediction $f_2$ \\
+%       \hline
+%       1 & 1 & 0.67 & 0.99  \\
+%       2 & 1 & 0.67 & 0.99  \\
+%       3 & 0 & 0.67 & 0.99  \\
+%       4 & 1 & 0.33 & 0.01  \\
+%       5 & 0 & 0.33 & 0.01  \\
+%       6 & 0 & 0.33 & 0.01  \\
+
+%       % avg. class-1 prob. & 50\%  & 50\%  & 50\% & 80\% \\
+%       \hline
+%     \end{tabular}
+%   \end{table}
+
+
+% \begin{itemize}
+%   \item Classifier $f_1$ is both well-calibrated in the large and the small:
+%     \begin{itemize}
+%         \item For class-1-probabilities of 0.67, the observed relative freq. of class 1 is 0.67. The same holds for class-1-probabilities of 0.33. 
+%         \item For a threshold of 0.5, its discriminative power, indicated by its accuracy, is 0.67.
+%     \end{itemize}
+%   \item Classifier $f_2$ is not well-calibrated but has the same discriminative power:
+%     \begin{itemize}
+%         \item For observations with class-1-probabilities of 0.99, one would expect a true label of class 1 almost every time.
+%         \item Its discriminative power, with an accuracy of 0.67, is the same as for $f_1$.
+%         \item $f_2$ is overconfident: its probabilities indicate that $f_2$ is too confident in classifying instances, which is not backed up by its accuracy.
+%     \end{itemize}
+%   % Both classifiers have identical calibration in the large, 
+%   % but $f_1$ has better discriminative power.
+%   % \lz
+%   % \begin{table}[]
+%   %   \centering
+%   %   \begin{tabular}{rrrr}
+%   %     \small
+%   %     \hline
+%   %     observation nr. & truth & prediction $f_1$ & prediction $f_2$ \\
+%   %     \hline
+%   %     1        & 1     & 1           & 0           \\
+%   %     2        & 1     & 1           & 1           \\
+%   %     3        & 0     & 0           & 1           \\
+%   %     4        & 0     & 0           & 0           \\ \hline
+%   %     avg. class-1 prob. & 50\%  & 50\%        & 50\%        \\
+%   %     \hline
+%   %   \end{tabular}
+%   % \end{table}
+
+%   % \lz
+% % <<eval = FALSE, echo = FALSE>>=
+% % truth = c(1,1,0,0,0,0)
+% % pred.rule.1 = c(1,1,0,0,0,0)
+% % pred.rule.2 = c(0,0,0,0,1,1)
+% % kable(data.frame(truth = truth, "pred rule 1" = pred.rule.1, "pred rule 2" = pred.rule.2))
+% % @
+% % \lz
+% %   \item Conversely, $f_1$ and $f_3$ both discriminate well (e.g., setting thresholds at
+% %   0.5 and 0.8, respectively), but $f_3$ is poorly calibrated with class 1 being estimated at an 80\% frequency, as opposed to a true frequency of 50\%.
+% %   % \lz
+%   %   \begin{table}[]
+%   %   \footnotesize
+%   %   % \centering
+%   %   \begin{tabular}{rrrr}
+%   %     \hline
+%   %     observation nr. & truth & prediction $f_1$ & prediction $f_2$ \\
+%   %     \hline
+%   %     1 & 1 & 0.97 & 0.66 \\
+%   %     2 & 1 & 0.97 & 0.66 \\
+%   %     3 & 0 & 0.01 & 0.45 \\
+%   %     4 & 0 & 0.01 & 0.45 \\
+%   %     5 & 0 & 0.01 & 0.45 \\
+%   %     6 & 0 & 0.01 & 0.45 \\
+%   %     % 7 & 0 & 0.01 & 0.67 \\
+%   %     % 8 & 0 & 0.01 & 0.67 \\ \hline
+%   %     avg. class-1 prob. & 25\%  & 25\%  & 75\% \\
+%   %     \hline
+%   %   \end{tabular}
+%   % \end{table}
+%   % \begin{table}[]
+%   %   \footnotesize
+%   %   % \centering
+%   %   \begin{tabular}{rrrr}
+%   %     \hline
+%   %     observation nr. & truth & prediction $f_1$ & prediction $f_2$ \\
+%   %     \hline
+%   %     1 & 1 & 0.97 & 0.99 \\
+%   %     2 & 1 & 0.97 & 0.99 \\
+%   %     3 & 0 & 0.01 & 0.67 \\
+%   %     4 & 0 & 0.01 & 0.67 \\
+%   %     5 & 0 & 0.01 & 0.67 \\
+%   %     6 & 0 & 0.01 & 0.67 \\
+%   %     7 & 0 & 0.01 & 0.67 \\
+%   %     8 & 0 & 0.01 & 0.67 \\ \hline
+%   %     avg. class-1 prob. & 25\%  & 25\%  & 75\% \\
+%   %     \hline
+%   %   \end{tabular}
+%   % \end{table}
+%   % \begin{table}[]
+%   %  \scriptsize
+%   % \centering
+%   % \begin{tabular}{rrrr}
+
+%   % \hline
+%   % observation nr. & truth & prediction $f_1$ & prediction $f_2$ \\
+%   % \hline
+%   % 1        & 1     & 0.9           & 0.9         \\
+%   % 2        & 1     & 0.9           & 0.9           \\
+%   % 3        & 0     & 0.1          & 0.7           \\
+%   % 4        & 0     & 0.1         & 0.7           \\ \hline
+%   % avg. class-1 prob. & 50\%  & 50\%        & 80\%        \\
+%   % \hline
+%   % \end{tabular}
+%   % \end{table}
+%   % \lz
+%   % \item Both classifiers discriminate well (e.g., setting thresholds at
+%   % 0.5 and 0.8, respectively).
+%   % \item Classifier $f_2$ is, however, rather poorly calibrated: the probability 
+%   % of class 1 would be estimated at three times the true proportion.
+% \end{itemize}
+% \end{frame}
+
+
+
+
+\begin{frame}{Calibration and Discrimination}
+%<!-- http://www.uphs.upenn.edu/dgimhsr/documents/predictionrules.sp12.pdf -->
+A well-calibrated classifier can be poorly discriminating, e.g.
+
+\begin{table}[]
+\centering
+\begin{tabular}{r|rrr}
+\hline
+Obs. Nr. & true $Y$ & $\fh_1$ & $\fh_2$ \\
+\hline
+1        & 1     & 1           & 0           \\
+2        & 1     & 1           & 0           \\
+3        & 0     & 0           & 1           \\
+4        & 0     & 0           & 1           \\ \hline
+Avg Prob & 50\%  & 50\%        & 50\%        \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+  \item Both models ($\fh_1$ and $\fh_2$) result in the same calibration in the large (50\%).
+  \item However, $\fh_1$ is better than $\fh_2$ as it correctly classifies the real outcome $Y$.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Calibration and Discrimination}
+A well-discriminating classifier can have a bad calibration, e.g.
+
+\begin{table}[]
+\centering
+\begin{tabular}{r|rrr}
+\hline
+Obs. Nr. & truth $Y$ & $\fh_1$ & $\fh_2$ \\
+\hline
+1        & 1     & 0.7           & 0.9         \\
+2        & 1     & 0.7           & 0.9           \\
+3        & 0     & 0.3          & 0.5           \\
+4        & 0     & 0.3         & 0.5           \\ \hline
+Avg Prob & 50\%  & 50\%        & 70\%        \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+  \item Both models are well discriminating, i.e., setting thresholds $c_1 \in ]0.3, 0.7[$ for $\fh_1$ and $c_2 \in ]0.5, 0.9[$ for $\fh_2$ perfectly separates positive and negative observations (and will result, e.g., in a perfect AUC = 1).
+  \item $\fh_2$ is poorly calibrated as the averaged probabilities are $70\%$ and do not match the truth proportion of positive observations (which is $50\%$).
+\end{itemize}
+
+$\Rightarrow$ \textbf{How can we measure calibration quality?}
+
+\end{frame}
+
+% \begin{frame}{Importance of Calibration}
+
+% % \textbf{Example 1: Weather Forecasting}
+
+% % \begin{itemize}
+% %     \item Consider a weather forecasting model that predicts the probability of rain.
+% %     \item If the model consistently predicts a 70\% chance of rain, but it actually rains only 10\% of the time when it predicts a 70\% chance, it's poorly calibrated.
+% %     \item Poor calibration can lead to bad decisions (carrying an umbrella unnecessarily).
+% % \end{itemize}
+
+% \textbf{Example: Medical Diagnosis}
+
+% \begin{itemize}
+%     \item In medicine, a well-calibrated model is crucial for decision-making.
+%     \item If a diagnostic test predicts 90\% probability of a disease, but only 50\% of patients with that predicted probability have the disease, it's poorly calibrated.
+%     \item Poor calibration can lead to misdiagnosis, unnecessary medical procedures, or delayed treatment, impacting patient outcomes.
+% \end{itemize}
+
+% \end{frame}
+
+
+
+
+
+
+
+
+\begin{frame}{Calibration Plot / Reliability Diagram}
+
+%TODO use graphics from paper (equi-width binning): this binning is not so intuitive
+
+%\fbox{
+%\parbox[][45pt][t]{\linewidth}{%
+ To assess calibration visually, we can plot on the
+\begin{itemize}
+    \item $x$-axis: average predicted probability (e.g., grouped by quantiles) 
+    \item $y$-axis: observed proportion of positive instances in each group
+\end{itemize}
+%}
+%}
+
+% \begin{columns}[c, onlytextwidth]
+%     \begin{column}{0.25\textwidth}
+% %\begin{center}
+% \centering
+% \begin{tabular}{rr}
+% \hline
+% $\hat{p}$ & $y$ \\
+% \hline
+%  0.1 & 0 \\
+%  0.1 & 0 \\
+% \hline
+%  0.4 & 0 \\
+%  0.4 & 1 \\
+% \hline
+%  0.7 & 0 \\
+%  0.7 & 1 \\
+%  0.7 & 1 \\
+% \hline
+%  0.9 & 1 \\
+% \hline
+% \end{tabular}
+% %\end{center}
+%  \end{column}
+%         \begin{column}{0.75\textwidth}
+% %\begin{center}
+% \centering
+% \includegraphics[width=0.85\textwidth]{figure_man/calibplot}
+% %\end{center}
+%     \end{column}
+% \end{columns}
+
+\includegraphics{figure_man/calibplot2.png}
+
+\textbf{Gap pred. mean:} Shows deviation between observed proportion of positives (red points) and average predicted probability within each group (red bar).
+
+\end{frame}
+
+
+
+\begin{frame}{Calibration Plot / Reliability Diagram}
+
+%\parbox[][45pt][t]{\linewidth}{%
+Changing predictions will change the position of the red points on the x-axis
+\begin{itemize}
+    \item The closer the red points to the diagonal line, the better calibration
+    %\item[$\Rightarrow$] \textit{Gap pred. mean} shows deviation between points and diagonal line
+    \item \textbf{Question:} Did we improve or worsen calibration?
+\end{itemize}
+%}
+
+\begin{columns}[c, onlytextwidth]
+    \begin{column}{0.25\textwidth}
+%\begin{center}
+\centering
+\begin{tabular}{rr}
+\hline
+$\hat{p}$ & $y$ \\
+\hline
+ 0.1 & 0 \\
+ \textbf{0.2} & 0 \\
+\hline
+ \textbf{0.3} & 0 \\
+ 0.4 & 1 \\
+\hline
+ \textbf{0.6} & 0 \\
+ 0.7 & 1 \\
+ \textbf{0.8} & 1 \\
+\hline
+ 0.9 & 1 \\
+\hline
+\end{tabular}
+%\end{center}
+ \end{column}
+        \begin{column}{0.75\textwidth}
+%\begin{center}
+\centering
+\includegraphics[width=0.85\textwidth]{figure_man/calibplot-2}
+%\end{center}
+
+    \end{column}
+\end{columns}
+
+\end{frame}
+
+
+
+
+% Frame: Or should we group forecasts differently?
+\begin{frame}{Calibration Plot / Reliability Diagram}
+
+
+Different groupings lead to a completely different picture
+
+\begin{center}
+    
+\begin{columns}[c, onlytextwidth]
+
+    \begin{column}{0.15\textwidth}
+    \raggedleft
+    2 Groups
+    \end{column}
+    \begin{column}{0.30\textwidth}
+
+\footnotesize
+\centering
+\begin{tabular}{r|r}
+$\hat{p}$ & $y$ \\
+\hline
+ 0.1 & 0 \\
+ 0.2 & 0 \\
+ 0.3 & 0 \\
+ 0.4 & 1 \\
+\hline
+ 0.6 & 0 \\
+ 0.7 & 1 \\
+ 0.8 & 1 \\
+ 0.9 & 1 
+\end{tabular}
+
+ \end{column}
+        \begin{column}{0.47\textwidth}
+        \raggedright
+\includegraphics[width=\textwidth]{figure_man/calibplot-3}
+
+    \end{column}
+\end{columns}
+\pause\hrule
+\begin{columns}[c, onlytextwidth]
+    \begin{column}{0.15\textwidth}
+     \raggedleft 8 Groups
+    \end{column}
+    \begin{column}{0.30\textwidth}
+\footnotesize
+\centering
+\begin{tabular}{r|r}
+$\hat{p}$ & $y$ \\
+\hline
+ 0.1 & 0 \\
+\hline
+ 0.2 & 0 \\
+\hline
+ 0.3 & 0 \\
+\hline
+ 0.4 & 1 \\
+\hline
+ 0.6 & 0 \\
+\hline
+ 0.7 & 1 \\
+\hline
+ 0.8 & 1 \\
+\hline
+ 0.9 & 1 
+\end{tabular}
+
+ \end{column}
+        \begin{column}{0.47\textwidth}
+        \raggedright
+\includegraphics[width=\textwidth]{figure_man/calibplot-4}
+
+    \end{column}    
+
+\end{columns}
+
+\end{center}
+\end{frame}
+
+% Frame: Binning or pooling predictions is a fundamental notion
+\begin{frame}{Importance of grouping predictions}
+\textbf{Evaluating calibration with bins/groups:}
+\begin{itemize}
+    \item We need enough predictions in each group for reliable estimates.%We need a sufficient number of predictions within each group to obtain reliable empirical estimates.
+    \item Trade-off: 
+    \begin{itemize}
+        \item large groups give better empirical estimates
+        \item small groups allow a more fine-grained assessment of calibration
+    \end{itemize}
+\end{itemize}
+% But adjusting forecasts in groups also gives rise to practical calibration methods:
+% \begin{itemize}
+%     \item empirical binning
+%     \item isotonic regression (aka ROC convex hull)
+% \end{itemize}
+\pause 
+\textbf{How groups/bins can be created:}
+\begin{itemize}
+\item Equal-Width: Splits predicted probabilities into equally sized intervals.\\
+$\Rightarrow$ Can lead to bins with few or no observations.
+\item Equal-Frequency: Each bin holds a similar number of observations.\\
+$\Rightarrow$ Bin width can vary notably.%; Issues with duplicated values.
+% \item Empirical Binning: Uses unique values to create bins containing at least a desired number of observations.\\
+% $\Rightarrow$ Bin width and bin size may vary; Useful with duplicated values.% similar to equal-frequency in case of no duplicates.
+\end{itemize}
+\end{frame}
+
+
+
+
+\begin{frame}{ROC Curve vs. Calibration Plot}
+
+
+{\centering \includegraphics[width=\textwidth]{figure_man/calibdiscr1}}
+
+% and do not visualize how well-calibrated the probabilities are.
+%To assess the performance of classifiers, we should consider:
+\begin{itemize}
+\item \textbf{ROC:}
+Measures only discrimination as it is based on TPR and FPR and assesses only the ranking of predicted probabilities (not their magnitude).
+%Measures the ability to separate the classes well. % (e.g., confusion matrix). %accurately rank individuals from low to high risk.
+\item \textbf{Calibration plot:} Measures (for reasonable groups, here by deciles) how well the predicted probabilities match the proportion of positives. %(i.e., $Y = 1$).
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{ROC Curve vs. Calibration Plot}
+
+{\centering \includegraphics[width=\textwidth]{figure_man/calibdiscr2}}
+
+\vspace{0.5em}
+
+Permuting predictions within each group (e.g., randomly assigning different predictions to observations within each decile)
+
+\begin{itemize}
+\item worsens the ROC curve /  AUC (ranking within each decile changes).
+\item does not affect the calibration plot (as we only look at averages).
+\end{itemize}
+
+
+\end{frame}
+
+
+\begin{frame}{ROC Curve vs. Calibration Plot}
+
+{\centering \includegraphics[width=\textwidth]{figure_man/calibdiscr3}}
+
+\vspace{0.5em}
+
+Monotonic transformations of the predicted probabilities (e.g., $\tfrac{\hat p + 0.2}{1.2}$)
+\begin{itemize}
+\item do not affect the ROC curve as the ranking of $\hat p$ will not change.
+\item affect the calibration plot (here it looks worse). %as the probabilities are changed.
+\end{itemize}
+\end{frame}
+
+
+
+
+
+
+
+% \begin{frame}{Calibration Plots}
+
+% \begin{columns}[c, onlytextwidth]
+%     \begin{column}{0.61\linewidth}
+% \includegraphics[width=\textwidth, page=1]{figure_man/calibration.pdf}
+%     \end{column}
+%       \begin{column}{0.39\linewidth}
+        
+% Calibration plots (reliability diagrams) visualize on
+% \begin{itemize}
+%     \item $x$-axis: average predicted probability (e.g., grouped by quantiles) 
+%     \item $y$-axis: observed proportion of positive instances in each group
+% \end{itemize}
+
+%     \end{column}
+% \end{columns}
+
+%\end{frame}
+
+\begin{frame}{Example: Calibration Plots  (equal-width)}
+
+
+\begin{columns}[c, onlytextwidth]
+    \begin{column}{0.61\linewidth}
+
+\only<1>{
+\includegraphics[width=\textwidth, page=2]{figure_man/calibration.pdf}}
+\only<2>{\includegraphics[width=\textwidth, page=3]{figure_man/calibration.pdf}}
+\only<3>{\includegraphics[width=\textwidth, page=4]{figure_man/calibration.pdf}}
+
+    \end{column}
+      \begin{column}{0.39\linewidth}
+
+        
+
+\begin{itemize}
+ %\item Logistic regression is already well-calibrated as it optimzes log-loss
+ \item<1-> Many algorithms (except logistic regression) return biased probabilities.
+ \item<1-> Linear SVC: badly calibrated, as predictions refer to a distance (to decision boundary) and not to probabilities.
+ \item<2-> Random Forest: probabilities close to 0 or 1 are very rare.
+ \item<3-> Naive Bayes: pushes probabilities to 0 or 1 (see histograms).
+ %Base-level trees trained with random forests incorporate relatively high variance due to feature subsisting
+ %(Niculescu-Mizil and Caruana 2005).
+
+\end{itemize}
+    \end{column}
+\end{columns}
+
+\end{frame}
+
+%TODO include proper scoring rules here (i.e. measure calibration quality)
+
+% \begin{frame}{Metrics for Calibration}
+
+% \textbf{Motivation}: Quantify Calibration Quality
+
+% Let $y$ be the true outcome, $p$ the model's predicted probability, $M$ number of bins, $N$ number of instances
+
+% There is ways to measure ONLY calibration quality:
+
+% \begin{itemize}
+%     \item \textbf{Binary estimated calibration error}: average gap across all bins in a reliability diagram, weighted by the number of instances in each bin
+
+%     $$ECE_{binary} = \sum_{m=1}^M \frac{|B_m|}{N}|\bar{y}(B_m)-\bar{p}(B_m)|$$
+%     \item \textbf{Binary maximum calibration error}: maximum gap across all bins in a reliability diagram, weighted by the number of instances in each bin
+
+%     $$MCE_{binary} = \max|\bar{y}(B_m)-\bar{p}(B_m)|$$
+
+    
+% \end{itemize}
+    
+% \end{frame}
+
+
+% \begin{frame}{Metrics for Calibration}
+% \textbf{Goal}: Assess alignment between predicted probabilities and observed outcomes
+
+% \medskip
+% We assume:
+% \begin{itemize}
+%     \item $y_i \in \{0, 1\}$ true labels, $p_i \in [0,1]$ predicted probabilities
+%     \item $B_m$ denotes the $m$-th bin of predicted probabilities
+% \end{itemize}
+
+% \medskip
+% \textbf{Calibration-only Metrics}:
+% \begin{itemize}
+%     \item \textbf{Expected Calibration Error (ECE)}: Average absolute deviation between accuracy and confidence
+%     \[
+%     \mathrm{ECE} = \sum_{m=1}^M \frac{|B_m|}{N} \left| \bar{y}(B_m) - \bar{p}(B_m) \right|
+%     \]
+    
+%     \item \textbf{Maximum Calibration Error (MCE)}: Worst-case deviation across all bins
+%     \[
+%     \mathrm{MCE} = \max_{m \in \{1, \dots, M\}} \left| \bar{y}(B_m) - \bar{p}(B_m) \right|
+%     \]
+% \end{itemize}
+% \end{frame}
+\begin{frame}{Metrics for Calibration}
+\textbf{Goal}: Measure agreement between pred. probabilities and observed freq.
+
+%\medskip
+%Assume:
+\begin{itemize}
+    \item $N$ instances; $\hat p \in [0,1]$ predicted probabilities; $y \in \{0,1\}$ true labels
+    \item Predictions are grouped into $M$ disjoint bins $B_1, \dots, B_M$
+    \item $\bar{p}_m$: average predicted probability in bin $B_m$
+    \item $\bar{y}_m$: average true label in bin $B_m$
+\end{itemize}
+
+%\medskip
+\textbf{Calibration-only Metrics}: Measure how well predicted probabilities match observed frequencies, independent of class separation.
+\begin{columns}[c, onlytextwidth]
+    \begin{column}{0.6\textwidth}
+        \begin{itemize}
+    \item \textbf{Expected Calibration Error (ECE)}: Average bin-wise gap between predicted probabilities and actual frequencies $\textstyle \mathrm{ECE} = \sum_{m=1}^M \frac{|B_m|}{N} \left| \bar{y}_m - \bar{p}_m \right|$
+
+    \item \textbf{Maximum Calibration Error (MCE)}: Largest bin-wise gap between predicted probabilities and actual frequencies $\mathrm{MCE} = \max_{1 \leq m \leq M} \left| \bar{y}_m - \bar{p}_m \right|$
+\end{itemize}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+        \centering
+\includegraphics[width=\textwidth]{figure_man/calibplot-2}
+    \end{column}
+\end{columns}
+
+\end{frame}
+
+
+\begin{frame}{Hypothesis Test for Calibration}
+
+
+%\textbf{Approach}:
+
+\begin{itemize}
+\item \textbf{Goal}: Test if a classifier is really uncalibrated on the given data set
+    \item Group instances into $M$ bins based on percentiles of the predicted probabilities for the
+positive class (equal-frequency binning)
+\item Compute the test statistics of the Hosmer-Lemeshow (HL) test
+
+$$H = \sum_{m=1}^{M} \left( \frac{(O_m^+ - E_m^+)^2}{E_m^+} + \frac{(O_m^- - E_m^-)^2}{E_m^-} \right)$$
+
+\begin{itemize}
+    \item $M$ number of bins
+    \item $O_m^+$ observed positives or $O_m^-$ observed negatives in bin $m$
+    \item $E_m^+ = N_m \times \bar{p}_m$ expected positives 
+    \item $E_m^- = N_m \times (1 - \bar{p}_m)$ expected negatives in bin $m$
+    \item $N_m$ number of obs. and $\bar{p}_m$ average predictions in bin $m$
+\end{itemize}
+
+\item If $H$ is small $\Rightarrow$ observed outcomes match predicted probabilities (well-calibrated model)
+
+\item Follows a Chi-Squared distribution with $M-2$ degrees of freedom %Calculate p-value on this
+\end{itemize}
+    
+\end{frame}
+
+\begin{frame}{HL Test: Example}
+
+\begin{center}
+\footnotesize 
+\begin{tabular}{r|rrr}
+\hline
+Obs. Nr. & truth $Y$ & $\fh_1$ & $\fh_2$ \\
+\hline
+1 & 1 & 0.9 & 0.9 \\
+2 & 1 & 0.9 & 0.9 \\
+\hline
+3 & 0 & 0.1 & 0.7 \\
+4 & 0 & 0.1 & 0.7 \\
+\hline
+\end{tabular}
+\end{center}
+
+Group obs. by their predicted probability, creating $M=2$ bins for each model.
+
+%\begin{center}
+{%\footnotesize % Use a smaller font for the tables to ensure they fit
+\begin{columns}[T, onlytextwidth]
+    \begin{column}{0.5\textwidth}
+    \centering
+        \textbf{Model $\fh_1$ (Well-calibrated)}
+                \begin{tabular}{@{}c|cc|cc@{}}
+\hline
+            Bin ($\hat{p}$) & $O^+$ & $E^+$ & $O^-$ & $E^-$ \\
+\hline
+            0.9 & 2 & 1.8 & 0 & 0.2 \\
+            0.1 & 0 & 0.2 & 2 & 1.8 \\
+\hline
+        \end{tabular}
+        \begin{align*}
+H =& \left( \tfrac{(0-0.2)^2}{0.2} + \tfrac{(2-1.8)^2}{1.8} \right) + \\ &\left( \tfrac{(2-1.8)^2}{1.8} + \tfrac{(0-0.2)^2}{0.2} \right) = 0.44
+\end{align*}
+
+    \end{column}
+    \begin{column}{0.5\textwidth}
+    \centering
+        \textbf{Model $\fh_2$ (Poorly calibrated)}
+        %\vspace{0.5em}
+        \begin{tabular}{@{}c|cc|cc@{}}
+\hline
+            Bin ($\hat{p}$) & $O^+$ & $E^+$ & $O^-$ & $E^-$ \\
+\hline
+            0.9 & 2 & 1.8 & 0 & 0.2 \\
+            0.7 & 0 & 1.4 & 2 & 0.6 \\
+\hline
+        \end{tabular}
+                \begin{align*}
+H =& \left( \tfrac{(0-1.4)^2}{1.4} + \tfrac{(2-0.6)^2}{0.6} \right) + \\ &\left( \tfrac{(2-1.8)^2}{1.8} + \tfrac{(0-0.2)^2}{0.2} \right) = 4.89
+\end{align*}
+    \end{column}
+\end{columns}
+%\end{center}
+}
+\medskip
+
+\textbf{Conclusion:} H-L statistic for $\fh_2$ is over 10 times larger due to a large discrepancy for the $\hat{p}=0.7$ bin ($O^+=0$ vs. $E^+=1.4$). %drives the high H-value, quantifying its poor calibration.
+
+%\vfill
+%\textbf{Conclusion:} The H-L statistic for $\fh_2$ is more than 10x larger than for $\fh_1$. This confirms our earlier intuition: the large gap between observed ($O^+$) and expected ($E^+$) outcomes for $\fh_2$ indicates poor calibration.
+
+\end{frame}
+
+\begin{frame}{Calibration: Over- and Under-estimates}
+
+\textbf{Example:} Weather model predicting daily rain probabilities
+
+\begin{itemize}
+    % \item Weather forecasters began considering calibration in the 1950s. % (Brier, 1950).
+    % \item Consider a weather forecasting model that predicts the probability of rain.
+%     \item If the model consistently predicts a 70\% chance of rain, but it actually rains only 10\% of the time when it predicts a 70\% chance, it's poorly calibrated.
+\item Calibration implies: predicted probabilities should (on average) match their observed frequencies \\
+    $\Rightarrow$ E.g., `70\% chance of rain' $\rightarrow$ should rain $\approx 70\%$ of the time
+    \\
+    $\Rightarrow$ Ensures predictions can be interpreted as actual risk/probabilities
+    \item Consider the following predictions of a (good performing) classifier:
+    
+    % \item For all instances where a model predicts a '70\% chance of rain', it should actually have rained $\approx$ 70\% of the time (retrospectively).
+    % %\item Applicable to both binary and multi-class classification.
+    % \item In general, predicted probabilities for any event happening should (on average) match their observed empirical probabilities.\\
+    % $\Rightarrow$ Ensures predictions can be interpreted as actual risk/probabilities.
+    % \item Consider the following predictions of a (good performing) classifier:
+\end{itemize}
+\begin{columns}[c, onlytextwidth]
+    \begin{column}{0.15\textwidth}
+        \centering
+        
+\begin{tabular}{rr}
+$\hat{p}$ & $y$ \\
+\hline
+ 0.1 & 0 \\
+ 0.1 & 0 \\
+\hline
+ 0.4 & 0 \\
+ 0.4 & 1 \\
+\hline
+ 0.7 & 0 \\
+ 0.7 & 1 \\
+ 0.7 & 1 \\
+\hline
+ 0.9 & 1 \\
+\hline
+\end{tabular}
+    \end{column}
+        \begin{column}{0.85\textwidth}
+\begin{itemize}
+    \item `10\% chance of rain' was a slight over-estimate ($\bar{y}=0/2=0\%$).
+    \item `40\% chance of rain' was a slight under-estimate ($\bar{y}=1/2=50\%$).
+    \item `70\% chance of rain' was a slight over-estimate ($\bar{y}=2/3=67\%$).
+    \item `90\% chance of rain' was a slight under-estimate ($\bar{y}=1/1=100\%$).
+\end{itemize}
+    \end{column}
+\end{columns}
+%\vspace{1em}
+%\textbf{Calibration}: Is a post-processing step on predicted probabilities trying to reduce over- and under-estimates.
+\end{frame}
+
+
+
+\begin{frame}{Calibration: Over- and Under-estimates}
+%TODO remove the tabular example and give the graphics from this paper https://link.springer.com/article/10.1007/s10994-023-06336-7
+
+\centerline{\includegraphics{figure_man/OverAndUnderConfidence.png}}
+\centerline{% OLD
+%\citebutton{Filho et al. (2023)}{https://link.springer.com/article/10.1007/s10994-023-06336-7/figures/3}
+% NEW
+\furtherreading{FILHO2023}}
+
+\begin{itemize}
+    \item \textbf{Underconfidence}: 
+    Predicted probabilities are too close to 0.5 \& need to be expanded (underestimates near 1, overestimates near 0)
+    %dots should move outwards on the x-axis (i.e., classifier should be more confident)
+    \item \textbf{Overconfidence}: Predicted probabilities are too close to 0 or 1 \&  should be pulled toward 0.5 (overestimates near 1, underestimates near 0)
+    %dots should move inwards on the x-axis (i.e,. classifier should be less confident)
+\end{itemize}
+
+%\textbf{Example:} Weather forecasting model that predicts the probability of rain.
+
+%\begin{itemize}
+    %\item Weather forecasters began considering calibration in the 1950s. % (Brier, 1950).
+    %\item Consider a weather forecasting model that predicts the probability of rain.
+% %     \item If the model consistently predicts a 70\% chance of rain, but it actually rains only 10\% of the time when it predicts a 70\% chance, it's poorly calibrated.
+    %\item For all instances where a model predicts a '70\% chance of rain', it should actually have rained $\approx$ 70\% of the time (retrospectively).
+    %\item Applicable to both binary and multi-class classification.
+    % \item In general, predicted probabilities for any event happening should (on average) match their observed empirical probabilities.\\
+    % $\Rightarrow$ Ensures predictions can be interpreted as actual risk/probabilities.
+    %\item Consider the following predictions of a (good performing) classifier:
+%\end{itemize}
+
+
+% \begin{columns}[c, onlytextwidth]
+%     \begin{column}{0.3\textwidth}
+%         \begin{center}
+%         \small
+% \begin{tabular}{rr}
+% \hline
+% $\hat{p}$ & $y$ \\
+% \hline
+%  0.1 & 0 \\
+%  0.1 & 0 \\
+% \hline
+%  0.4 & 0 \\
+%  0.4 & 1 \\
+% \hline
+%  0.7 & 0 \\
+%  0.7 & 1 \\
+%  0.7 & 1 \\
+% \hline
+%  0.9 & 1 \\
+% \hline
+% \end{tabular}
+% \end{center}
+%     \end{column}
+%         \begin{column}{0.7\textwidth}
+% \begin{itemize}
+%     \item '10\% chance of rain' was a slight over-estimate ($\bar{y}=0/2=0\%$).
+%     \item '40\% chance of rain' was a slight under-estimate ($\bar{y}=1/2=50\%$).
+%     \item '70\% chance of rain' was a slight over-estimate ($\bar{y}=2/3=67\%$).
+%     \item '90\% chance of rain' was a slight under-estimate ($\bar{y}=1/1=100\%$).
+% \end{itemize}
+%     \end{column}
+% \end{columns}
+% %\vspace{1em}
+% %\textbf{Calibration}: Is a post-processing step on predicted probabilities trying to reduce over- and under-estimates.
+\end{frame}
+
+
+\endlecture
+\end{document}

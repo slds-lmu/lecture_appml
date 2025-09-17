@@ -1,0 +1,1 @@
+Perhaps this and the `rmds_from_eds_folder` directories are redundant. Keeping just in case.

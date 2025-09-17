@@ -1,0 +1,404 @@
+---
+title: ""
+subtitle: "Building a Sequential Pipeline"
+output:
+  prettydoc::html_pretty:
+    theme: hpstr
+    toc: yes
+    toc_depth: 2
+    css: ../_template/prettydoc-hpstr.css
+    self_contained: yes
+---
+
+```{r, include=FALSE}
+sys.source("setup.R", envir = knitr::knit_global())
+set.seed(123)
+```
+
+# Goal
+Our goal for this exercise sheet is to build a simple machine learning pipeline using `mlr3pipelines`.
+The package `mlr3pipelines` helps to write machine learning workflows as directed `Graph`s that unify preprocessing and model fitting in an expressive and intuitive language.
+By combining preprocessing steps and model fitting, we will create a pipeline that can be used as an ordinary `mlr3` learner.
+Specifically, we will apply the kNN learning algorithm with multiple preprocessing steps on a dirty version of the German credit dataset.
+
+# German Credit Dataset (dirty)
+We use a dirty version of the German credit dataset of Prof. Dr. Hans Hoffman of the University of Hamburg in 1994, which contains 1000 datapoints reflecting bank customers.
+The dataset is available at the UCI repository as [Statlog (German Credit Data) Data Set](https://archive.ics.uci.edu/ml/datasets/Statlog+%28German+Credit+Data%29).
+We artificially introduced missing values and outliers in a few features.
+
+## Preprocessing
+
+We first load the `.csv` file from the directory.
+
+```{r}
+credit = read.csv("data/german_credit_dirty.csv", sep = ",", stringsAsFactors = TRUE)
+```
+
+In a previous exercise sheet, we already did an explorative analysis of the dirty `credit` dataset.
+First, we clean the data:
+
+- Ages of 0 for a credit applicant are implausible and are, therefore, replaced by `NA`s.
+<!-- - We fix factor features to make sure that the factor levels during prediction -->
+<!-- are the same as during training by removing empty training factor levels. -->
+
+Applying a preprocessing step as data cleaning directly to the task (which is unproblematic w.r.t. to data leakage).
+
+```{r}
+library("mlr3verse")
+library("data.table")
+
+task = TaskClassif$new("german_credit", backend = credit, target = "credit_risk")
+fix_age = function(x) {
+  x[which(x == 0L)] = NA_integer_
+  x
+}
+preproc = po("colapply", applicator = fix_age, affect_columns = selector_name("age"))
+task = preproc$train(list(task))[[1]]
+```
+
+# Exercises:
+
+In this exercise, we will apply a k-nearest neighbour (kNN) learning algorithm
+to the preprocessed (dirty) credit dataset.
+
+## Create a Filtering PipeOp
+
+Since the kNN learner suffers from the curse of dimensionality, we want to
+subset our set of features to the five most important ones according to  a feature filtering method based on the feature importance computed by a learning algorithm.
+
+Set up a `PipeOp` that filters features according to the feature importance values returned by `rpart` (see `flt("importance")$help()`).
+
+<!-- <details> -->
+<!-- <summary>**Details on the ANOVA F-test filter:**</summary> -->
+
+<!-- The filter conducts an analysis of variance for each feature, where the feature explains the target class variable. -->
+<!-- The score is determined by the F statistic's value. -->
+<!-- The more different the mean values of a feature between the target classes are, the higher is the F statistic. -->
+<!-- </details> -->
+
+<details>
+<summary>**Hint 1:**</summary>
+
+The filter can be created by `flt("importance")` (see also its help page `flt("importance")$help()`). 
+Note that if you don't pass the `learner` argument in `flt`, by default the feature importance of a decision tree (`rpart`) is used.
+You can set up a `PipeOp` with `po()`. 
+This filter should be the input to the `filter` argument of `po()` (see also examples in the help page `?PipeOpFilter`).
+To select the five most important features, you need to specify
+`filter.nfeat` in the `param_vals` argument of `po()`.
+You can see a list of other possible filters by looking at the dictinary `as.data.table(mlr_filters)`.
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+
+```{r, eval=FALSE}
+filter = po("...",
+  filter = flt(...),
+   ... = list(filter.nfeat = ...))
+```
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+```{r}
+filter = po("filter",
+  filter = flt("importance"),
+   param_vals = list(filter.nfeat = 5L))
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Create Imputation PipeOps
+
+Our dataset has missing values that need to be imputed
+before we can apply the kNN algorithm.
+Create a `PipeOp` that imputes numerical features based on randomly sampling feature values from the non-missing values and
+another `PipeOp` that imputes factor/categorical (including ordinal) features by out of range
+imputation. The latter introduces a new level ".MISSING" for missings.
+
+<details>
+<summary>**Hint 1:**</summary>
+
+You can set up a `PipeOp` with the `po()` function and use the `affect_columns` argument to address the columns to which the preprocessing should be applied (see also `?PipeOpImpute` for how to use the `affect_columns` argument).
+There exists a shortcut for setting up the imputation based on randomly sampling feature values from the non-missing values which is `imputesample` (see also `?PipeOpImputeSample`) and for out of range imputation which is `imputeoor` (see also `?PipeOpImputeOOR`).
+
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+
+```{r, eval=FALSE}
+impute_integer = po("...", affect_columns = selector_type("..."))
+impute_factor = po("...", affect_columns = ...(c("factor", "ordered")))
+```
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+```{r}
+impute_integer = po("imputesample", affect_columns = selector_type("integer"))
+impute_factor = po("imputeoor", affect_columns = selector_type(c("factor", "ordered")))
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+
+## Create a Proper Graph
+
+Combine both, the imputation and filtering `PipeOps` with a kNN learning algorithm into a `Graph`.
+
+<details>
+<summary>**Hint 1:**</summary>
+
+Create a kNN learner using `lrn()`.
+Remember that the shortcut for a kNN classifier ist `"classif.kknn"`.
+You can concatenate different preprocessing steps and a learner using the `%>>%` operator.
+
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+
+```{r, eval=FALSE}
+graph = filter %>>%
+  ... %>>%
+  ... %>>%
+  lrn("...")
+```
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+```{r}
+graph = filter %>>%
+  impute_integer %>>%
+  impute_factor %>>%
+  lrn("classif.kknn")
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Plot the Graph
+
+Put your created `Graph` to display by plotting it.
+
+<details>
+<summary>**Hint 1:**</summary>
+
+Created `Graph`s could be put on display with `$plot()`.
+
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+
+```{r, eval=TRUE}
+graph$plot()
+```
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+```{r}
+graph = filter %>>%
+  impute_integer %>>%
+  impute_factor %>>%
+  lrn("classif.kknn")
+
+graph$plot()
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+
+## Performance Assessment
+
+Use 10-fold cross-validation to estimate the classification error of the
+pipeline stored in the `Graph` on the credit data.
+Use a seed to make your results reproducible (e.g., `set.seed(7130L`).
+
+<details>
+<summary>**Hint 1:**</summary>
+
+Specifically, you need to conduct three steps:
+
+1. Specify a `Resampling` object using `rsmp()` and instantiate the train-test splits.
+2. Use this object together with the task and learner specified above
+as an input to the `resample()` method.
+3. Measure the performance with `$aggregate()`.
+
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+
+```{r, eval=FALSE}
+set.seed(7130L)
+resampling = rsmp("cv", ...)
+resampling$instantiate(...)
+rr = resample(task = ..., learner = ..., resampling = ...)
+rr$...()
+```
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+```{r, messages=FALSE}
+set.seed(7130L)
+resampling = rsmp("cv", folds = 10L)
+resampling$instantiate(task)
+rr = resample(task = task, learner = graph, resampling = resampling)
+rr$aggregate()
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Extra: Different Imputation Technique
+
+Try out a different imputation method for numeric and categorical features:
+`"imputemode"` which imputes features by computing the mode using the non-missing training data (i.e., it uses the most frequent value for categorical features and the feature value where the distribution has its maximum for numeric features).
+Does this approach change the overall performance of the previous kNN classifier?
+Assess this by using the same folds as in the previous exercise.
+
+<details>
+<summary>**Hint 1:**</summary>
+
+Specifically, you need to conduct the following steps:
+
+1. Create a new `Graph` by replacing the two imputation processes for
+numerical and factor features by a single imputation step based on sampling
+(`id = "imputemode"`) .
+2. Redo `resample()` with the new `Graph` as an input. Use the same train-test splits as before. You could also use the `benchmark` function to compare the result with the previous ML pipeline.
+3. Call `$aggregate()` to see the performance
+
+
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+
+```{r, eval=FALSE}
+graph2 = filter %>>%
+  po("...") %>>%
+  lrn("classif.kknn")
+
+rr2 = resample(task = ..., learner = graph2, resampling = ...)
+rr2$aggregate(...)
+```
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+```{r, messages=FALSE}
+graph2 = filter %>>%
+  po("imputemode") %>>%
+  lrn("classif.kknn")
+
+set.seed(7130L)
+resampling$instantiate(task)
+rr2 = resample(task = task, learner = graph2, resampling = resampling)
+rr2$aggregate()
+
+set.seed(7130L)
+bench = benchmark(benchmark_grid(list(task), list(graph, graph2), list(resampling)))
+bench$aggregate()
+```
+
+The classification error did not change. 
+Most probably because we use a filter to select the top 5 features and among them there is no feature with missing values (as we only have 3 features with missing values).
+
+```{r}
+# top 5 features
+filter$train(list(task))
+
+# features with missing values
+miss = sapply(task$data(), function(x) any(is.na(x)))
+miss[miss]
+```
+
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+<!-- The classification error slightly dropped by a factor of 0.02. -->
+
+<!-- We can check if the folds are indeed the same if we use the same seed -->
+<!-- for both performance estimations. -->
+<!-- We, therefore, compare the test sets for each iteration by inspecting -->
+<!-- `$resampling$test_set()` of the `ResampleResult` objects. -->
+
+<!-- ```{r} -->
+<!-- tests = sapply(1:10, FUN = function(i) { -->
+<!--   oldids = rr$resampling$test_set(i = i) -->
+<!--   newids = rr2$resampling$test_set(i = i) -->
+<!--   all.equal(oldids, newids) -->
+<!-- }) -->
+
+<!-- all(tests) -->
+<!-- ``` -->
+
+<!-- Indeed, both resampling processes use the same folds. -->
+
+
+# Summary
+In this exercise sheet, we learned how to set up a `Graph` learner for combining
+the preprocessing steps with model fitting.
+We saw a basic pipeline that conducts feature filtering and imputation of
+missing values before a kNN classifier is fit.
+
+In the upcoming exercise sheet, we will learn how to tune different components of a pipeline
+such that preprocessing as well as model fitting could be further optimized for the
+task at hand.

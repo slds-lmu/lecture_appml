@@ -1,0 +1,54 @@
+\begin{vbframe}{Ensembling in Machine Learning}
+\begin{itemize}
+\item Techniques that combine predictions of multiple base models
+\item Goal: Improve predictive performance and model robustness
+\item Idea: Errors of a single model will likely be compensated by other models, and as a result, the overall prediction performance of the ensemble would be better than that of a single model
+\end{itemize}
+\vspace{1em}
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+        \begin{figure}
+            \centering
+            \includegraphics{slides/03-ensembles-stacking/figure/ensemble_smiley.png}
+            %\caption{Caption}
+            % from https://wires.onlinelibrary.wiley.com/doi/full/10.1002/widm.1249?saml_referrer
+            \label{fig:ensemble_smiley}
+        \end{figure}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+        \begin{figure}
+            \centering
+            \includegraphics{slides/03-ensembles-stacking/figure/ensembles_hs.png}
+            %\caption{Caption}
+            %from https://web.engr.oregonstate.edu/~tgd/publications/mcs-ensembles.pdf
+            \label{fig:ensembles_hs}
+        \end{figure}
+    \end{column}
+\end{columns}
+\end{vbframe}
+
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Ensemble Methods}
+Higher level mechanisms:
+\begin{itemize}
+    \item during base model training (how to generate different models?)
+    \begin{itemize}
+        \item data manipulation (e.g., bagging); partitioning of data
+        \item learning algorithm manipulation (e.g., randomly select splits)
+        \item output manipulation (error-correcting output codes)
+        \item hybridization of the above
+    \end{itemize}
+    \item during prediction (how to combine the predictions of different models?)
+    \begin{itemize}
+        \item output manipulation
+        \item weighting methods
+        \item meta-learning
+    \end{itemize}
+    \item homogeneous vs. heterogeneous
+    \begin{itemize}
+        \item same types of models vs. different models
+    \end{itemize}
+\end{itemize}
+\end{vbframe}

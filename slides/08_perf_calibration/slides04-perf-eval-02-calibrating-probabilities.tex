@@ -1,0 +1,551 @@
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+
+\usepackage{etoolbox}
+\makeatletter
+\newlength{\parboxtodim}
+\patchcmd{\@iiiparbox}
+  {\hsize}
+  {\ifx\relax#2\else\setlength{\parboxtodim}{#2}\fi\hsize}
+  {}{}
+\makeatother
+
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
+\begin{document}
+
+\title{Applied Machine Learning}
+
+\titlemeta{
+Performance Evaluation:
+}{
+Calibration Methods \& Practices
+}{
+figure/calibrationplot
+}{
+\item How to calibrate probabilities using different methods
+\item Best practices for data splitting in calibration
+}
+
+
+\begin{frame}{Calibrating Probabilities}
+
+\textbf{Goal}: Calibration Techniques
+
+\begin{itemize}
+  \item Calibrating probabilities involves \textbf{post-processing} predictions. % to improve their reliability.
+  %Calibrating probabilities means to \textbf{post-process} the predictions.% to improve the estimates and obtain more reliable probabilities.
+  %\item Two popular calibration methods are the \textbf{Platt’s scaling} (parametric) and the \textbf{isotonic regression} (non-parametric).
+  %\item A well calibrated classifier should classify samples such that among these samples with a predicted probability of 0.7, approximately 70\% actually belong to the positive class.
+  \item \textbf{Aim:} Ensure predicted probabilities of any event should (on average) match their observed empirical probabilities.\\
+    $\Rightarrow$ Makes predictions interpretable as actual risk/probabilities.
+  \item Calibration should be performed on \textbf{new data} not used for model fitting.
+  \item Link function in \textbf{logistic regression} can be viewed as a calibration of predictions of a \textbf{linear regression}.
+\end{itemize}
+
+%In order to extract exact probabilities, like logarithmic loss does, a classifier can be calibrated, i.\,e. the output score of the calssifier can be transformed into a more accurate probability. The link function of logisitc regression is basically a calibration for the linear regression. In order to evaluate the calibration an additional validation data set is used. \lz
+\end{frame}
+
+
+% \begin{frame}{Calibrating Probabilities}
+
+% The \textbf{Platt's scaling} (parametric sigmoid calibration) and the \textbf{isotonic regression} (non-parametric) are popular calibration methods:
+% \begin{itemize}
+% \item \textbf{Platt's scaling:} logistic regression on the output of the classifier with respect to the true class labels.
+% \item \textbf{Isotonic regression:} fit a piecewise-constant non-decreasing function instead of logistic regression.
+% \end{itemize}
+
+% %\tiny{Source 1: https://scikit-learn.org/stable/modules/calibration.html}
+% %\tiny{Source 2: http://fastml.com/classifier-calibration-with-platts-scaling-and-isotonic-regression/}
+% %\tiny{Source 3: https://towardsdatascience.com/probability-calibration-for-boosted-trees-24cbd0f0ccae}
+% %\tiny{Source 3: https://jmetzen.github.io/2015-04-14/calibration.html}
+% %\tiny{Source 4: http://fa.bianp.net/blog/2013/isotonic-regression/}
+% %\tiny{Source 5: https://www.analyticsvidhya.com/blog/2016/07/platt-scaling-isotonic-regression-minimize-logloss-error/}
+
+
+% \textbf{Platt's scaling}:
+
+% \begin{itemize}
+%   \item Train a logistic regression model using the (uncalibrated) classifier's predictions $\hat{Y}$ as input and the true labels as output.
+%   \item Use the probabilities $\hat{\pi}$ of this logistic regression model as calibrated predictions.
+%   %\item Essentially Platt's scaling performs a logistic regression on the output of a classifier.
+% \end{itemize}
+% % \begin{center}
+% % \includegraphics[width=0.55\textwidth]{figure_man/platt.png}
+% % \end{center}
+
+
+% \end{frame}
+
+
+% \begin{frame}{Platt's Scaling}
+
+% \begin{figure}
+% \includegraphics[width=0.8\textwidth]{figure_man/platts-scaling.png}
+% \end{figure}
+
+% \end{frame}
+
+
+% \begin{frame}{Isotonic regression}
+
+% \begin{itemize}
+% \item The idea is to fit a piecewise-constant non-decreasing function instead of
+% logistic regression with the pool adjacent violators algorithm
+% ($\mathcal{O}(n)$).
+% \item Basically, the algorithm goes through the data and looks for violations of
+% the monotonicity constraint. If it finds one, it gets adjusted with the best
+% possible fit under the constraint.
+% \end{itemize}
+
+% \begin{center}
+% \includegraphics[width=0.5\textwidth]{figure_man/iso-reg.png}
+% \end{center}
+% \end{frame}
+% \begin{frame}{Isotonic regression}
+
+% \begin{figure}
+% \includegraphics[width=0.8\textwidth]{figure_man/isotonic-reg.png}
+% \end{figure}
+
+% \end{frame}
+
+
+
+
+
+
+% \begin{frame}{Diagnosis with Reliability Diagrams}
+%     % https://www.cs.cornell.edu/~alexn/papers/calibration.icml05.crc.rev3.pdf
+%     To Do: selbst coden
+%     \begin{figure}
+%         \centering
+%         \includegraphics{figure/reliability_diagram.png}
+%         % \caption{Caption}
+%         % \label{fig:enter-label}
+%     \end{figure}
+% \end{frame}
+
+% --------------------------------------
+
+% \begin{frame}{Sources of Miscalibration}
+% % https://classifier-calibration.github.io/assets/slides/clacal_tutorial_ecmlpkdd_2020_intro.pdf
+% \begin{itemize}
+%     \item Calibration is a characteristic of a learner, e.g., tree-based learners such as CART or random forests seldom produce probabilities close to 0 or 1 due to averaging class values. 
+%     \item Miscalibration is related to accuracy: if the average class probability is higher or lower than accuracy, the model is said to be over- or underconfident.
+%     \item \textbf{Underconfidence:} Probabilities are underestimating true incidences. This typically gives a sigmoidal reliability diagram.
+%     $\Rightarrow$ We need to pull probabilities away from the center.
+%     \item \textbf{Overconfidence:} Probabilities are overestimating true incidences.  This typically gives an inverse-sigmoidal reliability diagram. $\Rightarrow$ We need to push probabilities toward the center.
+%     \item \textbf{Predicament:} Under- and overconfidence can coexist for different classes, requiring a simultaneous increase and decrease in different class probabilities.
+
+% \end{itemize}
+% \end{frame}
+
+% \begin{frame}[t]
+% 	\frametitle{Calibrating Probabilities}
+% 	%\small
+% 	\begin{itemize}
+% % %		
+% % 		\item Consider binary classification with a probabilistic score  classifier
+% % %		
+% % 		$$\fx = 2 \cdot \mathds{1}_{[ s(\xv) \ge c]} -1,$$
+% % %		
+% % 		leading to the prediction random variable $\yh = f(\xv).$ Let $\mathbf{S}=s(\xv)$ be the score random variable. 
+% % %		
+% % 		\item $f$ is calibrated iff $P(y=1~|~\mathbf{S}=s) = s$ for all $s\in [0,1].$
+% %		
+% 		\item Let $s(\xv)$ be the predicted (uncalibrated) score/probability of instance $\xv$ and $\mathbb{S}$ the set of possible scores produced by the classifier.
+%         \item Different \emph{post-processing} methods have been proposed for the purpose of calibration, i.e., to construct a \emph{calibration function} 
+% %		
+% 		$$C: \, \mathbb{S} \to [0,1], $$
+% 		such that $C(s(\xv))$ is well-calibrated.
+		
+% 		\item For learning a calibration function $C$, a set of \emph{calibration data} is used:
+% 		$$
+% 		\mathcal{D}_{cal} = \big\{ (s^{(1)}, y^{(1)}) , \ldots , (s^{(n)}, y^{(n)}) \big\} \subset \mathbb{S} \times \{ 0 , 1 \}
+% 		$$ 
+% 		\item This data should be different from the training data used to learn the scoring classifier. Otherwise, there is a risk of introducing a bias. 
+		
+% 	\end{itemize}
+% \end{frame}
+
+\begin{frame}[t]
+  \frametitle{Calibrating Probabilities}
+
+  \begin{itemize}
+    \item Let $s(\xv)$ denote the predicted (uncalibrated) score for input $\xv$
+    \item Define $\mathbb{S}$ as the set of possible scores produced by the classifier
+    \item Goal: Construct a \emph{calibration function} $C$ that maps scores $s(\xv) \in \mathbb{S}$ to calibrated probabilities $C(s(\xv)) \in [0,1]$:
+    \[
+      C: \mathbb{S} \to [0, 1], \text{such that } C(s(\xv)) \approx P(y = 1 \mid s(\xv)) \text{ (well-calibrated)}
+    \]
+    \item To learn calibrator function $C$, use a separate \emph{calibration dataset}:
+    \[
+      \mathcal{D}_{\text{cal}} = \{ (s^{(i)}, y^{(i)}) \}_{i=1}^{n} \subset \mathbb{S} \times \{0, 1\}
+    \]
+    \item Important: $\mathcal{D}_{\text{cal}}$ must be disjoint from the training data used to learn the scoring classifier to avoid bias in estimated calibration
+  \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[t]
+	\frametitle{Empirical binning}
+	% https://link.springer.com/article/10.1007/s10994-023-06336-7
+\emph{Empirical binning} partitions predicted scores \( s \in \mathbb{S}\) into bins \( B_1, \ldots, B_M \) and defines a (piecewise constant) calibration function \( C \) by:
+
+\[ 
+C(s) = \bar{p}_{J(s)} = \frac{\sum_{i=1}^n \mathds{1}[ s^{(i)}  \in B_{J(s)}] \cdot y^{(i)}}{|B_{J(s)}|}, \, \text{ where }
+\]
+
+\begin{itemize}
+    \item \( J(s) \in \{1, \dots, M\}\) is the bin index that \( s \) belongs to (i.e., \( s \in B_{J(s)} \))
+    \item \( s^{(i)} = s(\xi) \) is the score  and \( y^{(i)} \) the label of instance \( i \) % (with \( y^{(i)} = 1 \) indicating a positive instance)%,
+%- \( |B_{J(s)}| \) is the number of instances in the bin \( B_{J(s)} \).
+    \item numerator counts the number of positive instances within \( B_{J(s)} \)
+%- \( |B_{J(s)}| \) counts the total number of instances within the bin \( B_{J(s)} \).
+\end{itemize}
+
+\( \Rightarrow C \) maps \( s \) to \( \bar{p}_{J(s)} \) (average proportion of positive instances in \( B_{J(s)} \))  %\( \bar{p}_{J(s)} \) represents the average proportion of positive instances in the bin \( B_{J(s)} \), and \( C(s) \) is the calibration function that maps the score \( s \) to this average proportion.
+
+  \vfill
+  \centering
+\includegraphics[width=0.8\textwidth]{figure/calibration_methods1.pdf}
+\end{frame}
+
+
+
+
+\begin{frame}[t]
+	\frametitle{Platt scaling
+    % OLD
+%\citebutton{Niculescu-Mizil et al., 2005}{https://www.cs.cornell.edu/~alexn/papers/calibration.icml05.crc.rev3.pdf}
+% NEW
+\furtherreading{MIZIL2005} }
+
+    %TODO requires: unbounded outputs before sigmoid/ softmax, good for Neuronal Networks, SVM, boosted trees
+    %TODO reference Alexandru Niculescu-Mizil and Rich Caruana. “Predicting Good Probabilities with Supervised Learning.” In Proceedings of the 22nd International Conference on Machine Learning (ICML), 2005.
+	
+\emph{Platt scaling} applies logistic regression to predicted scores $s \in \mathbb{S}$, i.e., it fits a calibration function $C$ minimizing the log-loss on $\mathcal{D}_{cal}$ by:
+		$$
+		C(s) = \frac{1}{1 + \exp( \theta_0 + \theta_1 \cdot s) } , \, \text{ where }
+		$$
+
+  \begin{itemize}
+    \item $\theta_0$ is the intercept, and $\theta_1$ the slope estimated by the logistic regression
+    \item Requires: unbounded outputs before sigmoid/softmax, good for Neural Networks, SVM, boosted trees
+\end{itemize}
+  \vfill\centering
+\includegraphics[width=0.8\textwidth]{figure/calibration_methods2.pdf}
+\end{frame}
+
+
+\begin{frame}[t]
+	\frametitle{Isotonic regression % OLD
+%\citebutton{Kull et al., 2017 }{http://proceedings.mlr.press/v54/kull17a/kull17a.pdf}
+% NEW
+\furtherreading{KULL2017}}
+    
+    %TODO requires bounded or monotonic relationship with probabilities
+    %TODO reference http://proceedings.mlr.press/v54/kull17a/kull17a.pdf
+	
+	\begin{itemize}
+		%\item The sigmoidal transformation fit by Platt scaling is appropriate for some methods (e.g., support vector machines) but not for others. 
+		\item \emph{Isotonic regression} combines the non-parametric character of empirical binning with the monotonicity guarantee of Platt scaling by minimizing
+		$$
+		\sum_{i=1}^n w_i \, (C(s^{(i)}) - y^{(i)})^2 
+		$$
+		subject to the constraint that $C$ is isotonic: $C(s) \leq C(t)$ for $s <t$. 
+		\item 
+		Note: $C$ is evaluated only at a finite number of points; in-between, one may (linearly) interpolate or assume a piecewise constant function. 
+		
+	\end{itemize}
+ \vfill\centering
+\includegraphics[width=0.8\textwidth]{figure/calibration_methods3.pdf}
+\end{frame}
+
+
+
+\begin{frame}[t]
+	\frametitle{Isotonic Regression - PAVA}
+	
+	\begin{itemize}
+        \item Optimization can be solved by the pool-adjacent violators algorithm (PAVA) by sorting scores such that
+		$$
+		s^{(1)} < s^{(2)} < \ldots < s^{(n)}\, .
+		$$
+		% We then seek values $c_1 \leq c_2 \leq \ldots \leq c_n$ which minimize
+		% $$
+		% \sum_{i=1}^n w_i ( c_i - y^{(i)})^2 \, .
+		% $$
+		\item Initialize bins $B_i$ for each observation $(s^{(i)} , y^{(i)})$
+        \item Assign to all scores $s \in B_i$: $C(s) = y^{(i)}$ with initial width $w(B_i) = 1$.
+		
+		\item A merge operation combines two adjacent bins $B_j$ and $B_k$ into a new bin $B = B_j \cup B_k$ with width $w(B) = w(B_j) + w(B_k)$ and 
+		$$
+		C(B) = \frac{w(B_j) C(B_j) + w(B_k) C(B_k)}{w(B_j) + w(B_k)} \, .
+		$$
+		
+		
+\item The algorithm looks for violations of the monotonicity constraint and adjusts them with the best possible fit under the constraint ($\mathcal{O}(n)$).
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[t]
+	\frametitle{Isotonic Regression - PAVA}
+	 PAVA iterates the following steps (simplified to avoid notational overload):
+
+		\begin{itemize}
+        \setlength\itemsep{0pt} % or 0pt
+			\item[(1)]<1-> Find first violating adjacent bins $B_i$ and $B_{i+1}$ such that $C(B_i) > C(B_{i+1})$.
+			\item[(2)]<1-> Merge $B_i$ and $B_{i+1}$ into a new bin $B$. Stop if no violation occurred.
+			\item[(3)]<2-> If $C(B) < C(B_{i-1})$ for the left neighbor bin $B_{i-1}$, merge also these bins and continue until no more violations are found (monotonicity).
+			\item[(4)]<2-> Continue with \textbf{(1)}.
+		\end{itemize}
+	
+	\begin{center}
+	\includegraphics<1>[width=0.6\textwidth, trim=0px 200px 0px 0px, clip]{figure/pic-pava}
+        \includegraphics<2->[width=0.6\textwidth, trim=0px 0px 0px 0px, clip]{figure/pic-pava}
+	\end{center}
+\end{frame}
+
+% \begin{frame}[t]
+% 	\frametitle{Isotonic Regression - PAVA}
+	
+% 	\begin{itemize}
+% 		\item Note that, in the case of binary classification, the target values $y^{(n)}$ are all in $\{ 0, 1 \}$:
+% 	\end{itemize}
+	
+% 	\medskip 
+	
+% 	\begin{center}
+% 		\includegraphics[width=0.4\textwidth]{figure/pic-pava2}
+		
+% 	\end{center}
+% \end{frame}
+
+
+% \begin{frame}[t]
+% 	\frametitle{Outlook: Multi-class calibration}
+	
+% 	\begin{itemize}
+%         \itemsep1em
+% 		\item Calibration methods also exist for the multi-class case (i.e., classification problems with more than two classes).
+% 		\item Then, however, the problem becomes conceptually more difficult (and is still a topic of ongoing research).
+% 		\item 
+% 		While essentially coinciding for binary classification, the following definitions of calibration (leading to increasingly difficult problems) can be distinguished for more than two classes:
+% 		\begin{itemize}
+% 			\item Calibration of the highest predicted probability (confidence calibration) 
+% 			\item Calibration of the marginal probabilities (class-wise calibration)
+% 			\item Calibration of the entire vector of predicted probabilities (multi-class calibration)
+% 		\end{itemize}
+%         \item Recently, native multi-class calibration methods extended Platt scaling by adding a calibration layer between the logits of the neural network and the softmax layer. 
+% 	\end{itemize}
+% \end{frame}
+
+
+%TODO add workflow here
+
+%Split data in train, calibrate test
+%After training, find best calibration method by evaluating on calibrate
+
+%add reference on workflow: http://proceedings.mlr.press/v54/kull17a/kull17a.pdf
+
+%Tuning prior calibration leads to better results than tuning the calibrated learner
+%CV calibration leads to better results than holdout calibration
+
+
+
+
+\begin{frame}{How to Split Data for Calibration?  \furtherreading{ESKANDAR2023}}% OLD
+%\citebutton{Eskandar, 2023}{https://medium.com/@eskandar.sahel/applying-calibration-techniques-to-improve-probabilistic-predictions-in-machine-learning-models-c175c2e38ffc}
+
+
+\textbf{Problem:} How to avoid overfitting the calibrator during training?
+
+\vspace{0.5em}
+\textbf{Deployment scenario:} 
+\begin{itemize}
+  \item Inducer (ML algorithm \& hyperparameters) already selected
+  \item Want to calibrate predictions of resulting model using all available data
+\end{itemize}
+\pause
+
+\vspace{0.5em}
+\textbf{Naive solution:} Use hold-out calibration set
+
+\includegraphics[width=\linewidth]{figure_man/CalibWorkflow1.png}
+
+\vspace{0.5em}
+\textbf{Limitation:} Does not utilize full dataset for training model and calibrator
+
+\vspace{0.5em}
+\visible{\textbf{Idea:} Use $k$-fold CV to use available data more efficiently}
+\end{frame}
+
+
+\begin{frame}{CV for Calibration: Per-Fold Strategy}
+%\textbf{Per-fold strategy:}
+\begin{itemize}
+  \item Fit model and calibrator on each CV fold separately
+  \item Use fold-wise models to generate (uncalibrated) predictions and fold-wise calibrators to calibrate them
+  \item Average fold-wise calibrated predictions
+\end{itemize}
+
+{\centering
+\includegraphics[width=0.9\linewidth]{figure_man/CalibWorkflow2.png}}
+
+\pause
+
+\textbf{Drawback:} Computationally inefficient (requires training $k$ models and $k$ calibrators); none are trained on full data $\Rightarrow$ pessimistic bias in calibration.
+
+\visible{\textbf{Alternative:} CV with pooled out-of-fold (OOF) predictions}
+\end{frame}
+
+
+\begin{frame}{CV for Calibration: Pooled OOF Strategy}
+%\textbf{Steps:}
+\begin{enumerate}
+  \item Fit final model on entire dataset
+  \item Perform CV and generate out-of-fold predictions from CV models
+  \item Train calibrator on pooled OOF CV predictions (uses all observations)
+  \item Deploy: predict with final model, calibrate with pooled calibrator\\
+  \item[$\Rightarrow$] \textbf{Advantage:} One final model + one calibrator, both trained on all data
+\end{enumerate}
+
+\vspace{1em}
+\centering
+\includegraphics[width=0.75\linewidth]{figure_man/CalibWorkflow3.png}
+
+\end{frame}
+
+
+\begin{frame}{When Evaluation is Needed}
+\textbf{Setting:} When the aim is to tune hyperparameters or estimate performance, we require an independent test set (besides the train and calibration set).
+%Performance metrics or hyperparameter tuning required
+
+\vspace{0.5em}
+\textbf{Option 1:} Simple hold-out split (train set, calibration set, test set)
+
+\vspace{0.5em}
+\textbf{Option 2:} Nested Cross-Validation
+\begin{itemize}
+  \item Inner loop: Train model \& calibrator (per-fold or pooled OOF strategy) 
+  \item Outer loop: Evaluate generalization performance
+\end{itemize}
+
+\centering
+\includegraphics[width=0.6\linewidth]{figure_man/CalibrationCVPooled.png}
+\end{frame}
+
+% \begin{frame}{Calibration Workflow % OLD
+%\citebutton{Eskandar, 2023}{https://medium.com/@eskandar.sahel/applying-calibration-techniques-to-improve-probabilistic-predictions-in-machine-learning-models-c175c2e38ffc}
+% NEW
+% \furtherreading{Eskandar2023}}
+
+% \textbf{Question}: How to split the data for training the model and training the calibrator, so that we don't overfit the calibrator?
+
+% \textbf{Given Situation}: We have already settled on a specific inducer and now want to train the model and calibrator on all our data for deployment.
+
+% \textbf{Simplest Solution}: Hold out split.
+
+% \includegraphics[width = \linewidth]{figure_man/CalibWorkflow1.png}
+
+% \textbf{But}: We want to use ALL the data for training the model and calibrator \\ $\Rightarrow$ \textbf{Cross-validation}
+
+% \begin{itemize}
+%     \item CV per fold
+%     \item Pooled CV
+% \end{itemize}
+
+% \end{frame}
+
+
+% \begin{frame}{Calibration Workflow}
+% \textbf{Option A}: Cross-validation per fold
+% \includegraphics[width = \linewidth]{figure_man/CalibWorkflow2.png}
+
+% Disadvantage:
+% \begin{itemize}
+%     \item we fit multiple models and calibrators, which takes a long time
+%     \item none of the calibrators is fitted on all data
+% \end{itemize}
+
+% $\Rightarrow$ Pooled CV
+% \end{frame}
+
+% \begin{frame}{Calibration Workflow}
+% \textbf{Option B}: Cross-validation pooled
+% \includegraphics[width = 0.7 \linewidth]{figure_man/CalibWorkflow3.png}
+% \begin{itemize}
+%     \item Fit final model on all data
+%     \item Fit multiple models on CV folds
+%     \item Fit calibrator using pooled out-of-fold predictions (uses all observations) %and data
+%     \item Pass new data point through final model and calibrator\\
+%     $\rightarrow$ Only one model and calibrator, fitted on all data
+% \end{itemize}
+% \end{frame}
+
+% \begin{frame}{Calibration Workflow}
+
+% \textbf{Question}: How to split the data for training the model and training the calibrator, so that we don't overfit the calibrator?
+
+% \textbf{New Situation}: We want to tune or compute performance metrics, i.e. we also need untouched test data.
+
+% \textbf{Solution}:
+% \begin{itemize}
+%     \item Simple: Hold-out-split in train, calibrate and test (three sets)
+%     \item Better: Nested Cross-validation, i.e. per-fold:
+% \end{itemize}
+
+% \includegraphics[width = 0.7 \linewidth]{figure_man/CalibrationCVFold.png}
+    
+% \end{frame}
+
+%reference for calibration data split:
+%- https://onlinelibrary.wiley.com/doi/full/10.1002/sim.9921 2 sets hold out
+%- http://proceedings.mlr.press/v70/guo17a/guo17a.pdf 3 sets hold out
+%- https://medium.com/@eskandar.sahel/applying-calibration-techniques-to-improve-probabilistic-predictions-in-machine-learning-models-c175c2e38ffc 5 fold cross validation
+
+
+
+
+\begin{frame}{Example: Calibration Plot (Revisited)}
+%Draw some conlusion in text form (i.e. all calibrations improved the original SVC)
+
+
+Calibrating a SVC with Platt's scaling and isotonic regression:
+\begin{center}
+\includegraphics[width=0.5\textwidth]{figure_man/calibration2.png}
+\end{center}
+$\Rightarrow$ all calibrations improved the original SVC
+
+\end{frame}
+
+\begin{frame}{Summary: Why Is Calibration Important?}
+
+    \begin{itemize}
+        \item \textbf{Interpreting Predicted Probabilities:}
+            \begin{itemize}
+                %\item They should accurately reflect actual risks or frequencies of events.
+                \item Good calibration ensures that predicted probabilities %match observed frequencies to 
+                accurately reflect actual risks or frequencies of events.
+                \item[$\Rightarrow$] Otherwise, predictions are just scores that happen to lie in $[0,1]$.
+            \end{itemize}
+        \item Instance-based probability evaluation metrics, such as Brier score or log-loss, always measure calibration (plus something else).
+        \item \textbf{Example: Medical Diagnosis}
+            \begin{itemize}
+                \item Poor calibration: Only half of patients with 90\% predicted probability of a disease actually have it.
+                \item Good calibration: 90\% of patients with 90\% predicted probability of a disease actually have it.
+            \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\endlecture
+\end{document}

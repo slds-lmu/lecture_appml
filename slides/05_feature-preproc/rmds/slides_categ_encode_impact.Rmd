@@ -1,0 +1,107 @@
+```{r include=FALSE, cache=FALSE}
+library(knitr)
+root = rprojroot::find_root(rprojroot::is_git_root)
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+## Target Encoding
+
+- Developed to solve limitations of dummy encoding for high cardinality categorical features.
+
+__Goal__: Each categorical feature $x$ should be encoded in a single numeric feature $\tilde x$.
+
+- Basic definition for regression by Micci-Barreca (2001):
+
+$$
+  \tilde x = \frac{\sum_{i:x=l}y^{(i)}}{N_l}, \quad l=1,\dots,k,
+$$
+
+where $N_l$ is the number of observations of the $l$'th level of feature $x$.
+
+## Target Encoding - Example
+
+```{r, echo=FALSE, message=FALSE, warning = FALSE}
+library(dplyr)
+data = read.csv(paste0(root, "/data/ames_housing_extended.csv"), stringsAsFactors = TRUE)
+data %>%
+  filter(!is.na(Foundation)) %>%
+  select(Foundation) %>%
+  group_by(Foundation) %>%
+  tally() %>%
+  t() %>%
+  knitr::kable(format = 'latex', booktabs = TRUE) %>%
+  kableExtra::kable_styling(latex_options = 'HOLD_position', font_size = 7)
+```
+
+- Encoding for wooden foundation:
+
+```{r, echo=FALSE, message=FALSE}
+data %>%
+  mutate(house.id  = row_number()) %>%
+  select(house.id, SalePrice, Foundation) %>%
+  filter(Foundation == "Wood") %>%
+  t() %>%
+  knitr::kable(format = 'latex', booktabs = TRUE) %>%
+  kableExtra::kable_styling(latex_options = 'HOLD_position', font_size = 7)
+```
+
+$$
+  \frac{164000 + 145500 + 143000 + 250000 + 202000}{5} = 180900
+$$
+
+
+## Target Encoding - Example
+
+- For all foundation types:
+
+```{r, echo=FALSE, message=FALSE, warning = FALSE}
+data %>%
+  select(SalePrice, Foundation) %>%
+  group_by(Foundation) %>%
+  dplyr::summarize(`Foundation(enc)` = mean(SalePrice, na.rm = TRUE)) %>%
+  t() %>%
+  knitr::kable(format = 'latex', booktabs = TRUE) %>%
+  kableExtra::kable_styling(latex_options = 'HOLD_position', font_size = 7)
+
+```
+
+This mapping is calculated on training data and later applied to test data.
+
+
+## Target Encoding for Classification
+
+- Extending encoding to binary classification is straightforward, instead of the average target value the relative frequency of the positive class is used
+
+- Multi-class classification extends this by creating one feature for each target class in the same way as binary classification.
+
+
+## Target Encoding - Issues
+
+__Problem:__ Target encoding can assign extreme values to rarely occurring levels.
+
+__Solution:__ Encoding as weighted sum between global average target value and encoding value of level.
+
+
+$$
+  \tilde x = \lambda_l\frac{\sum_{i:x=l}y^{(i)}}{N_l} + (1-\lambda_l)\frac{\sum_{i=1}^n y^{(i)}}{n}, \quad l=1,\dots,k.
+$$
+
+- $\lambda_l$ can be parameterized and tuned, but optimally, tuning must be done for each feature and level separately (most likely infeasible!).
+
+- Simple solution: Set $\lambda_l=\frac{N_l}{N_l+\epsilon}$ with regularization parameter $\epsilon$.
+
+- This shrinks small levels stronger to the global mean target value than large classes.
+
+
+## Target Encoding - Issues
+
+__Problem:__ Label leakage! Information of $y^{(i)}$ is used to calculate $\tilde x$. This can cause overfitting issues, especially for rarely occurring classes.
+
+__Solution:__ Use internal cross-validation to calculate $\tilde x$.
+
+
+- It is unclear how serious this problem is in practice.
+
+- But: calculation of $\tilde x$ is very cheap, so it doesn't hurt.
+
+- An alternative is to add some noise $\tilde x^{(i)} + N(0,\sigma_\epsilon)$ to the encoded samples.

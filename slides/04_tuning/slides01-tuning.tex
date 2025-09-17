@@ -1,0 +1,68 @@
+% OLD
+%\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+% NEW
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+
+% NEW
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+% Defines macros and environments
+\input{../../latex-math/ml-hpo.tex}
+\input{../../latex-math/ml-eval.tex}
+
+\usepackage{pdfpages}
+\includepdfset{trim=0 10pt 0 0, pagecommand={\global\setcounter{framenumber}{\value{page}}}, offset=0 5pt, clip=true, noautoscale=true}
+
+\title{Applied Machine Learning}
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
+
+\begin{document}
+
+\titlemeta{
+Hyperparameter Tuning
+}{
+Hyperparameter Tuning Problem \&  Methods
+}{
+figure_man/empty
+}{
+\item The Hyperparameter Optimization Problem
+\item Grid Search, Random Search and Bayesian optimization
+}
+
+
+\section{Hyperparameter Tuning}
+
+\includepdf[pages={2-9}]{i2ml/slides-tuning-intro.pdf}
+
+\section{Hyperparameter Tuning Algorithms}
+
+\includepdf[pages={2,4,6,7}]{i2ml/slides-tuning-basicalgos.pdf}
+
+\begin{frame}{Summary}
+    \begin{table}[]
+        \centering
+        \begin{tabular}{l|cc}
+            Property & Grid Search & Random Search \\
+            \midrule
+            Easy to implement & $\checkmark$ & $\checkmark$ \\
+            All parameter types possible & $\checkmark$ & $\checkmark$ \\
+            Parallelization is trivial & & $\checkmark$ \\
+            Does not suffer from the curse of dimensionality & & $\checkmark$ \\
+            Does not require discretization of hyperparameters & & $\checkmark$ \\
+            Anytime algorithm & & $\checkmark$
+        \end{tabular}
+    \end{table}
+\end{frame}
+
+\includepdf[pages={2,4,5,10}]{i2ml/slides-tuning-advanced.pdf}
+
+\includepdf[pages={6}]{i2ml/slides-tuning-practical.pdf}
+
+\endlecture
+\end{document}

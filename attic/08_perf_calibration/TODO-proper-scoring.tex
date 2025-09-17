@@ -1,0 +1,130 @@
+\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+
+
+\usepackage[nospeakermargin]{../../style/lmu-lecture-2}
+% Defines macros and environments
+\input{../../style/common.tex}
+\usepackage{etoolbox}
+\makeatletter
+\newlength{\parboxtodim}
+\patchcmd{\@iiiparbox}
+  {\hsize}
+  {\ifx\relax#2\else\setlength{\parboxtodim}{#2}\fi\hsize}
+  {}{}
+\makeatother
+\begin{document}
+
+\newcommand{\titlefigure}{figure/calibrationplot}
+\newcommand{\learninggoals}{
+\item Understand difference between calibration and discrimination
+\item How to diagnose calibration
+\item How to calibrate probabilities}
+
+\lecturechapter{Calibration versus Discrimination}
+\lecture{Applied Machine Learning}
+
+
+\begin{frame}{What Are Proper Scoring Rules?}
+\textbf{Definition}: A \emph{scoring rule} (loss) is a function $S(y, p)$ that assigns a penalty based on the predicted probability $p \in [0,1]$ and the true label $y \in \{0,1\}$.
+
+\medskip
+\textbf{Proper Scoring Rule}:
+\begin{itemize}
+    \item A scoring rule $S(y, p)$ is \emph{proper} if it is minimized in expectation when predicted probability $p$ equals the true conditional probability $\pi$:
+    \[
+    \mathbb{E}_{Y \sim \pi}[S(Y, p)] \geq \mathbb{E}_{Y \sim \pi}[S(Y, \pi)]
+    \quad \text{for all } p \in [0,1]
+    \]
+    \item It is \emph{strictly proper} if equality holds only when $p = \pi$.
+\end{itemize}
+
+\medskip
+\textbf{Implication}: Proper scoring rules encourage honest probability estimates. Examples include Log-Loss and Brier Score.
+\end{frame}
+
+
+% \begin{frame}{Proper Scoring Rules}
+% \textbf{Motivation}: Quantify Calibration Quality
+
+% Let $y$ be the true outcome, $p$ the model's predicted probability, $M$ number of bins, $N$ number of instances
+
+% There is ways to measure BOTH calibration and accuracy:
+
+% \begin{itemize}
+%     \item \textbf{Brier Score}: mean squared error between predicted probability and true outcome
+
+%     $$BS = \frac{1}{N}\sum_{i=1}^{N}(y_i-p_i)^2$$
+
+%     can be decomposed into 
+
+%     $$BS = \sum_{m=1}^M \frac{|B_m|}{N}(\bar{y}(B_m)-\bar{p}(B_m))^2 - \sum_{m=1}^M \frac{|B_m|}{N}(\bar{y}(B_m)-\bar{y})^2 + \bar{y}(1-\bar{y})$$
+
+%     so BS = Calibration Quality - Accuracy + Inherent Uncertainty (how unbalanced classes are)
+% \end{itemize}
+% \end{frame}
+
+% \begin{frame}{Proper Scoring Rules}
+%     \begin{itemize}
+%         \item \textbf{Log-Loss}: 
+
+%         $$-\frac{1}{N}\sum_{i=1}^{N}(y\log p+(1-y)\log(1-p))$$
+
+%         it measures 
+%         \begin{itemize}
+%             \item Accuracy: It penalizes wrong predictions — especially confident wrong predictions.
+%             \item Calibration: It evaluates whether your predicted probabilities reflect true likelihoods.
+%         \end{itemize}
+
+%         Log loss is strictly proper, which means:
+
+% The expected log loss is minimized only when predicted probabilities match the true conditional probabilities.
+%     \end{itemize}
+
+
+% \end{frame}
+\begin{frame}{Proper Scoring Rules: Brier Score}
+\textbf{Goal}: Jointly evaluate calibration and predictive accuracy
+
+\medskip
+\textbf{Brier Score (BS)}:
+\[
+\mathrm{BS} = \frac{1}{N} \sum_{i=1}^N (y_i - p_i)^2
+\]
+
+\medskip
+\textbf{Decomposition} (Murphy, 1973):
+\[
+\mathrm{BS} = \underbrace{\text{Calibration}}_{\mathrm{bias}} - \underbrace{\text{Discrimination}}_{\mathrm{var}} + \underbrace{\text{Uncertainty}}_{\mathrm{noise}}
+\]
+\[
+\mathrm{BS} = \sum_{m=1}^M \frac{|B_m|}{N} (\bar{y}(B_m) - \bar{p}(B_m))^2 - \sum_{m=1}^M \frac{|B_m|}{N} (\bar{y}(B_m) - \bar{y})^2 + \bar{y}(1 - \bar{y})
+\]
+
+\medskip
+Smaller BS indicates both better calibration and higher sharpness.
+\end{frame}
+
+\begin{frame}{Proper Scoring Rules: Log Loss}
+\textbf{Goal}: Strictly proper scoring for probabilistic predictions
+
+\medskip
+\textbf{Logarithmic Loss (Negative Log Likelihood)}:
+\[
+\mathrm{LogLoss} = -\frac{1}{N} \sum_{i=1}^N \left[ y_i \log p_i + (1 - y_i) \log (1 - p_i) \right]
+\]
+
+\medskip
+\textbf{Interpretation}:
+\begin{itemize}
+    \item Penalizes confident mispredictions more heavily
+    \item Measures both calibration and correctness
+\end{itemize}
+
+\medskip
+\textbf{Strictly Proper}:
+Expected LogLoss is minimized only if $p_i = \mathbb{P}(y_i=1|x_i)$
+\end{frame}
+
+
+\endlecture
+\end{document}

@@ -1,0 +1,461 @@
+---
+title: "Data Preprocessing - Playing With Different Preprocessings"
+subtitle: "Cleaning a Data Set"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 2
+    css: ../../courses/_setup/css/style-usecase.css
+    self_contained: yes
+---
+
+<!-- #FIXME: mlr3 codestyle -->
+
+```{r, echo = FALSE}
+show.solution = TRUE
+```
+
+```{r, include = FALSE}
+# Just some preparation
+knitr::opts_chunk$set(
+  cache = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  echo = TRUE,
+  R.options = list(width = 120)
+)
+lgr::get_logger("mlr3")$set_threshold("warn")
+# SET BBOTK TO 'info' IF YOU PLAY AROUND WITH THIS!
+lgr::get_logger("bbotk")$set_threshold("info")
+```
+
+# Goals
+
+Learn how to detect missing values and `NA`s in a data set and create a clean data set that can be used for modelling.
+
+# Exercises
+
+We work with a ''dirty'' version of the German credit data set, where some variables have outliers and missing values.
+(Numeric) outliers are observations that lie within an ''abnormal'' distance from other values.
+Note that this definition leaves it up to the data analyst to decide what is to be considered ''abnormal''.
+However, outliers often can also have a content-related interpretation (which we will see in Exercise 1).
+
+<details>
+<summary>Categorical outliers</summary>
+
+Note that the definition above is only suitable for numeric features.
+For categorical features, there is no straightforward definition of outliers.
+However, what often can be encountered in practice is that some categorical features have a very large number of rarely used factor levels.
+During the modelling process, it is often useful to collapse rarely used levels to a single level such as ''other'', to,
+e.g., reduce overhead when encoding categorical features.
+Note that we will not cover such ''categorical outliers'' in this usecase.
+
+</details>
+
+&nbsp;
+
+```{r}
+library(data.table)
+credit = as.data.table(read.csv("data/german_credit_dirty.csv", header = TRUE, stringsAsFactors = TRUE))
+```
+
+## Detect outliers and set them to NA
+
+Use techniques from Day 1 to find outliers in the dataset and set them to `NA`.
+
+<details>
+<summary>**Hint 1:**</summary>
+
+You can, for example, use functionality from the `DataExplorer` package.
+
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+
+```{r, eval = FALSE}
+library(DataExplorer)
+plot_histogram(...)
+plot_density(...)
+```
+
+You can use the `data.table` in-place operator (`:=`) to assign `NA` values, e.g.,
+
+```{r, eval = FALSE}
+credit[1, age := NA_integer_]
+```
+
+sets the age value of the first row to `NA`.
+
+</details>
+
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r}
+library(DataExplorer)
+plot_histogram(credit)
+plot_density(credit)
+```
+
+Looking at the histogram plots, we observe plenty of age values of `0`.
+
+This is also reflected in the density plots.
+
+As we know that an underage person cannot take out a loan, we can assume that those values are content-related outliers, e.g., they may have been set to `0` to indicate that the actual values were missing.
+
+We also observe that there appears to be a single amount value that is comparably large (around `80000`).
+
+```{r}
+range(credit$age, na.rm = TRUE)
+mean(credit$age == 0, na.rm = TRUE)  # relative frequency
+range(credit$amount, na.rm = TRUE)
+mean(credit$amount == 80000, na.rm = TRUE)  # relative frequency
+```
+
+We therefore assign age values of `0` and amount values of `80000` `NA`:
+
+```{r}
+credit[age == 0, age := NA_integer_]
+credit[amount == 80000, amount := NA_integer_]
+```
+
+</details>
+
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Figure out how many observations have missing values
+
+Create summary statistics / missing plots to figure out how many observations have missing values (`NA`s).
+
+<details>
+<summary>**Hint 1:**</summary>
+
+You can again use functionality from the `DataExplorer` package.
+
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+
+```{r, eval = FALSE}
+plot_missing(...)
+```
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r}
+plot_missing(credit)
+rel_missing = colMeans(is.na(credit))
+rel_missing[rel_missing > 0]
+```
+
+13.4 % of age observations, 0.1% of amount observations, 8.7% of employment observations and 4.9% of number\_credits observations are missing.
+
+&nbsp;
+
+If we want o see how many rows contain at least one missing value, we can do the following:
+
+```{r}
+mean(rowSums(is.na(credit)) > 0)
+```
+
+24.8% of rows have at least one missing value.
+
+
+</details>
+
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Use histogram imputation for numeric and constant imputation for categorical features
+
+We now want to impute missing values for each feature variable.
+For numeric features, we want to use histogram imputation, whereas categorical features should be imputed using a constant.
+As our data set only contains integer features (and no continuous numeric features), the histogram imputation boils down to constructing a table of observed values and sampling imputed values proportionally to their observed frequency.
+
+We will do this manually.
+
+We start with the categorical feature imputation.
+
+What would be an appropriate ''constant'' for imputing a categorical feature?
+
+<details>
+<summary>Click me:</summary>
+
+Any new level that indicates that we imputed the value, e.g., `".missing"`.
+
+</details>
+
+Now, we want to write a function for performing histogram imputation.
+Recall that histogram imputation works by computing a histogram / table of feature values and sampling imputed values proportionally to the observed frequency of observed values (in the case of integer features).
+
+The very basic structure of the function should look like the following: `impute_table = function(x, seed = NULL)`.
+
+`x` should be the (integer) feature to impute and `seed` is an optional random seed to allow for reproducibility.
+The function should return the imputed `x`, i.e., `NA` values are imputed by sampling feature values proportionally to their observed frequency.
+
+After having written the function, impute integer features using the `impute_table` function.
+Also, impute categorical features with missing values via a new level `".missing"`.
+Recall that `age` and `amount` are integer features with missing values, and `employment_duration` and `number_credits` are categorical features with missing values.
+Summarize the cleaned data set with plots you used in earlier exercises.
+
+<details>
+<summary>**Hint 1:**</summary>
+
+```{r, eval = FALSE}
+impute_table = function(x, seed = NULL) {
+  stopifnot(typeof(x) == "integer")
+  ...
+}
+```
+
+```{r, eval = FALSE}
+# missing value imputation
+```
+
+
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+
+```{r, eval = FALSE}
+impute_table = function(x, seed = NULL) {
+  stopifnot(typeof(x) == "integer")
+  tab = table(x)
+  values = sort(unique(x))  # note that all(names(tab) == as.character(values))
+  rel_freq = tab / sum(tab)
+  is_missing = is.na(x)
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
+  imputed_values = sample(...)
+  x[is_missing] = imputed values
+  x
+}
+```
+
+```{r, eval = FALSE}
+# missing value imputation
+```
+
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r}
+impute_table = function(x, seed = NULL) {
+  stopifnot(typeof(x) == "integer")
+  tab = table(x)
+  values = sort(unique(x))  # note that all(names(tab) == as.character(values))
+  rel_freq = tab / sum(tab)
+  is_missing = is.na(x)
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
+  imputed_values = sample(values, size = sum(is_missing), replace = TRUE, prob = rel_freq)
+  x[is_missing] = imputed_values
+  x
+}
+```
+
+```{r}
+# missing value imputation
+imputed_age = impute_table(credit$age, seed = 1)
+credit[, age := imputed_age]
+
+imputed_amount = impute_table(credit$amount, seed = 1)
+credit[, amount := imputed_amount]
+
+credit[is.na(employment_duration), employment_duration := ".missing"]
+levels(credit$employment_duration)
+
+credit[is.na(number_credits), number_credits := ".missing"]
+levels(credit$number_credits)
+
+plot_histogram(credit)
+plot_density(credit)
+plot_missing(credit)
+```
+
+</details>
+
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Fit a logistic regression to the cleaned data set
+
+Fit a logistic regression to the cleaned data set.
+
+<details>
+<summary>**Hint 1:**</summary>
+
+```{r, eval = FALSE}
+logreg = glm(formula = ..., family = ..., data = ...)
+```
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r}
+logreg = glm(formula = credit_risk ~ ., family = binomial(), data = credit)
+```
+
+</details>
+
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Advanced: Compare feature ranges and write a function that checks if new data contains outliers
+
+Compare the ranges of integer features in the (dirty) data set to the ranges after setting outliers to `NA` and imputation (i.e., the ranges in the already cleaned data set).
+
+Then, write a function that checks for a given feature, whether data contains outliers (i.e., feature values outside of the range in the cleaned data set).
+
+The very basic structure of the function should look like the following: `check_range = function(x, range)`.
+
+`x` should be the feature to check and `range` should be a vector of length 2, containing the minimum and maximum of feature values.
+
+The function should return `TRUE` or `FALSE`, depending on whether all `x` values are in range or not.
+
+<details>
+<summary>**Hint 1:**</summary>
+
+Use `range`.
+
+```{r, eval = FALSE}
+# range comparison
+range(...)
+.
+.
+.
+```
+
+```{r, eval = FALSE}
+check_range = function(x, range) {
+}
+```
+
+</details>
+
+
+<details>
+<summary>**Hint 2:**</summary>
+
+```{r, eval = FALSE}
+# range comparison
+range(credit$age)
+...
+
+range(credit_dirty$age, na.rm = TRUE)
+...
+```
+
+```{r, eval = FALSE}
+check_range = function(x, range) {
+  x_in_range = x >= ... & x <= ...  # x in [min, max]
+  all(x_in_range)
+}
+```
+
+</details>
+
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = FALSE}
+# range comparison
+range(credit$age)
+range(credit$amount)
+
+range(credit_dirty$age, na.rm = TRUE)
+range(credit_dirty$amount, na.rm = TRUE)
+```
+
+```{r}
+check_range = function(x, range) {
+  # we skip some safety checks here
+  # x must be numeric or integer and should not contain any NAs
+  # range must be a numeric / integer vector of length 2
+  # range[1] must be <= range[2], i.e., min then max and not switched
+
+  x_in_range = x >= range[1] & x <= range[2]
+  all(x_in_range)
+}
+```
+
+</details>
+
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+We can now test the `check_range` function on the `age` variable in the cleaned and dirty data set:
+
+```{r, eval = FALSE}
+check_range(credit$age, range = range(credit$age))
+outlier_age = credit$age
+outlier_age[1] = 99
+check_range(outlier_age, range = range(credit$age))
+```
+
+## Summary
+
+You have learned how to detect outliers and missing values and how to manually impute them.
+
+If we are in the scenario of training a model on a given data set and predicting with the model on a different data set, the same preprocessing that was used for the training data should also be performed on the test data.
+For example, if our test data also has missing values in the `age` feature, we should use the same histogram imputation that was used on the training data (and not recompute the table and frequency on the test data because this may result in data leakage and overly optimistic performance estimation of the model on the test data).
+
+In later exercises, we will see how preprocessing  can be efficiently done via the `mlr3pipelines` package which also prevents such potential data leakage.
+
+If you still have some free time, you may already want to check out the `mlr3pipelines` package ([link](https://mlr3pipelines.mlr-org.com/)), especially `PipeOpImpute`, `PipeOpImputeHist` and `PipeOpImputeConstant`.

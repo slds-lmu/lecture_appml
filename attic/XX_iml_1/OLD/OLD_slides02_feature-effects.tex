@@ -1,0 +1,34 @@
+\documentclass[11pt,compress,t,notes=noshow, aspectratio=169, xcolor=table]{beamer}
+
+% Can only be executed locally, as the 'lecture_iml' submodule is accessed (which is not included in Overleaf). 
+% Before executing this script, please ensure that the latest PDF files are available in the 'slides-pdf' folder in 'lecture_iml'.
+
+\usepackage{../../style/lmu-lecture}
+\usepackage{pdfpages}
+% Defines macros and environments
+\input{../../style/common.tex}
+
+
+\title{Interpretable Machine Learning}
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\begin{document}
+
+
+\includepdf[pages=-]{../../lecture_iml/slides-pdf/slides01-fe-intro.pdf}
+% \includepdf[pages={1}]{../../lecture_iml/slides-pdf/slides01-intro-motivation.pdf}
+
+\includepdf[pages={1-10}]{../../lecture_iml/slides-pdf/slides02-fe-ice.pdf}
+
+\includepdf[pages=-]{../../lecture_iml/slides-pdf/slides03-fe-pdp.pdf}
+
+\includepdf[pages={1}]{../../lecture_iml/slides-pdf/slides06-fe-ale.pdf}
+
+\includepdf[pages={2-}]{../../lecture_iml/slides-pdf/slides05-fe-ale-intro.pdf}
+
+\includepdf[pages={15-}]{../../lecture_iml/slides-pdf/slides06-fe-ale.pdf}
+
+
+\end{document}

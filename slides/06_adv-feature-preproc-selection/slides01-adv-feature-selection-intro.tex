@@ -1,0 +1,227 @@
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+\title{Applied Machine Learning}
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
+
+\begin{document}
+
+\titlemeta{
+Feature Selection:
+}{
+Introduction
+}{
+figure_man/empty
+}{
+	%\item Imputation
+    \item Reasons for Feature Selection
+    \item Types of Feature Selection
+}
+
+
+\section{Recap}
+
+\begin{frame}{What is feature engineering?}
+Feature engineering is on the intersection of \textbf{data cleaning}, \textbf{feature
+creation} and \textbf{feature selection}.
+\vfill
+The goal is to solve common difficulties in data science projects, like
+\vfill
+\begin{itemize}
+    \item skewed/weird feature distributions,
+    \item (high cardinality) categorical features,
+    \item functional (temporal) features,
+    \item missing observations,
+    \item high dimensional data,
+    \item ...
+\end{itemize}
+\vfill
+and improve model performance (or make the data readable by the model in the first place).
+\end{frame}
+
+\begin{frame}{Train-Test Leakage}
+% This is so important, that I will just repeat this again!
+% \includepdf[pages={2},trim=0 20 0 50,clip,width=400pt,offset=-60pt 10pt,pagecommand={}]{../05_feature-preproc/pdf_chapters/slides_leakage.pdf}
+\begin{center}
+\includegraphics[width=\textwidth]{figure_man/pipe_action.png}
+\end{center}
+
+\end{frame}
+
+
+
+\begin{frame}{Types of Feature Engineering (so far)}
+\begin{itemize}
+    \item numerical encoding of categorical features
+    \item feature transformations
+    \item imputation
+\end{itemize}
+\end{frame}
+
+% slides\06_adv-feature-preproc-selection\sl\slides-fs-introduction.pdf
+\section{Feature Selection}
+
+\begin{vbframe}{Motivation}
+\begin{itemize}
+\setlength{\itemsep}{0.8em}
+    \item Naive view:
+    \begin{itemize}
+        \item More features $\rightarrow$ more information $\rightarrow$ discriminant power $\uparrow$
+        \item Model is not harmed by irrelevant features since their parameters can simply be estimated as 0.
+    \end{itemize}
+    %\item In practice there are many reasons why this is not the case!
+    \item In practice, irrelevant and redundant features can \enquote{confuse} learners (see \textbf{curse of dimensionality}) and worsen performance.
+    \item Example: In linear regression, $R^2$ is monotonically increasing in $p$, but adding irrelevant features leads to overfitting (capturing noise). %instead of underlying relationship.
+\end{itemize}
+
+\begin{center}
+    \includegraphics[width = 0.5\textwidth]{sl/feature-selection/figure/avoid_overfitting_02.png}\\
+\end{center}
+
+\framebreak
+
+\begin{itemize}
+\setlength{\itemsep}{1.0em}
+    \item In high-dimensional data sets, we often have prior information that many features are either irrelevant %or redundant 
+    or of low quality
+    \item Having redundant features can cost something during prediction %cost something 
+    (money or time)
+    %\item Training data are limited.
+    %\item Computational resources are limited.
+    \item Many models require $n > p$ data. Thus, we either need to
+    %\item Thus, we either need
+    \begin{itemize}
+    \item adapt models to high-dimensional data (e.g., regularization)
+    \item design entirely new procedures for $p>n$ data
+    \item use filter preprocessing methods from this lecture
+    \end{itemize}
+\end{itemize}
+\end{vbframe}
+
+\begin{vbframe}{Size of datasets}
+Many new forms of technical measurements and connected data leads to availability of extremely high-dimensional data sets.
+
+\vspace{0.5cm}
+\begin{itemize}
+\setlength{\itemsep}{1.2em}
+    \item \textbf{Classical setting}: Up to around $10^2$ features, feature selection might be relevant, but benefits often negligible.
+    \item \textbf{Datasets of medium to high dimensionality}:
+    At around $10^2$ to $10^3$ features, classical approaches can still work well, while principled feature selection helps in many cases.
+    \item \textbf{High-dimensional data}: $10^3$ to $10^9$ or more features.
+    Examples: micro-array / gene expression data and text categorization (bag-of-words features).
+    If we also have few observations, scenario is called $p \gg n$.
+\end{itemize}
+
+\end{vbframe}
+
+\begin{vbframe}{Feature selection vs. extraction}
+
+\begin{columns}
+    %Both graphs taken out from Tim Conrad's presentation for Novisad (see cim2/external_material/tim_conrad_novisad)
+
+    \column{0.49\textwidth}
+    %\textbf{Feature selection}
+
+    \medskip
+
+    \includegraphics{sl/feature-selection/figure_man/feature_selection.png}
+
+    \smallskip
+
+    \begin{itemize}
+    \item Creates a subset of original features $\xv$ by selecting $\tilde{p} < p$ features $\bm{f}$.
+    %\item Selected features are subset of $\xv$.
+    \item Retains information on selected individual features.
+    \end{itemize}
+
+    \column{0.49\textwidth}
+    %\textbf{Feature extraction}
+
+    \medskip
+
+    \includegraphics{sl/feature-selection/figure_man/feature_extraction.png}
+
+    \smallskip
+
+    \begin{itemize}
+    \item Maps $p$ features in $\xv$ to $\tilde{p}$ extracted features $\bm{f}$.
+    %\item Forms linear or nonlinear combinations of the original features.
+    \item Info on individual features can be lost through (non-)linear combination.
+    \end{itemize}
+
+\end{columns}
+
+\end{vbframe}
+
+\begin{frame}{Reasons for feature selection}
+\begin{itemize}
+    % All from https://mlr3book.mlr-org.com/chapters/chapter6/feature_selection.html#sec-fs-filter
+    \item improved predictive performance, since we reduce overfitting on irrelevant features,
+    \item robust models that do not rely on noisy features,
+    \item simpler models that are easier to interpret,
+    \item faster model fitting, e.g. for model updates,
+    \item faster prediction, and
+    \item no need to collect potentially expensive features.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Goals of feature selection}
+% Source: https://link.springer.com/article/10.1007/s10618-020-00731-7
+\vfill
+\textbf{Single Feature Selection Problem:} identifying a minimal-size subset of the variables that is optimally predictive for an outcome variable T of interest.
+
+%\vspace{1cm}
+\vfill
+
+% For this lecture the multiple feature selection problem is not relevant, but it is important that you have heard about it
+\textbf{Multiple Feature Selection Problem:} Let $\mathcal{S}$ be the solution to the single feature selection problem (called the reference solution). The solution $\mathcal{M}$ to the multiple feature selection problem consists of all minimal-size sets $\mathcal{S}_i \in \mathcal{F}$  that are statistically equivalent to $\mathcal{S}$.
+\begin{itemize}
+    \item Important for knowledge discovery (know all possible solutions)
+    \item We will not delve into this any further
+\end{itemize}
+\vfill
+\end{frame}
+
+% \includepdf[pages={8},trim=0 20 0 0,clip,width=490pt,offset=-10pt 10pt,pagecommand={}]{sl/slides-fs-introduction.pdf}
+
+
+\begin{vbframe}{Types of feature selection methods}
+
+In rest of the chapter, we introduce different types of methods for FS:
+
+\begin{itemize}
+\item Filters: evaluate relevance of features using statistical properties such as correlation with target variable
+\item Wrappers: use a model to evaluate subsets of features
+\item Embedded methods: integrate FS directly into specific model - we look at them in their dedicated chapters (e.g., CART, $L_0$, $L_1$)
+\end{itemize}
+
+    \textbf{Example: embedded method (Lasso)} regularizing model params with $L1$ penalty %in the empirical risk 
+    enables ``automatic" feature selection:
+    \vspace{-0.28cm}
+    % I changed thetav to thetab, perhap this file was outdated
+    $ \riskrt = \risket + \lambda \|\thetab\|_1 = \sumin \left(\yi - \thetab^\top \xi \right)^2 +\lambda \sum_{j=1}^p |\theta_j| $
+    %are very popular for high-dimensional data.
+    %\item The penalty shrinks the coefficients towards 0 in the final model.
+    %\item Many (improved) variants: group LASSO, adaptive LASSO, ElasticNet, ...
+    %\item Has some very nice optimality results: e.g., compressed sensing.
+\vspace{0.1cm}
+\begin{center}
+\includegraphics[width=0.65\textwidth]{sl/feature-selection/figure/regu_example_lasso_ridge.png}
+%\footnotesize{Lasso vs ridge regularization.}
+\end{center}
+
+
+\end{vbframe}
+
+
+
+\endlecture
+\end{document}

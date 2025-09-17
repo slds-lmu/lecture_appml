@@ -1,0 +1,232 @@
+---
+title: "Supervised Learning II"
+subtitle: "Resampling: Stratified and Blocked"
+output:
+  prettydoc::html_pretty:
+    theme: hpstr
+    toc: yes
+    toc_depth: 2
+    css: ../_template/prettydoc-hpstr.css
+    self_contained: yes
+---
+
+```{r, include=FALSE}
+sys.source("setup.R", envir = knitr::knit_global())
+```
+
+# Goal
+
+After this exercise, you should be able to control the resampling process when using `mlr3` in order to account for data specificities, such as class imbalances in classification settings or grouping phenomena.
+
+# Prerequisites
+
+We load the most important packages and use a fixed seed for reproducibility.
+
+```{r}
+library(mlr3verse)
+library(mlbench)
+library(data.table)
+set.seed(7832)
+```
+
+# 1 Stratified Resampling
+
+In classification tasks, the ratio of the target class distribution should be similar in each train/test split, which is achieved by stratification. This is particularly useful in the case of imbalanced classes and small data sets.
+
+Stratification can also be performed with respect to explanatory categorical variables to ensure that all subgroups are represented in all training and test sets.
+
+In `mlr3`, each `task` has a slot `$col_roles`.
+This slot shows general roles certain features will have throughout different stages of the machine learning process.
+At least, the `$col_roles` slot shows which variables will be used as `feature` and as `target`.
+However, the `$col_roles` slot can be more diverse and some variables might even serve multiple roles.
+For example, `task$col_roles$stratum` specify the variable used for stratification.
+In this exercise, we will illustrate this using the `german_credit` data:
+
+```{r}
+task_gc = tsk("german_credit")
+task_gc$col_roles
+```
+
+## 1.1 Set stratification variable
+
+Modify the `task_gc` object such that the target variable `credit_risk` is used to for stratification.
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+```{r, eval = show.solution}
+task_gc$col_roles$stratum = "credit_risk"
+```
+
+After the specification of `task$col_roles$stratum`, the active binding `task$strata` will show the number of observations in each group and the corresponding row ids:
+
+```{r, eval = show.solution}
+task_gc$strata
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## 1.2 Create resampling procedure
+
+Next, specify a 3-fold cross validation and instantiate the resampling on the task.
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+```{r, eval = show.solution}
+cv3 = rsmp("cv", folds = 3)
+cv3$instantiate(task_gc)
+cv3$instance
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## 1.3 Sanity check
+
+As a sanity check, the target class distribution should be similar within each CV fold. Compute and check the target class distribution within each fold.
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+```{r, eval = show.solution}
+dt = merge(cv3$instance, task_gc$data()[, row_id := .I], by = "row_id")
+dt[, .(class_ratio = sum(credit_risk == "bad") /
+  sum(credit_risk == "good")), by = fold]
+```
+
+Indeed, we can see that the target class is distributed similarly within each CV fold, matching the overall class distribution:
+
+```{r, eval = show.solution}
+dt[, .(class_ratio = sum(credit_risk == "bad") / sum(credit_risk == "good"))]
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+# 2 Block Resampling
+
+An additional concern when specifying resampling is respecting the natural grouping of the data. Blocking refers to the situation where subsets of observations belong together and must not be separated during resampling. Hence, for one train/test set pair the entire block is either in the training set or in the test set.
+
+In the following example, wel will consider the `BreastCancer` data set from the `mlbench` package:
+
+```{r}
+data(BreastCancer, package = "mlbench")
+task_bc = as_task_classif(BreastCancer, target = "Class", positive = "malignant")
+```
+
+In this data set, several observations have the same `Id` (sample code number), which implies these are samples taken from the same patient at different times.
+
+## 2.1 Count groups
+
+Let's count how many observation actually have the same `Id` more than once.
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+```{r, eval = show.solution}
+sum(table(BreastCancer$Id) > 1)
+```
+
+There are 46 `Id`s with more than one observation (row).
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+The model trained on this data set will be used to predict cancer status of new patients. Hence, we have to make sure that each Id occurs exactly in one fold, so that all observations with the same Id should be either used for training or for evaluating the model. This way, we get less biased performance estimates via k-fold cross validation. This can be achieved by block cross validation.
+
+## 2.2 Set up block resampling
+
+Similarly to stratified resampling, block resampling uses `task$col_roles$group` to specify the name of a grouping variable included in the feature set. Now, set the column `Id` as grouping variable in the `task` object. 
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+```{r, eval = show.solution}
+task_bc$col_roles$group = "Id"
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## 2.3 Instantiate resampling
+
+Next, set up a 5-fold CV and instantiate it on the task.
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+```{r}
+cv5 = rsmp("cv", folds = 5)
+cv5$instantiate(task_bc)
+cv5$instance
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## 2.4 Sanity check
+
+If the specified blocking groups are respected, each `Id` appears only in exactly one fold. To inspect if blocking was successful when generating the folds, count how often each `Id` appears in a specific fold and print the `Id`s that appear in more than one fold.
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>**Click me:**</summary>
+
+```{r, eval = show.solution}
+dt = merge(task_bc$data(), cv5$instance, by.x = "Id", by.y = "row_id")
+dt = dt[, .(unique_folds = length(unique(fold))), by = Id]
+dt[unique_folds > 1, ]
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+As expected, the table is empty as there are no Id’s present in more than one fold.
+
+# Summary
+
+- Stratified resampling helps with balancing classes and features within CV folds, to ensure each fold represents the data well enough.
+- Block resampling reduces bias in generalization error estimates by ensuring that observations from the same group end up in the same fold.

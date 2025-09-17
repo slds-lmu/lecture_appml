@@ -1,0 +1,2 @@
+Todos:
+re-generate figures from raschka in google pres --> hiwi job for next iteration of slides (MF: I improved them a bit and put them on Google Docs, but still need more iterations because they still look bad...Sources are here: https://docs.google.com/presentation/d/1gaeW1LefW3vQi3aoEiZEoSUaEyXfmQ9-U_1WoGKfGNM/edit#slide=id.g2e833da9e7c_0_91)

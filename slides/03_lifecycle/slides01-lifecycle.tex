@@ -1,0 +1,1239 @@
+\documentclass[10pt,compress,t,notes=noshow, xcolor=table]{beamer}
+
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+
+\usepackage{etoolbox}
+\makeatletter
+\newlength{\parboxtodim}
+\patchcmd{\@iiiparbox}
+  {\hsize}
+  {\ifx\relax#2\else\setlength{\parboxtodim}{#2}\fi\hsize}
+  {}{}
+\makeatother
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
+\begin{document}
+
+\title{Applied Machine Learning}
+
+\titlemeta{
+The Data Science Lifecycle
+}{
+Main phases
+}{
+figure_man/DSLifecycle1
+}{
+  \item Know phases of data science lifecycle
+  \item Identify essential concepts, tools, and methods for each phase
+}
+
+% \begin{frame}[plain]
+% \titlepage
+% \end{frame}
+
+
+% \begin{frame}[plain]{}
+% \phantomsection\label{section}
+% \end{frame}
+
+% \section{The Data Science Lifecycle}\label{the-data-science-lifecycle}
+
+% \begin{frame}{Learning Objectives}
+% By the end of this session, you should be able to:
+% \begin{itemize}
+%   \item Describe key phases of the data science lifecycle
+%   \item Identify essential concepts, tools, and methods for each phase
+%   \item Plan an end-to-end ML workflow with attention to constraints and dependencies
+% \end{itemize}
+
+% \end{frame}
+
+\begin{frame}{The Data Science Lifecycle \furtherreading{CRISP}}
+\phantomsection\label{the-data-science-lifecycle-1}
+\textbf{Lifecycle Management}: Process of managing a (product) lifecycle from inception, through engineering, design and manufacturing to deployment and eventual disposal.
+
+\textbf{CRISP-DM (Cross-Industry Standard Process for Data Mining)}:
+A widely used framework that formalizes the iterative process of turning data into knowledge. 
+
+%https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
+% \begin{figure}[h]
+% \includegraphics[width=7cm]{figure_man/DSLifecycle1.png}
+% \end{figure}
+
+% \end{frame}
+
+% \begin{frame}{The Data Science Lifecycle}
+% \phantomsection\label{the-data-science-lifecycle-1}
+
+%https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
+\begin{figure}[h]
+\includegraphics[width=9cm]{figure_man/DSLifecycle2.png}
+\end{figure}
+
+\end{frame}
+
+
+\section{1. Business Understanding}\label{business-understanding-1}
+
+\begin{frame}{Overview Business Understanding}
+%https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
+\begin{figure}[h]
+\includegraphics[width=\textwidth]{figure_man/BusinessUnderstandingOverview.png}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Requirements \& Constraints}
+\phantomsection\label{requirements-analysis}
+\textbf{Key question}: What is the end goal of the project?
+\begin{itemize}
+% \tightlist
+\item
+  Define the intended \textbf{output}:
+  \begin{itemize}
+  % \tightlist
+      \item Report, dashboard, or interactive tool?
+      \item Scalable pipeline for production use?
+  \end{itemize}
+\pause
+\item Identify constraints% (--> Summarized in \textbf{Service Level Agreements})
+    \begin{itemize}
+      % \tightlist
+      \item
+        Ethical: Avoid sensitive data use (e.g., address may proxy ethnicity)
+      \item
+        Legal: Exclude protected attributes (e.g., gender in automated hiring)  %in automated decisions (e.g., job applications).
+      \item
+        Reproducibility: Ensure the analysis is fully reproducible in a single step
+      \item
+        Explainability: All model decisions must be explainable to the user
+        \item Prediction Latency: Real-time predictions required
+        \item Model Size: Stay within specified memory constraints
+      \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Requirements \& Constraints}
+\phantomsection\label{requirements-ml-framing}
+
+\textbf{1. ML Applicability: Is ML justified?}
+\begin{itemize}
+  % \tightlist
+  \item Explore non-ML baselines first (rules, heuristics, simple analytics)
+  \item Use ML only if it adds clear value over simpler/existing alternatives
+\end{itemize}
+\pause
+\textbf{2. Problem Framing: How to frame the task?}
+\begin{itemize}
+  % \tightlist
+  \item \emph{Imbalanced data:} classification vs.\ anomaly detection?
+  \item \emph{Pred. maintenance:} failure probability (classif.) vs.\ remaining lifetime (regr.)?
+  \item Select the ML task that aligns with your KPI and data characteristics
+\end{itemize}
+
+\centering
+\includegraphics[width=0.6\textwidth]{figure_man/MLTasks.png}
+\end{frame}
+
+% \begin{frame}{Requirements Analysis: ML Application}
+% \phantomsection\label{non-ml-baseline}
+% \textbf{Key question}: Is ML necessary or is a simpler non-ML baseline sufficient?
+% \begin{itemize}
+% \tightlist
+%   \item Consider simpler alternatives first
+%   \item Evaluate current rule-based or heuristic systems
+%   \item ML is justified when patterns are too complex or dynamic for rules
+% \end{itemize}
+% \end{frame}
+
+% \begin{frame}{Requirements Analysis: Problem Frame}
+% \phantomsection\label{choosing-the-right-problem-frame}
+% \textbf{Key question}: Is it classification, regression or something else?
+% \begin{itemize}
+% \tightlist
+% \item
+%   A highly imbalanced problem: Frame it as classification, or anomaly
+%   detection?
+% \item
+%   Predictive maintenance: Frame it as classification (probability of
+%   failure), or regression (expected remaining lifetime)?
+% \item
+%   The answer is not clear, but depends on your application. It's
+%   important to think about these problems!
+% \end{itemize}
+% ML-tasks you can select from:
+% %https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
+% \begin{figure}[h]
+% \includegraphics[width=7cm]{figure_man/MLTasks.png}
+% \end{figure}
+% \end{frame}
+
+
+% \begin{frame}{KPIs and Business Objectives}
+% \phantomsection\label{translating-kpis-into-performance-measures}
+% \textbf{KPI}: Key Performance Indicator
+
+% \textbf{Key question}: How does the business side measure success/ performance of the ML solution? How can we translate this to a ML performance measure?
+
+% \begin{itemize}
+% \tightlist
+% \item
+%   Spam detection:
+
+% \begin{itemize}
+%   \tightlist
+%   \item
+%     \emph{Not} OK to misclassify a job application as spam (positive
+%     class)
+%   \item
+%     A spam mail in your inbox once in a while is no problem\\
+%     \(\rightarrow\) \emph{minimize the false positive rate},
+%     i.e.~maximize precision
+%   \end{itemize}
+% \item
+%   Airport security:
+
+%   \begin{itemize}
+%   \tightlist
+%   \item
+%     \emph{Not} OK to misclassify a weapon (positive class) as laptop
+%   \item
+%     A false alarm once in a while is no problem\\
+%     \(\rightarrow\) \emph{minimize the false negative rate},
+%     i.e.~maximize recall
+%   \end{itemize}
+% \end{itemize}
+
+% \end{frame}
+
+% \begin{frame}{Multiple Objectives}
+% \phantomsection\label{multiple-objectives}
+% \textbf{Key question}: How to optimize multiple objectives?
+% \begin{itemize}
+% \tightlist
+% \item
+%   What if a choice increases objective 1, but decreases objective 2? Is
+%   it better?
+% \item Maybe maximizing AUC leads to more model complexity and less explainability
+% \item
+%   There are two common ways to deal with multiple objectives:
+
+%   \begin{itemize}
+%   \tightlist
+%   \item
+%     \textbf{Scalarization} in a \emph{compound measure}:
+%     \(obj_1 * obj_2\)
+%   \item
+%     \textbf{Multi-objective Analysis} %TODO add link for further reading
+%   \end{itemize}
+% \end{itemize}
+% \end{frame}
+
+
+
+% \begin{frame}{Performance Measures}
+% \phantomsection\label{performance-measures}
+
+% \textbf{Key question}: what performance measure suits best for your solution?
+
+% \begin{itemize}
+% \tightlist
+%     \item \textbf{Precision and Recall}%: $Precision = \frac{TP}{TP+FP}$, $Recall = \frac{TP}{TP+FN}$
+%     \item to capture the tradeoff \textbf{F1-score} $F1 = \frac{2*Recall*Precision}{Recall + Precision}$
+%     \item \textbf{Accuracy}: %$Acc = \frac{TP+TN}{TP+TN+FP+FN}$
+%     for highly imbalanced data, the accuracy
+%   (percentage of correct predictions) is not a good measure
+%   \item I.e. in an HIV test, where 99.9\% of the population is healthy, a senseless
+%   test that predicts ``healthy'' \emph{all the time}, automatically has
+%   an accuracy of 99.9\%
+% \end{itemize}
+
+% %https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
+% \begin{figure}[h]
+% \includegraphics[width=0.72\textwidth]{figure_man/ConfusionMatrix.png}
+% \end{figure}
+% \end{frame}
+
+
+\begin{frame}{Business Objectives: Performance Measures}
+\phantomsection\label{kpi-metrics-slide}
+\vspace{-0.5em}
+\begin{itemize}
+  % \tightlist
+  %-----------------------------------------------------------
+  \item<1-> \textbf{How to translate key performance indicators (KPIs) to metrics?}
+\begin{itemize}
+  % \tightlist
+  \item \textbf{Spam detection}: Job application flagged as spam = unacceptable\\
+      $\Rightarrow$ Occasional inbox spam is fine $\Rightarrow$ minimize FP $\Rightarrow$ maximize \textbf{precision}
+  \item \textbf{Airport security}:  Weapon flagged as laptop = unacceptable\\
+      $\Rightarrow$ Occasional false alarm is fine $\Rightarrow$ minimize FN $\Rightarrow$ maximize \textbf{recall}
+\end{itemize}
+
+\only<1>{
+    \begin{center}
+        
+    \includegraphics[width=0.5\linewidth]{figure_man/spam_airport.jpg}
+    \end{center}
+}
+  %-----------------------------------------------------------
+  \item<2-> \textbf{Multiple objectives:} What if improving one metric worsens another?
+    \begin{itemize}
+      % \tightlist
+      \item \textit{Scalarization}: Combine into one score (e.g.,\ $F_1$)
+      \item \textit{Pareto/frontier}: Analyze trade-off without collapsing (e.g., ROC curve)
+    \end{itemize}
+  %-----------------------------------------------------------
+  %\item \textbf{Core performance metrics}
+    % \begin{itemize}
+    %   \tightlist
+    %   \item Precision, Recall, $F_1$
+    %   \item Accuracy (misleading on severe class imbalance)
+    % \end{itemize}
+\end{itemize}
+
+\only<2>{
+ \scriptsize
+ \renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|l|cc|c|}
+\hline
+\multirow{2}{*}{\textbf{True Values}}
+  & \multicolumn{2}{c|}{\textbf{Predicted Values}} & \\%[0.3ex]
+  & \textbf{Pos} & \textbf{Neg} & \\[0.3ex]
+\hline
+
+\textbf{Pos}
+  & \cellcolor[gray]{0.9}\rule{0pt}{3.5ex}TP
+  & \cellcolor[gray]{0.9}FN
+  & \cellcolor[gray]{0.9}\rule{0pt}{3.5ex}%
+    \textbf{Sensitivity/Recall/TPR }%
+    $=\dfrac{TP}{TP+FN}$ \\
+
+\textbf{Neg}
+  & \cellcolor[gray]{0.9}\rule{0pt}{3.5ex}FP
+  & \cellcolor[gray]{0.9}TN
+  & \cellcolor[gray]{0.9}\rule{0pt}{3.5ex}%
+    \textbf{Specificity }%
+    $=\dfrac{TN}{TN+FP}$ \\[0.8ex]
+\hline
+  & \cellcolor[gray]{0.9}\rule{0pt}{3.5ex}
+      \textbf{Precision} $=\dfrac{TP}{TP+FP}$
+  & \cellcolor[gray]{0.9}\rule{0pt}{3.5ex}
+      \textbf{NPV} $=\dfrac{TN}{TN+FN}$
+  % & \cellcolor[gray]{0.9}\rule{0pt}{3ex}%
+  %     \textbf{Precision} $=\dfrac{TP}{TP+FP}$
+  % & \cellcolor[gray]{0.9}\rule{0pt}{3ex}%
+  %     \textbf{NPV} $=\dfrac{TN}{TN+FN}$
+  & \cellcolor[gray]{0.9}\rule{0pt}{3.5ex}
+      \textbf{F$_1$}%
+        $=\dfrac{2\,\text{Precision}\,\text{Recall}}%
+                {\text{Precision}+\text{Recall}}$
+  %\shortstack[l]{%
+      %\tiny\rule{0pt}{3.5ex}\textbf{Accuracy }%
+      %  $=\dfrac{TP+TN}{TP+FP+TN+FN}$\\[0.8ex]
+      %\tiny\rule{0pt}{3ex}\textbf{F$_1$}%
+      %  $=\dfrac{2\,\text{Precision}\,\text{Recall}}%
+      %          {\text{Precision}+\text{Recall}}$} 
+                \\[0.8ex]
+\hline
+\end{tabular}
+}
+
+
+%\vspace{0.5em}
+% \centering
+% \includegraphics[width=0.65\textwidth]{figure_man/ConfusionMatrix.png}
+\end{frame}
+
+
+% \begin{frame}{Validation Strategy}
+% \phantomsection\label{validation-strategy}
+
+% \textbf{Key question}: How to validate the model?
+
+% %from I2ML: https://drive.google.com/file/d/16O-rVIPJVpLIZ9-qb7BRIJxomCXcrNgL/edit
+% \begin{figure}[h]
+% \includegraphics[width=12cm]{figure_man/Validation.png}
+% \end{figure}
+% \end{frame}
+
+% \begin{frame}{Validation Strategy}
+% \phantomsection\label{validation-strategy}
+
+% \textbf{Key question}: How to validate the model?
+
+% Considerations when deciding for a validation strategy:
+
+% \begin{itemize}
+% \tightlist
+% \item
+%   What to generalize to?
+
+%   \begin{itemize}
+%   \tightlist
+%   \item
+%     blocking factors
+%   \item
+%     temporal effects
+%   \item
+%     spatial effects
+%   \end{itemize}
+% \item
+%   Validate it just like you would use it in real life:
+%   \begin{itemize}
+%   \tightlist
+%   \item
+%     A time series model: You'd build it in 2020 with data from
+%     2016--2020, then use it in 2021
+%   \item
+%     Validate it with the same strategy: Train on 2016--2019, validate on
+%     2020
+%   \end{itemize}
+% \end{itemize}
+
+% \end{frame}
+
+% \begin{frame}{Validation Strategy}
+% \phantomsection\label{validation-strategy}
+
+% \textbf{Key question}: How to validate the model?
+
+% be aware of \textbf{data leakage}
+% \begin{itemize}
+% \tightlist
+%     \item Target Leakage: When features that won't be available at prediction time contain information about the target variable.
+%     \begin{itemize}
+%     \tightlist
+%         \item Example: Using "Total Sales in Next Month" as a predictor when trying to forecast sales.
+%     \end{itemize} 
+%     \item Train-Test Leakage: 
+%     \begin{itemize}
+%     \tightlist
+%         \item Example: Normalizing the dataset using the entire data before splitting into train and test sets.
+%     \end{itemize}
+% \end{itemize}
+% \end{frame}
+
+
+\begin{frame}{Business Objectives: Validation Strategy}
+\phantomsection\label{validation-strategy}
+
+\textbf{Key question}: How to validate the model reliably and realistically?
+
+\textbf{1. Strategic Considerations}
+\begin{itemize}
+  \item \textbf{What should your model generalize to?}
+    \begin{itemize}
+      \item \emph{Blocking factors} (e.g., customers, hospitals, product types)
+      \item \emph{Temporal effects} (e.g., seasonality, trends)
+      \item \emph{Spatial effects} (e.g., regions, branches)
+    \end{itemize}
+
+  \item \textbf{Simulate realistic deployment:}
+    \begin{itemize}
+      \item \textbf{Time series:} Train on data from 2016--2020, deploy in 2021
+  \item \textbf{Validation:} Mimic deployment -- train on 2016--2019, validate on 2020
+      % \item Time series: Train on 2016--2019, validate on 2020, deploy in 2021
+      % \item Match your validation logic to your intended use case
+    \end{itemize}
+\end{itemize}
+
+\only<1>{
+    \begin{center}
+        
+    \includegraphics[width=0.5\linewidth]{figure_man/blocking.jpg}
+    \end{center}
+}
+\only<2>{
+\textbf{2. Beware of Data Leakage}
+\begin{itemize}
+  \item \textbf{Target Leakage:} Features leak future info not available at prediction time
+    \begin{itemize}
+      \item Example: "Total Sales in Next Month" used to predict this month
+    \end{itemize}
+
+  \item \textbf{Train-Test Leakage:} Information from the test set is used during training
+    \begin{itemize}
+      \item Example: Scaling the full dataset before splitting
+    \end{itemize}
+\end{itemize}
+}
+%\textbf{Guideline:} Always split your data first, then apply transformations only on training folds.
+\end{frame}
+
+
+
+
+
+% \section{2. Data Acquisition and
+% Understanding}\label{data-acquisition-and-understanding-1}
+
+% \begin{frame}{Data Source}
+% \phantomsection\label{data-source}
+% \textbf{Key question}: Where does the data come from?
+
+% In real world, there are multiple data sources
+
+% \begin{minipage}{0.3\textwidth}
+% %https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
+% \includegraphics[width=\linewidth]{figure_man/DataSources.png}
+% \end{minipage}
+% \begin{minipage}{0.6\textwidth}%\RaggedRight
+% \begin{itemize}
+% %\tightlist
+%     \item \textbf{internal vs. external data sources}: external providers might change their data format or discontinue the service
+%     \item \textbf{structured vs. unstructured}: structured data can be stored in a database, unstructured one might include images and is not so straightforward to work with
+%     \item \textbf{database vs. files}: databases combine many advantages of other file types, most software can grab and process data from there.
+%     \item \textbf{on-premise vs. cloud:} decision depends on data protection laws, costs and team preferences
+% \end{itemize}
+% \end{minipage}
+
+% \end{frame}
+
+\section{2. Data Acquisition and Understanding}\label{data-acquisition-and-understanding}
+
+\begin{frame}{Data Sources and Data Versioning}
+\phantomsection\label{data-source}
+\textbf{Key question:} What data is available and where does it come from?
+
+\bigskip
+\begin{columns}[T]
+  \begin{column}{0.35\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{figure_man/DataSources.png}
+  \end{column}
+
+  \begin{column}{0.60\textwidth}
+    \begin{itemize}
+      % \tightlist
+      \item \textbf{Internal vs. External:} External feeds may change format or be discontinued
+      \item \textbf{Structured vs. Unstructured:} Tables vs.\ free-text, images, audio, etc.
+      \item \textbf{Databases vs. Files:} DBs offer querying, consistency and security
+      \item \textbf{On-Premise vs. Cloud:} Governed by regulations, cost and team expertise
+    \end{itemize}
+  \end{column}
+\end{columns}
+
+\textbf{Data Versioning:}
+
+\begin{itemize}
+% \tightlist
+\item Data can evolve - use version control for data, like \texttt{git} for code  
+\item Tools: \texttt{DVC} (Data Version Control), \texttt{Pachyderm}
+\end{itemize}
+
+
+
+\end{frame}
+
+
+% \begin{frame}{Data Access at Deployment Time}
+% \phantomsection\label{data-access-at-deployment-time}
+% \textbf{Key question}: How to feed the \emph{new} data to your model when it's in use?
+% \begin{itemize}
+% \tightlist
+% \item
+%   This is often a separate workflow than your training data pipeline
+% \item
+%   Plan ahead: Think about these questions in the beginning
+% \end{itemize}
+% \end{frame}
+
+
+
+\begin{frame}{Datasheets \furtherreading{GEBRU2018}}
+\phantomsection\label{datasheets}
+
+\emph{Datasheets} summarize key metadata about a dataset's content, structure, provenance, and known limitations to support informed and responsible use.
+
+  \begin{itemize}
+  % \tightlist
+    \item Why and how was the data collected?
+    \item What are its limitations and ethical concerns?
+    \item For which tasks is it suitable or unsuitable?
+  \end{itemize}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\linewidth]{figure_man/DataSheet.png}\\
+\tiny Source: \furtherreading{KAGGLE2025}
+\end{figure}
+
+%\scriptsize
+%Based on: \href{https://arxiv.org/abs/1803.09010}{Gebru et al., 2018 — Datasheets for Datasets}
+\end{frame}
+
+% \begin{frame}{Data Exploration}
+% \phantomsection\label{data-exploration}
+% \textbf{Key question}: What are the data features and how do they look like?
+% \begin{itemize}
+% \tightlist
+% \item Create a \emph{data dictionary} to clarify:
+
+%   \begin{itemize}
+%   \tightlist
+% \item Semantic meaning of each feature
+%     \item Measurement units and expected ranges
+%     \item Valid levels for categorical features (factors)
+%     \item Encoding scheme for missing or special values
+%   \end{itemize}
+% \item  Compute (stratified) summary statistics and inspect missingness
+% \item  Plot uni- and bivariate diagrams to explore distributions and structure
+% \item Identify: Outliers, anomalies, imbalances, or highly correlated features
+% \end{itemize}
+
+% \textbf{Beware of confounders:} Unmeasured variables may bias analysis
+% \includegraphics[width = \linewidth]{figure_man/confounder.png}
+% \end{frame}
+
+\begin{frame}{Data Exploration}
+\phantomsection\label{data-exploration}
+
+\textbf{Key question}: What features are in the data, and what do they reveal?
+
+\begin{itemize}
+  \item \textbf{Build a data dictionary}:
+  \begin{itemize}
+    \item Feature meaning, units, valid ranges/category-levels
+    \item Missing value encoding and special codes
+  \end{itemize}
+  
+  \item \textbf{Examine structure and quality to gain understanding}:
+  \begin{itemize}
+    \item Compute (stratified) summary statistics and inspect missingness
+    \item Plot univariate and bivariate distributions
+    \item Identify outliers, anomalies, imbalances, redundancy, or high correlation
+  \end{itemize}
+  
+  \item \textbf{Watch for confounders:} unmeasured variables may distort associations
+\end{itemize}
+
+\begin{center}
+\includegraphics[width=\linewidth]{figure_man/confounder.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{Data Quality}
+\phantomsection\label{data-quality}
+\textbf{Key question:} Is the data fit for modeling? \emph{Garbage in, garbage out.}
+
+\begin{itemize}
+  \item Assess missingness: How many values are missing, and where?
+  \item Detect implausible or inconsistent values (requires domain expertise)
+  \item Standardize formats (e.g., date/time parsing)
+  \item Drop near-constant or non-informative features
+  \item Remove redundancy and obsolete variables
+\end{itemize}
+
+\vspace{0.5em}
+\textbf{Watch for data bias:}
+\begin{itemize}
+  \item \textit{Sampling bias:} E.g., a survey at 10am in the city center misses working adults
+  \item \textit{Response bias:} Online reviews often reflect extreme opinions, not the median
+\end{itemize}
+\end{frame}
+
+
+
+
+
+
+% \begin{frame}[fragile]{Hidden Features}
+% \phantomsection\label{hidden-features}
+% \begin{itemize}
+% \tightlist
+% \item
+%   Also known as \emph{confounder variables} (or \emph{mediator
+%   variables} in psychology)
+% \item
+%   Variables that influence your target outcome, but that you
+%   didn't measure
+% \item
+%   Simple example:
+
+%   \begin{itemize}
+%   \tightlist
+%   \item
+%     A customer happiness survey done over 7 days concludes that
+%     customers are very unhappy on Fridays and Saturdays
+%   \item
+%     Hidden feature: There was a rainstorm on these two days
+%   \item
+%     The hidden feature \texttt{weather}, not the weekday, was
+%     responsible for the drop in happiness
+%   \end{itemize}
+% \item
+%   As a more realistic example, data measured over multiple facilities
+%   may contain a similar bias, when measurement devices have slight
+%   differences in those locations
+% \end{itemize}
+% \end{frame}
+
+% \begin{frame}{Pipeline}
+% \phantomsection\label{pipeline}
+% \includegraphics[width = 0.5\linewidth]{figure_man/pipeline.png}
+% \begin{itemize}
+% \tightlist
+% \item
+%   You usually need to set up a pipeline to ingest new data and refresh
+%   your existing data set regularly.
+% \item
+%   A pipeline can be
+
+%   \begin{itemize}
+%   \tightlist
+%   \item
+%     batch-based
+%   \item
+%     streaming or real-time
+%   \item
+%     a hybrid of these two
+%   \end{itemize}
+% \end{itemize}
+% \textbf{Data Versioning} can make sense, as data changes over time
+% \begin{itemize}
+% \tightlist
+% \item
+%   Like version control for code (e.g. Git), it can make sense to have version control for your data sets
+% \item
+%   \emph{Pachyderm} and \emph{DVC} (Data Version Control) are two
+%   versioning tools
+% \end{itemize}
+% \end{frame}
+
+
+% \begin{frame}{Hidden Complexity in Data}
+% \phantomsection\label{hidden-complexity}
+
+% \vspace{0.5em}
+% \begin{itemize}
+%   \item \textbf{Hidden Features:} Unmeasured variables (e.g., confounders) may bias analysis
+%   \end{itemize}
+% \includegraphics[width = \linewidth]{figure_man/confounder.png}
+%   % \begin{itemize}
+%   %   \item Example: Low customer satisfaction on Friday/Saturday may be due to \texttt{weather}, not weekday
+%   %   \item Real-world case: Subtle biases across facilities due to sensor differences
+%   % \end{itemize}
+%   \vspace{-1em}
+%   \pause
+% \begin{itemize}
+%   \item \textbf{Data Pipelines:} Ensure consistent and reproducible data ingestion
+%   \begin{columns}[T, totalwidth=\textwidth]
+%       \begin{column}{0.38\textwidth}
+%           \includegraphics[width = \linewidth]{figure_man/pipeline.png}
+%       \end{column}
+%             \begin{column}{0.62\textwidth}
+%             \begin{itemize}
+%     \item Can be batch-based, streaming, or hybrid
+%     \item Should support automated refresh \& monitoring
+%     \item \textbf{Data Versioning} helps track changes over time (e.g., with \texttt{DVC}, \texttt{Pachyderm})
+%   \end{itemize}
+%       \end{column}
+%   \end{columns}
+
+% \end{itemize}
+
+% \vspace{0.5em}
+% \textit{Key message: Understanding your data requires both domain awareness and engineering discipline.}
+% \end{frame}
+
+
+
+% \begin{frame}{Data Governance and Security}
+% \phantomsection\label{data-governance-and-security}
+% \textbf{Key question}: How to keep the data secure, accurate and usable?
+% \begin{itemize}
+% \tightlist
+%     \item \textbf{Integrity}: encure data stays intact when being updated (no duplicates,...)
+%     \item \textbf{Access}: ensure pipeline allows constant access
+%     \item establish internal rules for data use
+%     \item make sure to meet legal requirements such as privacy, anonymization
+% \end{itemize}
+% \end{frame}
+
+% \begin{frame}{Wrangling, Exploration and Cleaning}
+% \phantomsection\label{wrangling-exploration-and-cleaning}
+% \begin{itemize}
+% \tightlist
+% \item
+%   Once you successfully ingested the necessary data, you can begin to
+%   prepare it for modeling
+% \item
+%   This preparation often takes up most of the time in a ML project
+% \item
+%   The necessary steps include exploratory data analysis (EDA), data
+%   wrangling (e.g.~joins) and data cleaning
+%   \item Sometimes the data you obtain is not yet labeled $\rightarrow$ you need humans (with domain knowledge) to assign labels to your data points
+  
+% \end{itemize}
+% \end{frame}
+
+
+\section{3. Modeling}\label{modeling-1}
+
+% \begin{frame}{Modeling Steps Overview}
+% %https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
+% \includegraphics[width=\linewidth, trim=0 60 0 0, clip]{figure_man/Modelling1.png}
+    
+% \end{frame}
+
+\begin{frame}[t]{Feature Engineering}
+\phantomsection\label{feature-engineering}
+%https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
+\includegraphics[width = \linewidth, trim=0 60 0 0, clip]{figure_man/Modelling2.png}
+
+\textbf{Feature Engineering} transforms raw data into informative input variables for modeling.
+
+\begin{itemize}
+% \tightlist
+  \item \textbf{Transformation}: Scaling, log-transform, one-hot encoding
+  \item \textbf{Selection}: Wrapper and filter methods, model-based importance
+  \item \textbf{Dimensionality Reduction}: PCA, t-SNE
+  \item \textbf{Creation}: Aggregation, binning, interaction terms
+\end{itemize}
+
+\textbf{Best Practices:}
+\begin{itemize}
+% \tightlist
+  \item Avoid overengineering: irrelevant features introduce noise
+  \item Fit transformations \textbf{only on training data}; reuse parameters for test data
+  \item Prevent leakage: never use test data in feature construction
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[t]{Model Training}
+\phantomsection\label{model-training}
+
+\includegraphics[width=\linewidth, trim=0 60 0 0, clip]{figure_man/Modelling3.png}
+
+\vspace{0.5em}
+Treat model training like a scientific experiment:
+\begin{itemize}
+% \tightlist
+  \item \textbf{Track all inputs precisely:}
+    \begin{itemize}
+    % \tightlist
+      \item Dataset version
+      \item Algorithm and hyperparameters
+      \item Code version (e.g., Git commit/tag)
+    \end{itemize}
+  \item \textbf{Proceed iteratively:}
+    \begin{itemize}
+    % \tightlist
+      \item \emph{Start simple} – build a fast, interpretable baseline
+      \item Gradually increase model complexity and validate each improvement
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+% \begin{frame}[t]{Model Configuration}
+% \phantomsection\label{model-configuration}
+% %https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
+% \includegraphics[width = \linewidth, trim=0 60 0 0, clip]{figure_man/Modelling4.png}
+% \begin{itemize}
+% \tightlist
+% \item
+%   How do you store a configuration setup you used for a specific
+%   experiment (model)?\\
+%   \(\rightarrow\) And how do you store \emph{small} changes to that
+%   setup?
+% \item
+%   This configuration should be stored and clearly readable (i.e.~in
+%   plain text or json)
+% \item
+%   Good tools can help, e.g.~\href{https://hydra.cc}{hydra}
+% \end{itemize}
+% \end{frame}
+
+\begin{frame}[t]{Model Configuration}
+\phantomsection\label{model-configuration}
+
+\includegraphics[width=\linewidth, trim=0 60 0 0, clip]{figure_man/Modelling4.png}
+
+\vspace{0.5em}
+\begin{itemize}
+% \tightlist
+  \item How do you track the exact configuration of a model experiment?
+  \item How do you record small changes between experiments?
+  \item Store in plain text (e.g., \texttt{.yaml}, \texttt{.json}) for readability and version control
+\item Recommended tool: structured configuration managers
+    \begin{itemize}
+    % \tightlist
+      \item \textbf{Python}: \furtherreading{HYDRA} - structured, hierarchical configuration management
+      \item \textbf{R}: \furtherreading{RCONFIG} - environment-based YAML setup
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+% \begin{frame}[t]{Model Evaluation}
+% \phantomsection\label{model-evaluation}
+% %https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
+% \includegraphics[width = \linewidth, trim=0 60 0 0, clip]{figure_man/Modelling5.png}
+% \begin{itemize}
+% \tightlist
+% \item
+%   To select the best model, evaluate based on the
+%   \textbf{metrics} you predefined
+% \item Use the test or validation data set according to the validation method predefined
+% \item
+%   Besides this performance scoring, you can evaluate your
+%   model's \textbf{robustness}: How sensitive is it to noise or other pertubations
+%   and adverserial attacks?
+
+%   \begin{itemize}
+%   \tightlist
+%   \item
+%     Add random noise to your dataset and investigate the impact
+%     on your model's parameters and/or performance
+%   \end{itemize}
+% \end{itemize}
+% \end{frame}
+
+\begin{frame}[t]{Model Evaluation}
+\phantomsection\label{model-evaluation}
+
+\includegraphics[width=\linewidth, trim=0 60 0 0, clip]{figure_man/Modelling5.png}
+
+\vspace{0.5em}
+\begin{itemize}
+% \tightlist
+  \item Select models based on predefined \textbf{metrics} (e.g., accuracy, AUC, RMSE)
+  \item Use the \textbf{validation or test set} in line with your validation strategy
+  \item Assess \textbf{robustness}: How does the model respond to noise, perturbations, or adversarial inputs?\\
+  $\Rightarrow$ Add synthetic noise and measure changes in model parameters/performance
+\end{itemize}
+\end{frame}
+
+
+% \begin{frame}[t]{Interpretation}
+% \phantomsection\label{interpretation}
+% %https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
+% \includegraphics[width = \linewidth, trim=0 60 0 0, clip]{figure_man/Modelling6.png}
+% To understand your model better, you can use methods from
+%   \textbf{Interpretable Machine Learning (IML)}
+% \begin{itemize}
+% \tightlist
+%     \item Feature importances: how much did each feature contribute to the prediction?
+%     \item uncover potential algorithmic biases:
+%     \begin{itemize}
+%     \tightlist
+%         \item E.g., in October 2018
+%     \href{https://www.theguardian.com/technology/2018/oct/10/amazon-hiring-ai-gender-bias-recruiting-engine}{world
+%     headlines reported} about an Amazon AI recruiting tool that favored
+%     men. Amazon's model was trained on biased data that were skewed
+%     towards male candidates. It has built rules that penalized resumes
+%     that included the word ``women's''.
+%     \end{itemize}
+% \end{itemize}
+% \end{frame}
+
+\begin{frame}[t]{Interpretation and Fairness}
+\phantomsection\label{interpretation}
+
+\includegraphics[width=\linewidth, trim=0 60 0 0, clip]{figure_man/Modelling6.png}
+
+\vspace{0.5em}
+To understand and trust your model, apply methods from \textbf{Interpretable Machine Learning (IML)}:
+\begin{itemize}
+% \tightlist
+  \item \textbf{Feature Importance}: Which features drive predictions globally?
+  \item \textbf{Effects \& Interactions}: Visualize marginal effects and feature interactions %(e.g., ALE, PDP)
+  \item \textbf{Local Explanations}: Explain individual predictions %(e.g., LIME, SHAP)
+  \item \textbf{Bias Detection}: Reveal fairness issues and unintended discrimination
+    \begin{itemize}
+    % \tightlist
+      \item Example: Amazon's 2018 hiring tool penalized resumes with “women's” due to biased training data % OLD
+%\citebutton{The Guardian, 2018}{https://www.theguardian.com/technology/2018/oct/10/amazon-hiring-ai-gender-bias-recruiting-engine}
+% NEW
+\furtherreading{GUARDIAN2018}
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Model Cards  for
+  Model Reporting % OLD
+%\citebutton{Mitchell et al. 2019}{https://arxiv.org/pdf/1810.03993.pdf}
+% NEW
+\furtherreading{MITCHELL2019}}
+\phantomsection\label{model-cards}
+%https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
+%\includegraphics[width = \linewidth, trim=0 60 0 0, clip]{figure_man/Modelling7.png}
+\textbf{Model Card}: Documentation of the model similar to a Datasheet for data
+
+\begin{columns}[T, totalwidth=\textwidth]
+  \begin{column}{0.4\textwidth}
+    \begin{itemize}
+    %\tightlist
+      \item \textbf{Model Details}: Algorithm, parameters, model version
+      \item \textbf{Intended Use}: Intended use and out-of-scope use cases
+      \item \textbf{Performance}: Key metrics, validation approaches
+      \item \textbf{Analyses}: Feature/target distributions in train/test data
+      \item \textbf{Ethical Considerations}: Failure modes, fairness concerns, inappropriate use
+    \end{itemize}
+  \end{column}
+  \begin{column}{0.6\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{figure_man/modelcard.png}
+  \end{column}
+\end{columns}
+
+\end{frame}
+
+\section{4. Model Governance}\label{model-governance-1}
+
+% \begin{frame}{Model Governance}
+% \phantomsection\label{model-governance-2}
+% \begin{quote}
+% Developing and deploying ML systems is relatively fast and cheap, but
+% maintaining them over time is difficult and expensive.
+% ~\href{https://papers.nips.cc/paper/5656-hidden-technical-debt-in-machine-learning-systems.pdf}{Hidden
+% Technical Debt in ML Systems}
+% \end{quote}
+% \end{frame}
+
+% \begin{frame}{Model Governance}
+% \phantomsection\label{model-governance-3}
+% \begin{itemize}
+% \tightlist
+% \item
+%   Model Governance includes the \textbf{people, processes and
+%   technologies} needed to manage and protect your ML model.
+% \item it ensures easy maintenance and possibilities for adaption
+% \item
+%   Two extremes have to be avoided:
+
+%   \begin{itemize}
+%   \tightlist
+%   \item
+%     \textbf{Repression} by too many standards, rules, and controlling
+%   \item
+%     \textbf{Chaos} by too much speed, freedom, creativity and change
+%   \end{itemize}
+% \end{itemize}
+% \end{frame}
+
+\begin{frame}{Model Governance}
+\phantomsection\label{model-governance-3}
+
+
+\begin{itemize}
+% \tightlist
+  \item Model Governance includes \textbf{people, processes, and technologies} needed to manage and protect your ML models.
+    \item Ensures long-term maintainability and adaptation as requirements evolve.
+  \item Two extremes must be avoided:
+    \begin{itemize}
+    % \tightlist
+      \item \textbf{Repression}: too many rules, rigid standards, excessive control
+      \item \textbf{Chaos}: too much speed, freedom, creativity, and unstructured change
+    \end{itemize}
+  %\item Good governance ensures your models remain \textbf{maintainable}, \textbf{adaptable}, and usable over time - even as requirements evolve.
+\end{itemize}
+
+    Model governance steps are:
+    %https://docs.google.com/presentation/d/1RCourH6lXL6sycgT6HbIXWb7rnQvA5HJ/edit?slide=id.p1#slide=id.p1
+    \includegraphics[width = \linewidth]{figure_man/Model Governace.png}
+
+    
+\begin{quote}
+\footnotesize
+"Developing and deploying ML systems is relatively fast and cheap, but
+maintaining them over time is difficult and expensive."
+\hfill~\furtherreading{HIDDENDEBT}
+\end{quote}
+\end{frame}
+
+% \begin{frame}{Deployment}
+% \phantomsection\label{deployment}
+% %TODO include graphics on deployment strategies
+% \textbf{Deployment}: make model accessible to users (humans or other programs)
+% \begin{itemize}
+% \tightlist
+% \item
+%   You can deploy your model in different ways:
+
+%   \begin{itemize}
+%   \tightlist
+%   \item
+%     \textbf{One-off}: If you only need your model trained once (or very
+%     rarely), train it by hand and push it to production
+%   \item
+%     \textbf{Batch}: With batch training, you constantly (e.g.~weekly)
+%     update your model with a new batch of data (e.g.~this week's new
+%     contracts)
+%   \item
+%     \textbf{Real-time}: Some models are very time-critical and need to
+%     be updated continously on a stream of data.
+%   \end{itemize}
+% \item If you retrain and update your model frequently, it makes sense to have some model \textbf{versioning}
+% \begin{itemize}
+% \tightlist
+%     \item \href{https://mlflow.org/}{MLflow} is an open source platform for ML
+%   lifecycle management that includes a model registry
+% \end{itemize}
+% \end{itemize}
+% \end{frame}
+
+\begin{frame}{Deployment}
+\phantomsection\label{deployment}
+
+% TODO: Include graphic on deployment strategies
+\textbf{Deployment} means making a model accessible to users (humans or other systems).
+
+\vspace{0.5em}
+\begin{itemize}
+% \tightlist
+  \item Common deployment strategies:
+    \begin{itemize}
+    % \tightlist
+      \item \textbf{One-off}: Manually trained and deployed once; no regular updates
+      \item \textbf{Batch}: Periodically retrained on recent data (e.g., weekly updates)
+      \item \textbf{Real-time}: Continuously updated on streaming data; often latency-critical
+    \end{itemize}
+  \item For frequent updates, establish model \textbf{versioning and lifecycle tracking}
+    \begin{itemize}
+    % \tightlist
+      \item Tools like \furtherreading{MLFLOW} provide version control and a model registry
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+% \begin{frame}{Monitoring}
+% \phantomsection\label{monitoring}
+% \textbf{Monitoring}: detect possible problems in productive use and provide fixes:
+
+% \begin{itemize}
+% \tightlist
+%     \item Pipeline bugs
+%     \item \textbf{Data drift}: data distribution changes
+%     \begin{itemize}
+%     \tightlist
+%         \item Example: You train an image classifier on animal pictures taken in
+%     summer, and then winter comes and images start containing snow.
+%     \item Another possibility is that your \emph{target} evolves, and now
+%   includes new categories or new value ranges in case of a continuous
+%   target
+%   \item Remedy: Enough of the new data needs to be labeled to introduce the
+%   model to the new classes, and the model needs to be retrained
+%     \end{itemize}
+%     \item \textbf{Concept drift}: interpretation of data changes
+%     \begin{itemize}
+%     \tightlist
+%         \item Example: A classification problem into “high blood pressure”, and the cutoff
+% for “high blood pressure” changes from 140mmHg to 135mmHg.
+%         \item Remedy: Your affected old data needs to be relabeled and the model retrained
+%     \end{itemize}
+% \end{itemize}
+
+% \end{frame}
+
+
+
+% \begin{frame}{User Feedback, Reinforcement}
+% \phantomsection\label{user-feedback-and-acceptance}
+% At the end of the project, you will:
+% \begin{itemize}
+% \tightlist
+%     \item \textbf{System Validation}: Ask for customer feedback if the model
+%     and data pipeline meet their needs
+%     \item \textbf{Project handover}: Transfer the project to the team that
+%     will run your system in production
+% \end{itemize}
+% \end{frame}
+
+% \begin{frame}{User Feedback, Reinforcement}
+% \phantomsection\label{user-feedback-and-acceptance}
+
+% You can also include \textbf{Feedback Loops/ Reinforcement}:
+
+% \begin{itemize}
+% \tightlist
+% \item
+%   \textbf{Direct feedback loops}: A model may influence the selection of
+%   \emph{its own} future training data.
+
+%   \begin{itemize}
+%   \tightlist
+%   \item
+%     Example: Netflix influences which movies it recommends to certain
+%     viewers, and it will then use (only) these movies as future training
+%     data
+%   \end{itemize}
+% \item
+%   \textbf{Hidden feedback loops}: Here, \emph{two systems} influence
+%   each other \emph{indirectly} through the world.
+
+%   \begin{itemize}
+%   \tightlist
+%   \item
+%     Example: Flash crashes that occur because many trading algorithms
+%     sell at the same time and augment each others fear
+%   \end{itemize}
+% \end{itemize}
+% \end{frame}
+
+
+
+\begin{frame}{Monitoring}
+\phantomsection\label{monitoring}
+
+\textbf{Monitoring} ensures that deployed models work reliably and flags issues in production:
+
+\begin{itemize}
+% \tightlist
+  \item \textbf{Pipeline Failures}: Bugs in data ingestion or transformation logic
+  \item \textbf{Data Drift}: Changes in input distribution
+    \begin{itemize}
+    % \tightlist
+      \item Example: An image classifier trained on summer data fails when images contain winter snow
+      \item Also affects evolving targets (e.g., new categories or value ranges)
+      \item \textbf{Remedy}: Label sufficient new data and retrain the model
+    \end{itemize}
+  \item \textbf{Concept Drift}: Changes in the meaning of labels
+    \begin{itemize}
+    % \tightlist
+      \item Example: Redefining “high blood pressure” from 140mmHg to 135mmHg
+      \item \textbf{Remedy}: Relabel historical data and retrain
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{User Feedback, Reinforcement}
+\phantomsection\label{user-feedback-and-acceptance}
+
+
+\textbf{Handover:} At project completion, engage users and transfer responsibilities:
+
+\begin{itemize}
+% \tightlist
+  \item \textbf{System Validation}: Confirm with stakeholders that the solution meet their needs
+  \item \textbf{Project Handover}: Transfer system ownership to the production team
+\end{itemize}
+
+\textbf{Feedback loops} occur when model outputs influence future inputs:
+
+\begin{itemize}
+% \tightlist
+  \item \textbf{Direct Loops}: A model affects the data it later learns from
+    \begin{itemize}
+    % \tightlist
+      \item Example: Netflix recommends certain movies, then only learns from user responses to those
+    \end{itemize}
+  \item \textbf{Hidden Loops}: Multiple models indirectly affect each other via the environment
+    \begin{itemize}
+    % \tightlist
+      \item Example: Flash crashes triggered by interacting trading algorithms amplifying market reactions
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\endlecture
+\end{document}

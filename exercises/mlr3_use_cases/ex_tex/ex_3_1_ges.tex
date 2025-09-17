@@ -1,0 +1,43 @@
+\textbf{1:}\\ \noindent
+\vspace{0.1cm}
+
+General idea:
+3 binary classif datasets from openml; compare various ensembling methods
+
+in class A1 (easy):
+write your own model averaging ensemble (classification)
+soft vs. hard vote
+
+Homework 1 (medium):
+implement GES and do the following below
+compare GES to simple soft vs hard model averaging (A1) and a random forest baseline
+
+Homework 2 (more difficult):
+implement stacking of the base models below
+compare l0-l1 stacking (logistic regression meta model) to a l0-l1-l2 multilevel approach (todo: define l1 meta models, l2 random forest meta model)
+compare the performance obtained (to H1 and A1)
+extend your stacking implementations to work with crossvalidated predictions.
+
+----------
+Popular method for post-hoc ensemble selection: Greedy ensemble selection (GES\footnote{Caruana, R., Niculescu-Mizil, A., Crew, G., \& Ksikes, A. (2004, July). Ensemble selection from libraries of models. In Proceedings of the twenty-first International Conference on Machine Learning (p. 18). \url{https://dl.acm.org/doi/pdf/10.1145/1015330.1015432}})
+\begin{enumerate}
+    \item Start with the empty ensemble
+    \item Add the base model that maximizes the ensembles performance on a hillclimb (validation) set
+    \item Repeat step 2 until a given number of iterations are reached
+    \item Return the ensemble from the set of generated ensembles that has maximum performance on the validation set
+\end{enumerate}
+Note that ensemble selection effectively optimizes the weights on an integer domain (i.e., base models are selected one or multiple times or not at all)
+
+Write your own GES algorithm constructing an ensemble from a set of five base models obtained via fitting: DT, SVM, KNN, Elastic-Net, Logistic Regression.
+Use the adult data set from OpenML.
+Construct a 60/20/20 train/validation/test split manually (stratified for the target) and use the AUC ROC as performance metric.
+Train each base learner on the train split to generate the base models and use the validation split to perform GES for 10 iterations. Which models are selected and how often are they selected?
+What is the test performance of the final ensemble?
+How does it compare to the test performance of each base model?
+
+another idea:
+proof that weighted model averaging with MSE loss can be written as a quadratic program
+
+
+another idea:
+weighted model averaging insample optimization vs. holdout vs. GE

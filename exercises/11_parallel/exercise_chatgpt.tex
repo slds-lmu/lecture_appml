@@ -1,0 +1,114 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+
+\pagestyle{fancy}
+\fancyhead[L]{Applied Machine Learning}
+\fancyhead[C]{Exercise Sheet}
+\fancyhead[R]{\today}
+
+\title{Exercise Sheet: Parallel Machine Learning Experiments with MLR3, Batchtools, and OpenML}
+\author{Applied Machine Learning Course}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section*{Objective}
+The objective of this exercise is to get hands-on experience with conducting large-scale machine learning experiments using MLR3, Batchtools, and the OpenML connector. You will learn how to set up a parallelized benchmark experiment on your laptop.
+
+\section*{Instructions}
+
+\begin{enumerate}
+    \item Ensure you have the necessary R packages installed:
+    \begin{verbatim}
+    install.packages(c("mlr3", "mlr3verse", "batchtools", "mlr3oml"))
+    \end{verbatim}
+
+    \item Load the required libraries:
+    \begin{lstlisting}[language=R]
+    library(mlr3)
+    library(mlr3verse)
+    library(data.table)
+    library(batchtools)
+    library(mlr3oml)
+    \end{lstlisting}
+
+    \item Connect to OpenML and fetch a dataset:
+    \begin{lstlisting}[language=R]
+    # Connect to OpenML
+    oml_task = OMLTask$new(31)  # Task ID for OpenML dataset (e.g., iris dataset)
+    oml_data = as_data_backend(oml_task$data)
+    task = as_task_classif(oml_data, target = "class")
+    \end{lstlisting}
+
+    \item Define learners to be benchmarked:
+    \begin{lstlisting}[language=R]
+    learners = list(
+      lrn("classif.rpart"),
+      lrn("classif.svm"),
+      lrn("classif.ranger")
+    )
+    \end{lstlisting}
+
+    \item Create and configure a Batchtools experiment registry:
+    \begin{lstlisting}[language=R]
+    reg = makeExperimentRegistry(
+      file.dir = "mlr3_experiments",
+      packages = c("mlr3", "mlr3verse"),
+      seed = 1
+    )
+    \end{lstlisting}
+
+    \item Add problems and algorithms to the registry:
+    \begin{lstlisting}[language=R]
+    addProblem("task", data = task)
+    addAlgorithm(name = "mlr3", fun = function(job, data, instance, learner) {
+      learner = lrn(learner)
+      task = as_task(data)
+      resampling = as_resampling(data)
+      rr = resample(task, learner, resampling, store_models = TRUE)
+    })
+    \end{lstlisting}
+
+    \item Define the design of experiments:
+    \begin{lstlisting}[language=R]
+    prob_design = list(task = data.table())
+    algo_design = list(learner = data.frame(learner = sapply(learners, function(x) {x$id}), stringsAsFactors = FALSE))
+    addExperiments(prob.designs = prob_design, algo.designs = algo_design)
+    summarizeExperiments()
+    \end{lstlisting}
+
+    \item Test a single job to ensure it works correctly:
+    \begin{lstlisting}[language=R]
+    testJob(1)
+    \end{lstlisting}
+
+    \item Submit jobs to be executed in parallel:
+    \begin{lstlisting}[language=R]
+    submitJobs()
+    waitForJobs()
+    \end{lstlisting}
+
+    \item Collect and analyze the results:
+    \begin{lstlisting}[language=R]
+    res = reduceResultsList()
+    print(res)
+    \end{lstlisting}
+\end{enumerate}
+
+\section*{Exercises}
+\begin{enumerate}
+    \item Modify the example to use a different dataset from OpenML. Choose a dataset of your interest, fetch it, and adjust the code accordingly.
+    \item Add at least two more learners to the benchmark experiment. Choose any classification learners from the \texttt{mlr3learners} package.
+    \item Configure and run a resampling strategy (e.g., 10-fold cross-validation) instead of using the whole dataset for training and testing.
+    \item Plot the performance metrics of the different learners using the \texttt{ggplot2} package.
+\end{enumerate}
+
+\section*{Submission}
+Submit your R script and a brief report (max 2 pages) summarizing your findings and any challenges you faced during the exercise.
+
+\end{document}

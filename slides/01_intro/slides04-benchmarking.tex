@@ -1,0 +1,41 @@
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+% alternatively combining latex files with subfile package https://tex.stackexchange.com/a/155883/26830 (however, page numbering and some other stuff does not work well)
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
+% includepdf slides, pagecommad will set counter for framenumber
+\usepackage{pdfpages}
+\includepdfset{trim=0mm 0mm 0mm 0mm, pagecommand={\global\setcounter{framenumber}{\value{page}}}, offset=-25mm 0, clip=true, noautoscale=true}
+
+
+\title{Applied Machine Learning}
+
+\begin{document}
+
+
+\titlemeta{
+Machine Learning in R:
+}{
+MLR3 Benchmarking \& Summary}{
+figure_man/mlr3_logo.png
+}{
+\item Setting up benchmarking experiments
+\item Working with `BenchmarkResult` object
+\item Parallelization
+\item MLR3 resources and help
+}
+
+
+% \section{Benchmarking with mlr3}
+\includepdf[pages={33-36, 40-41, 43}]{../mlr3slides/mlr3-resampling.pdf}
+
+\section{Help and Summary}
+\includepdf[pages={45-46, last}]{../mlr3slides/mlr3-resampling.pdf}
+
+
+\endlecture
+\end{document}

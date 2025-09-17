@@ -1,0 +1,223 @@
+\documentclass[10pt,compress,t,notes=noshow, xcolor=table]{beamer}
+
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+
+\usepackage{etoolbox}
+\makeatletter
+\newlength{\parboxtodim}
+\patchcmd{\@iiiparbox}
+  {\hsize}
+  {\ifx\relax#2\else\setlength{\parboxtodim}{#2}\fi\hsize}
+  {}{}
+\makeatother
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
+\begin{document}
+
+\title{Applied Machine Learning}
+
+\titlemeta{
+ML Competition Strategy
+}{
+Best Practices for Competition Success
+}{
+figure_man/DSLifecycle1
+}{
+\item 10-step workflow for ML competitions
+\item Plan an end-to-end ML workflow with attention to constraints and dependencies
+}
+
+
+% \section{Best Practices for Competition Success}
+%TODO graphics with overview over steps
+\begin{frame}{Step 1: Understand the Problem Statement}
+\begin{itemize}
+  \item \textbf{Clarify Objectives \& Business Impact}: Determine whether it's a classification or regression task, the domain context, and what “success” looks like.
+  \item \textbf{Target Variable}: Understand how the target is defined and distributed.
+  \item \textbf{Constraints \& Permissions}: External data limits, privacy, or regulatory issues.
+  \item \textbf{Action Points}:
+    \begin{itemize}
+      \item Annotate key requirements and assumptions.
+      \item Research the domain for feature ideas.
+      \item Restate the problem in your own words to ensure clarity.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 2: Study the Evaluation Metric}
+\begin{itemize}
+  \item \textbf{Metric Matters}: Each competition or project has a specific metric (e.g., F1-score, AUC-ROC, RMSE), which guides how you tune and compare models.
+  \item \textbf{Classification vs. Regression Metrics}:
+    \begin{itemize}
+      \item Accuracy, F1-score, AUC-ROC, and Log Loss for classification.
+      \item RMSE, MAE, R\textsuperscript{2} for regression.
+    \end{itemize}
+  \item \textbf{Optimization Direction}: Decide if you must maximize or minimize the metric; some metrics (e.g., AUC-ROC) may need a proxy loss for training.
+  \item \textbf{Action Points}:
+    \begin{itemize}
+      \item Simulate prediction changes to see impact on the metric.
+      \item If allowed, implement custom losses aligned to the competition metric.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 3: Perform an Initial Data Analysis (EDA)}
+\begin{itemize}
+  \item \textbf{Data Profiling}: Summarize shape, basic statistics, feature and target distribution.
+  \item \textbf{Quality Checks}: Identify missing values, outliers, or suspicious patterns; confirm no hidden data leakage.
+  \item \textbf{Train-Test Shift}: Check if train and test set differ significantly in their feature distributions.
+  \item \textbf{Action Points}:
+    \begin{itemize}
+      \item Use tools like Pandas Profiling or Sweetviz for automated EDA.
+      \item Document anomalies or domain-specific oddities.
+      \item Examine correlations, scatter plots, and histograms.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 4: Develop a Baseline Model}
+\begin{itemize}
+  \item \textbf{Why a Baseline?} 
+  \begin{itemize}
+      \item A simple model (e.g., LM, Decision Tree) provides a reference performance.
+      \item Include a \emph{featureless} model (e.g., predicting the majority class or mean) to benchmark against trivial solutions.
+  \end{itemize}
+  \item \textbf{Pipeline Check}: Make sure that data loading, preprocessing, and validation splits are correct and leakage-free.
+  \item \textbf{Diagnostics} : Analyze misclassifications/residuals to spot improvement areas.
+  \item \textbf{Action Points}:
+    \begin{itemize}
+      \item Start with a naive or default-parameter model.
+      \item Use cross-validation to assess generalization.
+      \item Log baseline metrics to quantify future gains.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 5: Set Up a Robust Validation Strategy}
+\begin{itemize}
+  \item \textbf{Importance of Validation}: Avoid overfitting or a single random split.
+  \item \textbf{Common Methods}:
+    \begin{itemize}
+      \item K-Fold (balanced data).
+      \item Stratified K-Fold (imbalanced classes).
+      \item Time-Based or Group Splits (time series, repeated measures).
+    \end{itemize}
+  \item \textbf{Action Points}:
+    \begin{itemize}
+      \item Match validation approach to the final test scenario.
+      \item Keep a holdout set for final checks.
+      \item Use consistent folds across experiments to compare fairly.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 6: Feature Engineering \& Preprocessing}
+\begin{itemize}
+  \item \textbf{Missing Data}: Mean/median imputation, advanced methods, or flags.
+  \item \textbf{Encoding Categorical Variables}: One-hot/ target/ frequency enc. (leakage?!).
+  \item \textbf{Scaling \& Transformations}: Normalize or log-transform skewed features, especially for sensitive models (SVMs, neural nets).
+  \item \textbf{New Features}: Time-based, domain knowledge, interactions (e.g. ratios).
+  \item \textbf{Action Points}:
+    \begin{itemize}
+      \item Add features in small batches and track validation changes.
+      \item Use scikit-learn Pipelines to avoid leakage.
+      \item Consider dimensionality reduction if feature space is large.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 7: Select \& Tune Models Strategically}
+\begin{itemize}
+  \item \textbf{Model Choices}:
+    \begin{itemize}
+      \item Tree-based ensembles (XGBoost, LightGBM, CatBoost) for tabular data.
+      \item Neural networks for large-scale or unstructured data.
+      \item Simple linear/logistic models can still compete with good feature engineering.
+    \end{itemize}
+  \item \textbf{Hyperparameter Tuning}:
+    \begin{itemize}
+      \item Grid Search, Random Search, Bayesian Optimization.
+      \item Early stopping and regularization (L1, L2) to avoid overfitting.
+    \end{itemize}
+  \item \textbf{Action Points}:
+    \begin{itemize}
+      \item Track experiments (MLflow, Weights \& Biases, or spreadsheets).
+      \item Start with defaults and refine gradually.
+      \item Use IML tools (SHAP, permutation importance) for feature insights.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 8: Track Experiments and Iterate}
+\begin{itemize}
+  \item \textbf{Experiment Logging}: Keep detailed records of data versions, hyperparams, code revisions.
+  \item \textbf{Error Analysis}: Study misclassifications and residuals to guide feature tweaks.
+  \item \textbf{Iterative Improvements}:
+    \begin{itemize}
+      \item Refine features, adjust validation, revisit transformations.
+      \item Maintain a “changelog” for each iteration.
+    \end{itemize}
+  \item \textbf{Action Points}:
+    \begin{itemize}
+      \item Automate repeated tasks (submissions, data prep).
+      \item Prune ineffective ideas swiftly.
+      \item Ensure reproducibility (version control, environment snapshots).
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 9: Understand the Leaderboard}
+\begin{itemize}
+  \item \textbf{Public vs. Private Leaderboard}: Public boards use only part of the test set, overfitting leads to dramatic rank changes later.
+  \item \textbf{Submission Strategy}:
+    \begin{itemize}
+      \item Rely mainly on internal validation.
+      \item Keep a private holdout to confirm final performance.
+    \end{itemize}
+  \item \textbf{Leaderboard Shakeups}: Watch for big changes when private scores are revealed; it often indicates overfitting to the public set.
+  \item \textbf{Action Points}:
+    \begin{itemize}
+      \item Limit minor tweaks solely to improve a public rank.
+      \item If a jump seems suspicious, re-check data handling for leakage.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 10: Collaborate and Learn from Others}
+\begin{itemize}
+  \item \textbf{Study Top Solutions}: Many winning approaches are documented in blog posts or Kaggle discussions.
+  \item \textbf{Teamwork}:
+    \begin{itemize}
+      \item Collaboration brings diverse perspectives and model ensembling.
+      \item Share code and features for synergy.
+    \end{itemize}
+  \item \textbf{Community \& Networking}:
+    \begin{itemize}
+      \item Discussion forums reveal dataset quirks, best practices.
+      \item Local meetups or online communities keep you updated.
+    \end{itemize}
+  \item \textbf{Action Points}:
+    \begin{itemize}
+      \item Document and share your findings.
+      \item Adapt others' ideas carefully—validate them on your own splits.
+      \item Engage with peers for new tools and techniques.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Final Advice}
+\begin{itemize}
+  \item \textbf{Start Simple, Iterate}: Build a solid baseline before adding complexity.
+  \item \textbf{Prioritize Validation}: A robust validation strategy prevents nasty surprises.
+  \item \textbf{Log Everything}: Document transformations, parameters, and model versions.
+  \item \textbf{Aim for Generalizable Solutions}: Don't just chase leaderboard scores, keep your focus on reproducibility and reliability.
+\end{itemize}
+\end{frame}
+
+\endlecture
+\end{document}

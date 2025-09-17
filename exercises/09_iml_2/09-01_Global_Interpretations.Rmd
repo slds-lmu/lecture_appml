@@ -1,0 +1,400 @@
+---
+title: "Global Interpretation Methods"
+subtitle: "In-class exercise 09-1"
+output:
+  prettydoc::html_pretty:
+    theme: hpstr
+    toc: yes
+    toc_depth: 2
+    css: ../_template/prettydoc-hpstr.css
+    self_contained: yes
+---
+
+```{r, include=FALSE}
+sys.source("setup.R", envir = knitr::knit_global())
+```
+
+# Goal
+
+Apply what you have learned about global interpretation methods to real data.
+
+# Prerequisites
+
+We need the following libraries:
+
+```{r library}
+library('mlr3verse')
+library('iml')
+library('gridExtra')
+```
+
+# Data
+
+### Wines
+
+For a later example, we will use the wine data set, which includes quality ratings (assessed by blind tasting, on a scale from 0 to 10) for roughly 6500 red and white wines with given physiochemical properties:
+
+```{r}
+wine = read.csv("wine.csv")
+wine = na.omit(wine)
+wine$type = ifelse(wine$type == "red", 1, 0)
+```
+
+### Custom data
+
+First, we will consider a toy example to understand how PDP and ALE, two global interpretation methods, handle correlated features. Imagine a simple data generating process (DGP) with two features, $x_1$ and $x_2$, that are highly correlated: 
+
+```{r}
+set.seed(1234)
+x1 = runif(n = 3000, min = 0, max = 1)
+x2 = x1 + rnorm(n = 3000, mean = 0, sd = 0.08)
+# Pearson correlation between x1 and x2:
+cor(x1, x2)
+```
+
+Further, we assume that the outcome $y$ is created via the following DGP: $y = x_1 + x_2^2 + \epsilon, \; \epsilon \sim N(0, 0.05)$.
+
+```{r}
+eps = rnorm(n = 3000, mean = 0, sd = 0.05)
+y = x1 + x2^2 + eps
+df = data.frame(x1, x2, y)
+```
+
+Obviously, we can infer the true feature effects directly from the DGP: Both $x_1$ and $x_2$ have positive effects on the outcome. Whereas $y$ increases linearly with $x_1$, $x_2$ has a quadratic effect. Leveraging this knowledge about the true DGP, we can test and compare to what extent PDP and ALE recover these effects for a given machine learning model.
+
+# Exercises
+
+## Exercise 1: Fit a Neural Network
+
+Fit a neural network using a simple train-test split, reserving 1,500 observations for testing. Find a suitable learner with `mlr3` and set `size = 10` and `maxit = 1000` as arguments for training. Then, visualize the prediction surface for the test data with the `plot_learner_prediction()` function from `mlr3viz`. 
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = show.solution}
+# Train-test split:
+ids = sample(1:nrow(df), size = 1500, replace = FALSE)
+train = df[-ids,]
+test = df[ids,]
+
+# Fit neural network:
+task_train = as_task_regr(x = train, target = "y")
+nnet = lrn("regr.nnet", size = 10, maxit = 1000, trace = FALSE)$train(task_train)
+
+# Visualize prediction surface:
+task_test = as_task_regr(x = test, target = "y")
+plot_learner_prediction(nnet, task_test)
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Exercise 2: Compute PDP and ALE
+
+To compute and visualize PDP and ALE, we can use the `iml` package. Last week, you have learned how to leverage `Predictor` objects within `iml` to store models and compute feature effects via the `FeatureEffect` class. This applies straightforwardly to PDP and ALE. Create 4 effect plots, one for each feature ($x_1$ and $x_2$), using both PDP and ALE, respectively. Use test data. Interpret this plot. To what extent do PDP and ALE recover information about the true DGP?
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = show.solution}
+# Predictor:
+pred = Predictor$new(nnet, data = test, y = "y")
+
+# Compute PDP plots:
+pdp_x1 = arrangeGrob(plot(FeatureEffect$new(predictor = pred,
+                            feature = "x1",
+                            method = "pdp",
+                            grid.size = 30)), top = "PDP x1")
+pdp_x2 = arrangeGrob(plot(FeatureEffect$new(predictor = pred,
+                            feature = "x2",
+                            method = "pdp",
+                            grid.size = 30)), top = "PDP x2")
+
+# Compute ALE plots:
+ale_x1 = arrangeGrob(plot(FeatureEffect$new(predictor = pred,
+                            feature = "x1",
+                            method = "ale",
+                            grid.size = 30)), top = "ALE x1")
+ale_x2 = arrangeGrob(plot(FeatureEffect$new(predictor = pred,
+                            feature = "x2",
+                            method = "ale",
+                            grid.size = 30)), top = "ALE x2")
+
+# Plot together:
+grid.arrange(pdp_x1, ale_x1, pdp_x2, ale_x2, nrow=2, ncol=2)
+```
+
+ALE seems to reflect the ground truth: both the linear effect of $x_1$ and the quadratic effect of $x_2$ are recovered. 
+The PDP, on the other hand, does not reflect the DGP. As discussed in the lecture, there is an extrapolation problem here.
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Exercise 3: Fit a Random Forest on the wine data
+
+Let's fit a Random Forest on the `wine` data, predicting the outcome of interest (`quality`) with `mlr3`. As always, please use a train-test split with `partition()`.
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = show.solution}
+task_wines = as_task_regr(x = wine, target = "quality")
+split = partition(task_wines)
+lrn_rf = lrn("regr.ranger")
+lrn_rf$train(task_wines, row_ids = split$train)
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Exercise 4: PFI
+
+Feature permutation is the process of randomly shuffling observed values for a single feature in a data set. This removes the original dependency structure of the feature with the target variable and with all other features while maintaining the marginal distribution of the feature. The PFI measures the change in the model performance before and after permuting a feature. In the `iml` package, PFI summaries can be generated with the `FeatureImp` class. As before, this requires a `Predictor` object. Use the documentation of `FeatureImp` to construct and plot the PFI values based on the L2 loss for the RF model, evaluated on test data.
+
+<details>
+  <summary>**Hint 1:**</summary>
+  
+As permutations are generated by a random process, PFI analysis usually works by repeating the permutation a few times, producing error bars of the PFI measure as a consequence. Play around with the relevant argument in `FeatureImp` to find a good trade-off between computational cost and obtaining useful error bars.
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = show.solution}
+# Features in test data:
+wines_x = task_wines$data(rows = split$test,
+  cols = task_wines$feature_names)
+# Target in test data:
+wines_y = task_wines$data(rows = split$test,
+  cols = task_wines$target_names)
+# Predictor:
+pred_wines = Predictor$new(lrn_rf, data = wines_x, y = wines_y)
+# PFI:
+importance = FeatureImp$new(pred_wines, loss = "mse", n.repetitions = 10)
+plot(importance)
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Exercise 5: LOCO
+
+Let's consider another method to compute feature importance values: LOCO. Here, the general idea is to remove the feature from the dataset, refit the model on the reduced dataset, and measure the loss in performance compared to the model fitted on the complete dataset. 
+
+We will now implement a function that calculates LOCO values for a given `task`, `learner`, `resampling` object and performance `measure`. 
+It shall return a vector containing a LOCO value for each feature, i.e., the loss in performance compared to the model fitted on the complete dataset.
+As in PFI we approximate our importance values. Here, this can be done by aggregating measures from two resampling objects (using the full dataset and the reduced dataset, respectively). 
+Below, you find an incomplete implementation of the LOCO function. Fill in the two gaps.
+
+```{r, eval = FALSE}
+loco = function(task, learner, resampling, measure) {
+  if (!resampling$is_instantiated) {
+    stop(paste("Resampling is not instantiated."))
+  }
+  features = task$feature_names
+  res = numeric(); names(res) = features
+  rr0 = resample(task = task, learner = learner, resampling = resampling)
+  v0 = rr0$aggregate(measure)
+  for (j in seq_len(length(features))) {
+    features2 = features[-j]
+    task2 = task$clone()$select(features2)
+    rr = ... # (one line)
+    res[j] ... # (one line)
+  }
+  return(res)
+}
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = show.solution}
+loco = function(task, learner, resampling, measure) {
+  if (!resampling$is_instantiated) {
+    stop(paste("Resampling is not instantiated."))
+  }
+  features = task$feature_names
+  res = numeric(length(features)); names(res) = features
+  rr0 = resample(task = task, learner = learner, resampling = resampling)
+  v0 = rr0$aggregate(measure)
+  for (j in seq_len(length(features))) {
+    features2 = features[-j]
+    task2 = task$clone()$select(features2)
+    rr = resample(task = task2, learner = learner, resampling = resampling)
+    res[j] = rr$aggregate(measure) - v0
+  }
+  return(res)
+}
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Exercise 6: LOCO vs. PFI - Calculation
+
+Using the custom `loco()` function, we can compute and compare differences in insights gained from PFI and LOCO. For this purpose, we create some toy data to assess similarities and differences between LOCO and PFI. We use the following DGP: $y = x_1 + \epsilon, \; \epsilon \sim N(0, 0.1)$ and add some other (noisy) features to the data:
+
+* $x_2$, which has no influence on $y$.
+* $x_3$, which has no influence on $y$.
+* $x_4$, which has no influence on $y$ and is highly correlated with $x_3$:
+
+```{r}
+n = 3000
+# True GDP:
+x1 = rnorm(n)
+y = x1 + rnorm(n, sd = 0.1)
+# Other features:
+x2 = rnorm(n)
+x3 = rnorm(n)
+x4 = x3 + rnorm(n, sd = 0.01)
+# Data frame:
+data = data.frame(x1, x2, x3, x4, y)
+```
+
+We fit a linear model on some training data:
+
+```{r}
+# Linear Model via mlr3:
+lrn_lm = lrn("regr.lm")
+task_lm = as_task_regr(data, target = "y")
+
+# Train-test split:
+split = partition(task_lm)
+
+# Fit model:
+lrn_lm$train(task_lm, row_ids = split$train)
+lrn_lm$model
+```
+
+Now, compute PFI and LOCO estimates for each of the four features. We want to use mean absolute error (MAE) as performance measure and the custom train-test split from above for resampling. The resampling object for LOCO is given here:
+
+```{r}
+rsmp_loco = rsmp("custom")
+rsmp_loco$instantiate(task_lm, list(split$train), list(split$test))
+```
+
+For this task, you will need to implement the following steps:
+
+1. Use the `loco()` function to compute LOCO estimates for each feature. 
+2. For PFI, create a `Predictor` object using the test data.
+3. Compute PFI, but make sure that the performance measure is correctly specified.
+4. Store all results in a data.frame `imp` with three columns: `feature` (name), `importance` (the value), `method` (PFI or LOCO).
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = show.solution}
+# Define performance measure:
+measure = msr("regr.mae")
+# Instantiate resampling:
+rsmp_loco$instantiate(task_lm, list(split$train), list(split$test))
+# Compute LOCO:
+imp_loco = loco(task_lm, lrn_lm, rsmp_loco, measure)
+# Compute PFI:
+pred_test = Predictor$new(lrn_lm, data[split$test, ], y = "y")
+imp_pfi = FeatureImp$new(pred_test, loss = "mae", n.repetitions = 10, compare = 'difference')
+
+# Aggregate results in data.frame:
+imp_loco = data.frame(feature = names(imp_loco), importance = imp_loco)
+
+imp = rbind(cbind(imp_pfi$results[, c("feature", "importance")], method = "PFI"),
+            cbind(imp_loco, method = "LOCO"))
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Exercise 7: LOCO vs. PFI - Visualization
+
+Visualize and interpret the results with the following function:
+
+```{r, eval = FALSE}
+ggplot(imp, aes(x = reorder(feature, importance),
+                         y = importance, fill = reorder(method, importance))) +
+  geom_bar(stat = 'identity', position = position_dodge()) + 
+  coord_flip() + 
+  scale_x_discrete(breaks = c('x1', 'x2', 'x3', 'x4'),
+    labels = c(expression(X[1]), expression(X[2]), expression(X[3]), expression(X[4]))) +
+  scale_fill_viridis_d() +
+  labs(x = 'Feature', y = 'Importance', fill = 'FI Method')
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = show.solution, echo = FALSE}
+# Plot results:
+ggplot(imp, aes(x = reorder(feature, importance),
+                         y = importance, fill = reorder(method, importance))) +
+  geom_bar(stat = 'identity', position = position_dodge()) + 
+  coord_flip() + 
+  scale_x_discrete(breaks = c('x1', 'x2', 'x3', 'x4'),
+    labels = c(expression(X[1]), expression(X[2]), expression(X[3]), expression(X[4]))) +
+  scale_fill_viridis_d() +
+  labs(x = 'Feature', y = 'Importance', fill = 'FI Method')
+```
+
+Note that the feature importance values differ between methods. Here, LOCO correctly identifies $x_1$ as the only relevant feature in the DGP while PFI assigns non-zero values to $x_3$ and $x_4$ since these are highly correlated. Let's look again at the coefficients of our linear model:
+
+```{r, eval = show.solution, echo = FALSE}
+lrn_lm$model$coefficients
+```
+
+We see that the two coefficients of $x_3$ and $x_4$ cancel each other out as long as the dependence structure between these two features is preserved. As described above, permuting one of the two features destroys their correlation and thus also the described effect.
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+# Summary
+
+We learned how to use the global interpretation methods PDP, ALE, PFI and LOCO.

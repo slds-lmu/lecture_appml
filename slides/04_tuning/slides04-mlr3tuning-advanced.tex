@@ -1,0 +1,43 @@
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+% alternatively combining latex files with subfile package https://tex.stackexchange.com/a/155883/26830 (however, page numbering and some other stuff does not work well)
+
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+\title{Applied Machine Learning}
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
+
+% includepdf slides, pagecommad will set counter for framenumber
+\usepackage{pdfpages}
+\includepdfset{trim=0mm 0mm 0mm 0mm, pagecommand={\global\setcounter{framenumber}{\value{page}}}, offset=-25mm 0, clip=true, noautoscale=true}
+% trim=0mm 6mm 0mm 0mm, offset=0 15,
+
+
+\begin{document}
+
+
+\titlemeta{
+MLR3 Tuning
+}{
+Parameter Transformations \& AutoTuner
+}{
+figure_man/empty
+}{
+\item Parameter transformation techniques in mlr3tuning
+\item AutoTuner for automated hyperparameter optimization
+\item Nested resampling implementation in mlr3
+}
+
+
+\section{Parameter Transformation}
+\includepdf[pages={41-42, 44, 46-49}]{../mlr3slides/mlr3tuning.pdf}
+
+\section{AutoTuner and Nested Resampling in mlr3}
+\includepdf[pages={51-last}]{../mlr3slides/mlr3tuning.pdf}
+
+\endlecture
+\end{document}

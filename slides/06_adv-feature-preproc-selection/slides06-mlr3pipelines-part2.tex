@@ -1,0 +1,50 @@
+\documentclass[11pt,compress,t,notes=noshow,xcolor=table]{beamer}
+% alternatively combining latex files with subfile package https://tex.stackexchange.com/a/155883/26830 (however, page numbering and some other stuff does not work well)
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
+
+\title{Applied Machine Learning}
+
+% includepdf slides, pagecommad will set counter for framenumber
+\usepackage{pdfpages}
+\includepdfset{trim=0mm 0mm 0mm 0mm, pagecommand={\global\setcounter{framenumber}{\value{page}}}, offset=-25mm 0, clip=true, noautoscale=true}
+% trim=0mm 6mm 0mm 0mm, offset=0 15,
+% add footer:
+\usepackage{framed, color}
+\usepackage{xcolor}
+
+\begin{document}
+
+
+\titlemeta{
+MLR3 Pipelines:
+}{
+Part 2
+}{
+figure_man/empty
+}{
+\item Targeting Columns
+\item Complex ML Pipelines
+\item AutoML Concepts
+}
+
+
+
+
+% \section{Targeting Columns}
+\includepdf[pages={53-56}]{../mlr3slides/mlr3pipelines.pdf}
+
+\section{Complex ML Pipelines and AutoML}
+\includepdf[pages={65-66, 69-71}]{../mlr3slides/mlr3pipelines.pdf}
+
+\section{Summary}
+\includepdf[pages={76, 73}]{../mlr3slides/mlr3pipelines.pdf}
+
+
+\endlecture
+\end{document}

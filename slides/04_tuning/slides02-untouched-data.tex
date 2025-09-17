@@ -1,0 +1,157 @@
+
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+% Defines macros and environments
+\input{../../latex-math/ml-hpo.tex}
+\input{../../latex-math/ml-eval.tex}
+
+\usepackage{pdfpages}
+\includepdfset{trim=0 10pt 0 0, pagecommand={\global\setcounter{framenumber}{\value{page}}}, offset=0 5pt, clip=true, noautoscale=true}
+
+\title{Applied Machine Learning}
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
+
+\begin{document}
+
+\titlemeta{
+Hyperparameter Tuning
+}{
+Nested Resampling \& Test Set Validation
+}{
+figure_man/empty
+}{
+\item Understanding the untouched test set principle
+\item Nested resampling
+}
+
+
+\section{The Untouched Test Set Principle}
+
+\includepdf[pages={3-5}]{i2ml/slides-nested-nestedintro.pdf}
+
+\includepdf[pages={2-7}]{i2ml/slides-nested-nestedresampling.pdf}
+
+\section{Pipelines}
+\includepdf[pages={3}]{i2ml/slides-tuning-pipelines.pdf}
+
+\section{Practical Considerations}
+
+\begin{frame}{Valid-Test Curves in Hyperparameter Optimization}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.7\linewidth,trim=0 0 540 0, clip]{figure_man/figure_1.pdf}
+        \includegraphics[width=0.7\linewidth,trim=540 0 0 0, clip]{figure_man/figure_1.pdf}
+    \end{figure}
+    Top Left: Idea, Top Right: Meta-Overfitting, Bottom Left: Begin Overtuning, Bottom Right: Severe Overtuning
+\end{frame}
+
+\begin{frame}{Overtuning}
+
+\vfill
+
+\begin{definition}
+Given a trajectory $(\lamv_{1}, \ldots, \lamv_{T})$, we define for each time point $1 \leq t \leq T$:
+\begin{align}
+%
+\text{\emph{overtuning:}} \quad
+\mathrm{ot}_{t}(\lamv_{1}, \ldots, \lamv_{t}, \ldots, \lamv_{T})
+&= \mathrm{test}(\lams_{t}) 
+- \min_{\lams_{t^\prime} \in \{\lams_{1}, \ldots, \lams_{t}\}} \mathrm{test}(\lams_{t^\prime}) \label{eq:overtuning} \\[1ex]
+%
+\text{\emph{meta-overfitting:}} \quad
+\mathrm{of}_{t}(\lamv_{1}, \ldots, \lamv_{t}, \ldots, \lamv_{T})
+&= \mathrm{test}(\lams_{t}) - \widehat{\mathrm{val}}(\lams_{t}) \label{eq:meta-overfitting} \\[1ex]
+%
+\end{align}
+where $\widehat{\mathrm{test}}(\lams_{t}) \coloneqq \GEh(\inducer, \lams_t, \JJ_{test}, \rho)$ and $\widehat{\mathrm{val}}(\lams_{t}) \coloneqq \GEh(\inducer, \lams_t, \JJ, \rho)$
+\end{definition}
+
+\vfill
+
+Question: is meta-overfitting or overtuning more problematic?
+
+\vfill
+
+\end{frame}
+
+\begin{frame}{Overtuning}
+\vfill
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.9\linewidth]{figure_man/ecdf_all.pdf}
+    \end{figure}
+\vfill
+\end{frame}
+
+\begin{frame}{Remedies against Overtuning}
+
+\vfill
+
+or recipes for better generalization performance
+
+\vfill
+
+    \begin{itemize}
+        \item More data
+        \item Cross-validation, repeated cross-validation
+        \item Bayesian optimization
+    \end{itemize}
+
+\vfill
+    
+\end{frame}
+
+\begin{frame}{Visualization}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.99\linewidth]{figure_man/normalized_test.pdf}
+\end{figure}
+    
+\end{frame}
+
+\begin{frame}{Variance in Resampling}
+
+\vfill
+\begin{figure}
+    \centering
+    \includegraphics[width=0.99\linewidth]{figure_man/biased_selection.png}
+\end{figure}
+\vfill
+\end{frame}
+
+\section{Recap}
+
+\begin{frame}{Importance of CV on Kaggle}
+
+\begin{itemize}
+\setlength\itemsep{1em}
+    \item Understand the data - After you download the data, start exploring features. Look at data types. Check variable classes. Create some univariate - bivariate plots to understand the nature of variables.
+    \item Understand the metric to optimize - Every problem comes with a unique evaluation metric. It's imperative for you to understand it, specially how does it change with target variable.
+    \item Decide cross validation strategy - To avoid overfitting, make sure you've set up a cross validation strategy in early stages. \textbf{A nice CV strategy will help you get reliable score on leaderboard}.
+    \item Start hyper parameter tuning 
+\end{itemize}
+
+Source: KazAnova, former Kaggle Champion at \href{https://www.hackerearth.com/practice/machine-learning/advanced-techniques/winning-tips-machine-learning-competitions-kazanova-current-kaggle-3/tutorial/}{hackerearth.com tutorial}
+\end{frame}
+
+\begin{frame}{Take-Home Messages}
+\setlength\itemsep{1em}
+    \begin{itemize}
+        \item Conduct correct cross-validation
+        \item Nested-Resampling for performance estimation
+        \item Use advanced and robust HPO
+        \item Include your preprocessing in the splitting
+    \end{itemize}
+\end{frame}
+
+\endlecture
+\end{document}

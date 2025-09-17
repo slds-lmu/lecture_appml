@@ -1,0 +1,534 @@
+---
+title: ""
+subtitle: "Practical Aspects of Xgboost"
+output:
+  prettydoc::html_pretty:
+    theme: hpstr
+    toc: yes
+    toc_depth: 2
+    css: ../_template/prettydoc-hpstr.css
+    self_contained: yes
+---
+
+```{r, include=FALSE}
+sys.source("setup.R", envir = knitr::knit_global())
+set.seed(123)
+```
+
+## Goal
+
+This somewhat technical exercise is concerned with getting more familiar with
+the hyperparameters of xgboost. The focus in this exercise is therefore **not so much on
+optimal modelling strategy** but on showcasting features of the xgboost algorithm and on
+their **usage**.
+
+The first goal in this notebook is to understand how to parallelize xgboost to
+reduce training time by utilizing multiple cores. The second goal is to
+understand how one can include monotonicity and interaction constraints into
+the model and visualize their effects. We will also discuss what those constraints actually
+entail.
+
+## Useful resources
+
+* [mlr3 book chapter on parallelization](https://mlr3book.mlr-org.com/technical.html)
+* [StatQuest video series on Xgboost](https://www.youtube.com/watch?v=OtD8wVaFm6E)
+
+# German Credit Dataset
+
+As in previous exercises, we use the German credit dataset of Prof. Dr. Hans Hoffman of the
+University of Hamburg in 1994.
+By using XGBoost, we want to classify people as a good or bad credit risk based
+on 20 personal, demographic and financial features.
+The dataset is available at the UCI repository as
+[Statlog (German Credit Data) Data Set](https://archive.ics.uci.edu/ml/datasets/Statlog+%28German+Credit+Data%29).
+
+# Exercises
+
+## Reducing training time
+
+<details>
+  <summary>**Recap**</summary>
+  In mlr3 we distinguish between *explicit* and *implicit* parallelization. The
+  former is done by `mlr3` using the R package `future` and can be used to e.g.
+  parallelize resampling, benchmarking, tuning or prediction. The latter is done by calling
+  external code (i.e. code from a CRAN package like xgboost) which runs in
+  parallel. In this usecase we are referring to the implicit parallelization from
+  xgboost if not stated otherwise. Note that using implicit and explicit
+  parallelization simultaneously can lead to conflicts and the former is thereby
+  disabled by default.
+</details>
+
+Read the documentation of xgboost and find the parameter that lets you
+determine the number of cores used for model fitting. Compare the timings of
+conducting a resampling of xgboost on the german credit task, using a standard
+holdout resampling and treatment encoding of categorical variables. Remember to
+drop constant columns afterwards. Set the positive class to `"good"`.
+
+Do this first for 10 and then 1000 boosting iterations and look at compare the relative differences
+of the parallel and sequential version. Why are they different?
+Also try to explain why the parallel version is not four times as fast.
+
+**Note**: The focus here is on *showing the features* of the learner and not on
+optimal methodology.
+
+<details>
+  <summary>**Hint 1:**</summary>
+  Use the function `bench::mark(..., check = FALSE)` to compare the timings.
+  Instantiate the resampling before, to ensure that the same train-test split.
+  The pipeops `po("encode")` and `po("removeconstants")` can be helpful for the preprocessing.
+</details>
+
+<details>
+  <summary>**Hint 2:**</summary>
+  ```{r, eval = FALSE}
+  library(mlr3verse)
+
+  task = tsk(...)
+  task = (po(...) %>>% po(...))$train(task)[[1L]]
+
+  learner = lrn(...)
+  learner_parallel = lrn(...)
+
+  resampling = rsmp("holdout")$instantiate(task)
+
+  timing_10 = bench::mark(
+    resample(...),
+    resample(...),
+    check = FALSE
+  )
+
+  timing_10
+
+  learner$param_set$values$nrounds = 1000
+  learner_parallel$param_set$values$nrounds = 1000
+
+
+  timing_1000 = bench::mark(
+    resample(...),
+    resample(...),
+    check = FALSE
+  )
+
+  timing_1000
+  ```
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>**Click me:**</summary>
+
+```{r}
+library(mlr3verse)
+
+task = tsk("german_credit")
+task$positive = "good"
+task = (po("encode", method = "one-hot") %>>% po("removeconstants"))$train(task)[[1L]]
+
+learner = lrn("classif.xgboost", nrounds = 10)
+learner_parallel = lrn("classif.xgboost", nthread = 4, nrounds = 10)
+
+resampling = rsmp("holdout")$instantiate(task)
+
+timing_10 = bench::mark(
+  resample(task, learner, resampling),
+  resample(task, learner_parallel, resampling),
+  check = FALSE
+)
+
+timing_10
+
+learner$param_set$values$nrounds = 1000
+learner_parallel$param_set$values$nrounds = 1000
+
+
+timing_1000 = bench::mark(
+  resample(task, learner, resampling),
+  resample(task, learner_parallel, resampling),
+  check = FALSE
+)
+
+timing_1000
+```
+
+The training time of xgboost can be simplified as $\text{startup} + \text{costs_per_iteration} \times \text{iters}$.
+When parallelizing, the time is saved in each iteration where a tree is fit.
+With only few iterations, the effect of saving time per iteration is relatively small compared
+to the startup costs. Therefore, the relative difference is much lower in the first, compared
+to the second comparison.
+
+The parallel implementation is however still not four times as fast.
+One reason is that only parts of the algorithm can be parallelized (more on that in the next exercise).
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Parallelizing what?
+
+In the exercise we have seen how to speed up training time of xgboost using parallelization,
+without thinking **what** is parallelized. Using your knowledge of gradient
+boosting to answer what part of the gradient boosting algorithm can be parallelized.
+Specifically address whether gradient boosting allows for parallelizing the creation of its
+individual trees.
+
+<details>
+  <summary>**Hint 1:**</summary>
+  How are the individual base learners (usually trees) in xgboost related?
+  Think about the difference between boosting and bagging.
+</details>
+
+<details>
+  <summary>**Hint 2:**</summary>
+  In gradient boosting, tree takes the errors of the previous trees into account.
+  Can this be parallelized?
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>**Click me:**</summary>
+
+In gradient boosting algorithms each base learner is trained on data, taking
+into account the previous base learner's (usually a tree) success, which means
+that the creation of trees cannot be parallelized, as the algorithm can only start
+with the n-th tree, when the (n-1)-th tree is fit.
+
+This has to be distinguished from bagging (like in a random forest) where the
+trees are built independently and which could therefore be parallelized. (Note
+that the actual `xgboost` implementation even allows for the creation of
+parallel trees, which results in a boosted random forest, see the
+experimental parameter `num_parallel_tree`.)
+
+In xgboost, the creation of splits for a new node within a tree can be parallelized,
+as the optimal splits for different features can be found in parallel.
+
+</details>
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+
+cat("-->")
+```
+
+
+## Monotonicity of feature effects
+
+<details>
+  <summary>**Recap**</summary>
+  A Partial Dependency Plot (PDP) is a model agnostic way to visualize the
+  marginal effect of a feature on the prediction. You can read more about it on
+  Christoph Molnar's
+  [excellent book](https://christophm.github.io/interpretable-ml-book/pdp.html).
+</details>
+
+You reason that longer credit durations should lead to a higher credit risk.
+Include this assumption in your xgboost model (100 rounds) and train it on a
+standard holdout split.
+
+Afterwards create a create a partial dependency plot
+for the test data using the `iml` R package. For that you need to predict probabilities.
+
+
+<details>
+  <summary>**Hint 1:**</summary>
+  The parameter `monotone_constraints` might be interesting. It has to be a
+  vector equal to the length of the features, where $+1$ indicates a monotonly
+  positive and $-1$ a monotonly negative effect, $0$ indicates no restriction.
+  For creating the PDP, use the `iml` R package.
+  There is a [chapter](https://mlr3book.mlr-org.com/interpretation.html) in the mlr3book that
+  can be helpful
+</details>
+
+<details>
+  <summary>**Hint 2:**</summary>
+  ```{r, eval = FALSE}
+  library(iml)
+
+  constraints_mon = (task$feature_names == ...) * -1
+
+  learner = lrn(...)
+
+  ids = partition(task)
+
+  learner$train(...)
+
+  model = Predictor$new(
+    learner,
+    data = task$data(ids$test, cols = task$feature_names),
+    y = task$data(ids$test, cols = task$target_names)[[1L]]
+  )
+
+  effect = FeatureEffect$new(model, method = ..., feature = ...)
+  plot(effect)
+  ```
+</details>
+
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>**Click me:**</summary>
+
+```{r}
+library(iml)
+
+constraints_mon = (task$feature_names == "duration") * -1
+
+learner = lrn("classif.xgboost", monotone_constraints = constraints_mon, nrounds = 100,
+  predict_type = "prob"
+)
+
+ids = partition(task)
+
+learner$train(task, ids$train)
+
+model = Predictor$new(
+  learner,
+  data = task$data(ids$test, cols = task$feature_names),
+  y = task$data(ids$test, cols = task$target_names)[[1L]]
+)
+
+effect = FeatureEffect$new(model, method = "pdp", feature = "duration")
+plot(effect)
+```
+
+Note that for two-class classification problems it is enough to consider only one plot, as they
+contain the same information.
+The plot confirms that we we indeed constrained the marginal effect of duration to be negative.
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Interaction of features
+
+
+<details>
+  <summary>**Recap**</summary>
+  The decision tree is a powerful tool to discover interaction among independent
+  variables (features). Variables that appear together in a traversal path are
+  interacting with one another, since the condition of a child node is predicated
+  on the condition of the parent node.
+</details>
+
+When two features appear in the same tree they are said to be interacting.
+By default, xgboost does not restrict which features can appear in the same tree, so all
+(higher order) interactions between features are in principle possible.
+
+You are interested in the interaction between age and duration.
+Restrict your model so that those two features can only interact with each other and
+repeat the experiment from the previous exercise.
+
+Afterwards visualize the results using a 2d PDP plot.
+
+<details>
+  <summary>**Hint 1:**</summary>
+  The parameter `interaction_constraints` might be interesting. Read the documentation and don't
+  forget to use 0-indexing.
+  When using `FeatureEffect` from `iml`, set `feature = c("duration", "age")`
+</details>
+
+<details>
+  <summary>**Hint 2:**</summary>
+  ```{r, eval = FALSE}
+  fn = task$feature_names
+
+  constraints_int = list(c(which(fn == ...), which(fn == ...)) - 1) # 0 indexing
+
+  learner = lrn(...)
+
+  ids = partition(task)
+
+  learner$train(task, ids$train)
+
+  model = Predictor$new(learner, data = task$data(ids$test, cols = task$feature_names),
+    y = task$data(ids$test, cols = task$target_names)[[1L]])
+
+  effect = FeatureEffect$new(model, feature = c(..., ...), method = ...)
+  plot(effect)
+  ```
+</details>
+
+
+### Solution:
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+<details>
+<summary>**Click me:**</summary>
+
+```{r}
+
+fn = task$feature_names
+
+constraints_int = list(c(which(fn == "duration"), which(fn == "age")) - 1) # 0 indexing
+
+learner = lrn("classif.xgboost", interaction_constraints = constraints_int, nrounds = 100,
+  predict_type = "prob"
+)
+
+ids = partition(task)
+
+learner$train(task, ids$train)
+
+model = Predictor$new(learner, data = task$data(ids$test, cols = task$feature_names),
+  y = task$data(ids$test, cols = task$target_names)[[1L]])
+
+effect = FeatureEffect$new(model, feature = c("duration", "age"), method = "pdp")
+plot(effect)
+```
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Monotonicity, Interaction and Correlation
+
+In the previous two exercises we have shown how one can **technically**
+restrict the effect directions and effect interactions between variables.
+Now we will consider what we this actually entails.
+
+In one of the exercises we restricted the effect direction of *duration* to be negative.
+Does this **necessarily entail** that observations with a higher duration have a lower risk?
+
+Analogously for the feature interaction: When `duration` and `age` are only allowed to interact
+with each other, does this **necessarily entail** that the difference between observations with
+a different durations only depends on the age?
+
+
+<details>
+  <summary>**Hint 1:**</summary>
+  Think about correlations between the features.
+</details>
+
+<details>
+  <summary>**Hint 2:**</summary>
+  When comparing people with different values of a variables, are they then otherwise
+  identical?
+</details>
+
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>**Click me:**</summary>
+
+In case all the features are independent, the answer is **yes**, because we are
+then making a *ceteris paribus* comparison. Otherwise, the difference in the
+duration might also entail a difference in other features, in which case the
+answer is **no**. This has to be taken into account when interpreting PDP plots.
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Bonus exercise: Parallel prediction
+
+Earlier we have parallelized the **training** of a learner. Now we also
+want to parallelize the **prediction** phase.
+
+Compare the timings of training an xgboost model on a default holdout split
+with 100 rounds with and without parallel prediction. Explain the results and
+answer whether it makes sense in this case to parallelize the prediction.
+
+<details>
+  <summary>**Hint 1:**</summary>
+  `help(Learner)` has information about the field `parallel_predict`.
+</details>
+
+<details>
+  <summary>**Hint 2:**</summary>
+  ```{r, eval = FALSE}
+  library(future)
+
+  future::plan(future::multisession())
+  learner = lrn()
+  learner_parallel = lrn()
+
+  resampling = rsmp("holdout")$instantiate(task)
+
+  timing = bench::mark(
+      ...,
+      ...,
+    check = FALSE
+  )
+  ```
+</details>
+
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+  <summary>**Click me:**</summary>
+
+  ```{r}
+  library(future)
+
+  future::plan(future::multisession())
+  learner = lrn("classif.xgboost", nrounds = 100)
+  learner_parallel = lrn("classif.xgboost", nrounds = 100, parallel_predict = TRUE)
+
+  resampling = rsmp("holdout")$instantiate(task)
+
+  timing = bench::mark(
+  resample(task, learner, resampling),
+  resample(task, learner_parallel, resampling),
+  check = FALSE
+  )
+  timing
+  ```
+
+  In this case it does not really make sense to parallelize the prediction, as the number of
+  observations is too low to make an actual difference when taking the startup and communication
+  costs between the cores into account. Parallelizing predictions is either useful when each
+  individual prediction takes long, or when many predictions must be made.
+
+</details>
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+# Summary
+
+In this exercise we learned how to parallelize the xgboost training and
+understood what can be parallelized.
+
+Using monotonicity- and
+interaction constraints we have also discovered two methods to include prior
+knowledge into our model, which we visualized using the iml R package.
+We have also understood that the correlation between features has to be taken into account
+when interpreting the results.
+
+Finally, we have learned how one can parallelize the prediction phase.

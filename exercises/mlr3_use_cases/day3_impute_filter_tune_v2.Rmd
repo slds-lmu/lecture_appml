@@ -1,0 +1,340 @@
+---
+title: "Supervised Learning III"
+subtitle: "Tuning a Pipeline"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 2
+    css: ../../../../_setup/css/style-usecase.css
+    self_contained: yes
+---
+
+```{r, echo = FALSE}
+if (!exists("show.solution")) {
+  show.solution = T
+}
+```
+
+```{r, include=FALSE}
+# Just some preparation
+knitr::opts_chunk$set(
+  cache = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  echo = TRUE,
+  R.options = list(width = 120)
+)
+lgr::get_logger("mlr3")$set_threshold("warn")
+# SET BBOTK TO 'info' IF YOU PLAY AROUND WITH THIS!
+lgr::get_logger("bbotk")$set_threshold("info")
+```
+
+# Goal
+Our goal for this exercise sheet is to learn how we can tune a nonlinear pipeline consisting of multiple `PipeOp`s generated with `mlr3pipelines`.
+The underlying mechanism is that we transform our pipeline into a proper learner.
+As such we can tune the hyperparameters of the learner jointly with the hyperparameters of each preprocessing step.
+
+# German Credit Dataset (dirty)
+We use a dirty version of the German credit dataset of Prof. Dr. Hans Hoffman of the University of Hamburg in 1994, which contains 1000 datapoints reflecting bank customers.
+The dataset is available at the UCI repository as [Statlog (German Credit Data) Data Set](https://archive.ics.uci.edu/ml/datasets/Statlog+%28German+Credit+Data%29).
+We artificially introduced missing values to the numeric features.
+
+```{r}
+library("mlr3verse")
+library("data.table")
+task = tsk("german_credit")
+dt = task$data()
+
+set.seed(2023)
+dt = dt[sample(task$row_ids, size = 100), duration := NA]
+dt = dt[sample(task$row_ids, size = 100), amount := NA]
+dt = dt[sample(task$row_ids, size = 100), age := NA]
+task = as_task_classif(dt, id = "german_credit_NA", target = task$target_names)
+task$missings()
+```
+
+# Exercises:
+
+Below, we built a `GraphLearner` which consists of a ML pipeline that first preprocesses the data by imputing the missing values (with one of three possible imputation methods: constant mean imputation, random sampling imputation, and model-based imputation using the decision tree `regr.rpart`), filtering features according to the information gain, and then applies a random forest `classif.ranger` learner.
+These steps can be reflected in the following ML pipeline (we use branching to select only one imputation method):
+
+```{r}
+library("mlr3verse")
+filter = po("filter", filter = flt("information_gain"))
+impute = list(
+  "imputemean" = po("imputemean"),
+  "imputesample" = po("imputesample"),
+  "imputerpart" = po("imputelearner", learner = lrn("regr.rpart"))
+)
+ranger = lrn("classif.ranger", num.trees = 100)
+graph = ppl("branch", impute) %>>% filter %>>% ranger
+# Visualize the ML pipeline graph
+plot(graph)
+glrn = GraphLearner$new(graph, id = "imputed.filtered.ranger")
+```
+
+Note that the `GraphLearner` combines also the hyperparameters of the learner and all other preprocessing methods.
+You can run the code above as we want use it in order to automatically tune the hyperparameters of the `GraphLearner` and benchmark it with some other learners.
+
+## Create a Search Space
+
+The elements of the above graph have different hyperparameters which can
+be tuned (see the output of `glrn$param_set` for the names of the hyperparameters).
+Set up a search space for
+
+- the number of features to filter `information_gain.filter.nfeat` by allowing values between `2L` and `20L`
+- the imputation method `branch.selection` by allowing all 3 values: `imputemean`, `imputesample`, `imputerpart`
+
+<details>
+<summary>**Hint 1:**</summary>
+
+The names of the hyperparameters could be extracted from `graph$param_set`.
+Use `ps()` or `ParamSet$new()` to create a search space.
+Use `p_int()` to define the search range for integer hyperparameters as required by `information_gain.filter.nfeat` and `p_fct()` for categorical hyperparameters as required by `branch.selection`.
+
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+
+```{r, eval=FALSE}
+tune_ps = ps(
+  ?? = p_int(2L, 20L),
+  branch.selection = ??
+)
+```
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = show.solution}
+tune_ps = ps(
+  information_gain.filter.nfeat = p_int(2L, 20L),
+  branch.selection = p_fct(c("imputemean", "imputesample", "imputerpart"))
+)
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Find the best Hyperparameters
+
+Use the defined search space to automatically tune the number of features for filtering and the imputation method of the `GraphLearner` by setting up an `AutoTuner` object with
+
+  - grid search as the tuner, with a resolution of 8, meaning that if possible up to 8 equidistant values are produced per hyperparameter
+  - the classification error `msr("classif.ce")` as performance measure
+  - 3-fold CV as resampling strategy
+
+Set a seed for reproducibility (e.g., `set.seed(2023)`).
+
+<details>
+<summary>**Recap `AutoTuner`:**</summary>
+
+The `AutoTuner` has the advantage over the tuning via `TuningInstanceSingleCrit` or
+`TuningInstanceMultiCrit` that we do not need to extract information on the best hyperparameter settings at the end.
+Instead, the learner is automatically trained on the whole dataset with the best hyperparameter setting after tuning.
+
+The `AutoTuner` wraps a learner and augments it with an automatic tuning process for a given set of hyperparameters. Because the AutoTuner itself inherits from the Learner base class, it can be used like any other learner.
+The only difference is that `train()` triggers the whole tuning process.
+
+</details>
+
+<details>
+<summary>**Hint 1:**</summary>
+
+With `AutoTuner$new()` a new `AutoTuner` instance can be initialized.
+The initialization method requires the following as an input
+
+- the `GraphLearner` from the previous exercise
+- the hyperparameter search space (which we have already set up)
+- a resampling instance initialized with `rsmp()` - the 3-fold cross-validation
+- a performance measure - the classification error
+- a termination criterion, which is `trm("none")` in our case since we specify
+the number of resolutions in the tuner
+- the tuner, i.e., grid search with its `resolution`.
+
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+
+```{r, eval=FALSE}
+set.seed(2023)
+glrn_tuned = AutoTuner$new(learner = ...,
+  search_space = ...,
+  resampling = rsmp("...", folds = ...),
+  measure = msr("..."),
+  terminator = trm("none"),
+  tuner = tnr("...", resolution = 8))
+glrn_tuned$train(task)
+```
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+```{r, message=FALSE, eval = show.solution}
+set.seed(2023)
+
+glrn_tuned = AutoTuner$new(glrn,
+  resampling = rsmp("cv", folds = 3L),
+  search_space = tune_ps,
+  measure = msr("classif.ce"),
+  terminator = trm("none"),
+  tuner = tnr("grid_search", resolution = 8, batch_size = 4))
+glrn_tuned$train(task)
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+#  at$learner$state$model$importance
+cat("-->")
+```
+
+## Visualize Tuning Process
+
+Visualize the tuning process using a `ggplot` for each of the two tuned hyperparameters.
+
+<details>
+<summary>**Hint 1:**</summary>
+
+Performance results of the 3-fold CV for each configuration could be viewed via the `achive$data` field of the `AutoTuner`.
+Use e.g. the `ggplot()` function to analyze the relationship of the hyperparameter values and the performance values `classif.ce`.
+
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+
+```{r, eval=FALSE}
+library("ggplot2")
+archive = glrn_tuned$...
+ggplot(archive, aes(x = ..., y = ...)) + 
+  geom_boxplot()
+
+ggplot(archive, aes(x = ..., y = classif.ce, col = ...)) + 
+  geom_line()
+
+ggplot(archive, aes(x = ..., y = ..., fill = classif.ce)) + 
+  geom_tile() 
+```
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = show.solution}
+library(ggplot2)
+archive = glrn_tuned$archive$data
+
+ggplot(archive, aes(x = branch.selection, y = classif.ce)) + 
+  geom_boxplot()
+
+ggplot(archive, aes(x = information_gain.filter.nfeat, y = classif.ce, col = branch.selection)) + 
+  geom_line()
+
+ggplot(archive, 
+  aes(x = information_gain.filter.nfeat, y = branch.selection, fill = classif.ce)) + 
+  geom_tile() + 
+  scale_fill_viridis_c()
+```
+
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Extract the best HPs
+
+Which of the hyperparameter combination was the best performing one?
+
+<details>
+<summary>**Hint:**</summary>
+
+You can either inspect the plots in the previous exercise or
+you can have a look on the `$tuning_result` field of the trained `AutoTuner`.
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = show.solution}
+glrn_tuned$tuning_result
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Benchmark
+
+Benchmark the previous `AutoTuner` (which automatically sets the best hyperparameters of the ML pipeline) against a decision tree (using its default hyperparameter values). Use 3-fold cross-validation.
+
+<details>
+<summary>**Hint:**</summary>
+```{r, eval = FALSE}
+lrns = list(...)
+design = benchmark_grid(tasks = ..., learners = ..., resamplings = ...)
+bmr = benchmark(...)
+bmr$aggregate()
+autoplot(bmr)
+```
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = show.solution}
+future::plan("multicore", workers = 4L)
+
+lrns = list(
+  glrn_tuned,
+  lrn("classif.rpart")
+)
+
+resampling = rsmp("cv", folds = 3)
+design = benchmark_grid(list(task), lrns, resampling)
+bmr = benchmark(design)
+bmr$aggregate()
+autoplot(bmr)
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+# Summary
+In this exercise sheet, we learned how to tune the whole pipeline such that preprocessing as well as model fitting can be optimized for the task at hand.
+We set up an `AutoTuner` object that combines the `GraphLearner` with the `Tuner` and could be used as a proper `mlr3` learner. We compared the `AutoTuner` with some other learners.
+
+Of course, we only saw a selection of the full functionality of the `mlr3pipelines` package - if you want to learn more have a look in the mlr3book.

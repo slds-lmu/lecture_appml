@@ -1,0 +1,70 @@
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+\newcommand{\titlefigure}{ames_dataset_title.png}
+\newcommand{\learninggoals}{
+  \item Understand the Ames Housing dataset structure and complexity
+  \item Learn about different feature types in real-world data
+  \item Recognize data preprocessing challenges
+  \item Appreciate dataset complexity beyond toy examples
+}
+
+\title{Feature Engineering: Ames Housing Dataset}
+\date{}
+
+\begin{document}
+
+\lecturechapter{Ames Housing Dataset}
+\lecture{Applied Machine Learning}
+
+% Set style/preamble.tex as framework
+
+\sloppy
+
+% ------------------------------------------------------------------------------
+% LECTURE CONTENT
+% ------------------------------------------------------------------------------
+
+% Ames Housing Data Set
+
+\begin{vbframe}{Ames Housing Data Set}
+
+Ames is a small city in Iowa, USA.
+
+It describes the sale of individual residential properties from 2006 to 2010.
+
+The data was collected by Dean De Cock as an more complex alternative to the often used Boston Housing dataset.
+
+It contains 2930 observations and
+
+\begin{itemize}
+\item 23 categorical features,
+\item 23 ordered categorical features,
+\item 12 integer features,
+\item 20 continuous features,
+\item 1 functional feature describing power usage of houses over a day.
+\end{itemize}
+
+\textbf{Note:} This is a slightly changed dataset from the original one.
+
+\end{vbframe}
+
+% Ames Housing Data Set - Target
+
+\begin{vbframe}{Ames Housing Data Set - Target}
+
+The goal is to predict the selling price based on these features
+
+\vfill
+
+\begin{center}
+\includegraphics[width = 0.8\textwidth]{figure/ames_saleprice_histogram.pdf}
+\end{center}
+
+\vfill
+
+\end{vbframe}
+
+\endlecture
+\end{document}

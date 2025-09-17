@@ -1,0 +1,31 @@
+# TODO: WIP TOPICS
+
+
+
+# Introduction
+slides01-intro
+
+# Tuning
+slides02-tuning
+
+# Feature Pre-Processing
+
+
+# Performance Evaluation
+slides04-perf-eval-01-motivation
+slides04-perf-eval-02-measures
+slides04-perf-eval-03-calibration-discrimination
+slides04-perf-eval-04-hypothesis
+slides04-perf-eval-05-practical
+
+# Imbalancy Correction
+
+
+# Interpretability
+slides06-iml-01-intro-lime-ce-ice
+slides06-iml-02-pdp-ale-pfi-loco
+
+# Ensembling / Stacking
+
+
+# Parallelization

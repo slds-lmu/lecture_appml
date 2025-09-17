@@ -1,0 +1,399 @@
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
+
+\title{Applied Machine Learning}
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\begin{document}
+
+
+\titlemeta{
+Benchmarking:
+}{
+Large-Scale Benchmarking \& OpenML
+}{
+figure/OpenML.png
+}{
+\item Why Benchmarking?
+\item What is OpenML?
+}
+
+
+\begin{vbframe}{Why Benchmarking}
+\vfill
+It is hard to evaluate methods using theoretical/mathematical analysis alone.
+% TODO create examples of what cannot be easily analyzed
+\vfill
+\begin{itemize}
+    \item Theoretical analysis typically requires strong assumptions \\
+    (e.g., infinite sample size, no noise, ideal model class).
+    \item Implementation details cannot be formally compared through purely theoretical/mathematical analysis (e.g., runtime, memory use).
+    \item Effect of different data properties on algorithms cannot be explained theoretically, e.g., does XGBoost outperform an LM on data with only categorical features?
+    \item Hyperparameter settings are often not part of the theoretical analysis.
+\end{itemize}
+\vfill
+\end{vbframe}
+
+\begin{vbframe}{The steps of Benchmarking}
+\vfill
+\begin{enumerate}
+    \item Formulate a hypothesis (about algorithm performance or behavior)
+    \item Define an appropriate performance metric (if not part of the hypothesis)
+    \item Select or collect datasets to evaluate the hypothesis
+    \item Define a resampling strategy
+    \item Define hyperparameter search space and tuning strategy
+    \item Execute the full cross-product of learners, datasets, and tuning configurations
+    \item Analyze results and draw conclusions
+\end{enumerate}
+\vfill
+\pause
+$\rightarrow$ OpenML supports dataset retrieval and facilitates standardized resampling
+\end{vbframe}
+
+\begin{vbframe}{The Problem with Datasets}
+\vfill
+\begin{itemize}
+    \item No universally adopted standard dataset format
+    \item No universally adopted dataset sharing platform
+    \item Few platforms offer programmatic (API-based) access to data
+\end{itemize}
+\vfill
+\pause
+\begin{itemize}
+    \item Data scattered across multiple repositories
+    \begin{itemize}
+        \item UCI Machine Learning Repository
+        \item Kaggle
+        \item Multiple small (mostly academic) platforms
+    \end{itemize}
+    \item No clear guidance on dataset selection for benchmarking studies
+\end{itemize}
+\end{vbframe}
+
+\begin{vbframe}{The ideal world - Frictionless ML}
+\vfill
+Datasets
+\begin{itemize}
+    \item Unified access to all datasets via unified API
+    \item Possibility to share own data (mostly relevant in academic context)
+    \item Discover and search datasets via their meta-data
+\end{itemize}
+\vfill
+\textbf{Associated Objects}
+\begin{itemize}
+    \item \textbf{Tasks}: Predefined train/test splits for standardized evaluation
+    \item \textbf{Runs}: Publicly shared results (algorithm, settings, performance)
+\end{itemize}
+\vfill
+\pause
+We mainly focus on datasets and tasks
+\end{vbframe}
+
+% \begin{vbframe}{OpenML: Networked Science for ML}
+% \vfill
+% \begin{quote}
+% "Move data out of our labs and minds, into online tools that help us organize the information, and reuse it in unexpected new ways."
+% \hfill \href{https://www.amazon.com/Reinventing-Discovery-New-Networked-Science/dp/0691148902}{\beamergotobutton{M. Nielsen}}
+% \end{quote}
+% \vfill
+% \textbf{OpenML} is an open platform for sharing and reusing machine learning artifacts:
+% \begin{itemize}
+%     \item \textbf{Datasets}: Annotated with meta-data and versioned
+%     \item \textbf{Tasks}: Standardized problem definitions (with train-test splits in supervised ML)
+%     \item \textbf{Flows}: Serialized learners including hyperparameter spaces
+%     \item \textbf{Runs}: Execution records (flow + task + performance)
+%     \item \textbf{Collections}: Groupings of datasets, tasks, or runs
+% \end{itemize}
+% \vfill
+% \textit{Goal: Reproducibility, transparency, and large-scale collaboration in ML.}
+% \end{vbframe}
+
+
+\begin{frame}{OpenML - The Project \furtherreading{OPENML}}
+\furtherreading{OPENML} is not only a data repository, it is a collaborative ML platform for sharing individual \textbf{components} involved in benchmark experiments.
+%(e.g., comparing ML algorithms w.r.t. performance/time on different datasets.)
+%data, ML tasks, algorithms, and results of benchmark experiments.
+% (different ML tasks can be performed on the same data, classification, regression, clustering, ...)
+
+\textbf{Benchmarking:} compare algorithms w.r.t. performance/runtime on datasets.
+
+\textbf{Goal:} Reproducibility, transparency, and large-scale collaboration in ML.
+
+OpenML relies on 4 \textbf{basic components} (just like benchmark experiments):
+\only<1>{
+\begin{center}
+\begin{figure}
+% Editable source: https://docs.google.com/presentation/d/1Gbae9fzuTjnfxCuTKIodM0assSDwLOxy7tzIv6y6cxc/edit?usp=sharing
+\includegraphics[page=1, width=\textwidth]{figure/oml_overview.pdf}
+\end{figure}
+\end{center}
+}
+\only<2>{
+\begin{center}
+\begin{figure}
+\includegraphics[page=2, width=\textwidth]{figure/oml_overview.pdf}
+\end{figure}
+\end{center}
+}
+\only<3>{
+\begin{center}
+\begin{figure}
+\includegraphics[page=3, width=\textwidth]{figure/oml_overview.pdf}
+\end{figure}
+\end{center}
+\textbf{Note:} \textit{OpenML also supports \textbf{collections} of tasks and runs}
+}
+\end{frame}
+
+\begin{vbframe}{OpenML Datasets}
+\begin{itemize}
+    \item \textbf{Raw data} stored in standardized formats:
+    \begin{itemize}
+        \item \texttt{.arff} (Attribute-Relation File Format): plain-text format with inline schema
+        \item \texttt{.parquet}: efficient binary columnar storage (preferred for large data)
+    \end{itemize}
+    \item \textbf{Meta-data} annotations include:
+\begin{itemize}
+        \item Dataset description (source, intended use, licensing)
+        \item Feature names and types (numeric, categorical, ordinal, date, string)
+        \item Designated roles: input features, target variable, ignored columns
+        %\item Default target attribute (used to define supervised tasks)
+    \end{itemize}
+    % \begin{itemize}
+    %     \item description
+    %     \item feature names
+    %     \item feature types
+    %     \item features to ignore
+    % \end{itemize}
+\item \textbf{Automatically extracted information:}
+    \begin{itemize}
+        \item Meta-features (e.g., number of instances, number of features)
+        \item Statistical summaries (missing values, sparsity, imbalance)
+        \item Baseline performance of simple models (e.g., majority class classifier)
+    \end{itemize}
+\end{itemize}
+\end{vbframe}
+
+\begin{vbframe}{OpenML Tasks}
+% \begin{itemize}
+%     \item Combination of \emph{data} + target feature + resampling technique
+%     \item Allows the exact definition of machine learning tasks
+%     \item \emph{Flows} are executed on \emph{tasks} and produce \emph{runs}
+% \end{itemize}
+
+\begin{itemize}
+    \item A \textbf{task} defines a concrete ML problem on a dataset, e.g., in supervised ML:
+    \begin{itemize}
+        \item Target feature (to be predicted)
+        \item Resampling strategy (e.g., 10-fold CV, holdout)
+        \item Evaluation metric (e.g., accuracy, RMSE)
+    \end{itemize}
+    \item Tasks ensure reproducibility by fixing all relevant components
+    \item \textbf{Flows} (i.e., ML pipelines or learners) are executed on \emph{tasks} and produce \emph{runs}
+    %\item Each execution produces a \textbf{run}: flow + task + predictions + performance
+\end{itemize}
+\end{vbframe}
+
+\begin{vbframe}{Open question: what datasets/tasks to use?}
+\begin{itemize}
+    \item Hard to compare results across papers
+    \item Benchmarking is often done on small set of datasets
+    \begin{itemize}
+        \item Question about generalization to other datasets
+        \item Cherry picking or arbitrary selection
+        \item Different versions, different train-test setups
+    \end{itemize}
+    \item Publication bias
+    \begin{itemize}
+        \item Published papers report good results
+        \item Interesting to know WHEN an algorithm works (and when it doesn’t)
+    \end{itemize}
+\end{itemize}
+\end{vbframe}
+
+\begin{vbframe}{OpenML Benchmarking Suites}
+\vfill
+\begin{itemize}
+    \item \textbf{Benchmarking suite:} curated collection of standardized OpenML tasks
+    \item Provide unified, shareable task definitions with fixed resampling and target
+    \item Accessible via APIs in \texttt{R}, \texttt{Python}, and \texttt{Java}
+    \item Enable reproducible and comparable experiments toward shared research goals
+\end{itemize}
+\vfill
+\end{vbframe}
+
+\begin{vbframe}{Example I: OpenML-CC18 (Classification) \furtherreading{BISCHL2021}}
+\vfill
+Standardized benchmark suite for evaluating supervised classification algorithms.
+\vspace{0.5em}
+\begin{itemize}
+    \item 72 classification tasks
+    \item Medium size: 500–100,000 observations, $\leq$ 5000 features (post encoding)
+    \item Contains missing values and categorical features
+    \item Excludes:
+    \begin{itemize}
+        \item Strong class imbalance
+        \item Time series or group structure
+        \item Sparse data and free-form text
+    \end{itemize}
+    \item Follows objective and subjective selection criteria (see paper)
+\end{itemize}
+\vfill
+\end{vbframe}
+
+\begin{vbframe}{Example II: OpenML-CTR23 (Regression) \furtherreading{FISCHER2023}}
+\vfill
+Extension of CC18 selection principles to regression tasks.
+\vspace{0.5em}
+\begin{itemize}
+    \item Uses same structural filters as CC18
+    \item Includes only datasets with numeric targets and $\geq 5$ distinct values
+    \item Excludes:
+    \begin{itemize}
+        \item Datasets trivially solved by linear models
+        \item Datasets with ethical/legal concerns
+        \item Datasets restricted from public benchmarking
+    \end{itemize}
+\end{itemize}
+\vfill
+\end{vbframe}
+
+\begin{vbframe}{Example III: AutoML Benchmark Suite (AMLB) \furtherreading{GIJSBERS2024}}
+\vfill
+Designed to evaluate modern AutoML systems on realistic and diverse problems.
+\vspace{0.5em}
+\begin{itemize}
+    \item 71 classification tasks and 33 regression tasks
+    \item Stricter inclusion criteria for difficulty and real-world complexity
+    \item Covers multiple domains; avoids trivial, overly cleaned, or synthetic data
+    \item Excludes:
+    \begin{itemize}
+        \item Free-text features
+        \item Time dependencies or metadata leaks
+    \end{itemize}
+\end{itemize}
+\vfill
+\end{vbframe}
+
+
+% \begin{vbframe}{OpenML Benchmarking Suites}
+% \begin{itemize}
+%     \item Collection of tasks
+%     \item Allow sharing task description in a unified format
+%     \item Can be accessed from R, Python and Java
+%     \item Work against a common goal
+% \end{itemize}
+% \end{vbframe}
+
+% \begin{vbframe}{Example I: OpenML-CC18}
+% \beamergotobutton{\href{https://datasets-benchmarks-proceedings.neurips.cc/paper/2021/hash/c7e1249ffc03eb9ded908c236bd1996d-Abstract-round2.html}{Bischl et al. (2021)}}
+
+% Provide a set of benchmark problems for standard machine learning algorithms.
+% \begin{itemize}
+%     \item Classification only
+%     \item 72 datasets
+%     \item Contain missing values and categorical features
+%     \item Medium-sized (500-100000 observations, <5000 features after one-hot-encoding)
+%     \item Not unbalanced
+%     \item No groups/block/time dependencies
+%     \item No sparse data
+%     \item Some more subjective criteria (see paper)
+% \end{itemize}
+    
+% \end{vbframe}
+
+% \begin{vbframe}{Example II: OpenML-CTR23}
+% \beamergotobutton{\href{https://openreview.net/forum?id=HebAOoMm94}{Fischer et al. (2023)}}
+
+% Extends the CC18 to regression.
+% \begin{itemize}
+%     \item Same criteria as the CC18
+%     \item There is a numeric target with at least 5 different values
+%     \item The dataset is not trivially solvable by a linear model
+%     \item The dataset does not have ethical concerns
+%     \item The use of the dataset for benchmarking is not forbidden
+% \end{itemize}
+% \end{vbframe}
+
+% \begin{vbframe}{Example III: AMLB}
+% \beamergotobutton{\href{https://www.jmlr.org/papers/v25/22-0493.html}{Gijsbers et al. (2024)}}
+% \begin{itemize}
+%     \item Classification: 71 datasets
+%     \item Regression: 33 datasets
+% \end{itemize}
+% Focus on harder and more raw datasets:
+% \begin{itemize}
+%     \item Similar criteria as the CC18
+%     \item Difficulty
+%     \item Representative of real-world
+%     \item No free form text features
+%     \item Diversity in the problem domain
+% \end{itemize}
+% \end{vbframe}
+
+\begin{vbframe}{Why Parallelization Matters}
+\vfill
+\textbf{Benchmark Scenario (AutoML Study)}
+\begin{itemize}
+    \item 71 datasets $\times$ 10-fold cross-validation
+    \item 9 AutoML systems evaluated
+    \item 1 hour per system-dataset–fold combination
+\end{itemize}
+$\Rightarrow$ Total runtime: \textbf{6390 hours} = \textbf{266+ days} sequentially
+
+\vspace{1em}
+\textbf{Conclusion:} \textit{Benchmarking at scale is infeasible without parallelization.}
+
+\vfill
+\pause
+\textbf{Single-Dataset Workflows (Real-World Use)}
+\begin{itemize}
+    \item Often: focus on one dataset with domain knowledge
+    \item Parallelization still useful for:
+    \begin{itemize}
+        \item Hyperparameter tuning (e.g., grid/random search)
+        \item Training large models (e.g., ensembles, deep nets)
+    \end{itemize}
+\end{itemize}
+\vfill
+\end{vbframe}
+
+% \begin{vbframe}{The need for parallelization}
+% \vfill
+% Example Workload: AutoML benchmark
+% \vfill
+% \begin{itemize}
+%     \item 71 datasets
+%     \item 10 fold cross-validation (outer CV)
+%     \item 9 AutoML systems (algorithms)
+%     \item 1 hour per AutoML system/dataset/fold
+% \end{itemize}
+% \vfill
+% Total: 6390 hours = 266.25 days
+% \vfill
+% Impossible in a sequential setting!
+% \end{vbframe}
+
+% \begin{vbframe}{Differences in the real world}
+% \vfill
+% \begin{itemize}
+%     \item Often: one dataset + domain knowledge
+%     \item Parallelization is still helpful for 
+%     \begin{itemize}
+%         \item hyperparameter optimization
+%         \item large models
+%     \end{itemize}
+% \end{itemize}
+% \end{vbframe}
+
+\endlecture
+\end{document}

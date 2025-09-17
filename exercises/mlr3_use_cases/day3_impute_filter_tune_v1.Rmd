@@ -1,0 +1,448 @@
+---
+title: ""
+subtitle: "Tuning a Sequential Pipeline"
+output:
+  prettydoc::html_pretty:
+    theme: hpstr
+    toc: yes
+    toc_depth: 2
+    css: ../_template/prettydoc-hpstr.css
+    self_contained: yes
+---
+
+```{r, include=FALSE}
+sys.source("setup.R", envir = knitr::knit_global())
+set.seed(123)
+```
+
+# Goal
+Our goal for this exercise sheet is to learn how we can tune pipelines generated with `mlr3pipelines`.
+The underlying mechanism is that we transform our pipeline into a proper learner
+As such we cannot only tune the hyperparameters of the learner
+but also the hyperparameters of the preprocessing steps.
+
+# German Credit Dataset (dirty)
+As in the previous exercise, we use a dirty version of the German credit dataset
+of Prof. Dr. Hans Hoffman of the University of Hamburg in 1994, which contains
+1000 datapoints reflecting bank customers.
+The dataset is available at the UCI repository as
+[Statlog (German Credit Data) Data Set](https://archive.ics.uci.edu/ml/datasets/Statlog+%28German+Credit+Data%29).
+We artificially introduced missing values and outliers in a few features.
+
+## Preprocessing
+
+We first load the `.csv` file from the directory.
+
+```{r}
+credit = read.csv("data/german_credit_dirty.csv", sep = ",", stringsAsFactors = TRUE)
+```
+
+Applying a preprocessing step as data cleaning directly to the task (which is not problematic w.r.t. to data leakage).
+
+```{r}
+library("mlr3verse")
+library("data.table")
+
+task = TaskClassif$new("german_credit", backend = credit, target = "credit_risk")
+fix_age = function(x) {
+  x[which(x == 0L)] = NA_integer_
+  x
+}
+preproc = po("colapply", applicator = fix_age, affect_columns = selector_name("age"))
+task = preproc$train(list(task))[[1]]
+```
+
+In the last exercise sheet, we built a `Graph` learner by using filtering
+based on the feature importance calculated from a decision tree
+and imputation of missing feature values based on randomly sampling feature values (numeric features)
+and out of range classes (categorical features)  as preprocessing steps,
+and a kNN classifier as our learning algorithm.
+This can be reflected in the following pipeline.
+
+```{r}
+impute_integer = po("imputesample", affect_columns = selector_type("integer"))
+impute_factor = po("imputeoor", affect_columns = selector_type(c("factor", "ordered")))
+filter = po("filter",
+  filter = flt("importance"),
+   param_vals = list(filter.nfeat = 5L))
+
+graph = filter %>>%
+  impute_integer %>>%
+  impute_factor %>>%
+  lrn("classif.kknn")
+```
+
+We saw that we can use this `Graph` as a proper learning algorithm that has
+a `$train()` as well as a `$predict()` method such that resampling could be
+conducted.
+
+# Exercises:
+
+## Create a Search Space
+The elements of the above graph have different hyperparameters which can
+be tuned (see the output of `graph$param_set` for the names of the hyperparameters).
+Set up a search space for
+
+- the number of features to filter `importance.filter.nfeat` by allowing values between `2L` and `20L`
+- the `classif.kknn.k` parameter of the kNN classifier by allowing values between `3L` and `30L`.
+
+<details>
+<summary>**Hint 1:**</summary>
+
+Use `ps()` or `ParamSet$new()` to create a search space.
+Use `p_int()` to define the search range for integer hyperparameters.
+The names of the hyperparameters could be extracted from `graph$param_set`.
+
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+
+```{r, eval=FALSE}
+tune_ps = ps(
+  classif.kknn.?? = p_int(??, ??),
+  ?? = p_int(2L, 20L)
+)
+```
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+```{r}
+tune_ps = ps(
+  classif.kknn.k = p_int(3L, 30L),
+  importance.filter.nfeat = p_int(2L, 20L)
+)
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Create a Graph Learner
+
+Transform the above `Graph` into a `GraphLearner`.
+
+<details>
+<summary>**Hint:**</summary>
+
+Use `GraphLearner$new()` (or `as_learner`) with the above `Graph` as an input to convert the graph into a learning algorithm.
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+```{r}
+grln = GraphLearner$new(graph)
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Find the best Hyperparameters
+
+Tune the `k` and `nfeat` hyperparameters of the `Graph`
+learner on the German credit data by setting up an `AutoTuner` object with
+
+  - grid search as the tuner, with a resolution of 5L.
+  - the classification error `msr("classif.ce")` as performance measure
+  - 3-fold CV as resampling strategy.
+
+Set a seed for reproducibility (e.g., `set.seed(8002L)`).
+
+<details>
+<summary>**Recap `AutoTuner`:**</summary>
+
+The `AutoTuner` has the advantage over the tuning via `TuningInstanceSingleCrit` or
+`TuningInstanceMultiCrit` that we do not need to extract information on the best hyperparameter settings at the end.
+Instead, the learner is automatically trained on the whole dataset with the best hyperparameter setting after tuning.
+
+The `AutoTuner` wraps a learner and augments it with an automatic tuning process for a given set of hyperparameters. Because the AutoTuner itself inherits from the Learner base class, it can be used like any other learner.
+The only difference is that `train()` triggers the whole tuning process.
+
+</details>
+
+<details>
+<summary>**Hint 1:**</summary>
+
+With `AutoTuner$new()` a new `AutoTuner` instance can be initialized.
+The initialization method requires the following as an input
+
+- the `Graph` learner from the previous exercise
+- the hyperparameter search space (which we have already set up)
+- a resampling instance initialized with `rsmp()` - the 3-fold cross-validation
+- a performance measure - the classification error
+- a termination criterion, which is `trm("none")` in our case since we specify
+the number of resolutions in the tuner
+- the tuner, i.e., grid search with its `resolution`.
+
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+
+```{r, eval=FALSE}
+set.seed(8002L)
+at = AutoTuner$new(learner = ...,
+  search_space = ...,
+  resampling = rsmp("...", folds = ...),
+  measure = msr("none"),
+  terminator = trm("..."),
+  tuner = tnr("...", resolution = 5L))
+at$train(task)
+```
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+
+
+```{r, message=FALSE}
+set.seed(8002L)
+at = AutoTuner$new(grln,
+  resampling = rsmp("cv", folds = 3L),
+  search_space = tune_ps,
+  measure = msr("classif.ce"),
+  terminator = trm("none"),
+  tuner = tnr("grid_search", resolution = 5L))
+at$train(task)
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+#  at$learner$state$model$importance
+cat("-->")
+```
+
+## Visualize Tuning Process
+
+Visualize the tuning process using a `ggplot` for each of the two
+tuned hyperparameters.
+
+<details>
+<summary>**Hint 1:**</summary>
+
+Performance results of the 3-fold CV for each configuration could be viewed
+via the `achive$data` field of the `AutoTuner`.
+
+Use `ggplot()` with the hyperparameter values on the x-axis and y-axis and colors for the performance values.
+
+
+</details>
+
+<details>
+<summary>**Hint 2:**</summary>
+
+```{r, eval=FALSE}
+library("ggplot2")
+ggplot(at$archive$data, aes(x = ..., y = ..., fill = ...)) + geom_tile()
+```
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+```{r}
+library(ggplot2)
+ggplot(at$archive$data, aes(x = classif.kknn.k, y = importance.filter.nfeat, fill = classif.ce)) + geom_tile()
+```
+
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Extract the best HPs
+
+Which of the hyperparameter combination was the best performing one?
+
+<details>
+<summary>**Hint:**</summary>
+
+You can either inspect the plots in the previous exercise or
+you can have a look on the `$tuning_result` field of the trained `AutoTuner`.
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+```{r}
+at$tuning_result
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Predict on "new" Data
+
+The `train()` method of the `AutoTuner` automatically tunes the hyperparameters
+and fits a final model on the full data set using the best hyperparameters.
+We can see this via `at$learner$param_set()`.
+
+Use the final model to make predictions on the following subset of the credit dataset
+
+<!-- ```{r} -->
+<!-- newpoint = data.frame("credit_risk" = "good", "age" = c(NA, 3), "amount" = 1900L, -->
+<!--   "credit_history" = "no credits taken/all credits paid back duly", -->
+<!--   "duration" = 45L,  "employment_duration" = "1 <= ... < 4 yrs", "foreign_worker" = "no", -->
+<!--   "housing" = "own", "installment_rate" = "< 20", "job" = "skilled employee/official", -->
+<!--   "number_credits" = 1L, "other_debtors" = "none",  "other_installment_plans" = "none", -->
+<!--   "people_liable" = "0 to 2", "personal_status_sex" = "skilled employee/official", -->
+<!--   "present_residence" = ">= 7 yrs",  "property" = "real estate", "purpose" = "furniture/equipment", -->
+<!--   "savings" = "unknown/no savings account", "status" = "no checking account", -->
+<!--   "telephone" = "yes (under customer name)") -->
+<!-- newpoint = rbind(credit, newpoint)[1001L,] -->
+<!-- ``` -->
+
+```{r}
+subset = credit[5:15,]
+```
+
+<details>
+<summary>**Hint:**</summary>
+
+Use `$predict_newdata()` to predict on the new data `subset`.
+
+</details>
+
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+```{r}
+at$predict_newdata(subset)
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## Extra: Bagging kNN Classifiers
+
+The basic idea behind bagging - introduced by Breiman in 1996 - is that
+an aggregation of multiple weak learners trained on subsets of the data
+could form a powerful predictor. Conduct the following steps to create
+a bagging model based on 10 kNN classifiers.
+
+1. Create a simple pipeline called `singlepipe`
+that uses `PipeOpSubsample` to downsample our credit task to 70 \% of the data
+before we train a kNN `PipeOpLearner`.
+
+<details>
+<summary>**Hint:**</summary>
+
+Use `po("subsample", frac = ...)` to create a `PipeOpSample`.
+Concatenate it with a learner.
+
+</details>
+
+2. Use the following code to copy this operation 10 times and to
+aggregate the 10 pipelines for forming a single model.
+
+```{r, eval=FALSE}
+pred_set = ppl("greplicate", singlepipe, 10L)
+bagging = pred_set %>>%
+  po("classifavg", innum = 10)
+```
+
+3. Plot the `Graph` using `$plot()`.
+
+4. Use `as_learner()` to transform your `Graph` into a proper `Learner`.
+
+5. Train your stacked pipeline model using `$train()`.
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+<details>
+<summary>Click me:</summary>
+
+1. Create `singlepipe`
+```{r}
+singlepipe = po("subsample", frac = 0.7) %>>%
+  lrn("classif.rpart")
+```
+
+2. Copy operation and create a stacked model
+```{r}
+pred_set = ppl("greplicate", singlepipe, 10L)
+
+bagging = pred_set %>>%
+  po("classifavg", innum = 10)
+```
+
+3. Plot the `Graph`
+```{r}
+bagging$plot()
+```
+
+4. Create a `GraphLearner`
+```{r}
+baglrn = as_learner(bagging)
+```
+
+5. Train the stacked model on the credit task
+```{r}
+baglrn$train(task)
+```
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+# Summary
+In this exercise sheet, we learned how to tune the whole pipeline
+such that preprocessing as well as model fitting can be optimized for the
+task at hand.
+We set up an `AutoTuner` object that combines the `GraphLearner` with the
+`Tuner` and could be used as a proper `mlr3` learner that predicts on
+a new dataset.
+
+In the EXTRA exercise, we saw how to fit nonlinear structures with multiple input and output channels.
+We designed a model that consists of multiple models trained on subsets
+of the original dataset - the bagging approach.
+Whether the bagging model based on kNN classifiers really forms a strong predictor was not inspected -
+we leave this up to the reader.
+
+Of course, we only saw a selection of the full functionality of the `mlr3pipelines` package -
+if you want to learn more have a look in the mlr3book.

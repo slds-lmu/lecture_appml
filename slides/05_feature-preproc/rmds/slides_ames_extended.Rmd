@@ -1,0 +1,39 @@
+## Ames Housing Data Set
+```{r, include = FALSE}
+# enable caching for this document
+knitr::opts_chunk$set(cache = TRUE)
+library(magrittr)
+library(ggplot2)
+library(tibble)
+
+root = rprojroot::find_root(rprojroot::is_git_root)
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+Ames is a small city in Iowa, USA.
+
+It describes the sale of individual residential properties from 2006 to 2010.
+
+The data was collected by Dean De Cock as an more complex alternative to the often used Boston Housing dataset.
+
+It contains 2930 observations and
+
+- 23 categorical features,
+- 23 ordered categorical features,
+- 12 integer features,
+- 20 continuous features,
+- 1 functional feature describing power usage of houses over a day.
+
+
+__Note:__ This is a slightly changed dataset from the original one.
+
+## Ames Housing Data Set - Target
+
+The goal is to predict the selling price based on these features
+
+```{r, echo=FALSE, message = FALSE, fig.height=5.5}
+data = read.csv(paste0(root, "/data/ames_housing_extended.csv"))
+
+ggplot(data, aes(x = SalePrice)) + geom_histogram() + theme_minimal()
+
+```

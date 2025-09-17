@@ -1,0 +1,895 @@
+\documentclass[10pt,compress,t,notes=noshow, xcolor=table]{beamer}
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+% Defines macros and environments
+
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{verbatim}
+
+\usepackage{listings}
+
+% \lstset{
+%   basicstyle=\ttfamily\small,
+%   columns=fullflexible,
+%   keepspaces=true,
+% }
+
+\lstset{
+language=R,
+basicstyle=\scriptsize\ttfamily,
+commentstyle=\ttfamily\color{gray},
+backgroundcolor=\color{white},
+%backgroundcolor=\color{light-gray}
+showspaces=false,
+showstringspaces=false,
+showtabs=false,
+frame=single,
+%tabsize=3,
+xleftmargin=1cm,
+columns=fullflexible,
+keepspaces=true,
+captionpos=b,
+breaklines=false,
+breakatwhitespace=false,
+title=\lstname,
+escapeinside={},
+keywordstyle={},
+morekeywords={}, 
+belowskip = -1.2 \baselineskip,
+}
+%\verb|basicstyle=\ttfamily, columns=fullflexible, keepspaces=true|
+%\usepackage[usenames,dvipsnames]{xcolor}
+% \definecolor{backgroundCol}{rgb}{0.97,0.97,0.97}
+% \definecolor{commentstyleCol}{rgb}{0.678,0.584,0.686}
+% \definecolor{keywordstyleCol}{rgb}{0.737,0.353,0.396}
+% \definecolor{stringstyleCol}{rgb}{0.192,0.494,0.8}
+% \definecolor{NumCol}{rgb}{0.686,0.059,0.569}
+% \definecolor{basicstyleCol}{rgb}{0.345, 0.345, 0.345}       
+% \lstset{ 
+%   language=R,                     % the language of the code
+%   basicstyle=\scriptsize  \ttfamily \color{basicstyleCol}, % the size of the fonts that are used for the code
+%   %numbers=left,                   % where to put the line-numbers
+% %  numberstyle=\color{green},  % the style that is used for the line-numbers
+%   stepnumber=1,                   % the step between two line-numbers. If it is 1, each line
+%                                   % will be numbered
+%   numbersep=5pt,                  % how far the line-numbers are from the code
+%   backgroundcolor=\color{backgroundCol},  % choose the background color. You must add \usepackage{color}
+%   showspaces=false,               % show spaces adding particular underscores
+%   showstringspaces=false,         % underline spaces within strings
+%   showtabs=false,                 % show tabs within strings adding particular underscores
+%   %frame=single,                   % adds a frame around the code
+%   %rulecolor=\color{white},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+%   tabsize=2,                      % sets default tabsize to 2 spaces
+%   captionpos=b,                   % sets the caption-position to bottom
+%   breaklines=true,                % sets automatic line breaking
+%   breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+%   keywordstyle=\color{keywordstyleCol},      % keyword style
+%   commentstyle=\color{commentstyleCol},   % comment style
+%   stringstyle=\color{stringstyleCol},      % string literal style
+%   literate=%
+%    *{0}{{{\color{NumCol}0}}}1
+%     {1}{{{\color{NumCol}1}}}1
+%     {2}{{{\color{NumCol}2}}}1
+%     {3}{{{\color{NumCol}3}}}1
+%     {4}{{{\color{NumCol}4}}}1
+%     {5}{{{\color{NumCol}5}}}1
+%     {6}{{{\color{NumCol}6}}}1
+%     {7}{{{\color{NumCol}7}}}1
+%     {8}{{{\color{NumCol}8}}}1
+%     {9}{{{\color{NumCol}9}}}1
+% } 
+
+\title{Applied Machine Learning}
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\begin{document}
+\titlemeta{
+Parallelization:
+}{
+Batchtools package
+}{
+figure/empty
+}{
+\item Understand parallelization concepts
+\item Introduction to batchtools package
+}
+
+
+% \section{The batchtools package}
+% \begin{frame}[fragile]{Efficiency and Parallelization}
+%   \begin{itemize}
+%     \item \textbf{Goal}: Minimize computation time by distributing tasks across multiple CPU cores.
+%     \item \textbf{Parallelizable Tasks}: Independent replications, resampling, model averaging, parameter variations, etc.
+%     \item \textbf{Challenges}: Debugging and maintaining parallel code require strict coding discipline.
+%     \item \textbf{Performance}: Ideal speedup is linear to the number of processes, but often limited by overhead and dependencies (Amdahl's Law, Gustafson's Law).
+%   \end{itemize}
+% \end{frame}
+
+% \begin{frame}[fragile]{Programming and Batch Computing}
+%   \begin{itemize}
+%     \item \textbf{Requirements}: Minimal effort for simple problems, use existing high-level code (R), test sequentially, debug parallel code, reproducibility, scalability.
+%     \item \textbf{Naive Batch Computing}: Write standalone scripts, SSH login, manually check jobs, gather results.
+%     \item \textbf{Limitations}: No automation, no resource management, not scalable.
+%   \end{itemize}
+% \end{frame}
+
+
+% \begin{frame}[fragile]{Parallelization and Batch Computing}
+% \begin{itemize}
+% \item \textbf{Goal}: Minimize computation time by distributing tasks across CPUs/GPUs.\\
+% $\Rightarrow$ Speedup is ideally linear but often limited by overhead and dependencies.% (Amdahl's and Gustafson's Law).
+% \item \textbf{Parallel Tasks}: Independent replications, resampling, parameter variations.
+% \item \textbf{Challenges}: Debugging and maintaining parallel code.
+% \item \textbf{Naive Batch Computing}: Write scripts, SSH login, manually check jobs, gather results.\\
+% $\Rightarrow$ \textbf{Requirements}: Use high-level code (R), test sequentially, ensure reproducibility and scalability.
+% \item \textbf{Limitations}: Lack of automation, resource management, and scalability.
+% \end{itemize}
+% \end{frame}
+
+% \begin{frame}[fragile]{HPC Clusters and Workflow}
+%   \includegraphics[width=0.6\textwidth]{figure/hpc.png}
+%   \begin{itemize}
+%     \item \textbf{HPC Clusters}: Network of nodes managed by a scheduler, shared file system.
+%     \item \textbf{Workflow}: Specify resources, create job description files, submit jobs, monitor and collect results.
+%     \item \textbf{Issues}: Handle bugs, timeouts, and parameter changes.
+%   \end{itemize}
+% \end{frame}
+
+% \begin{frame}[fragile]{Conclusions and Further Remarks}
+%   \begin{itemize}
+%     \item \textbf{Advantages}: Significant speedups, efficient parallel task handling.
+%     \item \textbf{Challenges}: Job description files, start time control, inter-job communication, queue times, auxiliary scripts, result collection complexity, debugging issues.
+%     \item \textit{Final Note}: Clusters are powerful but require careful management and coding discipline.
+%   \end{itemize}
+% \end{frame}
+
+
+%\section{Efficiency: Parallelization}
+\begin{frame}[fragile]{Parallelization}
+  \begin{itemize}
+    \item \textbf{Goal}: Minimize computation time by distributing tasks across CPUs/GPUs.\\
+   $\Rightarrow$ Speedup is ideally linear but often limited by overhead and dependencies.% (Amdahl's and Gustafson's Law).
+    \item Debugging parallel code is especially hard.
+    \item Coding discipline is even more important to minimize errors and frustration.
+
+  \item \textbf{What can be easily parallelized?}
+  \begin{itemize}
+    \item Independent replications
+    \item Resampling, cross-validation
+    \item Model averaging
+    \item Parameter variations in simulations \ldots
+    \item "Single program, multiple data"
+    \item Everything expressible as a loop of independent iterations\\
+    (if you can write it with \texttt{(l|m|)apply}, you are fine)
+  \end{itemize}
+  \item \textbf{Many statistical problems are "embarrassingly parallel"}
+  
+  \end{itemize}
+\end{frame}
+
+% %\section{Performance Improvement}
+% \begin{frame}[fragile]{Ideal performance improvement}
+%   \begin{itemize}
+%     \item p processors should be p times faster than one processor.
+%     \item Note: This is rarely possible in practice.
+%     \item For more theory, look up Amdahl's law and Gustafson's law.
+%   \end{itemize}
+%   \begin{table}
+%     \centering
+%     \begin{tabular}{|c|c|}
+%       \hline
+%       Single processor & 30 Processors \\
+%       \hline
+%       1 minute & 2 seconds \\
+%       1 hour & 2 minutes \\
+%       1 day & 1 hour \\
+%       1 month & 1 day \\
+%       1 year & 2 weeks \\
+%       \hline
+%     \end{tabular}
+%   \end{table}
+% \end{frame}
+
+%\section{Programming Requirements}
+% \begin{frame}[fragile]{Ideal Programming Requirements}
+%   \begin{itemize}
+%     \item Minimal effort for simple problems
+%     \item Use existing high-level (i.e., R) code
+%     \item Ability to test code in a sequential setting
+%     \item Debugging parallel problems possible
+%     \item Seeding / Reproducibility (with different CPU settings)
+%     \item Scale up to larger systems with minimal effort
+%   \end{itemize}
+%   %\textit{As often: Cannot have your cake and eat it, too...}
+% \end{frame}
+
+%\section{Batch Computing}
+% \begin{frame}[fragile]{Naive batch computing}
+%   Computing on multicore machines (non-cluster):
+%   \begin{itemize}
+%     \item Write a standalone script(s) that run your jobs and save results at the end.
+%     \item Parameters must be hard-coded or retrieved through the command line.
+%     \item Login on a machine via SSH.
+%     \item Start job(s) with \texttt{R CMD BATCH myscript1.R}, combine this with nohup, screen, or tmux to avoid termination of the R session after logging out.
+%     \item Start remaining jobs when resources get available (argh...).
+%     \item Check manually for completion/errors (argh again...).
+%     \item Write a script to collect results.
+%   \end{itemize}
+  
+%   Drawbacks:
+  
+%   \begin{itemize}
+%       \item No automation, resource management, or fair share.
+%       \item Not easily extensible or scalable.
+%       \item Challenges in ensuring seeding and reproducibility across different CPUs.
+%       \item Difficult to debug parallel problems.
+%   \end{itemize}
+  
+% \end{frame}
+
+% %\section{HPC Clusters}
+% % \begin{frame}[fragile]{High Performance Computing (HPC) clusters}
+% %   \includegraphics{figure/hpc.png}
+% %   \begin{itemize}
+% %     \item User logs into the gateway server (master or head node).
+% %     \item Network of multiple nodes, managed by scheduler.
+% %     \item Scheduler orchestrates computation and organizes queues to fairly distribute computation times among users.
+% %     \item Nodes usually share a file system.
+% %   \end{itemize}
+% % \end{frame}
+% \begin{frame}[fragile]{High Performance Computing (HPC) Clusters}
+%   \includegraphics{figure/hpc.png}
+%   \begin{itemize}
+%     \item Users log into the gateway server (master or head node).
+%     \item The cluster consists of a network of multiple nodes managed by a scheduler.
+%     \item The scheduler orchestrates computations and organizes queues to fairly distribute computation time among users.
+%     \item Nodes typically share a common file system.
+%   \end{itemize}
+% \end{frame}
+
+% \begin{frame}[fragile]{Manual Workflow on a HPC Cluster}
+% \begin{itemize}
+% \item \textbf{Resource Specification}:
+% \begin{itemize}
+% \item Specify CPUs, tasks, runtime, and memory
+% \item Choose cluster/partition
+% \item Command to execute (e.g., \texttt{R CMD BATCH <myscript.R>})
+% \end{itemize}
+% \item \textbf{Manual Tasks}:
+% \begin{itemize}
+% \item Pass specs via CLI tools or shell scripts
+% \item Check job status with CLI tools (e.g., \texttt{squeue})
+% \item Write scripts to collect results
+% \end{itemize}
+% \item \textbf{Usual Workflow}:
+% \begin{itemize}
+% \item Unroll \texttt{R} loops for single iteration scripts
+% \item Generate \texttt{R} scripts and job description files for each iteration
+% \item Submit jobs and check for results or logs
+% \item Combine scattered result files
+% \end{itemize}
+% \item \textbf{Handling Issues}:
+% \begin{itemize}
+% \item Fix bugs by killing and resubmitting jobs
+% \item Resubmit jobs hitting wall time with weaker constraints
+% \item Restart from scratch for new datasets or parameters
+% \end{itemize}
+% \end{itemize}
+% \end{frame}
+
+% % %\section{Batch System Workflow}
+% % \begin{frame}[fragile]{Manual working on a (HPC) CLUSTER}
+% %   You have to specify:
+% %   \begin{itemize}
+% %     \item Resource specifications (number CPUs, number of tasks, expected runtime, and memory)
+% %     \item Which cluster/partition to use
+% %     \item Command to execute (e.g., \texttt{R CMD BATCH <myscript.R>})
+% %   \end{itemize}
+% %   You have to manually:
+% %   \begin{itemize}
+% %     \item Pass specs to CLI tools, either directly as arguments or encoded in a shell script
+% %     \item Check the status of jobs via CLI tools (e.g., \texttt{squeue})
+% %     \item Write a script to collect results
+% %   \end{itemize}
+% % \end{frame}
+
+% % \begin{frame}[fragile]{Usual workflow on a (HPC) CLUSTER}
+% %   \begin{itemize}
+% %     \item Unroll your \texttt{R} loop(s) so that your script computes a single iteration.
+% %     \item Write a script that writes \texttt{R} scripts for each iteration setting the iteration counter(s) at the beginning.
+% %     \item Write a script that writes job description files for each \texttt{R} script.
+% %     \item Write a script that submits your job description files.
+% %     \item Crawl through file system checking for the existence of results or log files.
+% %     \item Write a script that combines your scattered result files.
+% %   \end{itemize}
+% % \end{frame}
+
+% % \begin{frame}[fragile]{Handling Issues in a (HPC) CLUSTER}
+% %   \begin{itemize}
+% %     \item Found a bug in your code? Write a script that kills all running jobs, fix the bug, submit everything again.
+% %     \item Some jobs have hit the wall time? Write a script that finds out which jobs you need to resubmit with weaker constraints.
+% %     \item Want to try your model on another data set or using other parameters? Eventually start from scratch, it might get ugly.
+% %   \end{itemize}
+% % \end{frame}
+
+% %\section{Conclusions}
+% % \begin{frame}[fragile]{Conclusions and further remarks}
+% %   \begin{itemize}
+% %     \item Clusters are pretty fast!
+% %     \item Many statistical tasks are embarrassingly parallel
+% %   \end{itemize}
+% %   \textbf{But:}
+% %   \begin{itemize}
+% %     \item Job description files needed
+% %     \item We cannot control when jobs are started.
+% %     \item Jobs cannot really communicate, except by writing stuff on disk (or we have to allocate multiple cores and use something like MPI).
+% %     \item Requesting many nodes at once increases time spent in queue.
+% %     \item Auxiliary scripts to create files and submit jobs necessary.
+% %     \item Functions to collect results can get complicated and lengthy.
+% %     \item If some jobs fail (e.g., singularities), debugging is awful.
+% %   \end{itemize}
+% % \end{frame}
+
+% % \begin{frame}[fragile]{batchtools}
+% %   \begin{itemize}
+% %     \item Basic infrastructure to communicate with a high-performance cluster
+% %     \item Tailored around Map-Reduce paradigm
+% %     \item Can be incorporated into other packages
+% %     \item Supported via \texttt{parallelMap} and \texttt{BiocParallel}
+% %     \item Additional abstraction for \enquote{applying algorithms on problems}
+% %     \item Assists the user in conducting comprehensive computer experiments
+% %     \item Successor package (and combination) of \texttt{BatchJobs} and \texttt{BatchExperiments}.
+% %   \end{itemize}
+% % \end{frame}
+
+% % \begin{frame}[fragile]{batchtools features}
+% %   \begin{itemize}
+% %     \item Basic infrastructure to communicate with batch systems from within \texttt{R}
+% %     \item Complete control over the batch system from within \texttt{R}: submit, supervise, kill
+% %     \item Persistent state of computation for experiments
+% %     \item \texttt{R} code independent from the underlying batch system
+% %     \item Reproducibility in distributed environments, even if the architecture changes
+% %     \item Convenient result collection capabilities
+% %     \item Debugging tools
+% %   \end{itemize}
+% % \end{frame}
+
+% \begin{frame}[fragile]{batchtools Overview}
+% \begin{itemize}
+% \item Provides infrastructure to communicate with high-performance clusters.
+% \item Built around the Map-Reduce paradigm for scalable and efficient processing.
+% %\item Can be integrated into other packages.%, supported by \texttt{parallelMap} and \texttt{BiocParallel}.
+% \item Facilitates applying algorithms on problems and conducting experiments.
+% \item Offers complete control over batch systems: \\
+% submit, supervise, and kill jobs from within \texttt{R}.
+% \item Maintains computation state, ensuring resumable experiments.
+% \item Ensures reproducibility across different architectures.
+% %\item Successor of \texttt{BatchJobs} and \texttt{BatchExperiments}, with enhanced debugging and result collection tools.
+% \item Installation, documentation, vignettes, issue tracker, development version:
+% \begin{center}
+% \url{https://github.com/mllg/batchtools}
+% \end{center}
+% \item \textbf{Paper:}
+% \begin{quote}
+% Lang, Michel, Bernd Bischl, and Dirk Surmann. \textit{batchtools: Tools for R to work on batch systems}. The Journal of Open Source Software 2.10 (2017).
+% \end{quote}
+% \end{itemize}
+% \end{frame}
+
+\begin{frame}[fragile]{Naive Batch Computing (Non-Cluster)}
+\textbf{Workflow on multicore machines:}
+\begin{itemize}
+  \item Write standalone script(s) to run jobs and save outputs.
+  \item Hard-code parameters or pass via Command-Line Interface (CLI).
+  \item Log in via SSH; run with \texttt{R CMD BATCH myscript.R}.
+  \item Use \texttt{nohup}, \texttt{screen}, or \texttt{tmux} to persist after logout.
+  \item Manually start jobs when CPUs free up.
+  \item Check completion and errors by hand.
+  \item Write scripts to merge results.
+\end{itemize}
+
+\vspace{1em}
+\textbf{Drawbacks:}
+\begin{itemize}
+  \item No resource management, automation, or fair scheduling.
+  \item Poor scalability; hard to debug parallel issues.
+  \item No guarantees for reproducibility (e.g., seeding).
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{High-Performance Computing (HPC) Clusters}
+\includegraphics[width=0.8\textwidth]{figure/hpc.png}
+\vspace{1em}
+\begin{itemize}
+  \item Users access a gateway server (head node).
+  \item Cluster = multiple nodes managed by a scheduler (e.g., SLURM).
+  \item Scheduler assigns jobs to nodes via a queuing system.
+  \item Nodes share a common file system.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Manual Workflow on a HPC Cluster}
+\textbf{Resource Specification:}
+\begin{itemize}
+  \item Define CPU count, memory, runtime, partition.
+  \item Set command (e.g., \texttt{R CMD BATCH script.R}).
+\end{itemize}
+
+\textbf{Manual Tasks:}
+\begin{itemize}
+  \item Submit jobs via CLI or shell scripts.
+  \item Monitor with tools like \texttt{squeue}.
+  \item Write aggregation scripts for results.
+\end{itemize}
+
+\textbf{Typical Workflow:}
+\begin{itemize}
+  \item Unroll \texttt{R} loops into single-iteration scripts.
+  \item Auto-generate job and script files per task.
+  \item Submit jobs; crawl logs and outputs.
+\end{itemize}
+
+\textbf{Handling Issues:}
+\begin{itemize}
+  \item Kill + resubmit on failure.
+  \item Adjust resources on wall-time hits.
+  \item Full rerun for changes in data or params.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{batchtools Overview}
+\begin{itemize}
+  \item R package for structured access to batch systems.
+  \item Built around Map-Reduce: apply algorithms to many problems.
+  \item Full control from R: submit, monitor, kill jobs.
+  \item Persistent state: resume and audit large experiments.
+  %\item Reproducible across hardware and architectures.
+  \item Convenient debugging and result collection.
+  \item Supports reproducibility across hardware and job schedulers.
+\item Supports multiple execution backends:
+\begin{itemize}
+  \item \textbf{Interactive:} Run jobs directly in the current \texttt{R} session
+  \item \textbf{Multicore:} Parallel execution on local CPU cores
+  \item \textbf{SSH:} Offload jobs to remote machines via SSH
+  \item \textbf{HPC schedulers:} SLURM, Torque/PBS, Load Sharing Facility (LSF), etc. %, Sun Grid Engine%, LoadLeveler
+\end{itemize}
+\end{itemize}
+
+\vspace{0.5em}
+\textbf{Project Page:} \url{https://github.com/mllg/batchtools}
+
+\vspace{0.5em}
+\textbf{Paper:} \url{https://doi.org/10.21105/joss.00135}
+\end{frame}
+
+
+% \begin{frame}[fragile]{Supported Systems}
+%   \begin{itemize}
+%     \item Torque/PBS: Manages job scheduling and execution on clusters.
+%     \item SLURM: Schedules and manages jobs on HPC clusters.
+%     \item Load Sharing Facility (LSF): Distributes jobs across a network of computers.    
+%     \item Sun Grid Engine: Distributed resource management for computing tasks.
+%     \item LoadLeveler: Schedules and manages batch jobs on a cluster (IBM).
+%   \end{itemize}
+%   Other modes:
+%   \begin{itemize}
+%     \item Interactive: Executes jobs in the current interactive \texttt{R} session.
+%     \item Multicore: Executes jobs using multiple CPU cores on a local machine.
+%     \item SSH: Distributes computing tasks across machines accessible via SSH.
+%   \end{itemize}
+% \end{frame}
+
+
+% \begin{frame}[fragile]{Supported Systems}
+%   \begin{itemize}
+%     \item Torque/PBS based systems
+%     \item Sun Grid Engine / Oracle Grid Engine
+%     \item Load Sharing Facility (LSF)
+%     \item SLURM
+%     \item DockerSwarm
+%   \end{itemize}
+%   Other modes:
+%   \begin{itemize}
+%     \item Interactive: Jobs executed in current interactive \texttt{R} session
+%     \item Multicore: local multicore execution with spawned processes
+%     \item SSH: distributed computing on loosely connected machines which are accessible via SSH (makeshift cluster)
+%   \end{itemize}
+% \end{frame}
+
+% \begin{frame}[fragile]{Links and references}
+%   \begin{center}
+%     \url{https://github.com/mllg/batchtools}
+%   \end{center}
+%   \begin{itemize}
+%     \item Installation infos
+%     \item R documentation
+%     \item Vignettes
+%     \item Issue tracker
+%     \item Recent development version in git
+%   \end{itemize}
+%   Paper:
+%   \begin{quote}
+%     batchtools: Tools for R to work on batch systems.
+%     The Journal of Open Source Software 2.10 (2017).
+%     Lang, Michel, Bernd Bischl,
+
+%  and Dirk Surmann.
+%   \end{quote}
+% \end{frame}
+
+% \begin{frame}[fragile]{Create a registry}
+%   Object used to access and exchange information: file paths, job parameters, computational events, \ldots
+%   \begin{itemize}
+%     \item All information is stored in a single, portable directory
+%     \item Initialization of a new registry:
+%   \end{itemize}
+  
+% \begin{lstlisting}
+% library(batchtools)
+% reg = makeRegistry(
+%   file.dir = "registry",  # accessible on all nodes
+%   seed = 1                # initial seed for first job
+% )
+% \end{lstlisting}
+%   \begin{itemize}
+%     \item Configure on which system you want to work, e.g.,
+% \end{itemize}
+% \begin{lstlisting}
+% # Set interactive mode and start jobs in external R sessions
+% reg$cluster.functions = makeClusterFunctionsInteractive(external = TRUE)
+% \end{lstlisting}
+% $\Rightarrow$ Each supported system has its own \texttt{makeClusterFunctions*} function.
+%   \begin{itemize}
+%     \item \texttt{loadRegistry(dir)} to resume working with an existing registry
+%   \end{itemize}
+% \end{frame}
+
+
+\begin{frame}[fragile]{Creating and Configuring a Registry}
+  \textbf{Purpose}: 
+   \begin{itemize}
+    \item A registry object is used to access and exchange information: file paths, job parameters, and computational events, ...
+    \item Stores all data in a single, portable directory for easy tracking and reproducibility.
+  \end{itemize}
+  % A registry is used to manage and exchange information, including file paths, job parameters, and computational events.
+  % \begin{itemize}
+  %   \item All information is stored in a single, portable directory.
+  %   \item Allows easy tracking and reproducibility of computational experiments.
+  % \end{itemize}
+\textbf{Initialization of a new registry:}
+\begin{lstlisting}
+library(batchtools)
+reg = makeRegistry(
+  file.dir = "registry",  # Directory accessible on all nodes
+  seed = 1                # Initial seed for reproducibility
+)
+\end{lstlisting}
+
+\textbf{Configure the system}: 
+
+\begin{lstlisting}
+# Set interactive mode and start jobs in external R sessions
+reg$cluster.functions = makeClusterFunctionsInteractive(external = TRUE)
+\end{lstlisting}
+  \begin{itemize}
+    \item Each supported system has its own \texttt{makeClusterFunctions*} function.%:
+      % \begin{itemize}
+      %   \item \texttt{makeClusterFunctionsInteractive()}: For interactive execution.
+      %   \item \texttt{makeClusterFunctionsMulticore()}: For multicore execution on a local machine.
+      %   \item \texttt{makeClusterFunctionsSSH()}: For distributed execution over SSH.
+      %   \item \texttt{makeClusterFunctionsSlurm()}: For SLURM-based HPC clusters.
+      %   \item \texttt{makeClusterFunctionsTorque()}: For Torque/PBS-based systems.
+      %   \item \texttt{makeClusterFunctionsSGE()}: For Sun Grid Engine systems.
+      % \end{itemize}
+  \end{itemize}
+
+\textbf{Load an existing registry to continue work:}
+  \begin{lstlisting}
+loadRegistry("registry")
+\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{Define Jobs}
+  \texttt{batchMap}:
+  \begin{itemize}
+    \item Like \texttt{lapply} or \texttt{mapply}
+    \item \((x_1, x_2) \times (y_1, y_2) \rightarrow ( f(x_1, y_1), f(x_2, y_2) )\)
+    \item 10 jobs to calculate \(1+9\), \(2+8\), \ldots, \(9+1\)
+  \end{itemize}
+  
+\begin{lstlisting}
+map = function(i, j)  i + j
+ids = batchMap(fun = map, i = 1:9, j = 9:1, reg = reg)
+\end{lstlisting}
+  
+  \begin{itemize}
+    \item Stores function on file system
+    \item Creates jobs as rows in a \texttt{data.table}
+    \item Parameters also serialized into the \texttt{data.table} for fast access
+    \item All jobs get unique positive integers as IDs
+    \item \texttt{reg =} can be omitted in most cases. See \texttt{?getDefaultRegistry}.
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Subset Jobs}
+\textbf{Query Job IDs by Status and Parameters}
+\begin{itemize}
+\item Use \texttt{find*} functions to query job IDs by computational status:
+\begin{itemize}
+\item \texttt{findError} to get job IDs for failed jobs
+\item \texttt{findDone} to get job IDs for successful jobs
+\item \texttt{findNotSubmitted} to get job IDs in order resume jobs
+\item ...
+\end{itemize}
+\item Query job IDs by parameters with \texttt{findJobs(pars)} (here: i and j), e.g.,:
+\end{itemize}
+\begin{lstlisting}
+job = findJobs(i == 2 & j == 8)
+job
+## Key: <job.id>
+##    job.id
+##     <int>
+## 1:      2
+\end{lstlisting}
+\begin{itemize}
+%\item Perform set operations on \texttt{job.id} data tables using \texttt{merge}
+\item Pass the \texttt{data.table} containing the \texttt{job.id}s to functions interacting with the batch system, e.g., \texttt{submitJobs(ids = job)}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Submit Jobs}
+  \begin{itemize}
+    \item Creates \texttt{R} script files and job description files on the fly
+    \item Resources can be provided as named list
+  \end{itemize}
+  
+\begin{lstlisting}
+# 1 hour maximal execution time, about 2 GB of RAM
+res = list(walltime = 60*60, memory = 2000)
+
+# ... and submit
+submitJobs(resources = res)
+\end{lstlisting}
+  
+  \begin{itemize}
+    \item Submits all jobs per default
+    \item Subsets of jobs can be providing as \texttt{data.table} or \texttt{vector}
+  \end{itemize}
+  
+\begin{lstlisting}
+submitJobs(ids = 1:5, resources = res)
+\end{lstlisting}
+
+\begin{itemize}
+\item Collect/reduce results:
+\end{itemize}
+\begin{lstlisting}
+# get results of each job in a list
+reduceResultsList(ids = findDone())
+
+# get result of single job
+loadResult(id = 1)
+\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{Supervise and Debug}
+  \begin{itemize}
+    \item Quick overview of what is going on: \texttt{getStatus()}
+  \end{itemize}
+\begin{lstlisting}
+## Status for 9 jobs at 2019-10-10 17:49:48:
+##   Submitted    : 9 (100.0%)
+##   -- Queued    : 0 (  0.0%)
+##   -- Started   : 9 (100.0%)
+##   ---- Running : 0 (  0.0%)
+##   ---- Done    : 9 (100.0%)
+##   ---- Error   : 0 (  0.0%)
+##   ---- Expired : 0 (  0.0%)
+\end{lstlisting}
+  
+  \begin{itemize}
+    \item Display log files with a customizable pager (less, vi, ...): \texttt{showLog(findErrors()[1])}
+    \item You can also \texttt{grepLogs(pattern)}
+    \item Found a bug? \texttt{killJobs(findRunning())}
+    \item Run a job in the current \texttt{R} session: \texttt{testJob(id)}
+  \end{itemize}
+\end{frame}
+
+% \begin{frame}[fragile]{Collect Results}
+% Reduce:
+% \begin{lstlisting}
+% # get results of each job in a list
+% reduceResultsList(ids = findDone())
+
+% # get result of single job
+% loadResult(id = 1)
+% \end{lstlisting}
+  
+%   % \begin{itemize}
+%   %   \item Convenience wrappers around \texttt{reduceResults}: \texttt{reduceResults[DataTable|List]}
+%   % \end{itemize}
+  
+% \end{frame}
+
+% \begin{frame}[fragile]{More Configuration}
+%   Configuration file \texttt{\~/.batchtools.conf.R}:
+  
+% \begin{lstlisting}
+% cluster.functions = makeClusterFunctionsSlurm("~/slurm_lmulrz.tmpl",
+%   clusters = "serial")
+% default.resources = list(walltime = 3600, memory = 1024, ntasks = 1)
+% debug = FALSE
+% max.concurrent.jobs = 999
+% \end{lstlisting}
+  
+% \end{frame}
+
+% \begin{frame}[fragile]{Experiments in batchtools}
+%   Intended as an abstraction for typical statistical tasks:
+  
+%   \textbf{Applying algorithms on problems}
+%   \begin{itemize}
+%     %\item More aimed at the end user
+%     \item Convenient for simulation studies, comparison and benchmark experiments, sensitivity analysis, ...
+%     \item Workflow differs only in job definition
+%   \end{itemize}
+%   Scenarios:
+%   \begin{itemize}
+%     \item Compare machine learning algorithms on many data sets
+%     \item Compare one/many estimation procedure(s) on simulated data
+%     \item Compare optimizers on objective functions
+%     \item ...
+%   \end{itemize}
+% \end{frame}
+
+
+\begin{frame}[fragile]{Experiments in batchtools}
+  \begin{itemize}
+  \item \textbf{Purpose}: Abstraction for typical statistical tasks.
+  
+  \item \textbf{Applying Algorithms to Problems}:
+  \begin{itemize}
+    \item Ideal for simulations, benchmark experiments, sensitivity analyses, ...
+    \item Simplifies workflow with a focus on job definition.
+  \end{itemize}
+
+  \item \textbf{Scenarios}:
+  \begin{itemize}
+    \item Compare machine learning algorithms on multiple datasets.
+    \item Compare one/many estimation procedure(s) on simulated data.
+    \item Compare optimizers on various objective functions.
+  \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Abstraction of Computer Experiments}
+  \centering
+  \includegraphics{figure/experiments.png}
+  \begin{itemize}
+    \item \textbf{Problem Definition}:
+      \begin{itemize}
+        \item \textbf{Static part}: Immutable \texttt{R} objects (e.g., matrices, data frames).
+        \item \textbf{Dynamic part}: Arbitrary \texttt{R} functions (e.g., transformations of static objects, data extraction from external sources, data generation functions).
+      \end{itemize}
+    \item \textbf{Parametrization}: Specify experimental designs for problems and algorithms.
+    \item \textbf{Seeding and Reproducibility}:
+      \begin{itemize}
+        \item Each step is automatically seeded.
+        \item Random seeds are stored in a database for reproducibility.
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+% \begin{frame}[fragile]{Abstraction of Computer Experiments}
+%   \centering
+%   \includegraphics{figure/experiments.png}
+%   \begin{itemize}
+%     \item Problem definition split into a static and dynamic part
+%       \begin{itemize}
+%         \item Immutable \texttt{R} objects (static): matrix, data frames, ...
+%         \item Arbitrary \texttt{R} function (dynamic): transformations of static part, extraction of data from external sources, function that generates data, ...
+%       \end{itemize}
+%     \item Parametrization through specifying experimental designs for both problems and algorithms
+%     \item Each step automatically seeded, random seeds stored in a database
+%   \end{itemize}
+% \end{frame}
+
+\begin{frame}[fragile]{Experiment definition steps}
+  \begin{itemize}
+    \item Add problems to registry: \texttt{addProblem}
+      \begin{itemize}
+        \item Efficient storage: Separation of static (\texttt{data}) and dynamic (\texttt{instance}) problem parts.
+      \end{itemize}
+    \item Add algorithms to registry: \texttt{addAlgorithm}
+      \begin{itemize}
+        \item Problem instance gets passed to algorithm
+        \item Can be connected with an experimental design (function parameters)
+        \item Return value will be saved on the file system
+      \end{itemize}
+    \item Add experiments to registry: \texttt{addExperiments}
+      \begin{itemize}
+        \item Experiment: problem instance + algorithm + algorithm parameters
+        \item Job: Experiment + replication number
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{A simple Example}
+  
+\begin{lstlisting}
+reg = makeExperimentRegistry("test_reg")
+addProblem(name = "p1", data = 1, seed = 1,
+  fun = function(data, job) runif(data))
+addAlgorithm(name = "a1",
+  fun = function(job, data, instance) 2 * instance)
+addAlgorithm(name = "a2",
+  fun = function(job, data, instance) data + instance)
+addExperiments(repls = 2)
+submitJobs()
+res = reduceResultsDataTable()
+getJobPars()[res]
+
+## Key: <job.id>
+##    job.id problem prob.pars algorithm algo.pars   result
+##     <int>  <char>    <list>    <char>    <list>   <list>
+## 1:      1      p1 <list[0]>        a1 <list[0]>   0.5310
+## 2:      2      p1 <list[0]>        a1 <list[0]>   0.3698
+## 3:      3      p1 <list[0]>        a2 <list[0]>   1.2655
+## 4:      4      p1 <list[0]>        a2 <list[0]>   1.1849
+\end{lstlisting}
+  
+\end{frame}
+
+% \begin{frame}[fragile]{Summary}
+%   \begin{itemize}
+%     \item Reproducibility: Every computation is seeded, seeds are stored in a \texttt{data.table}
+%     \item Portability: Data, algorithms, results and job information reside in a single directory
+%     \item Extensibility: Add more problems or algorithms, try different parameters or increase the replication numbers at any computational state
+%     \item Exchangeability: Share your file directory to allow others to extend your study with their data sets and algorithms
+%   \end{itemize}
+%   \begin{itemize}
+%     \item Greatly simplifies the work with batch systems
+%     \item Interactively control batch systems from within R (no shell required)
+%     \item Do reproducible research
+%     \item Exchange code and results with others
+%   \end{itemize}
+% \end{frame}
+
+\begin{frame}[fragile]{Summary}
+  \begin{itemize}
+    \item \textbf{Reproducibility}:
+      \begin{itemize}
+        \item Every computation is seeded.
+        \item Seeds are stored in a \texttt{data.table}.
+      \end{itemize}
+    \item \textbf{Extensibility}:
+      \begin{itemize}
+        \item Easily add more problems or algorithms.
+        \item Try different parameters or increase replications at any stage.
+      \end{itemize}
+    \item \textbf{Portability}: Data, algorithms, results, and job information in a single directory.
+    \item \textbf{Exchangeability}: Share your file directory to allow others to extend your study with their data sets and algorithms.
+    \item Simplifies working with batch systems.
+    \item Control batch systems interactively from within R (no shell required).
+    \item Facilitates reproducible research.
+    \item Enables easy exchange of code and results with others.
+  \end{itemize}
+\end{frame}
+
+\endlecture
+\end{document}

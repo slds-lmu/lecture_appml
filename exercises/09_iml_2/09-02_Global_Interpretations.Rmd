@@ -1,0 +1,240 @@
+---
+title: "Global Interpretation Methods"
+subtitle: "In-class exercise 09-2"
+output:
+  prettydoc::html_pretty:
+    theme: hpstr
+    toc: yes
+    toc_depth: 2
+    css: ../_template/prettydoc-hpstr.css
+    self_contained: yes
+---
+
+```{r, include=FALSE}
+sys.source("setup.R", envir = knitr::knit_global())
+```
+
+# Goal
+
+Apply what you have learned about global interpretation methods.
+
+# Prerequisites
+
+We need the following libraries:
+
+```{r library}
+library('mlr3verse')
+library('iml')
+library('gridExtra')
+library('ggpubr')
+set.seed(100)
+```
+
+# Data
+
+### German Credit
+
+The data set contains 1000 observations with 21 features and the binary target variable `credit_risk`. For illustrative purposes, we only consider 8 of the 21 features in the following:
+
+```{r}
+task = tsk("german_credit")
+task$select(cols = c("age", "amount", "duration", "credit_history", "employment_duration", "personal_status_sex", "purpose"))
+```
+
+# 1 Categorical ALE
+
+## 1.1 Fit a Random Forest
+
+Fit a random forest with `mlr3` on some training data to predict the risk.
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = show.solution}
+split = partition(task)
+learner = lrn("classif.ranger", predict_type = "prob")$train(task, row_ids = split$train)
+``` 
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## 1.2 Compute PDP of personal_status_sex
+
+Since the decision of whether a person gets a loan can have serious implications
+on the person's life, banks are subordinate to regulations and must disclose 
+the underlying mechanism of their used model to authorities. 
+Since looking on the single trees is not feasible to uncover the internals of a random forest, (model-agnostic) interpretation methods should help to unfold the underlying mechanisms and to explain specific decisions. 
+Since the regulations require that the model does not discriminate against 
+certain groups, you want to evaluate the feature effect of `personal_status_sex` of the fitted forest model. 
+Compute and visualize the PDP of `personal_status_sex` using test data and interpret the results.
+
+<details>
+  <summary>**Hint 1:**</summary>
+  
+To make the x-axis labels more legible, you can append the following code to the `plot()` function:
+
+```{r, eval = FALSE}
+plot (...) + 
+  theme(axis.text.x = element_text(angle = 50, hjust=1))
+```
+
+</details>
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = show.solution}
+# Predictor:
+pred = Predictor$new(learner, data = task$data(rows = split$test), y = "credit_risk")
+
+# Compute PDP:
+plot(FeatureEffect$new(predictor = pred, 
+                       feature = "personal_status_sex", 
+                       method = "pdp")) +
+  theme(axis.text.x = element_text(angle = 50, hjust=1))
+```
+
+All customers, regardless of their personal status and gender, have on 
+average a high probability of being a low (good) risk for the bank. 
+The average marginal prediction for divorced or separated male customers
+reveals a slightly higher risk for this group. 
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## 1.3 Analyse the corresponding ALE plot
+
+Because the ALE models accumulated effects in a specific direction, the feature values must have an order by definition. However, there is no natural order to categorical/nominal features like `personal_status_sex`. 
+In order to derive an artificial order, Molnar 2022 (Chapter 8.2)^[https://christophm.github.io/interpretable-ml-book/ale.html] proposes to order the categories of the features of interest $x_s$ according to their similarity based on other/remaining features $x_{-S}$.
+Take a look at the corresponding ALE plot and compare the results to the PDP.
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = show.solution}
+plot(FeatureEffect$new(predictor = pred, 
+                       feature = "personal_status_sex", 
+                       method = "ale")) +
+  theme(axis.text.x = element_text(angle = 50, hjust=1))
+```
+
+In comparison to the PDP, we now see that there are clear gender-specific differences, e.g., that divorced or separated male customers show a much higher risk.
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+# 2 PFI
+
+## 2.1 A synthetic example
+
+Download the `extrapolation.csv` dataset and remove the column that only contains the row indices (`X`). Fit a linear regression model with `mLr3` to some training data. Do not look at the model's coefficients or perform an exploratory analysis of the data yet. Assess the MSE of the model on test data.
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = show.solution}
+# load data and remove column "X"
+df = read.csv("../data/extrapolation.csv")
+df <- df[ , -which(names(df) == "X")]
+
+# create task and split in into train and test data
+task = as_task_regr(x = df, target = "y")
+split = partition(task)
+
+#learn and predict
+lm = lrn("regr.lm")
+lm$train(task, row_ids = split$train)
+pred_lm = Predictor$new(lm, data = task$data(rows = split$test), y = "y")
+preds = pred_lm$predict(task$data(rows = split$test))
+
+# MSE
+mse <- mean((task$data(rows = split$test)$y - preds$predict.model..newdata...newdata.) ^ 2)
+print(paste("MSE:", round(mse,4)))
+``` 
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## 2.2 Calculate and interpret PFI values
+
+Apply Permutation Feature Importance to the model (on test data) and plot the results.
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = show.solution}
+importance = FeatureImp$new(pred_lm, loss = "mse", n.repetitions = 10)
+plot(importance)
+``` 
+
+$X_3$ is the most important feature, with $X_1$ and $X_2$ sharing the second place. PFI considers $X_4$ to be irrelevant.
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+## 2.3 Exploratory analysis
+
+Perform an exploratory analysis of the data (correlation structure between features and with $y$) and print the model's coefficients and intercept. 
+What additional insight into the relationship of the features with $y$ do we gain by looking at the correlation structure of the covariates in addition to the PFI (assuming that all dependencies are linear)?
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("<!--")
+```
+
+### Solution:
+
+<details>
+<summary>Click me:</summary>
+
+```{r, eval = show.solution}
+cor(task$data(rows = split$test))
+``` 
+
+```{r, eval = show.solution}
+lm$model$coefficients
+``` 
+
+If we know the dependency structure of the covariates we can infer whether or not the PFI value is nonzero due to a dependency with the covariates or not. In our example we now know that $x_3$ is independent of its covariates, so we hypothesize that $x_3$ is actually dependent with $y$. Since $x_1, x_2$ are dependent, for those variables we cannot infer anything about the dependency with $y$ with the covariates dependency structure and PFI alone.
+
+```{r, eval = !show.solution, echo = FALSE, results='asis'}
+cat("-->")
+```
+
+# Summary
+
+In this exercise, we analyzed an example of ALE on a categorical target and deepened our understanding of PFI.

@@ -1,0 +1,39 @@
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+% alternatively combining latex files with subfile package https://tex.stackexchange.com/a/155883/26830 (however, page numbering and some other stuff does not work well)
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+\setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
+
+% includepdf slides, pagecommad will set counter for framenumber
+\usepackage{pdfpages}
+\includepdfset{trim=0mm 0mm 0mm 0mm, pagecommand={\global\setcounter{framenumber}{\value{page}}}, offset=-25mm 0, clip=true, noautoscale=true}
+
+
+\title{Applied Machine Learning}
+
+\begin{document}
+
+
+\titlemeta{
+Machine Learning in R:
+}{
+MLR3 Learning \& Evaluation}{
+figure_man/mlr3_logo.png
+}{
+\item Working with Learners in MLR3
+\item Train, Predict, Evaluate workflow
+\item Understanding model performance evaluation
+}
+
+% \subsection{Learner}
+\includepdf[pages={39-40, 42, 44-50}]{../mlr3slides/mlr3-intro.pdf}
+
+\subsection{Prediction and Evaluation}
+\includepdf[pages={51-53, 55-59, 62-65, 67-71}]{../mlr3slides/mlr3-intro.pdf}
+
+
+\endlecture
+\end{document}

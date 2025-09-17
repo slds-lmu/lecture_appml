@@ -1,0 +1,136 @@
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+\newcommand{\titlefigure}{categorical_encoding_title.png}
+\newcommand{\learninggoals}{
+  \item Understand why categorical features need special encoding
+  \item Learn one-hot and dummy encoding techniques
+  \item Recognize limitations of simple encoding methods
+  \item Know when to use different encoding strategies
+}
+
+\title{Feature Engineering: Categorical Encoding - One-Hot \& Dummy}
+\date{}
+
+\begin{document}
+
+\lecturechapter{Categorical Encoding: One-Hot \& Dummy}
+\lecture{Applied Machine Learning}
+
+% Set style/preamble.tex as framework
+
+\sloppy
+
+% ------------------------------------------------------------------------------
+% LECTURE CONTENT
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Categorical Features}
+
+A categorical feature is a feature with a finite number of discrete (unordered) \textit{levels} $c_1, \dots, c_k$, e.g., \textit{House.Style=2Story}$\stackrel{?}{>}$\textit{SFoyer}.
+
+\begin{itemize}
+\item Categorical features are very common in practical applications.
+
+\item Except for few machine learning algorithms like tree-based methods, categorical features have to be encoded in a preprocessing step.
+\end{itemize}
+
+\textit{Encoding} is the creation of a fully numeric representation from a categorical feature.
+
+\begin{itemize}
+\item Choosing the optimal encoding can be a challenge, especially when the number of levels $k$ becomes very large.
+\end{itemize}
+
+\end{vbframe}
+
+\begin{vbframe}{One-Hot Encoding}
+
+\begin{itemize}
+\item Convert each categorical feature to $k$ binary ($1/0$) features, where $k$ is the number of unique levels.
+
+\item One-Hot encoding does not loose any information of the feature and many models can correctly handle binary features.
+
+\item Given a categorical feature $x_j$ with levels $c_1,\dots, c_k$, the new features are
+$$\tilde x_{j,c} = \I(x_j)_{c} \quad c = c_1,\dots,c_k.$$
+\end{itemize}
+
+\textbf{One-Hot encoding is often the go-to choice for the encoding of categorical features!}
+
+\end{vbframe}
+
+\begin{vbframe}{One-Hot Encoding: Example}
+
+Original slice of the dataset:
+
+\vfill
+
+\begin{center}
+\includegraphics[width = 0.8\textwidth]{figure/categorical_original_table.pdf}
+\end{center}
+
+\vfill
+
+One-Hot Encoded:
+
+\vfill
+
+\begin{center}
+\includegraphics[width = 0.8\textwidth]{figure/categorical_onehot_table.pdf}
+\end{center}
+
+\vfill
+
+\end{vbframe}
+
+\begin{vbframe}{Dummy Encoding}
+
+\begin{itemize}
+\item Dummy encoding is very similar to one-hot encoding with the difference that only $k-1$ binary features are created.
+
+\item A \textit{reference} category is defined as all binary features being $0$, i.e.,
+$$\tilde x_{j,1} = 0, \dots, \tilde x_{j,k-1} = 0.$$
+
+\item Each feature $\tilde x_{j,1}$ represents the \textit{deviation} from the reference category.
+
+\item While using a reference category is required for stability and interpretability in statistical models like (generalized) linear models, it is not necessary, rarely done in ML and can even have negative influence on the performance.
+\end{itemize}
+
+\end{vbframe}
+
+\begin{vbframe}{Ames Housing - One-Hot vs. Dummy Encoding}
+
+\vfill
+
+\begin{center}
+\includegraphics[width = 0.8\textwidth]{figure/onehot_vs_dummy_comparison.pdf}
+\end{center}
+
+\vfill
+
+Result of linear model depends on actual implementation, e.g., R's \texttt{lm()} produces a \textit{rank-deficient fit} warning and recovers by dropping the intercept.
+
+\end{vbframe}
+
+\begin{vbframe}{One-Hot Encoding: Limitations}
+
+\begin{itemize}
+\item One-Hot encoding can become extremely inefficient when number of levels becomes too large, as one additional feature is introduced for every level.
+
+\item Assume a categorical feature with $k=4000$ levels, by using dummy encoding 4000 new features are added to the dataset.
+
+\item These additional features are very sparse.
+
+\item Handling such \textit{high-cardinality categorical features} is a challenge, possible solutions are
+    \begin{itemize}
+    \item specialized methods such as \textit{factorization machines},
+    \item \textbf{target/impact encoding},
+    \item clustering feature levels or
+    \item feature hashing.
+    \end{itemize}
+\end{itemize}
+
+\end{vbframe}
+
+\endlecture
+\end{document}

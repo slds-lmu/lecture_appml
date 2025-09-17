@@ -1,0 +1,118 @@
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+\title{Applied Machine Learning}
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\begin{document}
+
+\titlemeta{
+Feature Engineering:  
+}{
+Feature Transformations
+}{
+figure_man/empty
+}{
+\item Normalization
+\item Box-Cox Transformation
+}
+
+
+% \section{Feature Transformation}
+
+\begin{vbframe}{Feature Transformations}
+
+\begin{itemize}
+\item \textbf{Normalization:} The feature is transformed to have a mean of 0 and standard deviation of 1
+    $$z^{(i)} = \frac{x^{(i)} - \operatorname{mean}(x)}{\operatorname{sd}(x)}$$
+    Or use \textbf{robust} versions (median, IQR)
+
+\lz
+
+\item \textbf{Box-Cox Transformation:} Stabilizes variance, makes the data more normal distribution-like
+    $$z^{(i)} = \left\{\begin{array}{cc}
+    \frac{\left(x^{(i)}\right)^\lambda - 1}{\lambda} & \ \ \text{if} \ \ \lambda \neq 0 \\
+    \log(x^{(i)}) & \ \ \text{if} \ \ \lambda = 0 \\
+    \end{array}\right.$$
+\end{itemize}
+
+\end{vbframe}
+
+\begin{vbframe}{Feature Transformations}
+
+To illustrate the effect of transforming the features we evaluate a k-NN learner without scaling, with normalization, and with a Box-Cox transformation:
+
+\vfill
+
+\begin{center}
+\includegraphics[width = 0.7\textwidth]{figure/02_feature_transformation_knn.png}
+\end{center}
+
+\vfill
+
+\end{vbframe}
+
+\begin{vbframe}{Other Common Transformations}
+
+\begin{itemize}
+    \item Polynomials: $x_j \longrightarrow x_j, x_j^2, x_j^3, ...$
+    \item Interactions: $x_j, x_k \longrightarrow x_j, x_k, x_j \times x_k$
+    \item Basis expansions: BSplines, TPB, ...
+    \item Fourier expansions
+\end{itemize}
+
+\lz
+
+These transformations are used to improve simple models, e.g. linear regression, and most likely will \textbf{not} improve complex machine learning models.
+
+\end{vbframe}
+
+\begin{vbframe}{Feature Transformations - Other Data Types}
+
+Feature transformations allow handling a variety of data types:
+
+\lz
+
+\begin{itemize}
+\item \textbf{Dates:}
+  \begin{itemize}
+  \item Time since X
+  \item Birthday $\rightarrow$ age
+  \item Extract month, day of the week, ...
+  \end{itemize}
+
+\lz
+
+\item \textbf{Other:}
+  \begin{itemize}
+  \item Use outputs of neural networks (images, text)
+  \item Bag-of-words (text)
+  \item Statistics (time-series)
+  \end{itemize}
+\end{itemize}
+
+\end{vbframe}
+
+\begin{vbframe}{Feature Transformations - Summary}
+
+\begin{itemize}
+\item Transformations of the target variable can make modelling highly skewed data easier
+
+\item Scaling single features can lead to better results
+
+\item For some learners, e.g. tree-based methods scaling has no effect!
+
+\item Feature transformations can further improve models - use domain knowledge!
+\end{itemize}
+
+\end{vbframe}
+
+
+
+\endlecture
+\end{document}

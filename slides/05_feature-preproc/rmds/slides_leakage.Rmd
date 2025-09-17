@@ -1,0 +1,30 @@
+
+
+## Train-Test Leakage
+
+```{r include=FALSE, cache=FALSE}
+library(knitr)
+root = rprojroot::find_root(rprojroot::is_git_root)
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+- Ultimately we are interested in predicting on future data!
+
+- We can not use 'knowledge' about future (test) data during training.
+
+- Requires clearly separating train and test data in order to avoid overoptimistic conclusions:
+
+- **Examples:**
+
+  - Using knowledge about which features are relevant in test data
+  
+  - Scaling based on statistics of the test data 
+  
+  - Missing patterns in the test data not present in training data
+
+## Train-Test Leakage
+
+```{r, echo=FALSE, out.width="\\textwidth"}
+# source: https://mlr3book.mlr-org.com/pipelines.html
+knitr::include_graphics(ap("pipe_action.png"))
+```
