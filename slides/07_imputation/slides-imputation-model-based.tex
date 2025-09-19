@@ -154,8 +154,8 @@ Imputation for prediction: beware of diminishing return. Le Morvan and Varoquaux
 
 \begin{itemize}
     \item Better imputation performance does not result in better prediction performance for MNAR (w/o missingness indicator)
-    \item Better imputation might be irrelevant b/c information is available in other features, unimportant, even with imputation it might be hard to learn a good downstream model
-    \item More expressive models have less (relative) benefit from imputation
+    \item Better imputation might be irrelevant b/c information is available in other features, unimportant, even with imputation, it might be hard to learn a good downstream model
+    \item More expressive models benefit less from imputation
     \item Best on average: missForest + XGBoost + masking
     \item Open Questions:
     \begin{itemize}
