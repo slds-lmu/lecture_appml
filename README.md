@@ -1,5 +1,6 @@
 # Applied Machine Learning
 
+Note: Old repo with issue tracker and full commit history is here https://github.com/slds-lmu/lecture_appml_old (for some reason overleaf connection was not working and we had to create from overleaf this new repo here so we lost history and issues).
 
 Main course site: TBA
 
