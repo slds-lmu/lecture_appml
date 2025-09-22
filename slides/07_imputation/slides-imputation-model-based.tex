@@ -53,59 +53,161 @@ figure_man/fe_imputation_models_first_slide
 
 \end{frame}
 
-\begin{frame}{A tale of failed imputation}
-\vfill
+% \begin{frame}{A tale of failed imputation}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.6\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-17.png}
+%     \\ \small Source: \furtherreading{CARUANA2024} (Example starting at 43'31)
+% \end{figure}
+
+% \textbf{ICU Mortality}: Chance of dying in ICU depending on how well patients can breath (values near 0 indicate no breathing, around 1000 is healthy)
+
+% \end{frame}
+
+% \begin{frame}{A tale of failed imputation 2}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.6\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-27.png}
+%     \\ \small Source: \furtherreading{CARUANA2024} (Example starting at 43'31)
+% \end{figure}
+
+% \textbf{ICU Mortality}: Chance of dying in ICU depending on how well patients can breath (values near 0 indicate no breathing, around 1000 is healthy)
+
+% \textbf{Question:} Why is this value so low?
+% \end{frame}
+
+% \begin{frame}{A tale of failed imputation 3}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.6\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-34.png}
+%     \\ \small Source: \furtherreading{CARUANA2024} (Example starting at 43'31)
+% \end{figure}
+
+% \textbf{ICU Mortality}: Chance of dying in ICU depending on how well patients can breath (values near 0 indicate no breathing, around 1000 is healthy)
+
+% \textbf{Question:} Why is this value so low?
+
+% \textbf{Answer:} It was imputed with the mean.
+% \end{frame}
+
+% \begin{frame}{A tale of failed imputation 4}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.6\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-41.png}
+%     \\ \small Source: \furtherreading{CARUANA2024} (Example starting at 43'31)
+% \end{figure}
+
+% \textbf{ICU Mortality}: Chance of dying in ICU depending on how well patients can breath (values near 0 indicate no breathing, around 1000 is healthy)
+
+% \textbf{Problem:} With imputation, $60\%$ of healthiest patients (low risk) are are assigned in a PFRatio $<1000$, i.e. high risk, region.
+
+% \textbf{Question:} Should we rather use a more complex imputation method?
+
+% \end{frame}
+
+% \begin{frame}{A tale of failed imputation 5}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.6\linewidth]{figure_man/Screenshot from 2025-06-03 22-39-01.png}
+%     \\ \small Source: \furtherreading{CARUANA2024} (Example starting at 43'31)
+% \end{figure}
+
+% \textbf{Question:} Should we rather use a more complex imputation method?
+
+% \textbf{Answer:} For other imputation methods, the imputation only spreads healthy (low risk) people more in the PFRatio $<1000$ region. This leads to the final model learning lower risks for sick people (see upper plot), which is even worse.
+% \end{frame}
+
+
+% ------------------------------------------------------------
+% Failed imputation (Caruana 2024, example at 43'31)
+% ------------------------------------------------------------
+
+\begin{frame}{Failed imputation: ICU oxygenation (I)}
 \begin{figure}
-    \centering
-    \includegraphics[width=0.5\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-17.png}
-    \caption{Figure from \furtherreading{CARUANA2024} example starting at 43'31}
+  \centering
+  \includegraphics[width=0.6\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-17.png}
+  \\\scriptsize Source: \furtherreading{CARUANA2024} (example at 43'31)
 \end{figure}
-\vfill
+\begin{itemize}
+  \item ICU mortality vs.\ \textbf{PF ratio} (oxygenation)
+  \item $\approx 0$: no breathing;\ $\sim1000$: healthy
+  \item Expect \emph{decreasing} risk with PF
+\end{itemize}
 \end{frame}
 
-\begin{frame}{A tale of failed imputation 2}
-\vfill
+\begin{frame}{Failed imputation: ICU oxygenation (II)}
 \begin{figure}
-    \centering
-    \includegraphics[width=0.5\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-27.png}
-    \caption{Figure from \furtherreading{CARUANA2024} example starting at 43'31}
+  \centering
+  \includegraphics[width=0.6\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-27.png}
+  \\\scriptsize Source: \furtherreading{CARUANA2024} (example at 43'31)
 \end{figure}
-\vfill    
+\begin{itemize}
+  \item Local \alert{dip} in risk at one PF value
+  \item Contradicts physiology and trend
+  \item \textbf{Question:} Why so low?
+\end{itemize}
 \end{frame}
 
-\begin{frame}{A tale of failed imputation 3}
-\vfill
+\begin{frame}{Failed imputation: ICU oxygenation (III)}
 \begin{figure}
-    \centering
-    \includegraphics[width=0.5\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-34.png}
-    \caption{Figure from \furtherreading{CARUANA2024} example starting at 43'31}
+  \centering
+  \includegraphics[width=0.6\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-34.png}
+  \\\scriptsize Source: \furtherreading{CARUANA2024} (example at 43'31)
 \end{figure}
-\vfill
+\begin{itemize}
+  \item Missing PF values \alert{imputed by the mean} (collapse to \textbf{one} PF point)
+  \item Model learns spuriously \emph{low} risk there %(conflates “missing” with “mean")
+  \item Imputation ignores \alert{MNAR/MAR} structure
+\end{itemize}
 \end{frame}
 
-\begin{frame}{A tale of failed imputation 4}
-\vfill
+\begin{frame}{Failed imputation: ICU oxygenation (IV)}
 \begin{figure}
-    \centering
-    \includegraphics[width=0.5\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-41.png}
-    \caption{Figure from \furtherreading{CARUANA2024} example starting at 43'31}
+  \centering
+  \includegraphics[width=0.6\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-41.png}
+  \\\scriptsize Source: \furtherreading{CARUANA2024} (example at 43'31)
 \end{figure}
-\vfill
+\begin{itemize}
+  \item With imputation: \(\sim60\%\) healthy mapped to PF \(<1000\)
+  \item Label-feature mismatch near imputed PF
+  \item Risk landscape shifts toward “healthier”
+  \item \textbf{Should we use a more complex imputer?}
+\end{itemize}
 \end{frame}
 
-\begin{frame}{A tale of failed imputation 5}
-\vfill
+\begin{frame}{Failed imputation: ICU oxygenation (V)}
 \begin{figure}
-    \centering
-    \includegraphics[width=0.5\linewidth]{figure_man/Screenshot from 2025-06-03 22-39-01.png}
-    \caption{Figure from \furtherreading{CARUANA2024} example starting at 43'31}
+  \centering
+  \includegraphics[width=0.66\linewidth]{figure_man/Screenshot from 2025-06-03 22-39-01.png}
+  \\\scriptsize Source: \furtherreading{CARUANA2024} (example at 43'31)
 \end{figure}
-\vfill
+\begin{itemize}
+  \item “Smarter” imputers \emph{spread} healthy into PF \(<1000\)
+  \item Even worse: Final model underestimates risk for the sick
+  \item Prefer \textbf{no fill} + missingness indicator
+  \item If imputing: fit/tune \emph{inside} CV; consider MNAR
+\end{itemize}
 \end{frame}
+
+
+% \begin{frame}{Tests for missingness mechanisms}
+% \vfill
+% \textbf{MAR (Missing at Random)}: In a survey, older participants are less likely to report their income, but the missingness depends only on age, not on the income itself.
+
+% \textbf{MCAR (Missing Completely at Random)}: Some questionnaire responses are lost due to a printer error, completely unrelated to the respondents or their answers.
+
+% \textbf{MNAR (Missing Not at Random)}: People with higher income are less likely to report their income in a survey, so the probability of missing data depends on the income itself.
+% \vfill
+% \end{frame}
 
 \begin{frame}{Tests for missingness mechanisms}
 \vfill
-MAR vs MCAR
+\textbf{MAR} vs \textbf{MCAR}
 \begin{itemize}
     \vfill
     \item Little's test
@@ -118,7 +220,7 @@ MAR vs MCAR
     \end{enumerate}
     \vfill
 \end{itemize}
-MNAR: no test available
+\textbf{MNAR}: no test available
 \vfill
 \end{frame}
 
