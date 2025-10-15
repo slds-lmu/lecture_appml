@@ -1,5 +1,9 @@
 # Applied Machine Learning
 
+[![render-lecture-slide-status](https://github.com/slds-lmu/lecture_appml/actions/workflows/render-lecture-slide-status.yaml/badge.svg?branch=main)](https://github.com/slds-lmu/lecture_appml/actions/workflows/render-lecture-slide-status.yaml)
+[![View slide check results](https://img.shields.io/badge/View_slide_check_results-E0911F)](https://slds-lmu.github.io/lecture_appml)
+
+
 Note: Old repo with issue tracker and full commit history is here https://github.com/slds-lmu/lecture_appml_old (for some reason overleaf connection was not working and we had to create from overleaf this new repo here so we lost history and issues).
 
 Main course site: TBA
