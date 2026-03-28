@@ -44,41 +44,43 @@ figure_man/empty
 
 \section{Practical Considerations}
 
-\begin{frame}{Valid-Test Curves in Hyperparameter Optimization}
+\begin{frame}{Valid-Test Curves in HPO}
     \begin{figure}
         \centering
-        \includegraphics[width=0.7\linewidth,trim=0 0 540 0, clip]{figure_man/figure_1.pdf}
-        \includegraphics[width=0.7\linewidth,trim=540 0 0 0, clip]{figure_man/figure_1.pdf}
+        \includegraphics[width=0.55\linewidth,trim=0 0 540 0, clip]{figure_man/figure_1.pdf}
+        \includegraphics[width=0.55\linewidth,trim=540 0 0 0, clip]{figure_man/figure_1.pdf}
     \end{figure}
-    Top Left: Idea, Top Right: Meta-Overfitting, Bottom Left: Begin Overtuning, Bottom Right: Severe Overtuning
+
+    \begin{itemize}
+        \item \textbf{Ideal (top-left):} validation and test improve together.
+        \item \textbf{Meta-overfitting (top-right):} validation too optimistic, test still improves.
+        \item \textbf{Overtuning (bottom-left):} validation keeps improving, test deteriorates.
+        \item \textbf{Severe overtuning (bottom-right):} later incumbents can be worse than much earlier ones on test data.
+    \end{itemize}
 \end{frame}
 
 \begin{frame}{Overtuning}
+\small
+Let $\lams_t$ be the incumbent (best-performing configuration) at step $t$, i.e. the configuration with the best validation score seen so far.
 
-\vfill
+\vspace{0.5em}
 
-\begin{definition}
-Given a trajectory $(\lamv_{1}, \ldots, \lamv_{T})$, we define for each time point $1 \leq t \leq T$:
-\begin{align}
-%
-\text{\emph{overtuning:}} \quad
-\mathrm{ot}_{t}(\lamv_{1}, \ldots, \lamv_{t}, \ldots, \lamv_{T})
-&= \mathrm{test}(\lams_{t}) 
-- \min_{\lams_{t^\prime} \in \{\lams_{1}, \ldots, \lams_{t}\}} \mathrm{test}(\lams_{t^\prime}) \label{eq:overtuning} \\[1ex]
-%
-\text{\emph{meta-overfitting:}} \quad
-\mathrm{of}_{t}(\lamv_{1}, \ldots, \lamv_{t}, \ldots, \lamv_{T})
-&= \mathrm{test}(\lams_{t}) - \widehat{\mathrm{val}}(\lams_{t}) \label{eq:meta-overfitting} \\[1ex]
-%
-\end{align}
-where $\widehat{\mathrm{test}}(\lams_{t}) \coloneqq \GEh(\inducer, \lams_t, \JJ_{test}, \rho)$ and $\widehat{\mathrm{val}}(\lams_{t}) \coloneqq \GEh(\inducer, \lams_t, \JJ, \rho)$
-\end{definition}
+\textbf{Meta-overfitting:} validation looks better than test for the current incumbent
+$$
+\mathrm{of}_t = \widehat{\mathrm{test}}(\lams_t) - \widehat{\mathrm{val}}(\lams_t)
+$$
 
-\vfill
+\textbf{Overtuning:} the current incumbent is worse on test than the best incumbent seen so far
+$$
+\mathrm{ot}_t = \widehat{\mathrm{test}}(\lams_t) - \min_{t^\prime \le t} \widehat{\mathrm{test}}(\lams_{t^\prime})
+$$
 
-Question: is meta-overfitting or overtuning more problematic?
-
-\vfill
+\begin{itemize}
+    \item Meta-overfitting is a \textbf{gap} between validation and test.
+    \item Overtuning is a \textbf{selection error}: we keep improving validation but select a worse model.
+    \item Nonzero meta-overfitting is possible without overtuning.
+    \item In HPO, overtuning is usually the more important practical problem.
+\end{itemize}
 
 \end{frame}
 
@@ -92,21 +94,17 @@ Question: is meta-overfitting or overtuning more problematic?
 \end{frame}
 
 \begin{frame}{Remedies against Overtuning}
-
-\vfill
-
-or recipes for better generalization performance
-
-\vfill
-
     \begin{itemize}
-        \item More data
-        \item Cross-validation, repeated cross-validation
-        \item Bayesian optimization
+        \item \textbf{More data / larger validation sets:} reduces noise in validation estimates.
+        \item \textbf{Repeated CV or reshuffling splits:} stabilizes the HPO objective.
+        \item \textbf{Be skeptical about tiny late gains:} they may be pure validation noise.
+        \item \textbf{Keep strong baselines:} defaults or early incumbents can already generalize best.
     \end{itemize}
 
-\vfill
-    
+\vspace{0.5em}
+
+Main message from the paper: overtuning is especially relevant in the \textbf{small-data regime}.
+
 \end{frame}
 
 \begin{frame}{Visualization}
@@ -115,7 +113,7 @@ or recipes for better generalization performance
     \centering
     \includegraphics[width=0.99\linewidth]{figure_man/normalized_test.pdf}
 \end{figure}
-    
+
 \end{frame}
 
 \begin{frame}{Variance in Resampling}
@@ -137,7 +135,7 @@ or recipes for better generalization performance
     \item Understand the data - After you download the data, start exploring features. Look at data types. Check variable classes. Create some univariate - bivariate plots to understand the nature of variables.
     \item Understand the metric to optimize - Every problem comes with a unique evaluation metric. It's imperative for you to understand it, specially how does it change with target variable.
     \item Decide cross validation strategy - To avoid overfitting, make sure you've set up a cross validation strategy in early stages. \textbf{A nice CV strategy will help you get reliable score on leaderboard}.
-    \item Start hyper parameter tuning 
+    \item Start hyper parameter tuning
 \end{itemize}
 
 Source: KazAnova, former Kaggle Champion at \href{https://www.hackerearth.com/practice/machine-learning/advanced-techniques/winning-tips-machine-learning-competitions-kazanova-current-kaggle-3/tutorial/}{hackerearth.com tutorial}

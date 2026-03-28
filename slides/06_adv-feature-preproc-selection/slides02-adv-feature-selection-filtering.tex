@@ -29,10 +29,10 @@ figure_man/empty
 \section{Filtering}
 
 
-% \includepdf[pages={2},trim=0 20 0 0,clip,width=490pt,offset=-10pt 10pt,pagecommand={}]{sl/slides-fs-filters1.pdf} 
+% \includepdf[pages={2},trim=0 20 0 0,clip,width=490pt,offset=-10pt 10pt,pagecommand={}]{sl/slides-fs-filters1.pdf}
 % pages 2, 4, 5, 7
 
-\begin{frame2}{Introduction}
+\begin{vbframe}{Introduction}
   \vspace{0.4cm}
   \begin{itemize}
   \setlength{\itemsep}{0.8em}
@@ -46,12 +46,12 @@ figure_man/empty
   \includegraphics[width=0.55\textwidth]{sl/feature-selection/figure/fs-auc-barplot.png}\\
   \footnotesize{Exemplary filter score ranking for Spam data}
   \end{center}
-  
-\end{frame2}
+
+\end{vbframe}
 
 % 4, 5
 
-\begin{frame2}{Pearson \& Spearman correlation}
+\begin{vbframe}{Pearson \& Spearman correlation}
 \textbf{Pearson correlation $r(x_j, y)$: }
 \begin{itemize}
 \item For numeric features and targets only
@@ -67,11 +67,11 @@ figure_man/empty
 % \item Calculate the Spearman correlation coefficient between each feature-target combination:
 % $$ r_{SP} = \frac{\sum (rg(\xi) - \bar{rg}_x) (rg(\yi) - \bar{rg}_y)}{\sqrt{\sum (rg(\xi) - \bar{rg}_x)^2 \sum (rg(\yi) - \bar{rg}_y)^2}}$$
 % $-1 \le r_{SP} \le 1$
-% 
+%
 % $r_{SP} > 0$: positive correlation.
-% 
+%
 % $r_{SP} < 0$: negative correlation.
-% 
+%
 % $r_{SP} = 0$: no correlation.
 % \item A higher score indicates a higher relevance of the feature.
 \end{itemize}
@@ -79,8 +79,8 @@ figure_man/empty
 Use absolute values $|r(x_j, y)|$ for feature ranking:\\
 higher score indicates a higher relevance
 
-\end{frame2}
-\begin{frame2}{Pearson \& Spearman correlation}
+\end{vbframe}
+\begin{vbframe}{Pearson \& Spearman correlation}
 
 Only \textbf{linear} dependency structure, non-linear (non-monotonic) aspects are not captured:
 
@@ -97,10 +97,10 @@ To assess strength of non-linear/non-monotonic dependencies, generalizations suc
 
 % \begin{center}
 %   \includegraphics[width=0.9\textwidth]{figure_man/correlation_example.png}
-% 
+%
 %   \scriptsize{\url{https://en.wikipedia.org/wiki/Pearson\_correlation\_coefficient\#/media/File:Correlation\_examples2.svg}}
 % \end{center}
-% 
+%
 % \begin{vbframe}{Filter: Rank correlation}
 % \begin{itemize}
 %   \item For features and targets at least on ordinal scale.
@@ -109,23 +109,23 @@ To assess strength of non-linear/non-monotonic dependencies, generalizations suc
 % \item Calculate the Spearman correlation coefficient between each feature-target combination:
 % $$ r_{SP} = \frac{\sum (rg(\xi) - \bar{rg}_x) (rg(\yi) - \bar{rg}_y)}{\sqrt{\sum (rg(\xi) - \bar{rg}_x)^2 \sum (rg(\yi) - \bar{rg}_y)^2}}$$
 % $-1 \le r_{SP} \le 1$
-% 
+%
 % $r_{SP} > 0$: positive correlation.
-% 
+%
 % $r_{SP} < 0$: negative correlation.
-% 
+%
 % $r_{SP} = 0$: no correlation.
 % \item A higher score indicates higher relevance of the feature.
 %   \end{itemize}
 % \end{vbframe}
-\end{frame2}
+\end{vbframe}
 
 
 % 7
-\begin{frame2}{AUC/ROC}
+\begin{vbframe}{AUC/ROC}
 \begin{itemize}
 \item For binary classification with $\Yspace = \{ 0, 1\}$ and numeric features
-\item Classify samples using single feature (with thresholds), compute AUC per feature as proxy for its ability to separate classes 
+\item Classify samples using single feature (with thresholds), compute AUC per feature as proxy for its ability to separate classes
 %\item Uses each feature's values to classify samples for different thresholds, computing AUC per feature as proxy for its ability to separate classes.
 \item Features are then ranked; higher AUC scores $\to$ higher relevance.
 \end{itemize}
@@ -137,7 +137,7 @@ To assess strength of non-linear/non-monotonic dependencies, generalizations suc
 
 %\footnotesize{Isabelle Guyon, André Elisseeff (2003). An Introduction to Variable and Feature Selection.  Journal of Machine Learning Research (3) p. 1157-1182.}
 \end{center}
-\end{frame2}
+\end{vbframe}
 
 
 
@@ -149,7 +149,7 @@ To assess strength of non-linear/non-monotonic dependencies, generalizations suc
             \item $\chi^2$-statistic
             \item Welch's t-Test
             \item F-Test
-            
+
         \end{itemize}
         \item Regression \& Classification
         \begin{itemize}
@@ -164,7 +164,7 @@ To assess strength of non-linear/non-monotonic dependencies, generalizations suc
     \end{itemize}
 \end{frame}
 
-% \includepdf[pages={5},trim=0 20 0 0,clip,width=490pt,offset=0pt 10pt,pagecommand={}]{sl/slides-fs-filters2.pdf} 
+% \includepdf[pages={5},trim=0 20 0 0,clip,width=490pt,offset=0pt 10pt,pagecommand={}]{sl/slides-fs-filters2.pdf}
 \begin{vbframe}{Using Filter Methods}
 
 % \begin{minipage}{0.45\textwidth}

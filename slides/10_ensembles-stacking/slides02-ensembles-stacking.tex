@@ -40,7 +40,7 @@ Also called stacked generalization (\furtherreading{WOLPERT1992}): train multipl
             % https://docs.google.com/presentation/d/1gaeW1LefW3vQi3aoEiZEoSUaEyXfmQ9-U_1WoGKfGNM/edit#slide=id.g2e833da9e7c_0_143
             \includegraphics[width=0.9\textwidth]{figure/stacking_better.png}
             %\caption{Caption}
-            % Old version from 
+            % Old version from
             % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
             \label{fig:stacking}
         \end{figure}
@@ -68,22 +68,22 @@ In contrast to model averaging, stacking already combines predictions during tra
 \begin{algorithmic}
     \Require Training data $\D = \Dset$
     \Ensure Stacked Ensemble $\fM$
-    
+
     \State
     \State \textbf{Step 1: Learn level 0 base models}
     \For{$m \leftarrow 1$ to $M$}
         \State Fit base model $\bl[m]$ on $\D$
     \EndFor
-    
+
     \State
     \State \textbf{Step 2: Construct new dataset $\D^\prime$ from $\D$}
     \For{$i \leftarrow 1$ to $n$}
         \State Add $(\xv^{\prime(i)}, y^{(i)})$ to new dataset, where $\xv^{\prime(i)} = (\bl[1](\xv^{(i)}), \ldots, \bl[M](\xv^{(i)}))$
     \EndFor
-    
+
     \State
     \State \textbf{Step 3: Fit level 1 model $\fM$ on $\D^\prime$}
-    
+
     \State \Return $\fM$
 \end{algorithmic}
 NB: We can either drop the original features or keep them when learning the level 1 model.
@@ -99,7 +99,7 @@ NB: We can either drop the original features or keep them when learning the leve
         \vspace{-1em}
         \begin{figure}
             \centering
-            % New version from 
+            % New version from
             % https://docs.google.com/presentation/d/1gaeW1LefW3vQi3aoEiZEoSUaEyXfmQ9-U_1WoGKfGNM/edit#slide=id.g2e833da9e7c_0_143
             \includegraphics[width=0.7\textwidth]{figure/stacking_cv_better.png}
             % Old version from
@@ -130,7 +130,7 @@ NB: We can either drop the original features or keep them when learning the leve
 \begin{algorithmic}
     \Require Training data $\D = \Dset$, number of folds $K$
     \Ensure Stacked Ensemble $\fM$
-    
+
     \For{$k \leftarrow 1$ to $K$}
         \State \textbf{Step 1: Learn level 0 base models}
         \For{$m \leftarrow 1$ to $M$}
@@ -139,13 +139,13 @@ NB: We can either drop the original features or keep them when learning the leve
         \State
         \State \textbf{Step 2: Add out-of-fold predictions to new dataset $\D^\prime$}
         \ForAll{$(\xv^{(i)}, y^{(i)}) \in \D_{\mathrm{test}}^{(k)}$}
-            \State Add $(\xv^{\prime(i)}, y^{(i)})$ to new dataset, where $\xv^{\prime(i)} = (\blxi[1], \ldots, \blxi[M])$
+            \State Add $(\xv^{\prime(i)}, y^{(i)})$ to new dataset, where $\xv^{\prime(i)} = (\bl[1](\xv^{(i)}), \ldots, \bl[M](\xv^{(i)}))$
         \EndFor
     \EndFor
 
     \State
     \State \textbf{Step 3: Fit level 1 model $\fM$ on $\D^\prime$}
-    
+
     \State \Return $\fM$
 \end{algorithmic}
 
@@ -156,7 +156,7 @@ NB: We can either drop the original features or keep them when learning the leve
 \begin{vbframe}{Multilevel Stacking}
 \vfill
 So far: train level 0 base models, use predictions to train the level 1 model.\\
-Now: Also train multiple models at level 1, use predictions to train final level 2 model 
+Now: Also train multiple models at level 1, use predictions to train final level 2 model
 \vfill
 %\begin{columns}
 %    \begin{column}{0.5\textwidth}
@@ -174,7 +174,7 @@ Now: Also train multiple models at level 1, use predictions to train final level
 %        \begin{enumerate}
 %            \item level 0 base model training
 %            \item Collect predictions of level 0 base models
-%            \item level 1 model training 
+%            \item level 1 model training
 %            \item Collect predictions of level 1 models
 %            \item level 2 final model training
 %        \end{enumerate}
@@ -183,7 +183,7 @@ Now: Also train multiple models at level 1, use predictions to train final level
 \begin{enumerate}
     \item level 0 base model training
     \item Collect predictions of level 0 base models
-    \item level 1 model training 
+    \item level 1 model training
     \item Collect predictions of level 1 models
     \item level 2 final model training
 \end{enumerate}
@@ -198,7 +198,7 @@ NB: In principle we can repeat this training of multiple models at the $l$-th le
 \vfill
 Popular choices of level 1 or level 2 models in stacking include:
 \begin{itemize}
-    \item linear / logistic regression 
+    \item linear / logistic regression
     %\item random forest (especially in the case of multilevel stacking)
     \item GES (average the predictions of the models at the previous level)
 \end{itemize}
@@ -213,39 +213,57 @@ Higher-level training data:
 
 % ------------------------------------------------------------------------------
 
+% \begin{vbframe}{Forward Pass / Prediction}
+% % \vspace{-1.5em}
+% \scriptsize
+% \textbf{Algorithm:} Prediction Using Single Layer Stacking
+% \begin{algorithmic}
+%     \Require Training data $\D = \Dset$, Test data $\Xmat$
+%     \Ensure Predictions $\yv$
+%     \State \textbf{Step 1: Fit level-0 on the whole training data set}
+%     \For{$m \leftarrow 1$ to $M$}
+%         \State Fit level-0 model $\bl[m]$ on $\D$
+%     \EndFor
+%     \State
+%     \State \textbf{Step 2: Make predictions with every level-0 model}
+%     \For{$m \leftarrow 1$ to $M$}
+%         \State Predict with base model: $\yv^{[m]} = \bl[m](\Xmat)$
+%     \EndFor
+%     \State
+%     \State \textbf{Step 3: Construct new dataset $\Xmat^\prime$}
+%     \For{$i \leftarrow 1$ to $n$}
+%         \State $\Xmat^{\prime(i)} = [\xv_1^{(i)}, \dots, \xv_d^{(i)}, \xv_1^{\prime(i)}, \dots, \xv_M^{\prime(i)}]$
+%     \EndFor
+%     \State
+%     \State \textbf{Step 4: Make predictions with level 1 model $\fM$ on $\Xmat^\prime$}
+%     \State \Return $\fM(\Xmat)$
+% \end{algorithmic}
+
+% \end{vbframe}
+
+
 \begin{vbframe}{Forward Pass / Prediction}
-% \vspace{-1.5em}
-\textbf{Algorithm:} Prediction Using Single Layer Stacking
+%\footnotesize
+\textbf{Assume:} trained base models $\bl[1], \dots, \bl[M]$ and meta-model $\fM$
+
 \begin{algorithmic}
-    \State
-    \Require Training data $\D = \Dset$, Test data $\Xmat$
-    \Ensure Predictions $\yv$
+    \Require Test data $\Xmat_{\text{test}} = (\xv^{(1)}, \dots, \xv^{(n_{\text{test}})})$
+    \Ensure Predictions $\hat{\yv}_{\text{test}}$
 
-    \State \textbf{Step 1: Fit level-0 on the whole training data set}
+    \State \textbf{Step 1: Predict with each base model}
     \For{$m \leftarrow 1$ to $M$}
-        \State Fit level-0 model $\bl[m]$ on $\D$
+        \State $\hat{\yv}^{[m]} \leftarrow \bl[m](\Xmat_{\text{test}})$
     \EndFor
-    
+
     \State
-    \State \textbf{Step 2: Make predictions with every level-0 model}
-    \For{$m \leftarrow 1$ to $M$}
-        \State Predict with base model: $\yv^m = \sbl[m](\Xmat)$
-    \EndFor
-    
+    \State \textbf{Step 2: Construct meta-feature matrix}
+    \State $\Xmat^\prime \leftarrow [\hat{\yv}^{[1]}, \dots, \hat{\yv}^{[M]}]$ or $\Xmat^\prime \leftarrow [\Xmat_{\text{test}}, \hat{\yv}^{[1]}, \dots, \hat{\yv}^{[M]}]$ (if original features are retained)
+
     \State
-    \State \textbf{Step 3: Construct new dataset $\Xmat^\prime$}
-    \For{$i \leftarrow 1$ to $n$}
-        \State $\Xmat^{\prime{i}} = [\xi[i]_1, \dots, \xi[i]_d, \xv^{\prime{(i)}}_1, \dots, \xv^{\prime{(i)}}_M] $
-    \EndFor
-    
-    \State
-    \State \textbf{Step 4: Make predictions with level 1 model $\fM$ on $\Xmat^\prime$}
-    
-    \State \Return $\fM(\Xmat)$
+    \State \textbf{Step 3: Predict with the meta-model}
+    \State \Return $f^{[M]}(\Xmat^\prime)$
 \end{algorithmic}
-
 \end{vbframe}
-
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Two questions}
@@ -258,14 +276,14 @@ What other methods do the following level-1 classifiers recover?
     \item The level-1 model is a linear model that assign equal weight $w_{m} = \frac{1}{M}$ to every input feature.
 \end{itemize}
 \vfill
-    
+
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{AutoGluon}
 \begin{columns}
-    \begin{column}{0.4\textwidth}
+    \begin{column}{0.35\textwidth}
         \vspace{-1em}
         \begin{figure}
             \centering
@@ -281,7 +299,7 @@ What other methods do the following level-1 classifiers recover?
             \label{fig:auto_gluon_almb}
         \end{figure}
     \end{column}
-    \begin{column}{0.6\textwidth}
+    \begin{column}{0.65\textwidth}
         \begin{itemize}
             \item The de-facto most popular and successful AutoML system
             \item Developed and maintained by Amazon
