@@ -23,13 +23,30 @@ Stacking
 }{
 figure/stacking_better.png
 }{
-\item What is Stacking?
-\item How can we stack multiple layers?
+\item From Averaging to Stacking
+\item CV Stacking and Meta-Features
+\item Practical Guidance and AutoGluon
 }
 
 
+\begin{vbframe}{From Averaging to Stacking}
+\vfill
+So far: weighted model averaging uses a \textbf{fixed} aggregation function $G$:
+$$f_{\mathbf{w}}(\xv) = \sum_{m=1}^{M} w_m \cdot \bl[m](\xv)$$
+\vfill
+Key limitation: weights $w_m$ are \textbf{global} --- every input $\xv$ gets the same weighting of models.
+\vfill
+What if model 1 is better in one region of the input space, and model 2 in another?
+
+$\rightarrow$ \textbf{Idea:} Replace the fixed $G$ with a \textbf{learned model} that can adapt the combination to the input.
+This is \textbf{stacking}.
+\vfill
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
 \begin{vbframe}{Stacking}
-Also called stacked generalization (\furtherreading{WOLPERT1992}): train multiple base models (level 0) on the same data and use their predictions as input features for a level 1 model that makes the final ensemble prediction $\rightarrow$ heterogeneous ensembling
+Also called stacked generalization (\furtherreading{WOLPERT1992}): train multiple base models (Level 0) on the same data and use their predictions as input features for a Level 1 model that makes the final ensemble prediction $\rightarrow$ heterogeneous ensembling
 \vspace{1em}
 \begin{columns}
     \begin{column}{0.5\textwidth}
@@ -48,9 +65,9 @@ Also called stacked generalization (\furtherreading{WOLPERT1992}): train multipl
     \begin{column}{0.5\textwidth}
         Steps:
         \begin{enumerate}
-            \item Base model training (level 0)
+            \item Base model training (Level 0)
             \item Collect predictions
-            \item level 1 model training
+            \item Level 1 model training
         \end{enumerate}
     \end{column}
 \end{columns}
@@ -67,10 +84,10 @@ In contrast to model averaging, stacking already combines predictions during tra
 \textbf{Algorithm:} Single Layer Stacking
 \begin{algorithmic}
     \Require Training data $\D = \Dset$
-    \Ensure Stacked Ensemble $\fM$
+    \Ensure Stacked Ensemble $f^{[M]}$
 
     \State
-    \State \textbf{Step 1: Learn level 0 base models}
+    \State \textbf{Step 1: Learn Level 0 base models}
     \For{$m \leftarrow 1$ to $M$}
         \State Fit base model $\bl[m]$ on $\D$
     \EndFor
@@ -82,11 +99,118 @@ In contrast to model averaging, stacking already combines predictions during tra
     \EndFor
 
     \State
-    \State \textbf{Step 3: Fit level 1 model $\fM$ on $\D^\prime$}
+    \State \textbf{Step 3: Fit Level 1 model $f^{[M]}$ on $\D^\prime$}
 
-    \State \Return $\fM$
+    \State \Return $f^{[M]}$, $\bl[1], \ldots, \bl[M]$
 \end{algorithmic}
-NB: We can either drop the original features or keep them when learning the level 1 model.
+NB: We can either drop the original features or keep them when learning the Level 1 model.
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Stacking: Data Transformation}
+\footnotesize
+The key idea: base model predictions on the training data form a \textbf{new feature matrix} $\D^\prime$ for the Level 1 model.
+
+\begin{center}
+\begin{tikzpicture}[scale=0.7, every node/.style={scale=0.7}]
+    % --- Left table: Original data D ---
+    \node[font=\bfseries] at (1.5, 3.2) {$\D$};
+    % Headers
+    \node[font=\small] at (0.5, 2.6) {$x_1$};
+    \node[font=\small] at (1.5, 2.6) {$\cdots$};
+    \node[font=\small] at (2.5, 2.6) {$x_p$};
+    \node[font=\small] at (3.3, 2.6) {$y$};
+    % Rows
+    \foreach \i in {0,1,2} {
+        \pgfmathsetmacro{\ypos}{2.0 - \i*0.6}
+        \draw[gray] (0, \ypos-0.25) rectangle (2.9, \ypos+0.25);
+        \node[font=\tiny] at (1.5, \ypos) {observation $(\the\numexpr\i+1\relax)$};
+        \node[font=\small] at (3.3, \ypos) {$y^{(\the\numexpr\i+1\relax)}$};
+    }
+    \node at (1.5, -0.2) {$\vdots$};
+    \pgfmathsetmacro{\ybot}{-0.8}
+    \draw[gray] (0, \ybot-0.25) rectangle (2.9, \ybot+0.25);
+    \node[font=\tiny] at (1.5, \ybot) {observation $(n)$};
+    \node[font=\small] at (3.3, \ybot) {$y^{(n)}$};
+
+    % --- Arrow with model boxes ---
+    \draw[->, very thick] (4.0, 1.0) -- (6.0, 1.0);
+    \node[rectangle, draw, fill=blue!10, font=\tiny, minimum width=0.8cm] at (5.0, 1.8) {$b^{[1]}$};
+    \node[font=\tiny] at (5.0, 1.35) {$\cdots$};
+    \node[rectangle, draw, fill=blue!10, font=\tiny, minimum width=0.8cm] at (5.0, 0.2) {$b^{[M]}$};
+
+    % --- Right table: Meta-feature matrix D' ---
+    \node[font=\bfseries] at (8.5, 3.2) {$\D^\prime$};
+    % Headers
+    \node[font=\small] at (7.0, 2.6) {$b^{[1]}(\xv)$};
+    \node[font=\small] at (8.5, 2.6) {$\cdots$};
+    \node[font=\small] at (10.0, 2.6) {$b^{[M]}(\xv)$};
+    \node[font=\small] at (11.0, 2.6) {$y$};
+    % Rows
+    \foreach \i in {0,1,2} {
+        \pgfmathsetmacro{\ypos}{2.0 - \i*0.6}
+        \draw[blue!30, fill=blue!5] (6.2, \ypos-0.25) rectangle (10.6, \ypos+0.25);
+        \node[font=\tiny] at (8.4, \ypos) {predictions for obs $(\the\numexpr\i+1\relax)$};
+        \node[font=\small] at (11.0, \ypos) {$y^{(\the\numexpr\i+1\relax)}$};
+    }
+    \node at (8.5, -0.2) {$\vdots$};
+    \draw[blue!30, fill=blue!5] (6.2, \ybot-0.25) rectangle (10.6, \ybot+0.25);
+    \node[font=\tiny] at (8.4, \ybot) {predictions for obs $(n)$};
+    \node[font=\small] at (11.0, \ybot) {$y^{(n)}$};
+\end{tikzpicture}
+\end{center}
+\vspace{-0.5em}
+Each column $m$ in $\D^\prime$ contains model $b^{[m]}$'s predictions for all $n$ training observations.\\
+The labels $y$ are carried over unchanged. The Level 1 model is then trained on $\D^\prime$.
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Example: Meta-Feature Matrix}
+\footnotesize
+Continuing the sonar example from the previous lecture ($M = 3$ base models: RF, k-NN, LogReg).\\
+After collecting base model predictions, the meta-feature matrix $\D^\prime$ might look like:
+
+\vspace{0.5em}
+\begin{table}[h]
+\centering
+\begin{tabular}{c|ccc|c}
+\textbf{Obs} & \textbf{RF} $\hat{\pi}^{[1]}$ & \textbf{k-NN} $\hat{\pi}^{[2]}$ & \textbf{LogReg} $\hat{\pi}^{[3]}$ & $y$ \\
+\hline
+1  & 0.82 & 0.91 & 0.65 & 1 \\
+2  & 0.35 & 0.28 & 0.41 & 0 \\
+3  & 0.71 & 0.45 & 0.73 & 1 \\
+4  & 0.12 & 0.33 & 0.22 & 0 \\
+5  & 0.58 & 0.80 & 0.49 & 1 \\
+$\vdots$ & $\vdots$ & $\vdots$ & $\vdots$ & $\vdots$ \\
+\end{tabular}
+\end{table}
+
+\vspace{0.3em}
+\begin{itemize}
+    \item Each column = one base model's probability predictions (here: $P(y=1 | \xv)$)
+    \item Each row = one training observation
+    \item The Level 1 model (e.g., logistic regression) is trained on this $n \times 3$ matrix to predict $y$
+    \item The meta-model can learn, e.g., ``trust RF when it is confident, but rely on k-NN otherwise''
+\end{itemize}
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Why Not Use Training Predictions Directly?}
+\vfill
+\textbf{Problem:} If base models predict on the same data they trained on, the predictions can be overly optimistic.
+\vfill
+\textbf{Example:} A 1-nearest-neighbor classifier achieves 0\% error on its training data, but may have 30\% error on unseen data.
+$\rightarrow$ The meta-model would see 0\% error and learn to fully trust this model.
+\vfill
+\textbf{Solution:} Use \textbf{cross-validated (out-of-fold) predictions} to construct the meta-feature matrix.
+Each base model predicts only on data it was \emph{not} trained on $\rightarrow$ predictions reflect true generalization quality.
+\vfill
 
 \end{vbframe}
 
@@ -109,15 +233,19 @@ NB: We can either drop the original features or keep them when learning the leve
         \end{figure}
     \end{column}
     \begin{column}{0.4\textwidth}
-        Using cross-validated predictions of the base models
+        \footnotesize
+        Why use cross-validated predictions?
         \begin{itemize}
-            \item improve generalization
-            \item reduce overfitting
-            \item enhances base model diversity
-            \item minimizes information leakage
+            \item \textbf{Avoids information leakage:} without CV, base models predict on their own training data $\rightarrow$ overconfident $\rightarrow$ meta-model overfits
+            \item \textbf{Realistic error signal:} OOF predictions reflect true model quality
+            \item \textbf{Data-efficient:} all $n$ observations get a prediction $\rightarrow$ full-size meta-dataset
         \end{itemize}
-        \vspace{1em}
-        NB: Stacking with a simple hold-out split instead of cross-validation is known as \emph{blending}.
+        \vspace{0.5em}
+        \textbf{Blending} vs.\ \textbf{Stacking:}
+        \begin{itemize}
+            \item Blending: single hold-out split (simpler, wastes data)
+            \item Stacking: $K$-fold CV (data-efficient, more complex)
+        \end{itemize}
     \end{column}
 \end{columns}
 \end{vbframe}
@@ -129,84 +257,220 @@ NB: We can either drop the original features or keep them when learning the leve
 \textbf{Algorithm:} Single Layer Stacking with Cross-Validation
 \begin{algorithmic}
     \Require Training data $\D = \Dset$, number of folds $K$
-    \Ensure Stacked Ensemble $\fM$
+    \Ensure Stacked Ensemble $f^{[M]}$
 
     \For{$k \leftarrow 1$ to $K$}
-        \State \textbf{Step 1: Learn level 0 base models}
+        \State \textbf{Step 1: Learn fold-specific Level 0 base models}
         \For{$m \leftarrow 1$ to $M$}
-            \State Fit base model $\bl[m]$ on $\D_{\mathrm{train}}^{(k)}$
+            \State Fit base model $b_k^{[m]}$ on $\D_{\mathrm{train}}^{(k)}$
         \EndFor
         \State
         \State \textbf{Step 2: Add out-of-fold predictions to new dataset $\D^\prime$}
         \ForAll{$(\xv^{(i)}, y^{(i)}) \in \D_{\mathrm{test}}^{(k)}$}
-            \State Add $(\xv^{\prime(i)}, y^{(i)})$ to new dataset, where $\xv^{\prime(i)} = (\bl[1](\xv^{(i)}), \ldots, \bl[M](\xv^{(i)}))$
+            \State Add $(\xv^{\prime(i)}, y^{(i)})$ to new dataset, where $\xv^{\prime(i)} = (b_k^{[1]}(\xv^{(i)}), \ldots, b_k^{[M]}(\xv^{(i)}))$
         \EndFor
     \EndFor
 
     \State
-    \State \textbf{Step 3: Fit level 1 model $\fM$ on $\D^\prime$}
+    \State \textbf{Step 3: Fit Level 1 model $f^{[M]}$ on $\D^\prime$}
 
-    \State \Return $\fM$
+    \State \Return $f^{[M]}$
 \end{algorithmic}
+NB: For prediction, the base models must be retrained on the full dataset $\D$ (see Forward Pass).
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{CV Stacking: How the Meta-Feature Matrix Is Built}
+\footnotesize
+Example: $K=3$ folds, $M=2$ base models, $n=9$ observations.
+Each base model produces one OOF prediction per observation.
+
+\vspace{0.5em}
+\begin{center}
+\begin{tikzpicture}[scale=0.65, every node/.style={scale=0.65}]
+    % --- Left side: Fold assignments ---
+    \node[font=\bfseries] at (1.5, 4.2) {Training Data $\D$};
+
+    % Column headers
+    \node[font=\small] at (0.5, 3.5) {Obs};
+    \node[font=\small] at (1.5, 3.5) {Fold};
+
+    % Fold 1 (obs 1-3)
+    \foreach \i in {1,2,3} {
+        \pgfmathsetmacro{\ypos}{3.0 - (\i-1)*0.5}
+        \node at (0.5, \ypos) {\i};
+        \fill[blue!25] (1.1, \ypos-0.2) rectangle (1.9, \ypos+0.2);
+        \node at (1.5, \ypos) {1};
+    }
+    % Fold 2 (obs 4-6)
+    \foreach \i in {4,5,6} {
+        \pgfmathsetmacro{\ypos}{3.0 - (\i-1)*0.5}
+        \node at (0.5, \ypos) {\i};
+        \fill[orange!25] (1.1, \ypos-0.2) rectangle (1.9, \ypos+0.2);
+        \node at (1.5, \ypos) {2};
+    }
+    % Fold 3 (obs 7-9)
+    \foreach \i in {7,8,9} {
+        \pgfmathsetmacro{\ypos}{3.0 - (\i-1)*0.5}
+        \node at (0.5, \ypos) {\i};
+        \fill[green!25] (1.1, \ypos-0.2) rectangle (1.9, \ypos+0.2);
+        \node at (1.5, \ypos) {3};
+    }
+
+    % --- Arrow ---
+    \draw[->, very thick] (2.5, 1.0) -- (3.5, 1.0);
+    \node[above, font=\small] at (3.0, 1.0) {OOF};
+
+    % --- Right side: Meta-feature matrix D' ---
+    \node[font=\bfseries] at (6.0, 4.2) {Meta-Feature Matrix $\D^\prime$};
+
+    % Column headers
+    \node[font=\small] at (4.2, 3.5) {Obs};
+    \node[font=\small] at (5.3, 3.5) {$b^{[1]}$};
+    \node[font=\small] at (6.5, 3.5) {$b^{[2]}$};
+    \node[font=\small] at (7.7, 3.5) {$y$};
+
+    % Fold 1 predictions (trained on folds 2+3, predict fold 1)
+    \foreach \i in {1,2,3} {
+        \pgfmathsetmacro{\ypos}{3.0 - (\i-1)*0.5}
+        \node at (4.2, \ypos) {\i};
+        \fill[blue!25] (4.9, \ypos-0.2) rectangle (5.7, \ypos+0.2);
+        \node[font=\tiny] at (5.3, \ypos) {pred};
+        \fill[blue!25] (6.1, \ypos-0.2) rectangle (6.9, \ypos+0.2);
+        \node[font=\tiny] at (6.5, \ypos) {pred};
+        \node at (7.7, \ypos) {$y^{(\i)}$};
+    }
+    % Fold 2 predictions
+    \foreach \i in {4,5,6} {
+        \pgfmathsetmacro{\ypos}{3.0 - (\i-1)*0.5}
+        \node at (4.2, \ypos) {\i};
+        \fill[orange!25] (4.9, \ypos-0.2) rectangle (5.7, \ypos+0.2);
+        \node[font=\tiny] at (5.3, \ypos) {pred};
+        \fill[orange!25] (6.1, \ypos-0.2) rectangle (6.9, \ypos+0.2);
+        \node[font=\tiny] at (6.5, \ypos) {pred};
+        \node at (7.7, \ypos) {$y^{(\i)}$};
+    }
+    % Fold 3 predictions
+    \foreach \i in {7,8,9} {
+        \pgfmathsetmacro{\ypos}{3.0 - (\i-1)*0.5}
+        \node at (4.2, \ypos) {\i};
+        \fill[green!25] (4.9, \ypos-0.2) rectangle (5.7, \ypos+0.2);
+        \node[font=\tiny] at (5.3, \ypos) {pred};
+        \fill[green!25] (6.1, \ypos-0.2) rectangle (6.9, \ypos+0.2);
+        \node[font=\tiny] at (6.5, \ypos) {pred};
+        \node at (7.7, \ypos) {$y^{(\i)}$};
+    }
+
+    % Legend
+    \node[font=\small, anchor=west] at (0, -1.5) {Colors = fold assignment.};
+    \node[font=\small, anchor=west] at (0, -2.0) {Each prediction is out-of-fold: model trained on other folds, predicts held-out fold.};
+    \node[font=\small, anchor=west] at (0, -2.5) {$\Rightarrow$ Every observation gets exactly one OOF prediction per base model.};
+\end{tikzpicture}
+\end{center}
 
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Multilevel Stacking}
+So far: train Level 0 base models, use predictions to train the Level 1 model.\\
+Now: Also train multiple models at Level 1, use predictions to train final Level 2 model.
+
+\begin{center}
+\begin{tikzpicture}[
+    scale=0.55, every node/.style={scale=0.55},
+    model/.style={rectangle, draw, rounded corners, minimum width=1.1cm, minimum height=0.6cm, font=\small},
+    level0/.style={model, fill=blue!15},
+    level1/.style={model, fill=orange!15},
+    level2/.style={model, fill=green!20},
+    data/.style={rectangle, draw, fill=gray!10, minimum width=2.2cm, minimum height=0.45cm, font=\small},
+    arr/.style={->, thick}
+]
+    % Input
+    \node[data] (input) at (0, 3.5) {Training Data $\D$};
+
+    % Level 0
+    \node[font=\small\bfseries, anchor=east] at (-4.5, 2.2) {Level 0};
+    \node[level0] (l0a) at (-3, 2.2) {RF};
+    \node[level0] (l0b) at (-1, 2.2) {XGB};
+    \node[level0] (l0c) at (1, 2.2) {LR};
+    \node[level0] (l0d) at (3, 2.2) {KNN};
+
+    \foreach \n in {l0a, l0b, l0c, l0d}
+        \draw[arr] (input) -- (\n);
+
+    % Level 1
+    \node[font=\small\bfseries, anchor=east] at (-4.5, 0.7) {Level 1};
+    \node[level1] (l1a) at (-2, 0.7) {RF};
+    \node[level1] (l1b) at (0, 0.7) {XGB};
+    \node[level1] (l1c) at (2, 0.7) {LR};
+
+    \foreach \src in {l0a, l0b, l0c, l0d}
+        \foreach \dst in {l1a, l1b, l1c}
+            \draw[arr, thin, gray!60] (\src) -- (\dst);
+
+    % Annotation between levels
+    \node[font=\small, anchor=west] at (4.2, 1.45) {Predictions from level $l$};
+    \node[font=\small, anchor=west] at (4.2, 0.95) {become input features};
+    \node[font=\small, anchor=west] at (4.2, 0.45) {for level $l{+}1$};
+
+    % Level 2
+    \node[font=\small\bfseries, anchor=east] at (-4.5, -0.7) {Level 2};
+    \node[level2] (l2) at (0, -0.7) {Meta-Model};
+
+    \foreach \n in {l1a, l1b, l1c}
+        \draw[arr] (\n) -- (l2);
+
+    % Output
+    \node[font=\small] at (0, -1.5) {Final Prediction};
+    \draw[arr] (l2) -- (0, -1.25);
+\end{tikzpicture}
+\end{center}
+
+\begin{itemize}
+    \item In principle: repeat at any level, creating deep stacked ensembles. In practice, 2--3 layers suffice.
+    \item Looks like a neural network, but: each layer is trained \textbf{independently} (no backpropagation), and layers use \textbf{heterogeneous} model types rather than uniform neurons.
+\end{itemize}
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Higher Level Models: Meta-Learner Choice}
 \vfill
-So far: train level 0 base models, use predictions to train the level 1 model.\\
-Now: Also train multiple models at level 1, use predictions to train final level 2 model
+Popular choices of Level 1 or Level 2 models:
+\begin{itemize}
+    \item \textbf{Linear / logistic regression} (most common)
+    \begin{itemize}
+        \item Simple meta-model reduces overfitting risk on the small meta-feature space ($M$ columns)
+        \item Non-negative weight constraints can improve stability
+    \end{itemize}
+    \item \textbf{GES:} greedily selects and averages predictions of the models at the previous level
+    %\item random forest (especially in the case of multilevel stacking)
+\end{itemize}
 \vfill
-%\begin{columns}
-%    \begin{column}{0.5\textwidth}
-%        \vspace{-1em}
-%        \begin{figure}
-%            \centering
-%            \includegraphics[width=0.9\textwidth]{figure/stacking.png}
-%            %\caption{Caption}
-%            % from https://sebastianraschka.com/pdf/lecture-notes/stat479fs19/07-ensembles__notes.pdf
-%            \label{fig:stacking_multi}
-%        \end{figure}
-%    \end{column}
-%    \begin{column}{0.5\textwidth}
-%        Steps:
-%        \begin{enumerate}
-%            \item level 0 base model training
-%            \item Collect predictions of level 0 base models
-%            \item level 1 model training
-%            \item Collect predictions of level 1 models
-%            \item level 2 final model training
-%        \end{enumerate}
-%    \end{column}
-%\end{columns}
-\begin{enumerate}
-    \item level 0 base model training
-    \item Collect predictions of level 0 base models
-    \item level 1 model training
-    \item Collect predictions of level 1 models
-    \item level 2 final model training
-\end{enumerate}
-\vfill
-NB: In principle we can repeat this training of multiple models at the $l$-th level indefinitely creating deep stacked ensembles.
+NB: A powerful meta-model (e.g., gradient boosting) can overfit the meta-features, especially with few base models. Simpler is often better here.
 \vfill
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
 
-\begin{vbframe}{Higher Level Models}
+\begin{vbframe}{Higher Level Models: Meta-Feature Design}
 \vfill
-Popular choices of level 1 or level 2 models in stacking include:
+\textbf{Probabilities vs.\ hard labels} as meta-features (\furtherreading{TINGWITTEN1999}):
 \begin{itemize}
-    \item linear / logistic regression
-    %\item random forest (especially in the case of multilevel stacking)
-    \item GES (average the predictions of the models at the previous level)
+    \item Hard labels destroy confidence information: predictions 0.51 and 0.99 both map to class 1, but mean very different things
+    \item Probability predictions preserve this signal $\rightarrow$ meta-model can learn \emph{when} a base model is confident
+    \item $\Rightarrow$ Always prefer probability outputs as meta-features for classification
 \end{itemize}
 \vfill
-Higher-level training data:
+\textbf{Include original features $\Xmat$} alongside meta-features?
 \begin{itemize}
-    \item Probabilities instead of class labels (see \furtherreading{TINGWITTEN1999})
-    \item Include original dataset $\Xmat$ or not?
+    \item Can help when base models miss informative features (e.g., a feature no base model uses)
+    \item Increases overfitting risk: the meta-model now has $p + M$ features instead of $M$
+    \item In practice: try both, evaluate via nested CV
 \end{itemize}
 \vfill
 \end{vbframe}
@@ -235,7 +499,7 @@ Higher-level training data:
 %         \State $\Xmat^{\prime(i)} = [\xv_1^{(i)}, \dots, \xv_d^{(i)}, \xv_1^{\prime(i)}, \dots, \xv_M^{\prime(i)}]$
 %     \EndFor
 %     \State
-%     \State \textbf{Step 4: Make predictions with level 1 model $\fM$ on $\Xmat^\prime$}
+%     \State \textbf{Step 4: Make predictions with Level 1 model $\fM$ on $\Xmat^\prime$}
 %     \State \Return $\fM(\Xmat)$
 % \end{algorithmic}
 
@@ -244,7 +508,7 @@ Higher-level training data:
 
 \begin{vbframe}{Forward Pass / Prediction}
 %\footnotesize
-\textbf{Assume:} trained base models $\bl[1], \dots, \bl[M]$ and meta-model $\fM$
+\textbf{Assume:} trained base models $\bl[1], \dots, \bl[M]$ and meta-model $f^{[M]}$
 
 \begin{algorithmic}
     \Require Test data $\Xmat_{\text{test}} = (\xv^{(1)}, \dots, \xv^{(n_{\text{test}})})$
@@ -264,16 +528,78 @@ Higher-level training data:
     \State \Return $f^{[M]}(\Xmat^\prime)$
 \end{algorithmic}
 \end{vbframe}
+
 % ------------------------------------------------------------------------------
 
-\begin{vbframe}{Two questions}
+\begin{vbframe}{Forward Pass: Visual Overview}
+
+\begin{center}
+\begin{tikzpicture}[
+    scale=0.6, every node/.style={scale=0.6},
+    box/.style={rectangle, draw, rounded corners, minimum height=0.7cm, font=\small, text centered},
+    model/.style={box, fill=blue!15, minimum width=1.2cm},
+    meta/.style={box, fill=orange!20, minimum width=2cm},
+    data/.style={box, fill=gray!10, minimum width=1.5cm},
+    arr/.style={->, thick}
+]
+    % Input
+    \node[data] (xtest) at (0, 0) {$\xv_{\text{new}}$};
+
+    % Base models
+    \node[model] (b1) at (3, 1.2) {$b^{[1]}$};
+    \node[model] (b2) at (3, 0.2) {$b^{[2]}$};
+    \node at (3, -0.4) {$\vdots$};
+    \node[model] (bm) at (3, -1.0) {$b^{[M]}$};
+
+    \draw[arr] (xtest) -- (b1);
+    \draw[arr] (xtest) -- (b2);
+    \draw[arr] (xtest) -- (bm);
+
+    % Predictions
+    \node[data, fill=blue!5] (p1) at (5.8, 1.2) {$\hat{y}^{[1]}$};
+    \node[data, fill=blue!5] (p2) at (5.8, 0.2) {$\hat{y}^{[2]}$};
+    \node at (5.8, -0.4) {$\vdots$};
+    \node[data, fill=blue!5] (pm) at (5.8, -1.0) {$\hat{y}^{[M]}$};
+
+    \draw[arr] (b1) -- (p1);
+    \draw[arr] (b2) -- (p2);
+    \draw[arr] (bm) -- (pm);
+
+    % Meta-feature assembly
+    \node[box, fill=yellow!10, minimum width=2cm, minimum height=2cm] (mf) at (8.5, 0.1) {};
+    \node[font=\small] at (8.5, 0.7) {$\xv^\prime =$};
+    \node[font=\small] at (8.5, 0.1) {$(\hat{y}^{[1]}, \ldots, \hat{y}^{[M]})$};
+    \node[font=\tiny] at (8.5, -0.5) {(+ $\xv_{\text{new}}$ opt.)};
+
+    \draw[arr] (p1) -- (mf);
+    \draw[arr] (p2) -- (mf);
+    \draw[arr] (pm) -- (mf);
+
+    % Meta-model
+    \node[meta] (meta) at (11.5, 0.1) {$f^{[M]}$};
+    \draw[arr] (mf) -- (meta);
+
+    % Output
+    \node[data, fill=green!10] (out) at (14, 0.1) {$\hat{y}_{\text{final}}$};
+    \draw[arr] (meta) -- (out);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.5em}
+At prediction time, no cross-validation is needed: simply run all base models (trained on full data), assemble meta-features, and feed them to the trained meta-model.
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Conceptual Check}
 
 \vfill
 What other methods do the following level-1 classifiers recover?
 \vfill
 \begin{itemize}
     \item Fit the level-1 training data with a linear model that only depends on one feature, and that feature is chosen such that $\rho$, our metrics of interest, is optimized.
-    \item The level-1 model is a linear model that assign equal weight $w_{m} = \frac{1}{M}$ to every input feature.
+    \item The level-1 model is a linear model that assigns equal weight $w_{m} = \frac{1}{M}$ to every input feature.
 \end{itemize}
 \vfill
 
@@ -281,38 +607,106 @@ What other methods do the following level-1 classifiers recover?
 
 % ------------------------------------------------------------------------------
 
-\begin{vbframe}{AutoGluon}
+\begin{vbframe}{Conceptual Check -- Answers}
+
+\vfill
+\begin{itemize}
+    \item A linear model that selects the single best input feature (= base model prediction) and optimizes $\rho$ is equivalent to \textbf{model selection}: simply pick the best-performing base model.
+    \item A linear model with equal weights $w_{m} = \frac{1}{M}$ for every input feature is equivalent to \textbf{simple model averaging}: $\frac{1}{M} \sum_{m=1}^{M} \bl[m](\xv)$.
+\end{itemize}
+\vfill
+$\rightarrow$ Stacking with a flexible level-1 model generalizes both model selection and model averaging!
+\vfill
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{When Does Stacking Help?}
+\vfill
+Stacking tends to \textbf{help} when:
+\begin{itemize}
+    \item Base models are diverse (different algorithms, different hyperparameters)
+    \item Base models have complementary strengths (good in different regions of input space)
+    \item Training set is large enough for reliable out-of-fold predictions
+\end{itemize}
+\vfill
+Stacking can \textbf{hurt} when:
+\begin{itemize}
+    \item Base models are too similar $\rightarrow$ meta-model has nothing useful to learn
+    \item Dataset is small $\rightarrow$ out-of-fold predictions are noisy, meta-model overfits
+    \item Only one base model clearly dominates $\rightarrow$ model selection is simpler and equally effective
+\end{itemize}
+\vfill
+NB: Simple model averaging is a surprisingly strong baseline; stacking is not always worth the added complexity.
+\vfill
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Practical Tips for Stacking}
+\vfill
+\begin{itemize}
+    \item \textbf{Number of folds:} $K = 5$ or $K = 10$ is typical for CV stacking. Smaller $K$ $\rightarrow$ more bias in OOF predictions; larger $K$ $\rightarrow$ more computation.
+    \item \textbf{Number of base models:} Diminishing returns after $\sim$5--10 diverse models. Focus on diversity over quantity.
+    \item \textbf{Tune first, then stack:} Treat hyperparameter tuning of base models and stacking as two separate stages. Do not tune base models \emph{inside} the stacking CV loop.
+    \item \textbf{Avoid double-dipping:} The OOF predictions used to train the meta-model should \emph{not} also be used to select which base models to include $\rightarrow$ use nested CV for an honest estimate of the stacked ensemble's performance.
+    \item \textbf{Start simple:} Try equal-weight averaging first. Only move to stacking if averaging leaves clear room for improvement.
+\end{itemize}
+\vfill
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{AutoGluon \furtherreading{ERICKSON2020}}
+\vspace{-0.5em}
 \begin{columns}
-    \begin{column}{0.35\textwidth}
-        \vspace{-1em}
+    \begin{column}{0.3\textwidth}
         \begin{figure}
             \centering
-            \includegraphics[width=\textwidth]{figure/AG.png}
-            \caption*{\url{https://auto.gluon.ai/}}
+            \includegraphics[width=0.85\textwidth]{figure/AG.png}
+            \caption*{\footnotesize\url{https://auto.gluon.ai/}}
             \label{fig:auto_gluon}
         \end{figure}
-        \vspace{1em}
+        \vspace{-0.5em}
         \begin{figure}
             \centering
             \includegraphics[width=\textwidth]{figure/ALMB.png}
-            \caption{AutoGluon Performance on AMLB 1h binary classification.}
+            \caption*{\scriptsize AutoGluon on AMLB 1h binary.}
             \label{fig:auto_gluon_almb}
         \end{figure}
     \end{column}
-    \begin{column}{0.65\textwidth}
-        \begin{itemize}
-            \item The de-facto most popular and successful AutoML system
-            \item Developed and maintained by Amazon
-            \item Can also work with multimodal and time-series data
-            \item Does not use HPO to find well performing models
-            \begin{itemize}
-                \item Instead, uses a set of default configurations for different learners
+    \begin{column}{0.7\textwidth}
+        \footnotesize
+        \begin{itemize}\setlength{\itemsep}{2pt}
+            \item De-facto most popular and successful AutoML system (Amazon)
+            \item Also supports multimodal and time-series data
+            \item Does not use HPO; instead uses default configurations per learner
+            \item Employs multi-layer stacking (typically 2--3 layers)
+            \begin{itemize}\setlength{\itemsep}{1pt}
+                \item Same model types repeated in each layer
+                \item \textbf{Repeated $k$-fold bagging:} reduces OOF prediction variance
+                \item \textbf{Feature passthrough:} original features at every layer
             \end{itemize}
-            \item Employs multi-layer stacking using the same set of default models in higher layers as for the base layer
-            \item Uses greedy ensemble selection to combine the predictions of the last layer
+            \item Uses GES to select and average predictions of the last layer
         \end{itemize}
     \end{column}
 \end{columns}
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Summary}
+\vfill
+\begin{itemize}
+    \item \textbf{Stacking} replaces a fixed aggregation function with a \textbf{learned meta-model} trained on base model predictions
+    \item Use \textbf{cross-validated (out-of-fold) predictions} to avoid information leakage when constructing the meta-feature matrix
+    \item After CV stacking, \textbf{retrain} base models on full data for deployment
+    \item Keep the meta-model \textbf{simple} (e.g., linear/logistic regression) and use \textbf{probability} outputs as meta-features
+    \item Stacking generalizes both model selection and model averaging
+    \item Multi-layer stacking (e.g., AutoGluon) extends this to multiple levels with repeated bagging and feature passthrough
+\end{itemize}
+\vfill
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
