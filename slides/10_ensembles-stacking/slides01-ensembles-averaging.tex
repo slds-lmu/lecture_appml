@@ -99,49 +99,60 @@ Popular use case: Construction of RF using trees as base models
 
 \begin{vbframe}{Recap: Bagging}
 Bias vs. variance: Error = Variance + Bias + Noise
-\begin{figure}
-    \centering
-    \includegraphics[width=0.5\textwidth]{figure_man/bagging_variance_bias_tree.png}
-    %\caption{Caption}
-    \label{fig:bagging_tree}
-\end{figure}
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+        \begin{figure}
+            \centering
+            \includegraphics[width=\textwidth]{figure_man/bagging_variance_bias_tree.png}
+            \label{fig:bagging_tree}
+        \end{figure}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+        Bottom subplot shows the pointwise decomposition:
+        \begin{itemize}
+            \item Variance (green) is the dominant error component; bias$^2$ (blue) stays low
+            \item Error peaks (red) coincide with regions of sharp change in $f(\xv)$, where individual trees vary most
+            \item Top subplot: light red band shows the spread of individual tree fits $\hat{y}$ around $\mathbb{E}(\hat{y})$ (cyan)
+        \end{itemize}
+    \end{column}
+\end{columns}
 
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Recap: Bagging}
-Bias vs. variance bagging: Variance reduction through averaging; Bias of model is slightly increased as less data are seen\\
+Bagging effect: Variance reduction through averaging; bias slightly increases (less data per model)
 \begin{columns}
     \begin{column}{0.5\textwidth}
-        \vspace{-1em}
+        \vspace{-0.5em}
         \begin{figure}
             \centering
             \includegraphics{figure_man/bagging_variance_bias_tree.png}
-            %\caption{Caption}
             \label{fig:bagging_tree2}
         \end{figure}
     \end{column}
     \begin{column}{0.5\textwidth}
-        \vspace{-1em}
+        \vspace{-0.5em}
         \begin{figure}
             \centering
             \includegraphics{figure_man/bagging_variance_bias_100_trees.png}
-            %\caption{Caption}
             \label{fig:bagging_trees}
         \end{figure}
     \end{column}
 \end{columns}
-Works well for unstable learners\\
+\vspace{-0.5em}
+\footnotesize
+Compare bottom subplots: variance (green) nearly vanishes with 100 trees $\rightarrow$ total error (red) drops dramatically. Bias (blue) stays roughly unchanged. Individual fits (light red band, top) tighten around $\mathbb{E}(\hat{y})$.\\
 \vfill
-NB: RF also uses col subsampling
+Works well for unstable learners. NB: RF also uses feature (column) subsampling.
 
 \end{vbframe}
 
 % ------------------------------------------------------------------------------
 
 \begin{vbframe}{Recap: Boosting}
-Iterative technique that sequentially trains subsequent base models to correct errors of previous models, for example, by re-weighting instances or predicting pseudo-residuals.
+Iterative technique that sequentially trains subsequent base models to correct errors of previous models, for example, by re-weighting instances or predicting pseudo-residuals $\rightarrow$ homogeneous \& sequential ensemble
 \vfill
 Examples:
 \begin{itemize}
@@ -216,7 +227,9 @@ Assume a set of $M$ different models obtained from data $\D$ using a resampling 
 \vfill
 Assign weights $\mathbf{w} = (w_{1}, \ldots, w_{M}), \text{usually: } 0 \le w_{m} \le 1, \sum_{m=1}^{M} w_{m} = 1$ to the models\\
 \vfill
-$f_{\mathbf{w}}(\xv) = \sum_{m = 1}^{M} w_{m} \cdot \blp[m](\xv)$\\
+Classification: $f_{\mathbf{w}}(\xv) = \sum_{m = 1}^{M} w_{m} \cdot \blp[m](\xv)$\\
+\vfill
+Regression: $f_{\mathbf{w}}(\xv) = \sum_{m = 1}^{M} w_{m} \cdot \blx[m]$\\
 \begin{figure}
     \centering
     \includegraphics[width=0.375\textwidth]{figure/Weighted_Model_Averaging.pdf}
@@ -283,7 +296,7 @@ We now want to optimize the weights used in weighted model averaging.\\
 Greedy ensemble selection (GES, see \furtherreading{CARUANA2004}) is one of the most popular methods to do so:\\\
 \begin{enumerate}
     \item Start with the empty ensemble
-    \item Add the base model that maximizes the ensembles' performance metric on a hillclimb (validation) set
+    \item Add the base model that maximizes the ensemble's performance metric on a hillclimb (validation) set
     \item Repeat step 2 until a given number of iterations are reached
     \item Return the ensemble from the set of generated ensembles that has the best performance on the validation set
 \end{enumerate}
@@ -350,15 +363,20 @@ NB: Optimizing weights can (and often does) overfit to the validation data; espe
 \vfill
 Why does ensembling work? \furtherreading{DIETTERICH2000}
 \begin{itemize}
-    \item Statistical Problem
-    \item Computational Problem
-    \item Representational Problem
+    \item \textbf{Statistical Problem:} Limited data $\rightarrow$ many models achieve similar training error; averaging reduces the risk of picking a bad one
+    \item \textbf{Computational Problem:} Optimization can get stuck in local optima; combining multiple runs explores more of the hypothesis space
+    \item \textbf{Representational Problem:} The true function may lie outside any single hypothesis space; a combination can better approximate it
 \end{itemize}
 \vfill
 Requirements to build an ensemble:
 \begin{itemize}
-    \item Diverse Models
-    \item Strong Models
+    \item \textbf{Diverse Models:} Base models should make different errors (complementary strengths)
+    \begin{itemize}
+        \item Use different algorithms
+        \item Use different hyperparameter configurations of the same algorithm
+        \item Use different feature subsets or data subsets
+    \end{itemize}
+    \item \textbf{Strong Models:} Individual models should perform reasonably well
 \end{itemize}
 \vfill
 Practical Suggestion: Greedy Ensemble Selection works really well in practice.
