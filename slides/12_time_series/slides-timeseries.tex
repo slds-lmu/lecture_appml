@@ -5,7 +5,6 @@
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
 
-
 \setbeamersize{text margin left=0.3cm,text margin right=0.3cm}
 
 
@@ -16,35 +15,33 @@
 
 \begin{document}
 
-% TODO add a title figure
 \titlemeta{
 Time Series:
 }{
-Definition, feature engineering, cross-validation
+Definition, feature engineering, cross-validation, forecasting
 }{
-figure_man/empty
+figure/bike_one_week
 }{
 \item What is a time series?
-\item Important definitions
 \item Feature engineering for time series
 \item Time series cross-validation
+\item Practical guidance
 }
-
 
 \begin{vbframe}{Running Example: The Bike Sharing Dataset}
 \vfill
 Hourly bike rental data from Washington D.C.
 \vfill
-\small % otherwise the last column does not fit
-\begin{tabular}{llllrrrrlr}
+\scriptsize
+\begin{tabular}{lllrrrlr}
 \toprule
- & holiday & workingday & weather & temp & feel\_temp & humidity & windspeed & datetime & count \\
+holiday & workingday & weather & temp & humidity & windspeed & datetime & count \\
 \midrule
-0 & False & False & clear & 9.84 & 14.395 & 0.81 & 0.00 & 2011-01-01 00:00:00 & 16 \\
-1 & False & False & clear & 9.02 & 13.635 & 0.80 & 0.00 & 2011-01-01 01:00:00 & 40 \\
-2 & False & False & clear & 9.02 & 13.635 & 0.80 & 0.00 & 2011-01-01 02:00:00 & 32 \\
-3 & False & False & clear & 9.84 & 14.395 & 0.75 & 0.00 & 2011-01-01 03:00:00 & 13 \\
-4 & False & False & clear & 9.84 & 14.395 & 0.75 & 0.00 & 2011-01-01 04:00:00 & 1 \\
+False & False & clear & 9.84 & 0.81 & 0.00 & 2011-01-01 00:00 & 16 \\
+False & False & clear & 9.02 & 0.80 & 0.00 & 2011-01-01 01:00 & 40 \\
+False & False & clear & 9.02 & 0.80 & 0.00 & 2011-01-01 02:00 & 32 \\
+False & False & clear & 9.84 & 0.75 & 0.00 & 2011-01-01 03:00 & 13 \\
+False & False & clear & 9.84 & 0.75 & 0.00 & 2011-01-01 04:00 & 1 \\
 \bottomrule
 \end{tabular}
 \vfill
@@ -55,6 +52,16 @@ Question: how to feed this to a standard ML model?
 \vfill
 \end{vbframe}
 
+\begin{vbframe}{What Does the Data Look Like?}
+\vfill
+\begin{center}
+  \includegraphics[width=0.95\textwidth]{figure/bike_one_week.pdf}
+\end{center}
+\vspace{-0.5em}
+\footnotesize
+Hourly bike rentals -- one week in June 2012. Notice: \textbf{daily seasonality} (commuter peaks at 8am/5pm on weekdays) and \textbf{weekly seasonality} (smooth single-peak pattern on Sat/Sun).
+\vfill
+\end{vbframe}
 
 \begin{vbframe}{Key Definitions}
   \begin{itemize}
@@ -75,120 +82,83 @@ Question: how to feed this to a standard ML model?
 \begin{vbframe}{Tasks}
 \vfill
     \begin{itemize}
-        \item Time Series Analysis
-        Decompose time series into trends for understanding $\rightarrow$ time series course
-        
-        \item Time Series Forecasting
+        \item \textbf{Time Series Analysis}
+
+        Decompose time series into trend, seasonality, and residuals for understanding $\rightarrow$ time series course
+
+        \item \textbf{Time Series Forecasting}
 
         Fit a model on historical data and make predictions about the future.
-        \item Time Series Classification
 
-        Make predictions about one complete time series, e.g., one recording of an experiment.
+        \item \textbf{Time Series Classification}
+
+        Classify entire time series recordings, e.g., classify sensor signals as normal vs.\ faulty.
+
+        \item \textbf{Anomaly Detection}
+
+        Identify unusual observations or subsequences, e.g., fraud detection, sensor fault monitoring.
     \end{itemize}
 \vfill
 \end{vbframe}
 
-\begin{vbframe}{How to tackle time series?}
+\begin{vbframe}{How to Tackle Time Series Forecasting?}
 \vfill
     \begin{itemize}
-        \item Statistical Models
-        ARIMA (Autoregressive integrated moving average) and ETS (Error, Trend, Seasonality) $\rightarrow$ time series course
-        
-        \item Recurrent Models
+        \item \textbf{Statistical Models}
 
-        Deep learning architectures that track the state of data over time $\rightarrow$ part of the deep learning lecture
+        ARIMA, ETS (Error, Trend, Seasonality) $\rightarrow$ time series course
 
-        \item Transformer Models
+        \item \textbf{Recurrent Models}
 
-        Deep learning architecture that can treat series data in an auto-regressive manner $\rightarrow$ part of the deep learning lecture
-        
-        \item Feature Engineering for Machine Learning
+        Deep learning architectures that track the state of data over time $\rightarrow$ deep learning lecture
 
-        Make predictions about one complete time series, e.g., one recording of an experiment.
+        \item \textbf{Transformer Models}
+
+        Attention-based architectures for sequential data $\rightarrow$ deep learning lecture
+
+        \item \textbf{Feature Engineering + Standard ML Models}
+
+        Engineer temporal features (lags, rolling stats, calendar) from the time index and feed them to standard ML models (e.g., gradient boosting). $\rightarrow$ \textbf{focus of this lecture}
     \end{itemize}
 \vfill
 \end{vbframe}
 
-% =========================================================
-\section{Time-Series Cross-Validation}
-% ---------------------------------------------------------
-\begin{vbframe}{Chronology-Aware Splits}
-  \begin{figure}[h]
-    \centering
-        \begin{tikzpicture}[x=0.45cm,y=0.8cm]
-      % Color definitions
-      \definecolor{train}{RGB}{166,206,227}  % light blue
-      \definecolor{val}{RGB}{253,180,98}     % light orange
-
-      % Helper macro  {window index}{y-offset}{train start}{val start}{val end}
-      \newcommand{\window}[5]{%
-        % Train rectangle
-        \fill[train] (#3,#2) rectangle (#4,#2+0.5);
-        % Validation rectangle
-        \fill[val] (#4,#2) rectangle (#5,#2+0.5);
-        % Outline
-        \draw (#3,#2) rectangle (#5,#2+0.5);
-        % Label
-        \node[left] at (#3-0.3,#2+0.25) {\tiny W#1};}
-
-      % Five windows (progressively rolling forward)
-      %            idx y   trainStart valStart valEnd
-      \window{1}{0}{1}{6}{8}
-      \window{2}{-1}{2}{7}{9}
-      \window{3}{-2}{3}{8}{10}
-      \window{4}{-3}{4}{9}{11}
-      \window{5}{-4}{5}{10}{12}
-
-      % Horizontal timeline for reference
-      \draw[->] (0,0.8) -- (13,0.8);
-      \foreach \t in {1,...,12} {
-        \node[below,gray] at (\t+0.5,0.8) {\tiny $t_{\t}$};}
-
-      % Legend
-      \fill[train] (0.5,-5.2) rectangle (1.5,-4.8);
-      \node[right] at (1.6,-5) {Train};
-      \fill[val] (3,-5.2) rectangle (4,-4.8);
-      \node[right] at (4.1,-5) {Validation};
-    \end{tikzpicture}
-  \end{figure}
-  \begin{itemize}
-    \item \textbf{Expanding window}: grow train set, roll validation forward
-    \item \textbf{Sliding window}: fixed-width train and validation segments
-    \item Validation window should match the application forecasting windows
-  \end{itemize}
-\end{vbframe}
-
-\begin{vbframe}{Avoiding Data Leakage}
+\begin{vbframe}{Why Tree-Based Models for Time Series?}
 \vfill
-  \begin{itemize}
-    \item Compute lagged / rolling features \emph{after} defining the split or in a way it takes the split into account
-    \item No peeking into future data when standardizing / scaling
-    \item Requires special cross-validation methods
-  \end{itemize}
+With proper feature engineering, standard tabular ML models work surprisingly well for time series forecasting:
+\vfill
+\begin{itemize}
+    \item Handle mixed feature types naturally (calendar integers + continuous weather data)
+    \item No stationarity assumptions required (unlike ARIMA)
+    \item Fast to train and easy to tune
+    \item Feature engineering makes temporal patterns accessible to non-temporal models
+    \item Very competitive in Kaggle competitions and industry (e.g., gradient-boosted trees were widely used in top M5 forecasting competition solutions, often in ensembles\footnote{\tiny\url{https://mofc.unic.ac.cy/m5-competition/}})
+\end{itemize}
+\vfill
+\textbf{Caveat:} Tree-based models cannot extrapolate beyond the training range. If the data has a strong upward trend, predictions will plateau. See the next slide for how to handle this.
 \vfill
 \end{vbframe}
 
-\begin{vbframe}{Evaluation Metrics}
+\begin{vbframe}{Detrending for Tree-Based Models}
 \vfill
-  \begin{itemize}
-    \item \textbf{MAE} $= \frac{1}{n}\sum |y_t-\hat y_t|$ (robust to outliers)
-    \item \textbf{RMSE} (penalizes large errors)
-    \item \textbf{SMAPE}: symmetric MAPE avoids division issues when $y_t$ near 0
-    \begin{itemize}
-        \item Symmetric Mean Absolute Percentage Error
-        \item ${\text{SMAPE}}={\frac {100}{n}}\sum _{t=1}^{n}{\frac {|F_{t}-A_{t}|}{|A_{t}|+|F_{t}|}}$
-    \end{itemize}
-  \end{itemize}
+\begin{center}
+  \includegraphics[width=0.75\textwidth]{figure/bike_trend.pdf}
+\end{center}
+\vspace{-0.5em}
+\footnotesize
+Since trees cannot extrapolate, a strong trend (like the one above) will cause predictions to plateau. Solution: remove the trend before modelling, add it back after prediction.
+\vfill
+\begin{enumerate}
+    \item Fit a simple trend model on the training set (e.g., linear regression on the time index)
+    \item Subtract the trend: $r_t = y_t - \hat{\text{trend}}_t$
+    \item Train the tree model on the residuals $r_t$
+    \item At prediction time: $\hat{y}_t = \hat{r}_t + \hat{\text{trend}}_t$
+\end{enumerate}
+\vfill
+Alternative: use differencing ($y_t - y_{t-1}$) to make the series approximately stationary, then model the differenced series. This also removes linear trends.
 \vfill
 \end{vbframe}
 
-\begin{vbframe}{Simple Baseline}
-% \pause
-\large
-\vfill
-  $y_{t+1} = y_t$
-\vfill
-\end{vbframe}
 
 % =========================================================
 \section{Feature Engineering}
@@ -200,12 +170,13 @@ Question: how to feed this to a standard ML model?
     \item Boolean flags: public holidays, weekend, promotion days, end-of-month
   \end{itemize}
   \vspace{0.4cm}
+  \begin{center}
+    \includegraphics[width=0.55\textwidth]{figure/bike_hourly_by_daytype.pdf}
+  \end{center}
+  \vspace{-0.5em}
   \begin{block}{Why?}
-    Capture human or process-driven periodicity.
+    Capture human or process-driven periodicity. E.g., bike rentals peak on weekday mornings (commuters) but are spread throughout the day on weekends.
   \end{block}
-  \vfill
-  \pause
-  Caveat: pay attention to the calendar if the events do not follow the Gregorian calendar
   \vfill
 \end{vbframe}
 
@@ -215,12 +186,13 @@ Question: how to feed this to a standard ML model?
   \vfill
   \begin{itemize}
     \item Converts periodic integers (hour 0-23, month 1-12) into continuous space
-    \item Eliminates artificial jump between 23 \(\rightarrow\) 0
+    \item Eliminates artificial jump between 23 \(\rightarrow\) 0 (and December \(\rightarrow\) January)
+    \item Most beneficial for linear and distance-based models; trees can often learn periodicity from raw integers but may need deeper splits to do so
   \end{itemize}
   \vfill
 \end{vbframe}
 
-\begin{frame}{Cyclic Encoding Visualization (Hour 0-23)}
+\begin{vbframe}{Cyclic Encoding Visualization (Hour 0-23)}
   \begin{figure}
     \centering
     \begin{tikzpicture}[scale=2]
@@ -237,17 +209,19 @@ Question: how to feed this to a standard ML model?
       }
     \end{tikzpicture}
   \end{figure}
-\end{frame}
+\end{vbframe}
 
 \begin{vbframe}{Lagged \& Auto-Regressive Features}
   \vfill
   \begin{itemize}
-    \item Plain lags: $y_{t-1},\;y_{t-7},\;y_{t-14}$
-    \item Multi-step: include future-known covariates (e.g., planned price)
+    \item Plain lags: $y_{t-1},\;y_{t-24},\;y_{t-168}$ (1 hour ago, yesterday, last week)
+    \item Choose lag periods that match the data's seasonality (e.g., 168h = 1 week for hourly data)
+    \item Multi-step: include future-known covariates (e.g., planned price, weather forecast)
     \item Combine with calendar features for interactions
   \end{itemize}
   \vfill
   \pause
+\footnotesize
 \begin{tabular}{llrrrrr}
 \toprule
  & datetime & count & lag\_168 & lag\_336 & lag\_504 & lag\_672 \\
@@ -260,27 +234,280 @@ Question: how to feed this to a standard ML model?
 \bottomrule
 \end{tabular}
 \vfill
+NB: The first $s$ rows have NaN for lag$\_s$. Options: drop those rows, impute, or use a model that handles NaN natively (\texttt{HistGradientBoostingRegressor} does).\\
+Note: this table shows New Year's Eve -- lag\_168 is Christmas Eve, which explains the low values. Holidays create useful but noisy lag patterns.
+\vfill
+\end{vbframe}
+
+\begin{vbframe}{Why Do Lags Work?}
+\vfill
+\begin{center}
+  \includegraphics[width=0.55\textwidth]{figure/bike_lag168_scatter.pdf}
+\end{center}
+\vspace{-0.5em}
+\footnotesize
+$y_t$ vs $y_{t-168}$ (same hour, one week ago). The strong diagonal correlation shows that last week's count is a powerful predictor of this week's count.
+\vfill
 \end{vbframe}
 
 \begin{vbframe}{Rolling / Expanding Statistics}
   \vfill
+  Compute summary statistics over a sliding window of past observations:
   \begin{itemize}
-    \item Rolling mean / std / min / max over window
-    \item Expanding mean: trend indicator
-    \item Percentiles: 25th, 75th for distribution shape
+    \item \textbf{Rolling mean / std}: $\bar{y}_{t,w} = \frac{1}{w}\sum_{i=t-w}^{t-1} y_i$ over window of size $w$
+    \item \textbf{Rolling min / max}: capture recent extremes
+    \item \textbf{Expanding mean}: $\bar{y}_{t} = \frac{1}{t-1}\sum_{i=1}^{t-1} y_i$ acts as a trend indicator
+    \item \textbf{Percentiles}: 25th, 75th for distribution shape
   \end{itemize}
+  \vfill
+  Important: the window must only look \textbf{backward} (no future data!). When using lag features, shift the window by the forecasting horizon to avoid leakage.
   \vfill
 \end{vbframe}
 
 \begin{vbframe}{Interaction Features}
   \vfill
+  Combine temporal features with covariates to capture conditional effects:
   \begin{itemize}
-    \item Lag $\times$ Holiday flag
-    \item Weather $\times$ Weekend indicator
-    \item Captures non-linear, conditional effects
+    \item Lag $\times$ Holiday flag $\rightarrow$ ``was the same hour last week also a holiday?''
+    \item Weather $\times$ Weekend indicator $\rightarrow$ ``good weather on weekends drives leisure rentals''
+    \item Hour $\times$ Workingday $\rightarrow$ commuter peaks only on working days
   \end{itemize}
   \vfill
+  Tree-based models can learn interactions automatically, but explicit features can help simpler models and improve interpretability.
+  \vfill
 \end{vbframe}
+
+\begin{vbframe}{Feature Importance \& Selection}
+\vfill
+With many engineered features, check which ones actually help:
+\vfill
+\begin{itemize}
+    \item \textbf{Permutation importance}: shuffle one feature at a time, measure the drop in validation performance
+    \item \textbf{Tree-based (impurity) importance}: built-in \texttt{feature\_importances\_} attribute (fast, but biased toward high-cardinality features; permutation importance does not have this bias)
+    \item \textbf{SHAP values}: consistent, model-agnostic feature attributions (more expensive to compute)
+\end{itemize}
+\vfill
+Rule of thumb: start with many features, inspect importance, prune correlated or weak ones.
+\vfill
+See the Interpretable Machine Learning course for more details on feature importance and model interpretation methods: \url{https://slds-lmu.github.io/iml/}
+\vfill
+\end{vbframe}
+
+\begin{vbframe}{Putting It All Together: Raw Row $\rightarrow$ ML-Ready Row}
+\vfill
+\footnotesize
+One row of the bike dataset \textbf{before} feature engineering:
+\vspace{0.3em}
+
+\begin{tabular}{lrrrl}
+\toprule
+holiday & temp & humidity & windspeed & datetime \\
+\midrule
+False & 24.6 & 0.45 & 0.30 & 2012-06-15 17:00 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.8em}
+The same row \textbf{after} feature engineering:
+\vspace{0.3em}
+
+\scriptsize
+\begin{tabular}{lr|rr|rr|rr|r}
+\toprule
+holiday & temp & hour & dow\textsuperscript{*} & hour\_sin & hour\_cos & lag\_168 & lag\_336 & roll\_mean \\
+\midrule
+False & 24.6 & 17 & 4 & $-0.97$ & $-0.26$ & 432 & 389 & 285.3 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.5em}
+\normalsize
+The datetime column is gone. All temporal information is now encoded as numeric features that any standard ML model can consume.\\
+\textsuperscript{*}dow = day of week (Mon=0, Sun=6)
+\vfill
+\end{vbframe}
+
+
+% =========================================================
+\section{Time-Series Cross-Validation}
+% ---------------------------------------------------------
+\begin{vbframe}{Chronology-Aware Splits}
+  \begin{columns}[T]
+  \begin{column}{0.52\textwidth}
+    \begin{tikzpicture}[x=0.35cm,y=0.65cm]
+      % Color definitions
+      \definecolor{train}{RGB}{166,206,227}  % light blue
+      \definecolor{val}{RGB}{253,180,98}     % light orange
+
+      % --- Expanding Window (with gap) ---
+      \node[left,font=\footnotesize\bfseries] at (0, 1.2) {Expanding:};
+      \fill[train] (1,0) rectangle (5.5,0.5);
+      \fill[gray!30] (5.5,0) rectangle (6,0.5);
+      \fill[val] (6,0) rectangle (8,0.5);
+      \draw (1,0) rectangle (8,0.5);
+      \node[left] at (0.7,0.25) {\tiny W1};
+
+      \fill[train] (1,-1) rectangle (7.5,-0.5);
+      \fill[gray!30] (7.5,-1) rectangle (8,-0.5);
+      \fill[val] (8,-1) rectangle (10,-0.5);
+      \draw (1,-1) rectangle (10,-0.5);
+      \node[left] at (0.7,-0.75) {\tiny W2};
+
+      \fill[train] (1,-2) rectangle (9.5,-1.5);
+      \fill[gray!30] (9.5,-2) rectangle (10,-1.5);
+      \fill[val] (10,-2) rectangle (12,-1.5);
+      \draw (1,-2) rectangle (12,-1.5);
+      \node[left] at (0.7,-1.75) {\tiny W3};
+
+      % --- Sliding Window (with gap) ---
+      \node[left,font=\footnotesize\bfseries] at (0, -2.6) {Sliding:};
+      \fill[train] (1,-3.5) rectangle (5.5,-3);
+      \fill[gray!30] (5.5,-3.5) rectangle (6,-3);
+      \fill[val] (6,-3.5) rectangle (8,-3);
+      \draw (1,-3.5) rectangle (8,-3);
+      \node[left] at (0.7,-3.25) {\tiny W1};
+
+      \fill[train] (3,-4.5) rectangle (7.5,-4);
+      \fill[gray!30] (7.5,-4.5) rectangle (8,-4);
+      \fill[val] (8,-4.5) rectangle (10,-4);
+      \draw (3,-4.5) rectangle (10,-4);
+      \node[left] at (2.7,-4.25) {\tiny W2};
+
+      \fill[train] (5,-5.5) rectangle (9.5,-5);
+      \fill[gray!30] (9.5,-5.5) rectangle (10,-5);
+      \fill[val] (10,-5.5) rectangle (12,-5);
+      \draw (5,-5.5) rectangle (12,-5);
+      \node[left] at (4.7,-5.25) {\tiny W3};
+
+      % Timeline
+      \draw[->] (0,1.8) -- (13,1.8);
+      \foreach \t in {1,...,12} {
+        \node[below,gray] at (\t+0.5,1.8) {\tiny $t_{\t}$};}
+
+      % Legend
+      \fill[train] (0.5,-6.2) rectangle (1.3,-5.9);
+      \node[right,font=\tiny] at (1.4,-6.05) {Train};
+      \fill[gray!30] (3.5,-6.2) rectangle (4.3,-5.9);
+      \node[right,font=\tiny] at (4.4,-6.05) {Gap};
+      \fill[val] (6.5,-6.2) rectangle (7.3,-5.9);
+      \node[right,font=\tiny] at (7.4,-6.05) {Val};
+    \end{tikzpicture}
+  \end{column}
+  \begin{column}{0.46\textwidth}
+    \small
+    \begin{itemize}
+      \item \textbf{Expanding window}: train set grows, validation rolls forward
+      \item \textbf{Sliding window}: fixed-width train and validation segments
+      \item Validation window should match the forecasting horizon (e.g., 1 week)
+      \item \textbf{Gap}: insert a gap between train and validation to simulate real-world prediction delay
+    \end{itemize}
+  \end{column}
+  \end{columns}
+\end{vbframe}
+
+\begin{vbframe}{Avoiding Data Leakage}
+\vfill
+Time series leakage is subtle and can silently inflate your metrics:
+\vfill
+  \begin{itemize}
+    \item Compute lagged / rolling features \textbf{after} defining the split, or in a way that respects the split boundary
+    \begin{itemize}
+        \item Feature computation must be causal and respect the split boundary; non-causal or improperly shifted rolling features can leak future information
+    \end{itemize}
+    \item No peeking into future data when standardizing / scaling (fit scaler on train only)
+    \item Never use random shuffled splits for time series $\rightarrow$ use \texttt{TimeSeriesSplit} in scikit-learn
+  \end{itemize}
+\vfill
+\end{vbframe}
+
+\begin{vbframe}{Evaluation Metrics}
+\vfill
+  \begin{itemize}
+    \item \textbf{MAE} $= \frac{1}{n}\sum_{t=1}^{n} |y_t-\hat y_t|$
+    \begin{itemize}
+        \item Robust to outliers, easy to interpret (same unit as $y$)
+    \end{itemize}
+    \item \textbf{RMSE} $= \sqrt{\frac{1}{n}\sum_{t=1}^{n}(y_t - \hat{y}_t)^2}$
+    \begin{itemize}
+        \item Penalizes large errors more heavily than MAE
+    \end{itemize}
+    \item \textbf{SMAPE} $= \frac{100}{n}\sum_{t=1}^{n}\frac{|y_t - \hat{y}_t|}{|y_t| + |\hat{y}_t|}$ (Symmetric Mean Absolute Percentage Error)
+    \begin{itemize}
+        \item Scale-independent, useful for comparing across different series
+        \item Avoids division-by-zero issues of MAPE when $y_t$ is near 0
+        \item Note: some references use $(|y_t| + |\hat{y}_t|)/2$ in the denominator (ranges 0--200\%). The version above ranges 0--100\%
+    \end{itemize}
+  \end{itemize}
+\vfill
+\end{vbframe}
+
+\begin{vbframe}{Baselines}
+\vfill
+Always benchmark against naive forecasts. If your model cannot beat these, something is wrong.
+\vfill
+\begin{itemize}
+    \item \textbf{Naive (persistence) forecast:} $\hat{y}_{t+1} = y_t$ -- predict the last observed value
+    \item \textbf{Seasonal naive forecast:} $\hat{y}_{t} = y_{t-s}$ -- predict the value from one season ago (e.g., same hour last week: $s = 168$ for hourly data)
+    \item \textbf{Moving average:} $\hat{y}_{t+1} = \frac{1}{w}\sum_{i=t-w+1}^{t} y_i$ -- average of the last $w$ observations
+\end{itemize}
+\vfill
+\end{vbframe}
+
+
+% =========================================================
+\section{Multi-Step Forecasting}
+% ---------------------------------------------------------
+\begin{vbframe}{Multi-Step Forecasting Strategies}
+\vfill
+How to predict multiple steps ahead (e.g., the next 168 hours)?
+\vfill
+\begin{itemize}
+    \item \textbf{Recursive:} train a 1-step model, feed its prediction as input for the next step, repeat
+    \begin{itemize}
+        \item Simple, but errors accumulate over the horizon
+    \end{itemize}
+    \item \textbf{Direct:} train a separate model for each horizon ($h=1, 2, \ldots, H$)
+    \begin{itemize}
+        \item No error accumulation, but $H$ models to train and no shared learning
+    \end{itemize}
+    \item \textbf{Multi-output:} single model predicts all $H$ horizons at once
+    \begin{itemize}
+        \item Efficient, but requires a model that supports vector output
+    \end{itemize}
+    \item \textbf{DirRec (hybrid):} train a direct model for each horizon, but include recursive predictions from earlier horizons as additional features
+\end{itemize}
+\vfill
+\end{vbframe}
+
+
+% =========================================================
+\section{Practical Guidance}
+% ---------------------------------------------------------
+\begin{vbframe}{scikit-learn for Time Series}
+\vfill
+scikit-learn does not have native time series models (no ARIMA, no built-in lag generation), but provides useful building blocks:
+\vfill
+\begin{itemize}
+    \item \texttt{TimeSeriesSplit}: chronology-aware CV with configurable \texttt{test\_size} and \texttt{gap} (to simulate real-world prediction lag)
+    \item \texttt{FunctionTransformer}: wrap custom feature engineering functions (calendar, cyclic, lags)
+    \item \texttt{Pipeline} + \texttt{ColumnTransformer}: chain preprocessing and model into a single object
+    \item \texttt{HistGradientBoostingRegressor}: fast gradient boosting with native categorical support
+\end{itemize}
+\vfill
+\end{vbframe}
+
+
+\begin{vbframe}{Common Pitfalls}
+\vfill
+\begin{itemize}
+    \item \textbf{Leakage through temporal features}: computing rolling/lag features before the train/test split lets future data leak into training rows
+    \item \textbf{Overfitting to rare calendar events}: if your training set has only 2 Christmas periods, the model may memorize rather than generalize holiday effects
+    \item \textbf{Ignoring concept drift}: real-world patterns shift over time (e.g., bike usage changed after new stations were added). Periodically retrain or use a sliding window
+    \item \textbf{Not inspecting errors over time}: aggregate metrics (MAE, RMSE) can hide that a model is great on weekdays but terrible on weekends. Always plot residuals over time
+\end{itemize}
+\vfill
+\end{vbframe}
+
 
 % =========================================================
 \section{Wrap-Up}
@@ -288,14 +515,67 @@ Question: how to feed this to a standard ML model?
 \begin{vbframe}{Key Takeaways}
   \vfill
   \begin{itemize}
-    \item Feature engineering often outweighs model complexity in time-series ML.
-    \item Use chronology-aware CV to obtain honest performance estimates.
-    \item Always benchmark against a naive or seasonal naive baseline.
+    \item Feature engineering often outweighs model complexity in time-series ML
+    \item Calendar, cyclic, lag, and rolling features make temporal patterns accessible to standard ML models
+    \item Use chronology-aware CV (expanding or sliding window) to obtain honest performance estimates
+    \item Always benchmark against a naive or seasonal naive baseline
+    \item Be vigilant about data leakage: compute temporal features \emph{within} each CV fold
+    \item In practice, point forecasts are often not enough -- consider quantile regression or conformal prediction for prediction intervals
   \end{itemize}
   \vfill
+\end{vbframe}
+
+% =========================================================
+\section{Resources}
+% ---------------------------------------------------------
+\begin{vbframe}{Resources / Further Reading}
+\vfill
+\begin{itemize}
+    \item \textbf{Hyndman \& Athanasopoulos} -- ``Forecasting: Principles and Practice'' (free online textbook)\\
+    \url{https://otexts.com/fpp3/}
+    \item \textbf{scikit-learn} -- Time-related feature engineering guide\\
+    \url{https://scikit-learn.org/stable/auto_examples/applications/plot_cyclical_feature_engineering.html}
+    \item \textbf{Kaggle} -- Time Series course\\
+    \url{https://www.kaggle.com/learn/time-series}
+    \item \textbf{Cerqueira et al.} (2020) -- ``Evaluating time series forecasting models: an empirical study on performance estimation methods'' (comparison of CV strategies)
+\end{itemize}
+\vfill
+\end{vbframe}
+
+\begin{vbframe}{Packages for Time Series}
+\vfill
+\footnotesize
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Python:}
+\begin{itemize}\setlength{\itemsep}{1pt}
+    \item \textbf{statsmodels} -- ARIMA, ETS, decomposition
+    \item \textbf{StatsForecast} (Nixtla) -- fast AutoARIMA, AutoETS
+    \item \textbf{Prophet} (Meta) -- multiple seasonality, holidays
+    \item \textbf{sktime} -- sklearn-compatible forecasting framework
+    \item \textbf{Darts} (Unit8) -- ARIMA to deep learning
+    \item \textbf{NeuralForecast} (Nixtla) -- N-BEATS, PatchTST
+    \item \textbf{tsfresh} -- automated feature extraction
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{R:}
+\begin{itemize}\setlength{\itemsep}{1pt}
+    \item \textbf{forecast} -- ARIMA, ETS, STL decomposition
+    \item \textbf{fable} (tidyverts) -- tidy forecasting framework
+    \item \textbf{feasts} (tidyverts) -- feature extraction, decomposition
+    \item \textbf{tseries} -- stationarity tests, GARCH
+    \item \textbf{prophet} -- R interface to Meta's Prophet
+    \item \textbf{modeltime} -- tidymodels forecasting framework
+    \item \textbf{tsfeatures} -- automated feature extraction
+\end{itemize}
+\end{column}
+\end{columns}
+\vfill
+Comprehensive Python list: \url{https://github.com/MaxBenChrist/awesome_time_series_in_python}
+\vfill
 \end{vbframe}
 
 
 \endlecture
 \end{document}
-
