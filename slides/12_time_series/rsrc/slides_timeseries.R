@@ -126,3 +126,55 @@ ggsave("../figure/bike_trend.pdf", p_trend, width = 8, height = 3.5)
 ggsave("../figure/bike_trend.png", p_trend, width = 8, height = 3.5, dpi = 200)
 
 message("Saved bike_trend.{pdf,png}")
+
+# ---------------------------------------------------------------------------
+# 7. Plot: time series CV splits on actual bike data
+# ---------------------------------------------------------------------------
+bike_daily_cv <- bike_daily %>% mutate(row = row_number())
+n <- nrow(bike_daily_cv)
+test_size <- 7 * 4  # 4 weeks
+n_splits <- 3
+gap <- 7
+
+splits <- data.frame()
+for (i in 1:n_splits) {
+  test_end <- n - (n_splits - i) * test_size
+  test_start <- test_end - test_size + 1
+  train_end <- test_start - gap - 1
+  train_start <- 1
+
+  splits <- rbind(splits, data.frame(
+    fold = paste0("Fold ", i),
+    date = bike_daily_cv$date[train_start:train_end],
+    set = "Train"
+  ))
+  if (gap > 0) {
+    splits <- rbind(splits, data.frame(
+      fold = paste0("Fold ", i),
+      date = bike_daily_cv$date[(train_end+1):(test_start-1)],
+      set = "Gap"
+    ))
+  }
+  splits <- rbind(splits, data.frame(
+    fold = paste0("Fold ", i),
+    date = bike_daily_cv$date[test_start:test_end],
+    set = "Test"
+  ))
+}
+
+splits$set <- factor(splits$set, levels = c("Train", "Gap", "Test"))
+
+p_cv <- ggplot(splits, aes(x = date, y = fold, fill = set)) +
+  geom_tile(height = 0.6) +
+  scale_fill_manual(values = c("Train" = "#A6CEE3", "Gap" = "#DDDDDD", "Test" = "#FDB462")) +
+  labs(x = NULL, y = NULL, fill = NULL) +
+  theme_minimal(base_size = 14) +
+  theme(
+    panel.grid = element_blank(),
+    legend.position = "bottom"
+  )
+
+ggsave("../figure/bike_cv_splits.pdf", p_cv, width = 8, height = 2.5)
+ggsave("../figure/bike_cv_splits.png", p_cv, width = 8, height = 2.5, dpi = 200)
+
+message("Saved bike_cv_splits.{pdf,png}")
