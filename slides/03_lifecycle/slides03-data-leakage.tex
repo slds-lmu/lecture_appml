@@ -25,7 +25,6 @@
 \definecolor{leakfill}{HTML}{FDEDEC}
 \definecolor{cleanfill}{HTML}{E8F8F0}
 
-% Armenian flag palette for the temporal-CV strip (3+ colour usage convention)
 \definecolor{armred}{HTML}{D90012}
 \definecolor{armblue}{HTML}{0033A0}
 \definecolor{armorange}{HTML}{F2A800}
@@ -144,7 +143,7 @@ figure/leakage_title
 
 \medskip
 
-\centering\footnotesize\itshape The next four frames develop types 1--4; feature selection is a forward reference to chapter~6.
+\centering\footnotesize\itshape Each of the five types gets a worked-example frame next.
 
 \end{frame}
 
@@ -344,7 +343,47 @@ You will encounter several of these in chapter~5 (feature preprocessing). The Go
 
 
 % =====================================================================
-% Frame 9: The Golden Rule (centrepiece)
+% Frame 9 (new): Worked example -- Feature-selection leakage
+% =====================================================================
+\begin{frame}{Worked example: feature-selection leakage}
+\phantomsection\label{leakage-feature-selection}
+
+\textbf{Scenario.} Rank features by their correlation with the target, keep the top $k$, fit a model, report 10-fold CV accuracy.
+
+\medskip
+
+\begin{center}
+\begin{tikzpicture}[font=\footnotesize]
+  % Reported CV (leaky) bar
+  \fill[leakred!70]   (0, 0) rectangle (5.0, 0.4);
+  \node[left]  at (-0.1, 0.2) {Reported CV};
+  \node[right] at (5.1, 0.2) {\textbf{0.92}};
+
+  % Clean held-out test bar
+  \fill[cleangreen!70] (0, -0.8) rectangle (3.0, -0.4);
+  \node[left]  at (-0.1, -0.6) {Clean held-out test};
+  \node[right] at (5.1, -0.6) {\textbf{0.55}};
+
+  \node[gray, anchor=west, font=\scriptsize\itshape] at (-1.3, -1.3) {(illustrative numbers)};
+\end{tikzpicture}
+\end{center}
+
+\medskip
+
+\textbf{The catch.} The top-$k$ features were chosen using \emph{all} of $y$ -- including labels in the held-out fold. Those labels had already influenced which features made it into the model.
+
+\medskip
+
+\textbf{Same mechanism as preprocessing.} The selector is a transformer fit on data, same as a scaler or encoder. Same failure mode, same fix.
+
+\medskip
+
+\textbf{Fix.} Re-rank features \emph{inside each CV fold}. Wrappers that tune their own selection require nested resampling.
+\end{frame}
+
+
+% =====================================================================
+% Frame 10: The Golden Rule (centrepiece)
 % =====================================================================
 \begin{frame}{The Golden Rule}
 \phantomsection\label{leakage-golden-rule}
@@ -411,7 +450,7 @@ must live \textbf{inside} the resampling loop.
 
 
 % =====================================================================
-% Frame 10: Spotting leakage -- heuristics + audit checklist (merged)
+% Frame 11: Spotting leakage -- heuristics + audit checklist (merged)
 % =====================================================================
 \begin{frame}{Spotting leakage: heuristics and audit checklist}
 \phantomsection\label{leakage-detection}
