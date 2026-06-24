@@ -311,50 +311,46 @@ figure/SMOTE.png
 % \end{frame}
 
 
-\begin{frame}{Oversampling: SMOTE}
+\begin{frame}{SMOTE: the intuition}
     \begin{itemize}
-        %			
-        \item SMOTE creates \textbf{synthetic instances} of minority class.
+        \item \textbf{SMOTE} (\emph{Synthetic Minority Over-sampling Technique}) creates new minority instances by \emph{interpolating between existing minority points} -- neither copying them (like random oversampling) nor removing majority points (like undersampling).
 
-        \item Interpolate between neighboring minority instances.
+        \item \textbf{Why this helps:} the new points fill in the minority class's region of feature space, giving the classifier's decision boundary more support there.
 
-        \item Instances are created in $\Xspace$ rather than in $\Xspace\times\Yspace.$
-
-        \item Algorithm: For each minority class instance: 
-
-        \begin{itemize} 
-
-            \item Find its $k$ nearest minority neighbors.
-    
-            \item Randomly select one of these neighbors.
-    
-            \item Randomly generate new instances along the lines connecting the minority example and its selected neighbor.
-    
-        \end{itemize}
+        \item \textbf{Note:} interpolation happens in feature space only ($\Xspace$, not $\Xspace\times\Yspace$) -- each synthetic point is simply \emph{assigned} the minority label.
     \end{itemize}
-    
+\end{frame}
+
+
+\begin{frame}{Oversampling: SMOTE -- the algorithm}
+    For each minority class instance:
+    \begin{itemize}
+        \item Find its $k$ nearest minority neighbors ($k$ controls how local the synthetic points are).
+        \item Randomly select one of these neighbors.
+        \item Randomly generate a new instance along the line connecting the example and its selected neighbor.
+        \item Repeat until a desired minority:majority ratio is reached (the target ratio is a tunable hyperparameter, not necessarily $1{:}1$).
+    \end{itemize}
+
     \begin{figure}
         \centering
-        \includegraphics[width=0.8\textwidth]{figure/SMOTE.png} 
+        \includegraphics[width=0.75\textwidth]{figure/SMOTE.png}
     \end{figure}
-
-
 \end{frame}
 
 \begin{frame}{SMOTE: Generating new examples}
     
     \begin{itemize}
 
-        \item Let $\xi$ be the feature of the minority instance and let $\xv^{(j)}$ be its nearest neighbor. The line connecting the two instances is
-        $$		(1-\lambda) \xi + \lambda\xv^{(j)} = \xi + \lambda(\xv^{(j)} - \xi)	$$
-        where $\lambda \in [0,1].$		
-        
-        \item By sampling a $\lambda \in [0,1],$ say $\tilde{\lambda},$ we create a new instance		
-        $$   \tilde{\xv}^{(i)} =  \xi + \tilde{\lambda}(\xv^{(j)} - \xi)	 $$
+        \item Let $\textcolor{blue}{\xi}$ be the feature of the minority instance and let $\textcolor{orange}{\xv^{(j)}}$ be its nearest neighbor. The line connecting the two instances is
+        $$		(1-\lambda)\,\textcolor{blue}{\xi} + \lambda\,\textcolor{orange}{\xv^{(j)}} \;=\; \textcolor{blue}{\xi} + \lambda\,(\textcolor{orange}{\xv^{(j)}} - \textcolor{blue}{\xi})	$$
+        where $\lambda \in [0,1].$
 
-    \end{itemize}		
-        
-        Example: Let $\xi = (1,2)^\top$ and $\xv^{(j)} = (3,1)^\top.$ Assume $\tilde{\lambda} \approx 0.25.$
+        \item By sampling a $\lambda \in [0,1],$ say $\tilde{\lambda},$ we create a new instance
+        $$   \tilde{\xv}^{(i)} \;=\; \textcolor{blue}{\xi} + \tilde{\lambda}\,(\textcolor{orange}{\xv^{(j)}} - \textcolor{blue}{\xi})	 $$
+
+    \end{itemize}
+
+        Example: Let $\textcolor{blue}{\xi} = (1,2)^\top$ and $\textcolor{orange}{\xv^{(j)}} = (3,1)^\top.$ Assume $\tilde{\lambda} \approx 0.25.$
         %
     \begin{figure}
         \centering
@@ -431,8 +427,27 @@ SMOTE enriches minority class feature space.
     
         \item Prone to overgeneralizing as it pays no attention to majority class.
 
+        \item Some synthetic ``minority'' points can land in majority regions \furtherreading{TARAWNEH2022-STOP}.
+
     \end{itemize}		
 
+\end{frame}
+
+\begin{frame}{SMOTE: Practical Notes}
+    \begin{itemize}
+        \item \textbf{Resample inside the CV loop, on the training fold only.}
+        Applying SMOTE before the train/test split (or before cross-validation) leaks
+        information into the test data and inflates measured performance
+        (see the Data Leakage chapter).
+
+        \item \textbf{Continuous features only.} Vanilla SMOTE interpolates numerically.
+        For categorical features use \emph{SMOTE-NC} (mixed numeric/categorical) or
+        \emph{SMOTEN} (all categorical).
+
+        \item \textbf{Tune the key hyperparameters.} The target minority:majority ratio
+        (how much to oversample) and $k$ (neighborhood size) should be tuned, not left
+        at defaults.
+    \end{itemize}
 \end{frame}
 
 \begin{frame}{Comparison of Sampling Techniques}
@@ -470,12 +485,33 @@ SMOTE enriches minority class feature space.
     \item Only counteract if your metric is impacted by imbalanced data
     \item How to counteract? Can you change to a metric that is not affected by imbalanced data?
     \item Check if treatment of imbalanced data has any adversarial effects \furtherreading{BISCHL2024-ADVERSARIAL}
-    \item Try simple methods first, especially SMOTE is highly criticized \furtherreading{VANHULSE2022-SMOTE}
+    \item Try simple methods first, especially SMOTE is highly criticized \furtherreading{ELOR2022-SMOTE}
     \item Use hyperparameter optimization to decide what method to use.
     \item Why not treat finding the trade-off between precision and recall as a multi-objective hyperparameter optimization problem?
 \end{itemize}
     
 \end{frame}
+
+\begin{frame}{Practical Recommendations \furtherreading{ELOR2022-SMOTE}}
+    \small
+    \begin{itemize}
+        \item \textbf{Default: do not balance.}
+        \begin{itemize}
+            \footnotesize
+            \item Proper metric $\to$ use a strong classifier, no balancing.
+            \item Label metric $\to$ tune the decision threshold (one trained model serves many metrics; far cheaper than refitting per oversampler).
+        \end{itemize}
+        \item \textbf{Balance only when:}
+        \begin{enumerate}
+            \footnotesize
+            \item label metric \emph{and} threshold tuning is impossible (e.g. legacy system) $\to$ simple random oversampling (SMOTE no better for strong models);
+            \item stuck with a \emph{weak} classifier $\to$ SMOTE-like helps (but still worse than a strong model without balancing);
+            \item exceptionally good HPs known a-priori from domain expertise $\to$ SMOTE helps all classifiers.
+        \end{enumerate}
+        \item Other difficulty factors (class overlap, noise, small sample size) are often the real problem, not the skew itself.
+    \end{itemize}
+\end{frame}
+
 
 \endlecture
 \end{document}
