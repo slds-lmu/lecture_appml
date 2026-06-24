@@ -111,12 +111,14 @@ figure/imbalanced_data_plot_title
 %
 			\begin{figure}
 				\centering
-				\includegraphics[width=0.8\linewidth]{figure_man/benchmark_plots.pdf}
+				\includegraphics[width=0.7\linewidth]{figure_man/benchmark_plots.pdf}
 			\end{figure}
 			
 			
 			\footnotesize
                 In each scenario, we have 10.000 obs in the negative class. Number of obs in positive class varies between 10.000, 1.000, 100, and 50. Train classifiers with 10-fold stratified cv. Evaluate via aggregated predictions on test set.
+
+                \textbf{Takeaway:} accuracy stays high as the positive class shrinks, but other metrics drop sharply -- accuracy hides poor minority-class performance under imbalance.
 			
 
 %
@@ -497,13 +499,111 @@ figure/imbalanced_data_plot_title
 
 			\item Be careful with comparing the absolute values of the different measures, as these can be on different ``scales'', e.g.,\ MCC and BAC. 
 
-                \item Area under the ROC curve is also immune against class imbalance.
+                \item Area under the ROC curve is invariant to the class ratio (but PR-AUC is often more informative -- see later).
 	
 		\end{itemize}
 	}
 \end{frame}
 
 
+
+
+\section{ROC and Precision-Recall Curves}
+% Restored from advml ranking-metrics deck (was in attic/).
+% https://github.com/slds-lmu/lecture_advml/blob/main/slides/imbalanced-learning/attic/slides-imbalanced-learning-ranking-metrics.tex
+
+\begin{frame}{ROC Curves for Scoring Classifiers}
+    \small
+    \begin{itemize}
+        \item Many binary classifiers use a score $s:\Xspace \to \R$ and a threshold $c$:
+        $$\fx = 2 \cdot \mathds{1}_{[ s(\xv) \ge c]} -1.$$
+        \item The threshold $c$ trades off TPR against FPR.
+        \item A \textbf{ROC curve} plots TPR vs.\ FPR across all thresholds $\leadsto$ visual tool to pick a good threshold.
+    \end{itemize}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.42\linewidth]{figure_man/roc-pr.png}
+        \\ \tiny Davis and Goadrich (2006): The Relationship Between Precision-Recall and ROC Curves \furtherreading{DAVIS2006-PR}.
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Why a Low FPR Can Mislead: FPR vs.\ PPV}
+    \small
+    \begin{itemize}
+        \item For imbalanced data ($\nn \gg \np$), a low FPR is easy and uninformative: with many negatives, even many FPs barely move the FPR.
+        \item \textbf{Precision} (PPV) is more telling: among all positive predictions, how many are correct.
+    \end{itemize}
+    \begin{columns}
+        \footnotesize
+        \begin{column}{0.45\textwidth}
+            \centering \underline{FP = 10}\\ \lz
+            {\tiny
+            \begin{tabular}{|l|c|c|}
+                \hline
+                & True +1 & True -1 \\ \hline
+                Pred. Pos & 100 & 10 \\ \hline
+                Pred. Neg & 10 & 9990 \\ \hline
+                Total & 110 & 10000 \\ \hline
+            \end{tabular}}
+
+            \medskip
+            $\text{TPR} = 10/11$, \ $\text{FPR} = 0.001$\\
+            $\text{PPV} = 10/11$
+        \end{column}
+        \begin{column}{0.45\textwidth}
+            \centering \underline{FP = 100}\\ \lz
+            {\tiny
+            \begin{tabular}{|l|c|c|}
+                \hline
+                & True +1 & True -1 \\ \hline
+                Pred. Pos & 100 & 100 \\ \hline
+                Pred. Neg & 10 & 9900 \\ \hline
+                Total & 110 & 10000 \\ \hline
+            \end{tabular}}
+
+            \medskip
+            $\text{TPR} = 10/11$, \ $\text{FPR} = 0.01$\\
+            $\text{PPV} = 1/2$
+        \end{column}
+    \end{columns}
+    \vspace{6pt}
+    \footnotesize Same TPR and nearly identical FPR, but precision collapses from $10/11$ to $1/2$.
+\end{frame}
+
+\begin{frame}{Precision-Recall (PR) Curves}
+    \footnotesize{
+    \begin{itemize}
+        \item Instead of TPR vs.\ FPR, plot precision ($\rho_{PPV}$) vs.\ recall ($\rho_{TPR}$) across all thresholds.
+        \item $F_1$ and $G$ score live on this precision-recall trade-off, not the TPR-FPR one.
+        \item Below: both models look good on the ROC curves, but the PR curves reveal
+        \begin{enumerate}
+            \footnotesize
+            \item both have room to improve (ideal is the top-right corner),
+            \item model 2 dominates model 1 in recall-precision.
+        \end{enumerate}
+    \end{itemize}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.58\linewidth]{figure_man/roc-pr_edited.png}
+        \\ \tiny Davis and Goadrich (2006): The Relationship Between Precision-Recall and ROC Curves \furtherreading{DAVIS2006-PR}.
+    \end{figure}
+    }
+\end{frame}
+
+\begin{frame}{ROC vs.\ PR under Class Imbalance}
+    \small
+    \begin{itemize}
+        \item Top row: imbalanced, $\P(y=1) = 0.003$. \ Bottom row: balanced, $\P(y=1) = 0.5$.
+        \item The ROC curves (left) look almost identical in both cases.
+        \item The PR curves (right) change drastically $\leadsto$ PR exposes the imbalance that ROC hides.
+        \item \textbf{Takeaway:} for strongly imbalanced data, prefer PR curves (and area under the PR curve) over ROC.
+    \end{itemize}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.4\linewidth]{figure_man/roc-pr-imbalanced_edited.png}
+        \\ \tiny Siblini et al.\ (2019): Master your Metrics with Calibration \furtherreading{SIBLINI2019-METRICS}.
+    \end{figure}
+\end{frame}
 
 
 \endlecture
