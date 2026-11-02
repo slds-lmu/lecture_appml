@@ -1,20 +1,35 @@
 ## Slides PDFs
 
-This directory contains all PDFs that are generated locally. 
+This directory contains the released slide PDFs, published by `slidemk --release`.
 
-Changes in these directories will be reflected on the corresponding course websites,
-which also means that **changes to file names** will need to be adjusted in
-the website repository.
+Changes in this directory are reflected on the course website, so **changes to
+file names** need to be adjusted in the website repository.
 
-The expected structure for this folder using `lecture_i2ml` as an example:
+The layout mirrors `slides/`:
 
 ```
 slides-pdf
-├── slides-basics-data.pdf
-├── slides-basics-learner.pdf
-├── slides-basics-learnercomponents-hro.pdf
-├── slides-basics-models-parameters.pdf
+├── 01-intro
+│   ├── 01-basics.pdf
+│   ├── 02-learning.pdf
+│   ...
+├── 05-featsel
+│   ├── 01-intro.pdf
+│   ...
+│   └── 99-literature.pdf
 ...
 ```
 
-Here, `slides-pdf/<slide-name>.pdf` matches the source at `slides/<chapter>/<slide-name>.pdf`.
+Here, `slides-pdf/<chapter>/<NN>-<topic>.pdf` is built from
+`slides/<chapter>/<NN>-<topic>.tex`, and `<chapter>/99-literature.pdf` from
+`slides/<chapter>/references.bib`.
+
+The top-level PDFs are not built from this repo's decks; they stay because the
+`slds-lmu/i2ml` website links them:
+
+- `slides-fs-*.pdf`, `chapter-literature-feature-selection.pdf`: copies from
+  `lecture_sl`.
+- `slides-preprocessing-*.pdf`, `slides-imputation-*.pdf`: renders of the old
+  Rmd sources in `slides/04-preproc/rmds/` and
+  `slides/06-imputation/rmds_from_eds_folder/`. Their content now lives,
+  restructured, in the `04-preproc` and `06-imputation` decks.
