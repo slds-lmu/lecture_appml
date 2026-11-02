@@ -1,0 +1,291 @@
+\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
+
+
+\input{preamble-slides}
+\input{basic-math}
+\input{basic-ml}
+
+% \author{LMU}
+%\institute{\href{https://compstat-lmu.github.io/lecture_iml/}{compstat-lmu.github.io/lecture\_iml}}
+\date{}
+
+\begin{document}
+
+\titlemeta{
+Advanced Methods and Pitfalls
+}{
+figure_man/fe_imputation_models_first_slide
+}{
+\item Based imputation strategies
+\item Practical considerations for missing values
+}
+
+
+% Content adapted from texs_equivalent_to_rmds/slides-03-imputation-models.tex (pages 1-last equivalent from pdf_chapters/slides_03_imputation_models.pdf)
+\begin{frame}{Model-Based Imputation}
+
+    Instead of imputing a single value or sampling values it is desirable to take advantage of structure and correlation between features.
+    
+    \begin{center}
+        \includegraphics[width=\textwidth]{figure_man/fe_imputation_models_first_slide}
+    \end{center}
+
+\end{frame}
+
+\begin{frame}{Model-Based Imputation: Drawbacks}
+
+    \begin{itemize}
+        \item Choice of surrogate model has high influence on the imputation:
+    \end{itemize}
+    
+    \begin{center}
+        \includegraphics[width=0.4\textwidth]{figure/surrogate_model_influence}
+    \end{center}
+    
+    \begin{itemize}
+        \item Surrogate model should handle missing values itself, otherwise imputation \textit{loop} may be necessary.
+        
+        \item Surrogate model hyperparameters can be tuned and can be different for each feature to impute.
+    \end{itemize}
+
+\end{frame}
+
+% \begin{frame}{A tale of failed imputation}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.6\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-17.png}
+%     \\ \small Source: \furtherreading{CARUANA2024} (Example starting at 43'31)
+% \end{figure}
+
+% \textbf{ICU Mortality}: Chance of dying in ICU depending on how well patients can breath (values near 0 indicate no breathing, around 1000 is healthy)
+
+% \end{frame}
+
+% \begin{frame}{A tale of failed imputation 2}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.6\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-27.png}
+%     \\ \small Source: \furtherreading{CARUANA2024} (Example starting at 43'31)
+% \end{figure}
+
+% \textbf{ICU Mortality}: Chance of dying in ICU depending on how well patients can breath (values near 0 indicate no breathing, around 1000 is healthy)
+
+% \textbf{Question:} Why is this value so low?
+% \end{frame}
+
+% \begin{frame}{A tale of failed imputation 3}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.6\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-34.png}
+%     \\ \small Source: \furtherreading{CARUANA2024} (Example starting at 43'31)
+% \end{figure}
+
+% \textbf{ICU Mortality}: Chance of dying in ICU depending on how well patients can breath (values near 0 indicate no breathing, around 1000 is healthy)
+
+% \textbf{Question:} Why is this value so low?
+
+% \textbf{Answer:} It was imputed with the mean.
+% \end{frame}
+
+% \begin{frame}{A tale of failed imputation 4}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.6\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-41.png}
+%     \\ \small Source: \furtherreading{CARUANA2024} (Example starting at 43'31)
+% \end{figure}
+
+% \textbf{ICU Mortality}: Chance of dying in ICU depending on how well patients can breath (values near 0 indicate no breathing, around 1000 is healthy)
+
+% \textbf{Problem:} With imputation, $60\%$ of healthiest patients (low risk) are are assigned in a PFRatio $<1000$, i.e. high risk, region.
+
+% \textbf{Question:} Should we rather use a more complex imputation method?
+
+% \end{frame}
+
+% \begin{frame}{A tale of failed imputation 5}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.6\linewidth]{figure_man/Screenshot from 2025-06-03 22-39-01.png}
+%     \\ \small Source: \furtherreading{CARUANA2024} (Example starting at 43'31)
+% \end{figure}
+
+% \textbf{Question:} Should we rather use a more complex imputation method?
+
+% \textbf{Answer:} For other imputation methods, the imputation only spreads healthy (low risk) people more in the PFRatio $<1000$ region. This leads to the final model learning lower risks for sick people (see upper plot), which is even worse.
+% \end{frame}
+
+
+% ------------------------------------------------------------
+% Failed imputation (Caruana 2024, example at 43'31)
+% ------------------------------------------------------------
+
+\begin{frame}{Failed imputation: ICU oxygenation (I)}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-17.png}
+  \\\scriptsize Source: \furtherreading{CARUANA2024} (example at 43'31)
+\end{figure}
+\begin{itemize}
+  \item ICU mortality vs.\ \textbf{PF ratio} (oxygenation)
+  \item $\approx 0$: no breathing;\ $\sim1000$: healthy
+  \item Expect \emph{decreasing} risk with PF
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Failed imputation: ICU oxygenation (II)}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-27.png}
+  \\\scriptsize Source: \furtherreading{CARUANA2024} (example at 43'31)
+\end{figure}
+\begin{itemize}
+  \item Local \alert{dip} in risk at one PF value
+  \item Contradicts physiology and trend
+  \item \textbf{Question:} Why so low?
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Failed imputation: ICU oxygenation (III)}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-34.png}
+  \\\scriptsize Source: \furtherreading{CARUANA2024} (example at 43'31)
+\end{figure}
+\begin{itemize}
+  \item Missing PF values \alert{imputed by the mean} (collapse to \textbf{one} PF point)
+  \item Model learns spuriously \emph{low} risk there %(conflates “missing” with “mean")
+  \item Imputation ignores \alert{MNAR/MAR} structure
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Failed imputation: ICU oxygenation (IV)}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\linewidth]{figure_man/Screenshot from 2025-06-03 22-38-41.png}
+  \\\scriptsize Source: \furtherreading{CARUANA2024} (example at 43'31)
+\end{figure}
+\begin{itemize}
+  \item With imputation: \(\sim60\%\) healthy mapped to PF \(<1000\)
+  \item Label-feature mismatch near imputed PF
+  \item Risk landscape shifts toward “healthier”
+  \item \textbf{Should we use a more complex imputer?}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Failed imputation: ICU oxygenation (V)}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.66\linewidth]{figure_man/Screenshot from 2025-06-03 22-39-01.png}
+  \\\scriptsize Source: \furtherreading{CARUANA2024} (example at 43'31)
+\end{figure}
+\begin{itemize}
+  \item “Smarter” imputers \emph{spread} healthy into PF \(<1000\)
+  \item Even worse: Final model underestimates risk for the sick
+  \item Prefer \textbf{no fill} + missingness indicator
+  \item If imputing: fit/tune \emph{inside} CV; consider MNAR
+\end{itemize}
+\end{frame}
+
+
+% \begin{frame}{Tests for missingness mechanisms}
+% \vfill
+% \textbf{MAR (Missing at Random)}: In a survey, older participants are less likely to report their income, but the missingness depends only on age, not on the income itself.
+
+% \textbf{MCAR (Missing Completely at Random)}: Some questionnaire responses are lost due to a printer error, completely unrelated to the respondents or their answers.
+
+% \textbf{MNAR (Missing Not at Random)}: People with higher income are less likely to report their income in a survey, so the probability of missing data depends on the income itself.
+% \vfill
+% \end{frame}
+
+\begin{frame}{Tests for missingness mechanisms}
+\vfill
+\textbf{MAR} vs \textbf{MCAR}
+\begin{itemize}
+    \vfill
+    \item Little's test
+    \item Logistic regression for missingness
+    \begin{enumerate}
+        \item For each column, create a new classification task: predict if the value is missing or not
+        \item Use the remaining columns as features
+        \item Fit logistic regression
+        \item Examine coefficients and p-values
+    \end{enumerate}
+    \vfill
+\end{itemize}
+\textbf{MNAR}: no test available
+\vfill
+\end{frame}
+
+% \begin{frame}{Censored data: special missingness mechanisms}
+%     \small
+%     \begin{itemize}
+%         \item Left censoring – a data point is below a certain value but it is unknown by how much.
+%         \item Interval censoring – a data point is somewhere on an interval between two values.
+%         \item Right censoring – a data point is above a certain value but it is unknown by how much.
+%         \item Type I censoring occurs if an experiment has a set number of subjects or items and stops the experiment at a predetermined time, at which point any subjects remaining are right-censored.
+%         \item Type II censoring occurs if an experiment has a set number of subjects or items and stops the experiment when a predetermined number are observed to have failed; the remaining subjects are then right-censored.
+%         \item Random (or non-informative) censoring is when each subject has a censoring time that is statistically independent of their failure time. The observed value is the minimum of the censoring and failure times; subjects whose failure time is greater than their censoring time are right-censored.
+%     \end{itemize}
+% \end{frame}
+
+\begin{frame}{Censoring Mechanism}
+\small
+\begin{itemize}
+    \item \textbf{Left censoring:} True value below a threshold; exact value unknown.
+    \item \textbf{Interval censoring:} True value lies within a known interval.
+    \item \textbf{Right censoring:} True value above a threshold; exact value unknown.
+    \pause
+    \item \textbf{Type I censoring:} Experiment ends at pre-specified time; remaining subjects are right-censored.
+    \item \textbf{Type II censoring:} Experiment ends after a fixed number of failures; remaining subjects are right-censored.
+    \item \textbf{Random (non-informative) censoring:} Censoring times independent of failure times; observe minimum of failure and censoring time.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Takeaways of a recent benchmark}
+
+Imputation for prediction: beware of diminishing return. Le Morvan and Varoquaux, ICLR 2025 \furtherreading{LEMORVAN2024}
+
+\begin{itemize}
+    \item Better imputation performance does not result in better prediction performance for MNAR (w/o missingness indicator)
+    \item Better imputation might be irrelevant b/c information is available in other features, unimportant, even with imputation, it might be hard to learn a good downstream model
+    \item More expressive models benefit less from imputation
+    \item Best on average: missForest + XGBoost + masking
+    \item Open Questions:
+    \begin{itemize}
+        \item performance of random draws
+        \item performance of multiple imputation
+        \item impact of performance on explainability and calibration
+        \item performance of models that can learn directly with missing value (advanced transformer architectures)
+    \end{itemize}
+\end{itemize}
+    
+\end{frame}
+
+\begin{frame}{Takeaways}
+    \vfill
+    \begin{itemize}
+        \item There exist different reasons for missing data
+        \item There exist different missingness mechanisms
+        \item Different downstream tasks ask for different imputation strategies
+        \item Different data modalities ask for different imputation strategies
+        \item Understanding the data generating process helps deciding on the imputation strategy
+        \item Common imputation strategies:
+        \begin{itemize}
+            \item Constant value: mean, median
+            \item Imputation by sampling
+            \item Missingness indicator
+            \item Model-based
+        \end{itemize}
+        $\rightarrow$ imputation selection is a CASH problem
+    \end{itemize}
+    \vfill
+\end{frame}
+
+\endlecture
+\end{document}
